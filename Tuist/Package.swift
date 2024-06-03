@@ -17,6 +17,7 @@ let package = Package(
     
     .package(path: "../../../LocalDependencies/SKMySecret"),
     .package(path: "../../../LocalDependencies/Ecies"),
-    .package(path: "../../../LocalDependencies/SwiftTor")
+    .package(path: "../../../LocalDependencies/SwiftTor"),
+    .package(path: "../../../LocalDependencies/SwiftUICharts")
   ]
 )

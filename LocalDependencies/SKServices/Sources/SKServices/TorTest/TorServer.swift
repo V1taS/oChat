@@ -7,34 +7,44 @@
 
 import Foundation
 import CocoaAsyncSocket
+import SKAbstractions
 
-public final class TorServer: NSObject, GCDAsyncSocketDelegate {
-  var socket: GCDAsyncSocket?
-  var connectedSockets: [GCDAsyncSocket] = []
-  var messageAction: ((String) -> Void)?
+/// Класс, реализующий сервер Tor с использованием делегирования `GCDAsyncSocket`.
+final class TorServer: NSObject, GCDAsyncSocketDelegate, ITorServer {
   
-  override init() {
+  // MARK: - Public properties
+  
+  public var stateAction: ((TorServerState) -> Void)?
+  
+  // MARK: - Private properties
+  
+  private var socket: GCDAsyncSocket?
+  private var connectedSockets: [GCDAsyncSocket] = []
+  
+  // MARK: - Init
+  
+  public init(onPort: UInt16 = 80) {
     super.init()
-    socket = GCDAsyncSocket(delegate: self, delegateQueue: DispatchQueue.main)
+    socket = GCDAsyncSocket(delegate: self, delegateQueue: DispatchQueue.global())
     do {
-      try socket?.accept(onPort: 80)
-      print("✅ Server is running on port 80")
+      try socket?.accept(onPort: onPort)
+      stateAction?(.serverIsRunning(onPort: onPort))
     } catch let error {
-      print("❌ Error starting server: \(error)")
+      stateAction?(.errorStartingServer(error: "Error starting server: \(error)"))
     }
   }
   
-  public func socket(_ sock: GCDAsyncSocket, didAcceptNewSocket newSocket: GCDAsyncSocket) {
-    print("🟡 Accepted new connection")
+  func socket(_ sock: GCDAsyncSocket, didAcceptNewSocket newSocket: GCDAsyncSocket) {
+    stateAction?(.didAcceptNewSocket)
     connectedSockets.append(newSocket)
     newSocket.delegate = self
     newSocket.readData(withTimeout: -1, tag: 0)
   }
   
-  public func socket(_ sock: GCDAsyncSocket, didRead data: Data, withTag tag: Int) {
+  func socket(_ sock: GCDAsyncSocket, didRead data: Data, withTag tag: Int) {
+    stateAction?(.didReadData(data))
+    
     if let request = String(data: data, encoding: .utf8) {
-      print("🟢 Received request: \(request)")
-      
       // Разбираем HTTP запрос для определения метода и тела
       let lines = request.split(separator: "\r\n", omittingEmptySubsequences: false)
       if lines.count > 0 {
@@ -46,8 +56,7 @@ public final class TorServer: NSObject, GCDAsyncSocketDelegate {
             // Находим пустую строку, отделяющую заголовки от тела
             if let bodyIndex = lines.firstIndex(where: { $0.isEmpty }) {
               let bodyLines = lines[(bodyIndex + 1)...].joined(separator: "\n")
-              print("🟢 Body of POST request: \(bodyLines)")
-              messageAction?(bodyLines)
+              stateAction?(.didReceiveMessage(bodyLines))
               
               // Ответ на POST запрос
               let response = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: \(bodyLines.count)\r\n\r\n\(bodyLines)"
@@ -68,15 +77,14 @@ public final class TorServer: NSObject, GCDAsyncSocketDelegate {
     sock.readData(withTimeout: -1, tag: 0)
   }
   
-  
-  public func socket(_ sock: GCDAsyncSocket, didWriteDataWithTag tag: Int) {
-    print("🟢 Sent response")
+  func socket(_ sock: GCDAsyncSocket, didWriteDataWithTag tag: Int) {
+    stateAction?(.didSentResponse)
   }
   
-  public func socketDidDisconnect(_ sock: GCDAsyncSocket, withError err: Error?) {
+  func socketDidDisconnect(_ sock: GCDAsyncSocket, withError err: Error?) {
     if let index = connectedSockets.firstIndex(of: sock) {
       connectedSockets.remove(at: index)
+      stateAction?(.socketDidDisconnect)
     }
-    print("🔴 Disconnected")
   }
 }

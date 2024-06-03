@@ -6,87 +6,78 @@
 //
 
 import SwiftUI
+import SKAbstractions
 
-@available(iOS 13.0, macOS 13, *)
-public class P2PChatManager: ObservableObject {
-  private var webSocketTask: URLSessionWebSocketTask?
-  var torManager: TorHelper = TorHelper()
-  @Published public var messages: [String] = []
-  @Published public var isConnected: Bool = false
-  @Published var onionAddress: String?
-  private var server: TorServer?
+public final class P2PChatManager: IP2PChatManager {
   
-  init() {
-    torManager.start { [weak self] _ in
-      self?.onionAddress = self?.torManager.getOnionAddress()
+  // MARK: - Public properties
+  
+  public var serverStateAction: ((TorServerState) -> Void)?
+  public var sessionStateAction: ((_ state: TorSessionState) -> Void)?
+  public var stateErrorServiceAction: ((_ state: Result<Void, TorServiceError>) -> Void)?
+  
+  // MARK: - Private properties
+  
+  private var torService: ITorService = TorService()
+  private var torServer: ITorServer?
+  
+  // MARK: - Init
+  
+  public init() {
+    torService.start { [weak self] result in
+      self?.stateErrorServiceAction?(result)
+      
+      guard case .success(()) = result else {
+        return
+      }
       let server = TorServer()
-      server.messageAction = { message in
-        self?.messages.append(message)
-      }
-      self?.server = server
+      self?.serverStateAction = server.stateAction
+      self?.sessionStateAction = self?.torService.stateAction
+      self?.torServer = server
     }
   }
   
-  public func connect(to onionAddress: String) {
-    guard let url = URL(string: "ws://\(onionAddress):80") else {
-      print("❌ Invalid onion address")
-      return
-    }
-    
-    webSocketTask = torManager.session.webSocketTask(with: url)
-    webSocketTask?.resume()
-    isConnected = true
-    self.onionAddress = torManager.getOnionAddress()
-    receiveMessage()
+  // MARK: - Public funcs
+  
+  public func sendMessage(
+    _ message: String,
+    peerAddress: String,
+    completion: ((Result<Void, Error>) -> Void)?
+  ) {
+    sendMessage(
+      onionAddress: peerAddress,
+      message: message,
+      completion: completion
+    )
   }
   
-  public func sendMessage(_ message: String, peerAddress: String) {
-    sendMessage(message, peerAddress: peerAddress)
-//    let message = URLSessionWebSocketTask.Message.string(message)
-//    print("✅ sending \(message)")
-////    sendMessage(to: peerAddress, message: message)
-//    webSocketTask?.send(message) { error in
-//      print("🟡 sendMessage \(message)")
-//      if let error = error {
-//        print("❌ Failed to send message: \(error)")
-//      }
-//    }
+  public func getOnionAddress() -> Result<String, TorServiceError> {
+    torService.getOnionAddress()
   }
   
-  private func receiveMessage() {
-    webSocketTask?.receive { [weak self] result in
-      switch result {
-      case .failure(let error):
-        print("❌ Failed to receive message: \(error)")
-        self?.isConnected = false
-      case .success(let message):
-        switch message {
-        case .string(let text):
-          DispatchQueue.main.async {
-            self?.messages.append(text)
-            print("✅ success")
-          }
-        case .data(let data):
-          print("Received binary message: \(data)")
-          print("✅ Received binary message")
-        @unknown default:
-          fatalError()
-        }
-        
-        self?.isConnected = true
-        self?.receiveMessage()
-      }
-    }
+  public func getPrivateKey() -> Result<String, TorServiceError> {
+    torService.getPrivateKey()
   }
   
-  public func disconnect() {
-    webSocketTask?.cancel(with: .goingAway, reason: nil)
-    isConnected = false
+  public func start(completion: ((Result<Void, TorServiceError>) -> Void)?) {
+    torService.start(completion: completion)
   }
   
-  private func sendMessage(to onionAddress: String, message: String) {
+  public func stop() -> Result<Void, TorServiceError> {
+    torService.stop()
+  }
+}
+
+// MARK: - Private
+
+private extension P2PChatManager {
+  private func sendMessage(
+    onionAddress: String,
+    message: String,
+    completion: ((Result<Void, Error>) -> Void)?
+  ) {
     guard let url = URL(string: "http://\(onionAddress):80") else {
-      print("❌ Неверный URL")
+      completion?(.failure(URLError(.badURL)))
       return
     }
     
@@ -95,11 +86,11 @@ public class P2PChatManager: ObservableObject {
     request.setValue("text/plain; charset=utf-8", forHTTPHeaderField: "Content-Type")
     request.httpBody = message.data(using: .utf8)
     
-    let task = torManager.session.dataTask(with: request) { data, response, error in
-      if let error = error {
-        print("❌ Ошибка подключения: \(error)")
-      } else if let data = data, let responseString = String(data: data, encoding: .utf8) {
-        print("✅ Ответ сервера: \(responseString)")
+    let task = torService.getSession().dataTask(with: request) { data, response, error in
+      if error != nil {
+        completion?(.failure(URLError(.unknown)))
+      } else {
+        completion?(.success(()))
       }
     }
     task.resume()

@@ -23,4 +23,7 @@ public protocol IAccessAndSecurityManagementService {
   /// Возвращает сервис шифрования с использованием ECIES.
   /// - Returns: Сервис шифрования.
   var cryptoService: ICryptoService { get }
+  
+  /// Возвращает сервис для управления чатом P2P через Tor.
+  var p2pChatManager: IP2PChatManager { get }
 }

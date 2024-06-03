@@ -17,7 +17,7 @@ public final class ApplicationServicesStub: IApplicationServices, IDataManagerSe
                                             IModelHandlerService, IAppSettingsManager,
                                             IModelSettingsManager, IDataManagementService,
                                             IAccessAndSecurityManagementService, IUserInterfaceAndExperienceService,
-                                            IMessagesService {
+                                            IMessagesService, IP2PChatManager {
   public func deleteAllData() -> Bool { false }
   public init() {}
   public func getDataManagerService() -> any IDataManagerService { self }
@@ -56,6 +56,7 @@ public final class ApplicationServicesStub: IApplicationServices, IDataManagerSe
   public var notificationService: any INotificationService { self }
   public var messengerService: any IMessengerService { self }
   public func messagesService(privateKey: String) -> any IMessagesService { self }
+  public var p2pChatManager: any IP2PChatManager { self }
   
   public func loadFromKeychain(completion: @escaping (Result<Data, any Error>) -> Void) {}
   public func saveToKeychain(_ data: Data, completion: @escaping (Result<Void, any Error>) -> Void) {}
@@ -161,4 +162,12 @@ public final class ApplicationServicesStub: IApplicationServices, IDataManagerSe
   public func deleteWallet(_ model: WalletModel, completion: (() -> Void)?) {}
   public func getPricesForTokens(tokens: [TokenModel], currency: CurrencyModel, completion: ((Result<[TokenModel], NetworkError>) -> Void)?) {}
   public func searchTokensByNameOrSymbol(chain: TokenNetworkType?, text: String, limit: Int, completion: ((Result<[TokenModel], NetworkError>) -> Void)?) {}
+  public var serverStateAction: ((TorServerState) -> Void)?
+  public var sessionStateAction: ((TorSessionState) -> Void)?
+  public var stateErrorServiceAction: ((Result<Void, TorServiceError>) -> Void)?
+  public func getOnionAddress() -> Result<String, TorServiceError> { .success("") }
+  public func getPrivateKey() -> Result<String, TorServiceError> { .success("") }
+  public func start(completion: ((Result<Void, TorServiceError>) -> Void)?) {}
+  public func stop() -> Result<Void, TorServiceError> { .success(()) }
+  public func sendMessage(_ message: String, peerAddress: String, completion: ((Result<Void, any Error>) -> Void)?) {}
 }
