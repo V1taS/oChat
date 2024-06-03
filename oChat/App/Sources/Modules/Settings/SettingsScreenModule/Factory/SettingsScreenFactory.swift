@@ -32,11 +32,6 @@ protocol SettingsScreenFactoryOutput: AnyObject {
 protocol SettingsScreenFactoryInput {
   /// Создать заголовок для экрана
   func createHeaderTitle() -> String
-  /// Создать верхнюю секцию
-  func createHeaderSectionsModels(
-    myWalletsCount: Int,
-    stateCurrencyValue: CurrencyModel.CurrencyType
-  ) -> [WidgetCryptoView.Model]
   /// Создать среднюю секцию
   func createSecuritySectionsModels(
     passcodeAndFaceIDValue: Bool,
@@ -72,41 +67,6 @@ extension SettingsScreenFactory: SettingsScreenFactoryInput {
   func createHeaderTitle() -> String {
     return OChatStrings.SettingsScreenLocalization
       .State.Header.title
-  }
-  
-  func createHeaderSectionsModels(
-    myWalletsCount: Int,
-    stateCurrencyValue: CurrencyModel.CurrencyType
-  ) -> [WidgetCryptoView.Model] {
-    var models: [WidgetCryptoView.Model] = []
-    
-    let myWalletModel = createWidgetWithChevron(
-      image: Image(systemName: "wallet.pass"),
-      backgroundColor: #colorLiteral(red: 0.1844805479, green: 0.5407295227, blue: 0.9590529799, alpha: 1),
-      title: OChatStrings.SettingsScreenLocalization
-        .State.MyWallet.title,
-      additionRightTitle: "\(myWalletsCount)",
-      action: { [weak self] in
-        self?.output?.openMyWalletsSection()
-      }
-    )
-    
-    let currencyModel = createWidgetWithChevron(
-      image: Image(systemName: "dollarsign.circle"),
-      backgroundColor: #colorLiteral(red: 0.5207093954, green: 0.7432913184, blue: 0.5747435093, alpha: 1),
-      title: OChatStrings.SettingsScreenLocalization
-        .State.Currency.title,
-      additionRightTitle: stateCurrencyValue.details.symbol,
-      action: { [weak self] in
-        self?.output?.openCurrencySection()
-      }
-    )
-    
-    models = [
-      myWalletModel,
-      currencyModel
-    ]
-    return models
   }
   
   func createSecuritySectionsModels(

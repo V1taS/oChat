@@ -65,13 +65,6 @@ final class SettingsScreenPresenter: ObservableObject {
     return "\(versionTitle) \(appVersion)"
   }
   
-  func getHeaderSectionsModels() -> [WidgetCryptoView.Model] {
-    factory.createHeaderSectionsModels(
-      myWalletsCount: stateMyWalletsCount,
-      stateCurrencyValue: stateCurrencyValue
-    )
-  }
-  
   func getSecuritySectionsModels() -> [WidgetCryptoView.Model] {
     let languageValue = factory.createLanguageValue(from: stateCurrentLanguage)
     

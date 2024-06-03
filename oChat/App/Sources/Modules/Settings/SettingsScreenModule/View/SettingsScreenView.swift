@@ -23,7 +23,6 @@ struct SettingsScreenView: View {
     VStack(spacing: .zero) {
       ScrollView(.vertical, showsIndicators: false) {
         VStack(spacing: .s6) {
-          WidgetCryptoView(presenter.getHeaderSectionsModels())
           WidgetCryptoView(presenter.getSecuritySectionsModels())
         }
         .padding(.horizontal, .s4)
@@ -41,13 +40,13 @@ struct SettingsScreenView: View {
 private extension SettingsScreenView {
   func applicationVersionView() -> some View {
     VStack(spacing: .zero) {
-      SKUIKitAsset.skWatermark.swiftUIImage
-        .resizable()
-        .renderingMode(.template)
-        .foregroundColor(SKStyleAsset.ghost.swiftUIColor)
-        .aspectRatio(contentMode: .fit)
-        .frame(height: 50)
-        .padding(.s4)
+//      SKUIKitAsset.skWatermark.swiftUIImage
+//        .resizable()
+//        .renderingMode(.template)
+//        .foregroundColor(SKStyleAsset.ghost.swiftUIColor)
+//        .aspectRatio(contentMode: .fit)
+//        .frame(height: 50)
+//        .padding(.s4)
       
       VStack(spacing: .s1) {
         Text(presenter.stateApplicationTitle)
@@ -60,6 +59,7 @@ private extension SettingsScreenView {
       }
       .offset(y: -.s3)
     }
+    .padding(.top, .s10)
   }
 }
 

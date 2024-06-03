@@ -24,8 +24,6 @@ final class SettingsScreenFlowCoordinator: Coordinator<Void, SettingsScreenFinis
   private var notificationsSettingsScreenModule: NotificationsSettingsScreenModule?
   private var passcodeSettingsScreenModule: PasscodeSettingsScreenModule?
   private var authenticationFlowCoordinator: AuthenticationFlowCoordinator?
-  private var currencyListScreenModule: CurrencyListScreenModule?
-  private var myWalletsFlowCoordinator: MyWalletsFlowCoordinator?
   
   // MARK: - Initialization
   
@@ -46,14 +44,8 @@ final class SettingsScreenFlowCoordinator: Coordinator<Void, SettingsScreenFinis
 
 extension SettingsScreenFlowCoordinator: SettingsScreenModuleOutput {
   func openMessengerSection() {}
-  
-  func openMyWalletsSection() {
-    openMyWalletsFlow()
-  }
-  
-  func openCurrencySection() {
-    openCurrencyListScreenModule()
-  }
+  func openMyWalletsSection() {}
+  func openCurrencySection() {}
   
   func openPasscodeAndFaceIDSection() {
     openPasscodeSettingsScreenModule()
@@ -128,10 +120,6 @@ extension SettingsScreenFlowCoordinator: PasscodeSettingsScreenModuleOutput {
   }
 }
 
-// MARK: - CurrencyListScreenModuleOutput
-
-extension SettingsScreenFlowCoordinator: CurrencyListScreenModuleOutput {}
-
 // MARK: - Open modules
 
 private extension SettingsScreenFlowCoordinator {
@@ -203,34 +191,6 @@ private extension SettingsScreenFlowCoordinator {
     }
     authenticationFlowCoordinator.start(parameter: state)
   }
-  
-  func openCurrencyListScreenModule() {
-    var currencyListScreenModule = CurrencyListScreenAssembly().createModule(services)
-    self.currencyListScreenModule = currencyListScreenModule
-    currencyListScreenModule.input.moduleOutput = self
-    currencyListScreenModule.viewController.hidesBottomBarWhenPushed = true
-    
-    navigationController?.pushViewController(
-      currencyListScreenModule.viewController,
-      animated: true
-    )
-  }
-  
-  func openMyWalletsFlow() {
-    let myWalletsFlowCoordinator = MyWalletsFlowCoordinator(
-      navigationController,
-      services
-    )
-    self.myWalletsFlowCoordinator = myWalletsFlowCoordinator
-
-    myWalletsFlowCoordinator.finishFlow = { [weak self] result in
-      if case .exitTheApplication = result {
-        self?.finishSettingsScreenFlow(.exitWallet)
-      }
-      self?.myWalletsFlowCoordinator = nil
-    }
-    myWalletsFlowCoordinator.start()
-  }
 }
 
 // MARK: - Private
@@ -242,8 +202,6 @@ private extension SettingsScreenFlowCoordinator {
     notificationsSettingsScreenModule = nil
     passcodeSettingsScreenModule = nil
     authenticationFlowCoordinator = nil
-    currencyListScreenModule = nil
-    myWalletsFlowCoordinator = nil
     finishFlow?(flowType)
   }
 }

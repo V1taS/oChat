@@ -14,10 +14,10 @@ public final class ApplicationServicesStub: IApplicationServices, IDataManagerSe
                                             ISteganographyService, ISystemService, IUIService,
                                             IAnalyticsService, IMessengerService,
                                             ISecureDataManagerService, ICryptoService, ICloudKitService,
-                                            IModelHandlerService, IAppSettingsManager, IBlockchainService,
-                                            IWalletsManager, IModelSettingsManager, IDataManagementService,
+                                            IModelHandlerService, IAppSettingsManager,
+                                            IModelSettingsManager, IDataManagementService,
                                             IAccessAndSecurityManagementService, IUserInterfaceAndExperienceService,
-                                            IMessagesService, ITokenService {
+                                            IMessagesService {
   public func deleteAllData() -> Bool { false }
   public init() {}
   public func getDataManagerService() -> any IDataManagerService { self }
@@ -35,8 +35,6 @@ public final class ApplicationServicesStub: IApplicationServices, IDataManagerSe
   public func getCloudKitService() -> any ICloudKitService { self }
   public func getModelHandlerService() -> IModelHandlerService { self }
   public func getAppSettingsManager() -> IAppSettingsManager { self }
-  public var walletsManager: any IWalletsManager { get { self } set {} }
-  public func getBlockchainService() -> IBlockchainService { self }
   public func getDataManagementService() -> any IDataManagementService { self }
   public func getAccessAndSecurityManagementService() -> any IAccessAndSecurityManagementService { self }
   public func getUserInterfaceAndExperienceService() -> any IUserInterfaceAndExperienceService { self }
@@ -45,7 +43,6 @@ public final class ApplicationServicesStub: IApplicationServices, IDataManagerSe
   public var userInterfaceAndExperienceService: any IUserInterfaceAndExperienceService { self }
   public var analyticsService: any IAnalyticsService { self }
   public var cloudKitService: any ICloudKitService { self }
-  public var blockchainService: any IBlockchainService { self }
   public var permissionService: any IPermissionService { self }
   public var steganographyService: any ISteganographyService { self }
   public var cryptoService: any ICryptoService { self }
@@ -59,7 +56,6 @@ public final class ApplicationServicesStub: IApplicationServices, IDataManagerSe
   public var notificationService: any INotificationService { self }
   public var messengerService: any IMessengerService { self }
   public func messagesService(privateKey: String) -> any IMessagesService { self }
-  public var tokenService: any ITokenService { self }
   
   public func loadFromKeychain(completion: @escaping (Result<Data, any Error>) -> Void) {}
   public func saveToKeychain(_ data: Data, completion: @escaping (Result<Void, any Error>) -> Void) {}
@@ -163,7 +159,6 @@ public final class ApplicationServicesStub: IApplicationServices, IDataManagerSe
   public func setNameWallet(_ model: WalletModel, _ name: String, completion: (() -> Void)?) {}
   public func setNameWallet(_ model: WalletModel, _ name: String, completion: ((WalletModel?) -> Void)?) {}
   public func deleteWallet(_ model: WalletModel, completion: (() -> Void)?) {}
-  public func getValueForChart(token: TokenModel, timeRange: TimeRangeChart, completion: ((Result<[TokenChartValue], NetworkError>) -> Void)?) {}
   public func getPricesForTokens(tokens: [TokenModel], currency: CurrencyModel, completion: ((Result<[TokenModel], NetworkError>) -> Void)?) {}
   public func searchTokensByNameOrSymbol(chain: TokenNetworkType?, text: String, limit: Int, completion: ((Result<[TokenModel], NetworkError>) -> Void)?) {}
 }

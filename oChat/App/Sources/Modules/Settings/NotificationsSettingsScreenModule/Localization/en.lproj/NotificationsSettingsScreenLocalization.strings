@@ -9,4 +9,4 @@
 
 "State.Header.Title" = "Уведомления";
 "State.Notifications.Title" = "Push-уведомления";
-"State.Notifications.Description" = "Получайте уведомления при получении токенов";
+"State.Notifications.Description" = "Получайте уведомления при получении сообщения";

@@ -42,11 +42,6 @@ final class ApplicationServices: IApplicationServices {
     CloudKitService()
   }
   
-  /// Определяет интерфейс для взаимодействия с блокчейн-сервисами.
-  var blockchainService: IBlockchainService {
-    BlockchainService()
-  }
-  
   /// Возвращает сервис  для управления сервисами, связанными с мессенджером
   var messengerService: IMessengerService {
     MessengerService()
