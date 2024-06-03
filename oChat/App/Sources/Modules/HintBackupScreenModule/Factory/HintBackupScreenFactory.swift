@@ -47,17 +47,17 @@ private extension HintBackupScreenFactory {
   func createHintMessengerModel() -> HintBackupScreenModel {
     return HintBackupScreenModel(
       lottieAnimationName: nil,
-      headerTitle: oChatStrings.HintBackupScreenLocalization.Messenger.Header.title,
-      headerDescription: oChatStrings.HintBackupScreenLocalization.Messenger.Header.description,
-      buttonTitle: oChatStrings.HintBackupScreenLocalization.Messenger.Button.title,
-      oneTitle: oChatStrings.HintBackupScreenLocalization.Messenger.One.title,
-      oneDescription: oChatStrings.HintBackupScreenLocalization.Messenger.One.description,
+      headerTitle: OChatStrings.HintBackupScreenLocalization.Messenger.Header.title,
+      headerDescription: OChatStrings.HintBackupScreenLocalization.Messenger.Header.description,
+      buttonTitle: OChatStrings.HintBackupScreenLocalization.Messenger.Button.title,
+      oneTitle: OChatStrings.HintBackupScreenLocalization.Messenger.One.title,
+      oneDescription: OChatStrings.HintBackupScreenLocalization.Messenger.One.description,
       oneSystemImageName: "paperplane.fill",
-      twoTitle: oChatStrings.HintBackupScreenLocalization.Messenger.Two.title,
-      twoDescription: oChatStrings.HintBackupScreenLocalization.Messenger.Two.description,
+      twoTitle: OChatStrings.HintBackupScreenLocalization.Messenger.Two.title,
+      twoDescription: OChatStrings.HintBackupScreenLocalization.Messenger.Two.description,
       twoSystemImageName: "centsign.circle",
-      threeTitle: oChatStrings.HintBackupScreenLocalization.Messenger.Three.title,
-      threeDescription: oChatStrings.HintBackupScreenLocalization.Messenger.Three.description,
+      threeTitle: OChatStrings.HintBackupScreenLocalization.Messenger.Three.title,
+      threeDescription: OChatStrings.HintBackupScreenLocalization.Messenger.Three.description,
       threeSystemImageName: "lock.shield"
     )
   }
@@ -65,17 +65,17 @@ private extension HintBackupScreenFactory {
   func createBackupPhraseModel() -> HintBackupScreenModel {
     return HintBackupScreenModel(
       lottieAnimationName: nil,
-      headerTitle: oChatStrings.HintBackupScreenLocalization.BackupPhrase.Header.title,
-      headerDescription: oChatStrings.HintBackupScreenLocalization.BackupPhrase.Header.description,
-      buttonTitle: oChatStrings.HintBackupScreenLocalization.BackupPhrase.Button.title,
-      oneTitle: oChatStrings.HintBackupScreenLocalization.BackupPhrase.One.title,
-      oneDescription: oChatStrings.HintBackupScreenLocalization.BackupPhrase.One.description,
+      headerTitle: OChatStrings.HintBackupScreenLocalization.BackupPhrase.Header.title,
+      headerDescription: OChatStrings.HintBackupScreenLocalization.BackupPhrase.Header.description,
+      buttonTitle: OChatStrings.HintBackupScreenLocalization.BackupPhrase.Button.title,
+      oneTitle: OChatStrings.HintBackupScreenLocalization.BackupPhrase.One.title,
+      oneDescription: OChatStrings.HintBackupScreenLocalization.BackupPhrase.One.description,
       oneSystemImageName: "doc.text",
-      twoTitle: oChatStrings.HintBackupScreenLocalization.BackupPhrase.Two.title,
-      twoDescription: oChatStrings.HintBackupScreenLocalization.BackupPhrase.Two.description,
+      twoTitle: OChatStrings.HintBackupScreenLocalization.BackupPhrase.Two.title,
+      twoDescription: OChatStrings.HintBackupScreenLocalization.BackupPhrase.Two.description,
       twoSystemImageName: "exclamationmark.arrow.circlepath",
-      threeTitle: oChatStrings.HintBackupScreenLocalization.BackupPhrase.Three.title,
-      threeDescription: oChatStrings.HintBackupScreenLocalization.BackupPhrase.Three.description,
+      threeTitle: OChatStrings.HintBackupScreenLocalization.BackupPhrase.Three.title,
+      threeDescription: OChatStrings.HintBackupScreenLocalization.BackupPhrase.Three.description,
       threeSystemImageName: "key"
     )
   }
@@ -83,17 +83,17 @@ private extension HintBackupScreenFactory {
   func createBackupImageModel() -> HintBackupScreenModel {
     return HintBackupScreenModel(
       lottieAnimationName: nil,
-      headerTitle: oChatStrings.HintBackupScreenLocalization.BackupImage.Header.title,
-      headerDescription: oChatStrings.HintBackupScreenLocalization.BackupImage.Header.description,
-      buttonTitle: oChatStrings.HintBackupScreenLocalization.BackupImage.Button.title,
-      oneTitle: oChatStrings.HintBackupScreenLocalization.BackupImage.One.title,
-      oneDescription: oChatStrings.HintBackupScreenLocalization.BackupImage.One.description,
+      headerTitle: OChatStrings.HintBackupScreenLocalization.BackupImage.Header.title,
+      headerDescription: OChatStrings.HintBackupScreenLocalization.BackupImage.Header.description,
+      buttonTitle: OChatStrings.HintBackupScreenLocalization.BackupImage.Button.title,
+      oneTitle: OChatStrings.HintBackupScreenLocalization.BackupImage.One.title,
+      oneDescription: OChatStrings.HintBackupScreenLocalization.BackupImage.One.description,
       oneSystemImageName: "photo",
-      twoTitle: oChatStrings.HintBackupScreenLocalization.BackupImage.Two.title,
-      twoDescription: oChatStrings.HintBackupScreenLocalization.BackupImage.Two.description,
+      twoTitle: OChatStrings.HintBackupScreenLocalization.BackupImage.Two.title,
+      twoDescription: OChatStrings.HintBackupScreenLocalization.BackupImage.Two.description,
       twoSystemImageName: "exclamationmark.triangle",
-      threeTitle: oChatStrings.HintBackupScreenLocalization.BackupImage.Three.title,
-      threeDescription: oChatStrings.HintBackupScreenLocalization.BackupImage.Three.description,
+      threeTitle: OChatStrings.HintBackupScreenLocalization.BackupImage.Three.title,
+      threeDescription: OChatStrings.HintBackupScreenLocalization.BackupImage.Three.description,
       threeSystemImageName: "lock.shield"
     )
   }

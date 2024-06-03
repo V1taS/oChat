@@ -40,26 +40,26 @@ extension AuthenticationScreenFactory: AuthenticationScreenFactoryInput {
     case let .createPasscode(result):
       switch result {
       case .enterPasscode:
-        return oChatStrings.AuthenticationScreenLocalization
+        return OChatStrings.AuthenticationScreenLocalization
           .State.EnterPasscode.title
       default:
-        return oChatStrings.AuthenticationScreenLocalization
+        return OChatStrings.AuthenticationScreenLocalization
           .State.ReEnterPasscode.title
       }
     case .loginPasscode:
-      let title = oChatStrings.AuthenticationScreenLocalization
+      let title = OChatStrings.AuthenticationScreenLocalization
         .State.LoginPasscode.title
       return title
     case let .changePasscode(result):
       switch result {
       case .enterOldPasscode:
-        return oChatStrings.AuthenticationScreenLocalization
+        return OChatStrings.AuthenticationScreenLocalization
           .State.EnterOldPasscode.title
       case .enterNewPasscode:
-        return oChatStrings.AuthenticationScreenLocalization
+        return OChatStrings.AuthenticationScreenLocalization
           .State.EnterPasscode.title
       case .reEnterNewPasscode:
-        return oChatStrings.AuthenticationScreenLocalization
+        return OChatStrings.AuthenticationScreenLocalization
           .State.ReEnterPasscode.title
       }
     }
@@ -80,18 +80,18 @@ extension AuthenticationScreenFactory: AuthenticationScreenFactoryInput {
       default:
         let isValidation = accessCode == confirmAccessCode
         let isValidationText: String? = isValidation ?
-        oChatStrings.AuthenticationScreenLocalization
+        OChatStrings.AuthenticationScreenLocalization
           .State.CreatePasscode.Success.title :
-        oChatStrings.AuthenticationScreenLocalization
+        OChatStrings.AuthenticationScreenLocalization
           .State.CreatePasscode.Failure.title
         return (isValidation: isValidation, helperText: isValidationText)
       }
     case .loginPasscode:
       let isValidation = accessCode == oldAccessCode
       let isValidationText: String? = isValidation ?
-      oChatStrings.AuthenticationScreenLocalization
+      OChatStrings.AuthenticationScreenLocalization
         .State.LoginPasscode.Success.title :
-      oChatStrings.AuthenticationScreenLocalization
+      OChatStrings.AuthenticationScreenLocalization
         .State.LoginPasscode.Failure.title
       return (isValidation: isValidation, helperText: isValidationText)
     case let .changePasscode(result):
@@ -99,9 +99,9 @@ extension AuthenticationScreenFactory: AuthenticationScreenFactoryInput {
       case .enterOldPasscode:
         let isValidation = oldAccessCode == confirmAccessCode
         let isValidationText: String? = isValidation ?
-        oChatStrings.AuthenticationScreenLocalization
+        OChatStrings.AuthenticationScreenLocalization
           .State.LoginPasscode.Success.title :
-        oChatStrings.AuthenticationScreenLocalization
+        OChatStrings.AuthenticationScreenLocalization
           .State.LoginPasscode.Failure.title
         return (isValidation: isValidation, helperText: isValidationText)
       case .enterNewPasscode:
@@ -109,9 +109,9 @@ extension AuthenticationScreenFactory: AuthenticationScreenFactoryInput {
       case .reEnterNewPasscode:
         let isValidation = accessCode == confirmAccessCode
         let isValidationText: String? = isValidation ?
-        oChatStrings.AuthenticationScreenLocalization
+        OChatStrings.AuthenticationScreenLocalization
           .State.CreatePasscode.Success.title :
-        oChatStrings.AuthenticationScreenLocalization
+        OChatStrings.AuthenticationScreenLocalization
           .State.CreatePasscode.Failure.title
         return (isValidation: isValidation, helperText: isValidationText)
       }
@@ -129,7 +129,7 @@ private extension AuthenticationScreenFactory {
     guard accessCode.count == 4 else {
       return (
         isValidation: false,
-        helperText: oChatStrings.AuthenticationScreenLocalization.State
+        helperText: OChatStrings.AuthenticationScreenLocalization.State
           .ValidationCount.Failure.title("\(maxDigitsAccessCode)")
       )
     }
@@ -138,7 +138,7 @@ private extension AuthenticationScreenFactory {
     if simplePasswords.contains(accessCode) {
       return (
         isValidation: false,
-        helperText: oChatStrings.AuthenticationScreenLocalization.State
+        helperText: OChatStrings.AuthenticationScreenLocalization.State
           .SimplePasswords.Failure.title
       )
     }

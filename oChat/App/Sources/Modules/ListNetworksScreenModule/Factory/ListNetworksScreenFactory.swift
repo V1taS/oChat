@@ -54,7 +54,7 @@ extension ListNetworksScreenFactory: ListNetworksScreenFactoryInput {
   }
   
   func createHeaderTitle() -> String {
-    oChatStrings.ListNetworksScreenLocalization
+    OChatStrings.ListNetworksScreenLocalization
       .State.Header.title
   }
 }

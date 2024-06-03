@@ -17,15 +17,15 @@ enum InitialStoriesScreenModel: IStory {
   var title: String {
     switch self {
     case .first:
-      return oChatStrings.InitialScreenLocalization.Stories.Title.first
+      return OChatStrings.InitialScreenLocalization.Stories.Title.first
     case .second:
-      return oChatStrings.InitialScreenLocalization.Stories.Title.second
+      return OChatStrings.InitialScreenLocalization.Stories.Title.second
     case .third:
-      return oChatStrings.InitialScreenLocalization.Stories.Title.third
+      return OChatStrings.InitialScreenLocalization.Stories.Title.third
     case .fourth:
-      return oChatStrings.InitialScreenLocalization.Stories.Title.fourth
+      return OChatStrings.InitialScreenLocalization.Stories.Title.fourth
     case .fifth:
-      return oChatStrings.InitialScreenLocalization.Stories.Title.fifth
+      return OChatStrings.InitialScreenLocalization.Stories.Title.fifth
     }
   }
   
@@ -33,15 +33,15 @@ enum InitialStoriesScreenModel: IStory {
   var subtitle: String {
     switch self {
     case .first:
-      return oChatStrings.InitialScreenLocalization.Stories.Subtitle.first
+      return OChatStrings.InitialScreenLocalization.Stories.Subtitle.first
     case .second:
-      return oChatStrings.InitialScreenLocalization.Stories.Subtitle.second
+      return OChatStrings.InitialScreenLocalization.Stories.Subtitle.second
     case .third:
-      return oChatStrings.InitialScreenLocalization.Stories.Subtitle.third
+      return OChatStrings.InitialScreenLocalization.Stories.Subtitle.third
     case .fourth:
-      return oChatStrings.InitialScreenLocalization.Stories.Subtitle.fourth
+      return OChatStrings.InitialScreenLocalization.Stories.Subtitle.fourth
     case .fifth:
-      return oChatStrings.InitialScreenLocalization.Stories.Subtitle.fifth
+      return OChatStrings.InitialScreenLocalization.Stories.Subtitle.fifth
     }
   }
   

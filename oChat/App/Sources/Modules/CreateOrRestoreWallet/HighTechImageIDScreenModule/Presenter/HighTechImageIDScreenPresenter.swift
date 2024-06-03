@@ -18,7 +18,7 @@ final class HighTechImageIDScreenPresenter: ObservableObject {
   
   @Published var stateIsSaveImageID = false
   @Published var stateIsConfirmationRequirements = false
-  @Published var stateSaveImageIDButtonTitle = oChatStrings
+  @Published var stateSaveImageIDButtonTitle = OChatStrings
     .HighTechImageIDScreenLocalization.State.Button.SaveImageID.title
   @Published var stateIsDisabledPhotosPicker = false
   @Published var stateCurrentStateScreen: HighTechImageIDScreenState
@@ -203,7 +203,7 @@ extension HighTechImageIDScreenPresenter: HighTechImageIDScreenInteractorOutput 
   func didReceiveNotDefined() {
     interactor.showNotification(
       .negative(
-        title: oChatStrings.HighTechImageIDScreenLocalization
+        title: OChatStrings.HighTechImageIDScreenLocalization
           .State.Error.NotDefined.title
       )
     )
@@ -214,7 +214,7 @@ extension HighTechImageIDScreenPresenter: HighTechImageIDScreenInteractorOutput 
   func didReceiveDataTooBig() {
     interactor.showNotification(
       .negative(
-        title: oChatStrings.HighTechImageIDScreenLocalization
+        title: OChatStrings.HighTechImageIDScreenLocalization
           .State.Error.DataTooBig.title
       )
     )
@@ -225,7 +225,7 @@ extension HighTechImageIDScreenPresenter: HighTechImageIDScreenInteractorOutput 
   func didReceiveImageTooSmall() {
     interactor.showNotification(
       .negative(
-        title: oChatStrings.HighTechImageIDScreenLocalization
+        title: OChatStrings.HighTechImageIDScreenLocalization
           .State.Error.ImageTooSmall.title
       )
     )
@@ -236,7 +236,7 @@ extension HighTechImageIDScreenPresenter: HighTechImageIDScreenInteractorOutput 
   func didReceiveNoDataInImage() {
     interactor.showNotification(
       .negative(
-        title: oChatStrings.HighTechImageIDScreenLocalization
+        title: OChatStrings.HighTechImageIDScreenLocalization
           .State.Error.NoDataInImage.title
       )
     )
@@ -366,7 +366,7 @@ private extension HighTechImageIDScreenPresenter {
   func showSomethingWentWrong() {
     interactor.showNotification(
       .negative(
-        title: oChatStrings.HighTechImageIDScreenLocalization
+        title: OChatStrings.HighTechImageIDScreenLocalization
           .State.Error.SomethingWentWrong.title
       )
     )

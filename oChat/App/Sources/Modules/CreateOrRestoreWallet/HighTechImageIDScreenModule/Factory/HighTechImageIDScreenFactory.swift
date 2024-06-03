@@ -90,10 +90,10 @@ extension HighTechImageIDScreenFactory: HighTechImageIDScreenFactoryInput {
   ) -> String {
     switch currentStateScreen {
     case .generateImageID:
-      return oChatStrings.HighTechImageIDScreenLocalization
+      return OChatStrings.HighTechImageIDScreenLocalization
         .State.GenerateImageID.Header.title
     case .loginImageID:
-      return oChatStrings.HighTechImageIDScreenLocalization
+      return OChatStrings.HighTechImageIDScreenLocalization
         .State.LoginImageID.Header.title
     }
   }
@@ -104,7 +104,7 @@ extension HighTechImageIDScreenFactory: HighTechImageIDScreenFactoryInput {
     secondInputText: String
   ) -> WidgetCryptoView.Model {
     createWidgetWithPassword(
-      title: oChatStrings.HighTechImageIDScreenLocalization
+      title: OChatStrings.HighTechImageIDScreenLocalization
         .State.AdditionProtection.title,
       state: state,
       firstInputText: firstInputText,
@@ -119,19 +119,19 @@ extension HighTechImageIDScreenFactory: HighTechImageIDScreenFactoryInput {
     case let .generateImageID(result):
       switch result {
       case .finish:
-        return oChatStrings.HighTechImageIDScreenLocalization
+        return OChatStrings.HighTechImageIDScreenLocalization
           .State.Button.Main.GenerateImageIDFinish.title
       default:
-        return oChatStrings.HighTechImageIDScreenLocalization
+        return OChatStrings.HighTechImageIDScreenLocalization
           .State.Button.Main.GenerateImageIDDefault.title
       }
     case let .loginImageID(result):
       switch result {
       case .finish:
-        return oChatStrings.HighTechImageIDScreenLocalization
+        return OChatStrings.HighTechImageIDScreenLocalization
           .State.Button.Main.LoginImageIDFinish.title
       default:
-        return oChatStrings.HighTechImageIDScreenLocalization
+        return OChatStrings.HighTechImageIDScreenLocalization
           .State.Button.Main.LoginImageIDDefault.title
       }
     }
@@ -170,7 +170,7 @@ extension HighTechImageIDScreenFactory: HighTechImageIDScreenFactoryInput {
   }
   
   func createTermsOfAgreementTitle() -> String {
-    oChatStrings.HighTechImageIDScreenLocalization
+    OChatStrings.HighTechImageIDScreenLocalization
       .State.TermsOfAgreement.title
   }
   
@@ -181,31 +181,31 @@ extension HighTechImageIDScreenFactory: HighTechImageIDScreenFactoryInput {
     case let .generateImageID(result):
       switch result {
       case .initialState:
-        return oChatStrings.HighTechImageIDScreenLocalization
+        return OChatStrings.HighTechImageIDScreenLocalization
           .Step.GenerateImageID.InitialState.description("1")
       case .passCodeImage:
-        return oChatStrings.HighTechImageIDScreenLocalization
+        return OChatStrings.HighTechImageIDScreenLocalization
           .Step.GenerateImageID.PassCodeImage.description("2")
       case .startUploadImage:
-        return oChatStrings.HighTechImageIDScreenLocalization
+        return OChatStrings.HighTechImageIDScreenLocalization
           .Step.GenerateImageID.StartUploadImage.description("3")
       case .finish:
-        return oChatStrings.HighTechImageIDScreenLocalization
+        return OChatStrings.HighTechImageIDScreenLocalization
           .Step.GenerateImageID.Finish.description("4")
       }
     case let .loginImageID(result):
       switch result {
       case .initialState:
-        return oChatStrings.HighTechImageIDScreenLocalization
+        return OChatStrings.HighTechImageIDScreenLocalization
           .Step.LoginImageID.InitialState.description("1")
       case .passCodeImage:
-        return oChatStrings.HighTechImageIDScreenLocalization
+        return OChatStrings.HighTechImageIDScreenLocalization
           .Step.LoginImageID.PassCodeImage.description("2")
       case .startUploadImage:
-        return oChatStrings.HighTechImageIDScreenLocalization
+        return OChatStrings.HighTechImageIDScreenLocalization
           .Step.LoginImageID.StartUploadImage.description("3")
       case .finish:
-        return oChatStrings.HighTechImageIDScreenLocalization
+        return OChatStrings.HighTechImageIDScreenLocalization
           .Step.LoginImageID.Finish.description("4")
       }
     }
@@ -216,10 +216,10 @@ extension HighTechImageIDScreenFactory: HighTechImageIDScreenFactoryInput {
   ) -> String {
     switch currentStateScreen {
     case .generateImageID:
-      return oChatStrings.HighTechImageIDScreenLocalization
+      return OChatStrings.HighTechImageIDScreenLocalization
         .State.GenerateImageID.Header.description
     case .loginImageID:
-      return oChatStrings.HighTechImageIDScreenLocalization
+      return OChatStrings.HighTechImageIDScreenLocalization
         .State.LoginImageID.Header.description
     }
   }
@@ -304,7 +304,7 @@ private extension HighTechImageIDScreenFactory {
       VStack(spacing: .s4) {
         InputView(.init(
           text: firstInputText,
-          placeholder: oChatStrings.HighTechImageIDScreenLocalization
+          placeholder: OChatStrings.HighTechImageIDScreenLocalization
             .State.GenerateImageID.Input.First.placeholder,
           isSecureField: true,
           bottomHelper: nil,
@@ -316,7 +316,7 @@ private extension HighTechImageIDScreenFactory {
           maxLength: 100,
           borderColor: SKStyleAsset.slate.swiftUIColor,
           style: .leftHelper(
-            text: oChatStrings.HighTechImageIDScreenLocalization
+            text: OChatStrings.HighTechImageIDScreenLocalization
               .State.GenerateImageID.Input.First.leftHelper
           ),
           rightButtonType: .clear,
@@ -332,7 +332,7 @@ private extension HighTechImageIDScreenFactory {
         
         InputView(.init(
           text: secondInputText,
-          placeholder: oChatStrings.HighTechImageIDScreenLocalization
+          placeholder: OChatStrings.HighTechImageIDScreenLocalization
             .State.GenerateImageID.Input.Second.placeholder,
           isSecureField: true,
           bottomHelper: bottomHelper,
@@ -344,7 +344,7 @@ private extension HighTechImageIDScreenFactory {
           maxLength: 100,
           borderColor: SKStyleAsset.slate.swiftUIColor,
           style: .leftHelper(
-            text: oChatStrings.HighTechImageIDScreenLocalization
+            text: OChatStrings.HighTechImageIDScreenLocalization
               .State.GenerateImageID.Input.Second.leftHelper
           ),
           rightButtonType: .clear,
@@ -365,7 +365,7 @@ private extension HighTechImageIDScreenFactory {
     AnyView(
       InputView(.init(
         text: firstInputText,
-        placeholder: oChatStrings.HighTechImageIDScreenLocalization
+        placeholder: OChatStrings.HighTechImageIDScreenLocalization
           .State.LoginImageID.Input.First.placeholder,
         isSecureField: true,
         bottomHelper: nil,
@@ -377,7 +377,7 @@ private extension HighTechImageIDScreenFactory {
         maxLength: 100,
         borderColor: SKStyleAsset.slate.swiftUIColor,
         style: .leftHelper(
-          text: oChatStrings.HighTechImageIDScreenLocalization
+          text: OChatStrings.HighTechImageIDScreenLocalization
             .State.LoginImageID.Input.First.leftHelper
         ),
         rightButtonType: .clear,
@@ -397,7 +397,7 @@ private extension HighTechImageIDScreenFactory {
     if password.count < 4 {
       return (
         false,
-        oChatStrings.HighTechImageIDScreenLocalization
+        OChatStrings.HighTechImageIDScreenLocalization
           .State.Validation.MinimalAmount.title("4")
       )
     }
@@ -406,7 +406,7 @@ private extension HighTechImageIDScreenFactory {
     if password != confirm {
       return (
         false,
-        oChatStrings.HighTechImageIDScreenLocalization
+        OChatStrings.HighTechImageIDScreenLocalization
           .State.Validation.PasswordMismatch.title
       )
     }

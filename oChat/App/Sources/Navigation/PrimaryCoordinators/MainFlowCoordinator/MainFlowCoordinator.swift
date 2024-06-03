@@ -17,8 +17,6 @@ final class MainFlowCoordinator: Coordinator<Void, MainFinishFlowType> {
   private let tabBarController = UITabBarController()
   private let isPresentScreenAnimated: Bool
   
-  private var mainScreenFlowCoordinator: MainScreenFlowCoordinator?
-  private var activityScreenFlowCoordinator: ActivityScreenFlowCoordinator?
   private var messengerScreenFlowCoordinator: MessengerScreenFlowCoordinator?
   private var settingsScreenFlowCoordinator: SettingsScreenFlowCoordinator?
   
@@ -36,79 +34,15 @@ final class MainFlowCoordinator: Coordinator<Void, MainFinishFlowType> {
   // MARK: - Internal func
   
   override func start(parameter: Void) {
-    setupMainScreenFlowCoordinator()
-    setupActivityScreenFlowCoordinator()
     setupMessengerScreenFlowCoordinator()
     setupSettingsScreenFlowCoordinator()
 
     tabBarController.viewControllers = [
-      createMainScreenTab(),
-      createActivityScreenTab(),
       createMessengerScreenTab(),
       createSettingsScreenTab()
     ]
     tabBarController.presentAsRoot(animated: isPresentScreenAnimated)
     services.accessAndSecurityManagementService.sessionService.startSession()
-  }
-}
-
-// MARK: - MainScreenTab
-
-private extension MainFlowCoordinator {
-  func createMainScreenTab() -> UINavigationController {
-    guard let navigationController = mainScreenFlowCoordinator?.navigationController else {
-      return UINavigationController()
-    }
-    let tabBarItem = UITabBarItem()
-    tabBarItem.title = oChatStrings.MainFlowCoordinatorLocalization
-      .Tab.MainScreen.title
-    tabBarItem.image = UIImage(systemName: "bitcoinsign.square.fill")
-    navigationController.tabBarItem = tabBarItem
-    return navigationController
-  }
-  
-  func setupMainScreenFlowCoordinator() {
-    let mainScreenFlowCoordinator = MainScreenFlowCoordinator(services)
-    self.mainScreenFlowCoordinator = mainScreenFlowCoordinator
-    mainScreenFlowCoordinator.finishFlow = { [weak self] state in
-      switch state {
-      case .exitWallet:
-        self?.finishMainFlow(.exitWallet)
-      }
-      self?.mainScreenFlowCoordinator = nil
-    }
-    
-    mainScreenFlowCoordinator.start()
-  }
-}
-
-// MARK: - ActivityScreenTab
-
-private extension MainFlowCoordinator {
-  func createActivityScreenTab() -> UINavigationController {
-    guard let navigationController = activityScreenFlowCoordinator?.navigationController else {
-      return UINavigationController()
-    }
-    let tabBarItem = UITabBarItem()
-    tabBarItem.title = oChatStrings.MainFlowCoordinatorLocalization
-      .Tab.ActivityScreen.title
-    tabBarItem.image = UIImage(systemName: "clock")
-    navigationController.tabBarItem = tabBarItem
-    return navigationController
-  }
-  
-  func setupActivityScreenFlowCoordinator() {
-    let activityScreenFlowCoordinator = ActivityScreenFlowCoordinator(services)
-    self.activityScreenFlowCoordinator = activityScreenFlowCoordinator
-    activityScreenFlowCoordinator.finishFlow = { [weak self] state in
-      switch state {
-      case .exitWallet:
-        self?.finishMainFlow(.exitWallet)
-      }
-      self?.activityScreenFlowCoordinator = nil
-    }
-    
-    activityScreenFlowCoordinator.start()
   }
 }
 
@@ -120,7 +54,7 @@ private extension MainFlowCoordinator {
       return UINavigationController()
     }
     let tabBarItem = UITabBarItem()
-    tabBarItem.title = oChatStrings.MainFlowCoordinatorLocalization
+    tabBarItem.title = OChatStrings.MainFlowCoordinatorLocalization
       .Tab.MessengerScreen.title
     tabBarItem.image = UIImage(systemName: "message.fill")
     navigationController.tabBarItem = tabBarItem
@@ -150,7 +84,7 @@ private extension MainFlowCoordinator {
       return UINavigationController()
     }
     let tabBarItem = UITabBarItem()
-    tabBarItem.title = oChatStrings.MainFlowCoordinatorLocalization
+    tabBarItem.title = OChatStrings.MainFlowCoordinatorLocalization
       .Tab.SettingsScreen.title
     tabBarItem.image = UIImage(systemName: "gear")
     navigationController.tabBarItem = tabBarItem
@@ -176,8 +110,6 @@ private extension MainFlowCoordinator {
 
 private extension MainFlowCoordinator {
   func finishMainFlow(_ flowType: MainFinishFlowType) {
-    mainScreenFlowCoordinator = nil
-    activityScreenFlowCoordinator = nil
     messengerScreenFlowCoordinator = nil
     settingsScreenFlowCoordinator = nil
     finishFlow?(flowType)

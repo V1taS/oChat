@@ -41,17 +41,17 @@ final class MainScreenFactory {
 
 extension MainScreenFactory: MainScreenFactoryInput {
   func createSendButtonTitle() -> String {
-    return oChatStrings.MainScreenLocalization
+    return OChatStrings.MainScreenLocalization
       .State.Button.Send.title
   }
   
   func createReceiveButtonTitle() -> String {
-    return oChatStrings.MainScreenLocalization
+    return OChatStrings.MainScreenLocalization
       .State.Button.Receive.title
   }
   
   func createHeaderTitle() -> String {
-    return oChatStrings.MainScreenLocalization
+    return OChatStrings.MainScreenLocalization
       .State.Header.title
   }
   
@@ -74,7 +74,7 @@ private extension MainScreenFactory {
     return .init(
       leftSide: .init(
         titleModel: .init(
-          text: oChatStrings.MainScreenLocalization
+          text: OChatStrings.MainScreenLocalization
             .State.AddToken.title,
           textStyle: .netural
         )

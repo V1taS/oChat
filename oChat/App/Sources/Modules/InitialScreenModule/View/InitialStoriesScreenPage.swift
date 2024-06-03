@@ -94,26 +94,26 @@ private extension InitialStoriesScreenPage {
       Group {
         switch storiesType {
         case .first:
-          oChatAsset.storiesLogo.swiftUIImage
+          OChatAsset.storiesLogo.swiftUIImage
             .resizable()
             .aspectRatio(contentMode: .fit)
         case .second:
-          LottieView(animation: .named(oChatAsset.storiesImpenetrableProtection.name))
+          LottieView(animation: .named(OChatAsset.storiesImpenetrableProtection.name))
             .resizable()
             .looping()
             .aspectRatio(contentMode: .fit)
         case .third:
-          LottieView(animation: .named(oChatAsset.storiesConfidentialityGuaranteed.name))
+          LottieView(animation: .named(OChatAsset.storiesConfidentialityGuaranteed.name))
             .resizable()
             .looping()
             .aspectRatio(contentMode: .fit)
         case .fourth:
-          LottieView(animation: .named(oChatAsset.storiesEncryption.name))
+          LottieView(animation: .named(OChatAsset.storiesEncryption.name))
             .resizable()
             .looping()
             .aspectRatio(contentMode: .fit)
         case .fifth:
-          LottieView(animation: .named(oChatAsset.storiesMoreThanThousandCryptocurrencies.name))
+          LottieView(animation: .named(OChatAsset.storiesMoreThanThousandCryptocurrencies.name))
             .resizable()
             .looping()
             .aspectRatio(contentMode: .fit)

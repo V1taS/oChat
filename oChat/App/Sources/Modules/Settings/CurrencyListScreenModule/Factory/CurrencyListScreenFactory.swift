@@ -35,7 +35,7 @@ final class CurrencyListScreenFactory {
 
 extension CurrencyListScreenFactory: CurrencyListScreenFactoryInput {
   func createHeaderTitle() -> String {
-    oChatStrings.CurrencyListScreenLocalization
+    OChatStrings.CurrencyListScreenLocalization
       .State.Header.title
   }
   

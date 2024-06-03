@@ -37,12 +37,12 @@ final class DetailPaymentScreenFactory {
 
 extension DetailPaymentScreenFactory: DetailPaymentScreenFactoryInput {
   func createButtonSendTitle() -> String {
-    oChatStrings.DetailPaymentScreenLocalization
+    OChatStrings.DetailPaymentScreenLocalization
       .State.ButtonSend.title
   }
   
   func createButtonReceiveTitle() -> String {
-    oChatStrings.DetailPaymentScreenLocalization
+    OChatStrings.DetailPaymentScreenLocalization
       .State.ButtonReceive.title
   }
   

@@ -29,10 +29,10 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		1291B0FEF25C13F8A31E8527 /* oChat.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = oChat.xcconfig; path = ../../oChat.xcconfig; sourceTree = "<group>"; };
 		18C4C32CE885C18AEB29D698 /* NetworkError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkError.swift; sourceTree = "<group>"; };
 		19FBA31490A8BF12EA8A1C1B /* NetworkService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkService.swift; sourceTree = "<group>"; };
 		27A957D7BF5D08E9269482A4 /* Network+Curl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Network+Curl.swift"; sourceTree = "<group>"; };
-		6A87FE40E3599C821C29EA57 /* oChat.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = oChat.xcconfig; path = ../../oChat.xcconfig; sourceTree = "<group>"; };
 		8F22EDE2A98D0C18F9148146 /* SKNetwork-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "SKNetwork-Info.plist"; sourceTree = "<group>"; };
 		94230E06AC85245F684EBDE1 /* NetworkMethod.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkMethod.swift; sourceTree = "<group>"; };
 		A33E44D74F082121EF0E74D2 /* SKNetwork.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SKNetwork.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -64,7 +64,7 @@
 			children = (
 				E0CC24F09189104D2FB2015A /* Derived */,
 				E7CDE1A160FDC8DC747203A7 /* Sources */,
-				6A87FE40E3599C821C29EA57 /* oChat.xcconfig */,
+				1291B0FEF25C13F8A31E8527 /* oChat.xcconfig */,
 			);
 			name = Project;
 			sourceTree = "<group>";
@@ -226,7 +226,7 @@
 		};
 		2D36624A6F2962D53CFD4731 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 6A87FE40E3599C821C29EA57 /* oChat.xcconfig */;
+			baseConfigurationReference = 1291B0FEF25C13F8A31E8527 /* oChat.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
@@ -288,7 +288,7 @@
 		};
 		AB036968E1E0A30AE8B03988 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 6A87FE40E3599C821C29EA57 /* oChat.xcconfig */;
+			baseConfigurationReference = 1291B0FEF25C13F8A31E8527 /* oChat.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;

@@ -139,7 +139,7 @@ extension HighTechImageIDScreenInteractor: HighTechImageIDScreenInteractorInput 
       return
     }
     
-    let wallet = oChatStrings.HighTechImageIDScreenLocalization
+    let wallet = OChatStrings.HighTechImageIDScreenLocalization
       .State.Wallet.title
     
     modelHandlerService.getoChatModel { model in

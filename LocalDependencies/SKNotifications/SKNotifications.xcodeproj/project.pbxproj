@@ -31,12 +31,12 @@
 /* Begin PBXFileReference section */
 		1B1F15B2356DD652D08AFD13 /* Animator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Animator.swift; sourceTree = "<group>"; };
 		22DF0816D754055D2720C93D /* SKNotifications-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "SKNotifications-Info.plist"; sourceTree = "<group>"; };
+		3B674173DD97CAF0A1BE7822 /* oChat.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = oChat.xcconfig; path = ../../oChat.xcconfig; sourceTree = "<group>"; };
 		45338CB936AA607C1519BED0 /* Notifications.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Notifications.swift; sourceTree = "<group>"; };
 		7DF8DF0779900A923D0BCEE2 /* TuistBundle+SKNotifications.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TuistBundle+SKNotifications.swift"; sourceTree = "<group>"; };
 		87829C15CF54B58824A9983C /* NotificationsModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationsModel.swift; sourceTree = "<group>"; };
 		C708D115FB821B60C6B7BD19 /* NotificationsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationsView.swift; sourceTree = "<group>"; };
 		C9E961091028223FF0117C39 /* SKNotifications.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SKNotifications.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		CD17C56444C2569882C115B9 /* oChat.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = oChat.xcconfig; path = ../../oChat.xcconfig; sourceTree = "<group>"; };
 		D675799BF501FF3DB69D3226 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -65,7 +65,7 @@
 			children = (
 				4F600058C6B7217F403A91F5 /* Derived */,
 				D2633FEE4BBE010C3B828D6E /* Sources */,
-				CD17C56444C2569882C115B9 /* oChat.xcconfig */,
+				3B674173DD97CAF0A1BE7822 /* oChat.xcconfig */,
 			);
 			name = Project;
 			sourceTree = "<group>";
@@ -208,7 +208,7 @@
 /* Begin XCBuildConfiguration section */
 		27E3EC25D20FA906227ACD82 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = CD17C56444C2569882C115B9 /* oChat.xcconfig */;
+			baseConfigurationReference = 3B674173DD97CAF0A1BE7822 /* oChat.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
@@ -331,7 +331,7 @@
 		};
 		955D3172FF0274C3A6777B94 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = CD17C56444C2569882C115B9 /* oChat.xcconfig */;
+			baseConfigurationReference = 3B674173DD97CAF0A1BE7822 /* oChat.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;

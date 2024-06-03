@@ -90,7 +90,7 @@ extension CreatePhraseWalletScreenInteractor: CreatePhraseWalletScreenInteractor
       return
     }
     
-    let wallet = oChatStrings.CreatePhraseWalletScreenLocalization
+    let wallet = OChatStrings.CreatePhraseWalletScreenLocalization
       .State.Wallet.title
     
     modelHandlerService.getoChatModel { model in

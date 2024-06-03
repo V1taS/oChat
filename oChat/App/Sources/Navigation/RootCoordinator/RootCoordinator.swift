@@ -172,7 +172,7 @@ private extension RootCoordinator {
       if case let .failure(error) = result, error == .passcodeNotSet {
         services.userInterfaceAndExperienceService.notificationService.showNotification(
           .negative(
-            title: oChatStrings.RootCoordinatorLocalization
+            title: OChatStrings.RootCoordinatorLocalization
               .State.Notification.PasscodeNotSet.title
           )
         )

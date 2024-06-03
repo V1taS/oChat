@@ -41,22 +41,22 @@ final class RemoveWalletSheetFactory {
 
 extension RemoveWalletSheetFactory: RemoveWalletSheetFactoryInput {
   func getHeaderTitle() -> String {
-    oChatStrings.RemoveWalletSheetLocalization
+    OChatStrings.RemoveWalletSheetLocalization
       .State.Header.title
   }
   
   func getTipsOneTitle() -> String {
-    oChatStrings.RemoveWalletSheetLocalization
+    OChatStrings.RemoveWalletSheetLocalization
       .State.TipsOne.title
   }
   
   func getTipsTwoTitle() -> String {
-    oChatStrings.RemoveWalletSheetLocalization
+    OChatStrings.RemoveWalletSheetLocalization
       .State.TipsTwo.title
   }
   
   func getMainButtoTitle() -> String {
-    oChatStrings.RemoveWalletSheetLocalization.State.MainButton.title
+    OChatStrings.RemoveWalletSheetLocalization.State.MainButton.title
   }
 }
 

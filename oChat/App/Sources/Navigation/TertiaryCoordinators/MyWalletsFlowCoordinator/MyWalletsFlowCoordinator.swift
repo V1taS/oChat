@@ -175,13 +175,13 @@ extension MyWalletsFlowCoordinator: SaveImageScreenModuleOutput {
           case true:
             self?.services.userInterfaceAndExperienceService.notificationService.showNotification(
               .positive(
-                title: oChatStrings.MyWalletsFlowCoordinatorLocalization.State.SaveHighTechImageID.success
+                title: OChatStrings.MyWalletsFlowCoordinatorLocalization.State.SaveHighTechImageID.success
               )
             )
           case false:
             self?.services.userInterfaceAndExperienceService.notificationService.showNotification(
               .negative(
-                title: oChatStrings.MyWalletsFlowCoordinatorLocalization.State.SaveHighTechImageID.failure
+                title: OChatStrings.MyWalletsFlowCoordinatorLocalization.State.SaveHighTechImageID.failure
               )
             )
           }
@@ -189,7 +189,7 @@ extension MyWalletsFlowCoordinator: SaveImageScreenModuleOutput {
       case false:
         self?.services.userInterfaceAndExperienceService.notificationService.showNotification(
           .negative(
-            title: oChatStrings.MyWalletsFlowCoordinatorLocalization.State.PermissionGallery.failure
+            title: OChatStrings.MyWalletsFlowCoordinatorLocalization.State.PermissionGallery.failure
           ),
           action: { [weak self] in
             self?.services.userInterfaceAndExperienceService.systemService.openSettings()

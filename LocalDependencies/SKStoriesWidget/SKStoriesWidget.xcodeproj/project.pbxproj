@@ -46,6 +46,7 @@
 		1CC6BBA6D58C43165EC7334A /* Strategy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Strategy.swift; sourceTree = "<group>"; };
 		20673A2786AB4BB68F8E52DA /* IStoryTpl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IStoryTpl.swift; sourceTree = "<group>"; };
 		2E7289490B23845D1E9569D1 /* SKStoriesWidget.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SKStoriesWidget.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		2EF938AA69D9CC62BF47D192 /* oChat.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = oChat.xcconfig; path = ../../oChat.xcconfig; sourceTree = "<group>"; };
 		32775694B5ED2033AB9F434A /* IStoriesValidater.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IStoriesValidater.swift; sourceTree = "<group>"; };
 		4872C42EA71A7A31EE38D9EA /* StoriesError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoriesError.swift; sourceTree = "<group>"; };
 		5C41464A2268BFBC9B382940 /* SKStoriesWidget-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "SKStoriesWidget-Info.plist"; sourceTree = "<group>"; };
@@ -56,7 +57,6 @@
 		85168C3FD3A60E24191049AD /* IStory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IStory.swift; sourceTree = "<group>"; };
 		A77F53C0903DF3AF03554CFB /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
 		A9416F31E973E975D8929C73 /* TuistBundle+SKStoriesWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TuistBundle+SKStoriesWidget.swift"; sourceTree = "<group>"; };
-		D553786FB9A5843BD246D9CE /* oChat.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = oChat.xcconfig; path = ../../oChat.xcconfig; sourceTree = "<group>"; };
 		E08E1AB041F69FDEF3E0C42F /* IStoriesError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IStoriesError.swift; sourceTree = "<group>"; };
 		E8CB0271D5B7323099968038 /* ProgressBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgressBar.swift; sourceTree = "<group>"; };
 		F298D8BAAF63F1E45B8FBBFF /* StoriesStateKey.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoriesStateKey.swift; sourceTree = "<group>"; };
@@ -79,7 +79,7 @@
 			children = (
 				097197394C4AFA4AE4296B3C /* Derived */,
 				62345428D4AD0A02C968EFAB /* Sources */,
-				D553786FB9A5843BD246D9CE /* oChat.xcconfig */,
+				2EF938AA69D9CC62BF47D192 /* oChat.xcconfig */,
 			);
 			name = Project;
 			sourceTree = "<group>";
@@ -306,7 +306,7 @@
 /* Begin XCBuildConfiguration section */
 		40C0A4E0076C392360908B93 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = D553786FB9A5843BD246D9CE /* oChat.xcconfig */;
+			baseConfigurationReference = 2EF938AA69D9CC62BF47D192 /* oChat.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
@@ -429,7 +429,7 @@
 		};
 		EDFE202B0085E3CB411E08A5 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = D553786FB9A5843BD246D9CE /* oChat.xcconfig */;
+			baseConfigurationReference = 2EF938AA69D9CC62BF47D192 /* oChat.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;

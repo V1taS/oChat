@@ -37,7 +37,7 @@ final class MessengerListScreenModuleFactory {
 
 extension MessengerListScreenModuleFactory: MessengerListScreenModuleFactoryInput {
   func createHeaderTitle() -> String {
-    return oChatStrings.MessengerListScreenModuleLocalization
+    return OChatStrings.MessengerListScreenModuleLocalization
       .State.Header.title
   }
   

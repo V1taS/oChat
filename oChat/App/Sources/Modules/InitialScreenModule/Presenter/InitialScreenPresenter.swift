@@ -16,11 +16,11 @@ final class InitialScreenPresenter: ObservableObject {
   
   /// Заголовок кнопки `Создать новый кошелек`
   @Published
-  var stateNewWalletButtonTitle = oChatStrings.InitialScreenLocalization.State.NewWalletButton.title
+  var stateNewWalletButtonTitle = OChatStrings.InitialScreenLocalization.State.NewWalletButton.title
   
   /// Заголовок кнопки `Добавить существующий кошелек`
   @Published
-  var stateImportWalletButtonTitle = oChatStrings.InitialScreenLocalization.State.ImportWalletButton.title
+  var stateImportWalletButtonTitle = OChatStrings.InitialScreenLocalization.State.ImportWalletButton.title
   
   // MARK: - Internal properties
   

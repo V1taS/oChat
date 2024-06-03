@@ -33,12 +33,12 @@ final class MyWalletCustomizationScreenFactory {
 
 extension MyWalletCustomizationScreenFactory: MyWalletCustomizationScreenFactoryInput {
   func getTopInputHelper() -> String {
-    oChatStrings.MyWalletCustomizationScreenLocalization
+    OChatStrings.MyWalletCustomizationScreenLocalization
       .State.TopInputHelper.title
   }
   
   func getMainButtonTitle() -> String {
-    oChatStrings.MyWalletCustomizationScreenLocalization
+    OChatStrings.MyWalletCustomizationScreenLocalization
       .State.MainButton.title
   }
 }

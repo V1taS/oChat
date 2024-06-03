@@ -36,7 +36,7 @@ final class ImportWalletScreenFactory {
 
 extension ImportWalletScreenFactory: ImportWalletScreenFactoryInput {
   func createButtonTitle() -> String {
-    return oChatStrings.ImportWalletScreenLocalization
+    return OChatStrings.ImportWalletScreenLocalization
       .State.Button.title
   }
   
@@ -45,10 +45,10 @@ extension ImportWalletScreenFactory: ImportWalletScreenFactoryInput {
   ) -> String {
     switch walletType {
     case .seedPhrase:
-      return oChatStrings.ImportWalletScreenLocalization
+      return OChatStrings.ImportWalletScreenLocalization
         .State.SeedPhrase.Header.title
     case .trackingWallet:
-      return oChatStrings.ImportWalletScreenLocalization
+      return OChatStrings.ImportWalletScreenLocalization
         .State.TrackingWallet.Header.title
     }
   }
@@ -58,10 +58,10 @@ extension ImportWalletScreenFactory: ImportWalletScreenFactoryInput {
   ) -> String {
     switch walletType {
     case .seedPhrase:
-      return oChatStrings.ImportWalletScreenLocalization
+      return OChatStrings.ImportWalletScreenLocalization
         .State.SeedPhrase.description
     case .trackingWallet:
-      return oChatStrings.ImportWalletScreenLocalization
+      return OChatStrings.ImportWalletScreenLocalization
         .State.TrackingWallet.description
     }
   }

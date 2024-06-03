@@ -54,20 +54,20 @@ final class MyNewWalletSheetFactory {
 
 extension MyNewWalletSheetFactory: MyNewWalletSheetFactoryInput {
   func getNewWalletHeaderTitle() -> String {
-    oChatStrings.MyNewWalletSheetLocalization
+    OChatStrings.MyNewWalletSheetLocalization
       .State.NewWallet.header
   }
   
   func getImportWalletHeaderTitle() -> String {
-    oChatStrings.MyNewWalletSheetLocalization
+    OChatStrings.MyNewWalletSheetLocalization
       .State.ImportWallet.header
   }
   
   func createSeedPhrase12Model() -> MyNewWalletSheetModel {
     MyNewWalletSheetModel(
-      walletTitle: oChatStrings.MyNewWalletSheetLocalization
+      walletTitle: OChatStrings.MyNewWalletSheetLocalization
         .SeedPhrase12.title,
-      walletDescription: oChatStrings.MyNewWalletSheetLocalization
+      walletDescription: OChatStrings.MyNewWalletSheetLocalization
         .SeedPhrase12.description,
       walletSystemImageName: "12.circle"
     )
@@ -75,9 +75,9 @@ extension MyNewWalletSheetFactory: MyNewWalletSheetFactoryInput {
   
   func createSeedPhrase24Model() -> MyNewWalletSheetModel {
     MyNewWalletSheetModel(
-      walletTitle: oChatStrings.MyNewWalletSheetLocalization
+      walletTitle: OChatStrings.MyNewWalletSheetLocalization
         .SeedPhrase24.title,
-      walletDescription: oChatStrings.MyNewWalletSheetLocalization
+      walletDescription: OChatStrings.MyNewWalletSheetLocalization
         .SeedPhrase24.description,
       walletSystemImageName: "24.circle"
     )
@@ -85,9 +85,9 @@ extension MyNewWalletSheetFactory: MyNewWalletSheetFactoryInput {
   
   func createImageHighTechModel() -> MyNewWalletSheetModel {
     MyNewWalletSheetModel(
-      walletTitle: oChatStrings.MyNewWalletSheetLocalization
+      walletTitle: OChatStrings.MyNewWalletSheetLocalization
         .ImageHighTech.title,
-      walletDescription: oChatStrings.MyNewWalletSheetLocalization
+      walletDescription: OChatStrings.MyNewWalletSheetLocalization
         .ImageHighTech.description,
       walletSystemImageName: "photo.artframe.circle"
     )
@@ -95,9 +95,9 @@ extension MyNewWalletSheetFactory: MyNewWalletSheetFactoryInput {
   
   func createImportSeedPhraseWalletModel() -> MyNewWalletSheetModel {
     MyNewWalletSheetModel(
-      walletTitle: oChatStrings.MyNewWalletSheetLocalization
+      walletTitle: OChatStrings.MyNewWalletSheetLocalization
         .ImportSeedPhrase.title,
-      walletDescription: oChatStrings.MyNewWalletSheetLocalization
+      walletDescription: OChatStrings.MyNewWalletSheetLocalization
         .ImportSeedPhrase.description,
       walletSystemImageName: "arrow.down.to.line.circle"
     )
@@ -105,9 +105,9 @@ extension MyNewWalletSheetFactory: MyNewWalletSheetFactoryInput {
   
   func createImportImageHighTechWalletModel() -> MyNewWalletSheetModel {
     MyNewWalletSheetModel(
-      walletTitle: oChatStrings.MyNewWalletSheetLocalization
+      walletTitle: OChatStrings.MyNewWalletSheetLocalization
         .ImportImageHighTech.title,
-      walletDescription: oChatStrings.MyNewWalletSheetLocalization
+      walletDescription: OChatStrings.MyNewWalletSheetLocalization
         .ImportImageHighTech.description,
       walletSystemImageName: "photo.artframe.circle"
     )
@@ -116,9 +116,9 @@ extension MyNewWalletSheetFactory: MyNewWalletSheetFactoryInput {
   // TODO: - Добавлю позже этот функционал
   //  func createTrackWalletModel() -> MyNewWalletSheetModel {
   //    MyNewWalletSheetModel(
-  //      walletTitle: oChatStrings.MyNewWalletSheetLocalization
+  //      walletTitle: OChatStrings.MyNewWalletSheetLocalization
   //        .TrackWallet.title,
-  //      walletDescription: oChatStrings.MyNewWalletSheetLocalization
+  //      walletDescription: OChatStrings.MyNewWalletSheetLocalization
   //        .TrackWallet.description,
   //      walletSystemImageName: "eye.circle"
   //    )

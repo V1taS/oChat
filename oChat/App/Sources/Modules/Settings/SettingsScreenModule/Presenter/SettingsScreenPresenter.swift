@@ -60,7 +60,7 @@ final class SettingsScreenPresenter: ObservableObject {
   
   func getAplicationVersion() -> String {
     let appVersion = interactor.getAppVersion()
-    let versionTitle = oChatStrings.SettingsScreenLocalization
+    let versionTitle = OChatStrings.SettingsScreenLocalization
       .State.Version.title
     return "\(versionTitle) \(appVersion)"
   }

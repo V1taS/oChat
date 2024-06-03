@@ -66,12 +66,12 @@ extension ReceivePaymentScreenFactory: ReceivePaymentScreenFactoryInput {
   }
   
   func createHeaderTitle() -> String {
-    oChatStrings.ReceivePaymentScreenLocalization
+    OChatStrings.ReceivePaymentScreenLocalization
       .State.Header.title
   }
   
   func createButtonTitle() -> String {
-    oChatStrings.ReceivePaymentScreenLocalization
+    OChatStrings.ReceivePaymentScreenLocalization
       .State.Button.title
   }
   
@@ -82,7 +82,7 @@ extension ReceivePaymentScreenFactory: ReceivePaymentScreenFactoryInput {
     
     let token = ReceivePaymentScreenModel(
       id: UUID().uuidString,
-      title: oChatStrings.ReceivePaymentScreenLocalization
+      title: OChatStrings.ReceivePaymentScreenLocalization
         .State.TokenSection.title,
       widget: createWidget(
         with: model.name,
@@ -95,7 +95,7 @@ extension ReceivePaymentScreenFactory: ReceivePaymentScreenFactoryInput {
     
     let networkSection = ReceivePaymentScreenModel(
       id: UUID().uuidString,
-      title: oChatStrings.ReceivePaymentScreenLocalization
+      title: OChatStrings.ReceivePaymentScreenLocalization
         .State.NetworkSection.title,
       widget: createWidget(
         with: model.network.details.name,

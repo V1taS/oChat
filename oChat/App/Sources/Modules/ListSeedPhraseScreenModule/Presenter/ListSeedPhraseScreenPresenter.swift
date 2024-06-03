@@ -16,11 +16,11 @@ final class ListSeedPhraseScreenPresenter: ObservableObject {
   // MARK: - View state
   
   @Published var stateIsConfirmationRequirements = false
-  @Published var stateContinueButtonTitle = oChatStrings.ListSeedPhraseScreenLocalization.State.Button.Continue.title
-  @Published var stateCopyButtonTitle = oChatStrings.ListSeedPhraseScreenLocalization.State.Button.Copy.title
-  @Published var stateHeaderTitle = oChatStrings.ListSeedPhraseScreenLocalization.State.Header.title
-  @Published var stateHeaderDescription = oChatStrings.ListSeedPhraseScreenLocalization.State.Header.description
-  @Published var stateTermsOfAgreementTitle = oChatStrings.ListSeedPhraseScreenLocalization.State.TermsOfAgreement.title
+  @Published var stateContinueButtonTitle = OChatStrings.ListSeedPhraseScreenLocalization.State.Button.Continue.title
+  @Published var stateCopyButtonTitle = OChatStrings.ListSeedPhraseScreenLocalization.State.Button.Copy.title
+  @Published var stateHeaderTitle = OChatStrings.ListSeedPhraseScreenLocalization.State.Header.title
+  @Published var stateHeaderDescription = OChatStrings.ListSeedPhraseScreenLocalization.State.Header.description
+  @Published var stateTermsOfAgreementTitle = OChatStrings.ListSeedPhraseScreenLocalization.State.TermsOfAgreement.title
   @Published var stateListSeedPhrase: [String] = []
   @Published var stateScreenType: ListSeedPhraseScreenType
   
@@ -64,13 +64,13 @@ final class ListSeedPhraseScreenPresenter: ObservableObject {
       case .success:
         self?.interactor.showNotification(
           .neutral(
-            title: oChatStrings.ListSeedPhraseScreenLocalization.State.Copy.SeedPhrase.success
+            title: OChatStrings.ListSeedPhraseScreenLocalization.State.Copy.SeedPhrase.success
           )
         )
       case .failure:
         self?.interactor.showNotification(
           .negative(
-            title: oChatStrings.ListSeedPhraseScreenLocalization.State.Copy.SeedPhrase.failure
+            title: OChatStrings.ListSeedPhraseScreenLocalization.State.Copy.SeedPhrase.failure
           )
         )
       }

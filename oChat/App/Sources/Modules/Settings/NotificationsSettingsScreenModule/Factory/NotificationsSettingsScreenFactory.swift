@@ -34,7 +34,7 @@ final class NotificationsSettingsScreenFactory {
 
 extension NotificationsSettingsScreenFactory: NotificationsSettingsScreenFactoryInput {
   func createHeaderTitle() -> String {
-    oChatStrings.NotificationsSettingsScreenLocalization
+    OChatStrings.NotificationsSettingsScreenLocalization
       .State.Header.title
   }
   
@@ -42,9 +42,9 @@ extension NotificationsSettingsScreenFactory: NotificationsSettingsScreenFactory
     var models: [WidgetCryptoView.Model] = []
     
     let notificationsModel = createWidgetModel(
-      title: oChatStrings.NotificationsSettingsScreenLocalization
+      title: OChatStrings.NotificationsSettingsScreenLocalization
         .State.Notifications.title,
-      description: oChatStrings.NotificationsSettingsScreenLocalization
+      description: OChatStrings.NotificationsSettingsScreenLocalization
         .State.Notifications.description,
       initialState: isNotifications,
       action: { [weak self] newValue in

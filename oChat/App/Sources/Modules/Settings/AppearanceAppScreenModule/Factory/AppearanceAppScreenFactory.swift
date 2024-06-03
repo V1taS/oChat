@@ -38,7 +38,7 @@ extension AppearanceAppScreenFactory: AppearanceAppScreenFactoryInput {
     var models: [WidgetCryptoView.Model] = []
     
     let automaticThemeModel = createWidgetModel(
-      title: oChatStrings.AppearanceAppScreenLocalization
+      title: OChatStrings.AppearanceAppScreenLocalization
         .State.Theme.automatic,
       initNewValue: colorScheme == nil,
       isChangeValue: colorScheme != nil,
@@ -52,7 +52,7 @@ extension AppearanceAppScreenFactory: AppearanceAppScreenFactoryInput {
     )
     
     let lightThemeModel = createWidgetModel(
-      title: oChatStrings.AppearanceAppScreenLocalization
+      title: OChatStrings.AppearanceAppScreenLocalization
         .State.Theme.light,
       initNewValue: colorScheme == .light,
       isChangeValue: colorScheme != .light,
@@ -66,7 +66,7 @@ extension AppearanceAppScreenFactory: AppearanceAppScreenFactoryInput {
     )
     
     let darkThemeModel = createWidgetModel(
-      title: oChatStrings.AppearanceAppScreenLocalization
+      title: OChatStrings.AppearanceAppScreenLocalization
         .State.Theme.dark,
       initNewValue: colorScheme == .dark,
       isChangeValue: colorScheme != .dark,
@@ -88,7 +88,7 @@ extension AppearanceAppScreenFactory: AppearanceAppScreenFactoryInput {
   }
   
   func createHeaderTitle() -> String {
-    oChatStrings.AppearanceAppScreenLocalization
+    OChatStrings.AppearanceAppScreenLocalization
       .State.Header.title
   }
 }

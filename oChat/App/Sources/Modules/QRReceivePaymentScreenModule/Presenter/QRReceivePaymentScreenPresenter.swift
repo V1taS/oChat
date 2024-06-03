@@ -72,7 +72,7 @@ final class QRReceivePaymentScreenPresenter: ObservableObject {
     interactor.copyToClipboard(text: stateReplenishmentAddress)
     interactor.showNotification(
       .positive(
-        title: oChatStrings.QRReceivePaymentScreenLocalization
+        title: OChatStrings.QRReceivePaymentScreenLocalization
           .State.Notification.Copy.title
       )
     )

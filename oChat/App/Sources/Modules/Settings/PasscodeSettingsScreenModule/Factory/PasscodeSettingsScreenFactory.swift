@@ -38,7 +38,7 @@ final class PasscodeSettingsScreenFactory {
 
 extension PasscodeSettingsScreenFactory: PasscodeSettingsScreenFactoryInput {
   func createHeaderTitle() -> String {
-    oChatStrings.PasscodeSettingsScreenLocalization
+    OChatStrings.PasscodeSettingsScreenLocalization
       .State.Header.title
   }
   
@@ -47,7 +47,7 @@ extension PasscodeSettingsScreenFactory: PasscodeSettingsScreenFactoryInput {
     
     if stateIsShowChangeAccessCode {
       let accessCodeModel = createWidgetWithChevron(
-        title: oChatStrings.PasscodeSettingsScreenLocalization
+        title: OChatStrings.PasscodeSettingsScreenLocalization
           .State.ChangeAccessCode.title,
         action: { [weak self] in
           self?.output?.openChangeAccessCode()
@@ -57,7 +57,7 @@ extension PasscodeSettingsScreenFactory: PasscodeSettingsScreenFactoryInput {
     }
     
     let faceIDModel = createWidgetModel(
-      title: oChatStrings.PasscodeSettingsScreenLocalization
+      title: OChatStrings.PasscodeSettingsScreenLocalization
         .State.FaceID.title,
       initialState: stateFaceID,
       action: { [weak self] newValue in
@@ -70,7 +70,7 @@ extension PasscodeSettingsScreenFactory: PasscodeSettingsScreenFactoryInput {
     models.append(faceIDModel)
     
     let passcodeModel = createWidgetModel(
-      title:oChatStrings.PasscodeSettingsScreenLocalization
+      title:OChatStrings.PasscodeSettingsScreenLocalization
         .State.LockScreen.title,
       initialState: stateIsShowChangeAccessCode,
       action: { [weak self] newValue in

@@ -81,7 +81,7 @@ extension MessengerDialogScreenPresenter: MessengerDialogScreenInteractorOutput 
   func didSendMessageFailure() {
     interactor.showNotification(
       .negative(
-        title: oChatStrings.MessengerDialogScreenLocalization
+        title: OChatStrings.MessengerDialogScreenLocalization
           .State.Notification.messageFailure
       )
     )

@@ -33,7 +33,7 @@ final class TransactionInformationSheetFactory {
 
 extension TransactionInformationSheetFactory: TransactionInformationSheetFactoryInput {
   func createTransactionButtonTitle() -> String {
-    oChatStrings.TransactionInformationSheetLocalization
+    OChatStrings.TransactionInformationSheetLocalization
       .State.Transaction.Button.title
   }
   
@@ -50,11 +50,11 @@ extension TransactionInformationSheetFactory: TransactionInformationSheetFactory
 private extension TransactionInformationSheetFactory {
   func createAddressRecipientWidget(_ transactionModel: TransactionModel) -> WidgetCryptoView.Model {
     let recipientTitle = transactionModel.transactionType == .sent ? 
-    oChatStrings.TransactionInformationSheetLocalization
+    OChatStrings.TransactionInformationSheetLocalization
       .State.Transaction.Sent.title :
-    oChatStrings.TransactionInformationSheetLocalization
+    OChatStrings.TransactionInformationSheetLocalization
       .State.Transaction.Received.title
-    let address = oChatStrings.TransactionInformationSheetLocalization
+    let address = OChatStrings.TransactionInformationSheetLocalization
       .State.Transaction.Address.title
     return .init(
       leftSide: .init(
@@ -79,7 +79,7 @@ private extension TransactionInformationSheetFactory {
     let tokenSymbol = transactionModel.token.ticker
     let currency = transactionModel.token.currency
     let costInCurrency = "\(abs(transactionModel.commissionInCurrency))".formattedWithSpaces()
-    let commission = oChatStrings.TransactionInformationSheetLocalization
+    let commission = OChatStrings.TransactionInformationSheetLocalization
       .State.Transaction.Commission.title
     
     return .init(

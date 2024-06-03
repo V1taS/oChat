@@ -34,7 +34,7 @@ final class ActivityScreenFactory {
 
 extension ActivityScreenFactory: ActivityScreenFactoryInput {
   func createHeaderTitle() -> String {
-    return oChatStrings.ActivityScreenLocalization
+    return OChatStrings.ActivityScreenLocalization
       .State.Header.title
   }
   
@@ -69,7 +69,7 @@ private extension ActivityScreenFactory {
   func createWidget() -> WidgetCryptoView.Model {
     return .init(
       leftSide: .init(
-        imageModel: .custom(image: oChatAsset.currencyEthereum.swiftUIImage),
+        imageModel: .custom(image: OChatAsset.currencyEthereum.swiftUIImage),
         titleModel: .init(
           text: "Отправлено",
           textStyle: .standart

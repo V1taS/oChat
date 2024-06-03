@@ -69,11 +69,11 @@ extension SettingsScreenFlowCoordinator: SettingsScreenModuleOutput {
   
   func openLanguageSection() {
     UIViewController.topController?.showAlertWithTwoButtons(
-      title: oChatStrings.SettingsScreenFlowCoordinatorLocalization
+      title: OChatStrings.SettingsScreenFlowCoordinatorLocalization
         .LanguageSection.Alert.title,
-      cancelButtonText: oChatStrings.SettingsScreenFlowCoordinatorLocalization
+      cancelButtonText: OChatStrings.SettingsScreenFlowCoordinatorLocalization
         .LanguageSection.Alert.CancelButton.title,
-      customButtonText: oChatStrings.SettingsScreenFlowCoordinatorLocalization
+      customButtonText: OChatStrings.SettingsScreenFlowCoordinatorLocalization
         .LanguageSection.Alert.CustomButton.title,
       customButtonAction: { [weak self] in
         self?.services.userInterfaceAndExperienceService.systemService.openSettings()
@@ -105,7 +105,7 @@ extension SettingsScreenFlowCoordinator: PasscodeSettingsScreenModuleOutput {
       Timer.scheduledTimer(withTimeInterval: 1, repeats: false) { [weak self] _ in
         self?.services.userInterfaceAndExperienceService.notificationService.showNotification(
           .positive(
-            title: oChatStrings.SettingsScreenFlowCoordinatorLocalization
+            title: OChatStrings.SettingsScreenFlowCoordinatorLocalization
               .State.Notification.NewAccessCode.success
           )
         )
@@ -119,7 +119,7 @@ extension SettingsScreenFlowCoordinator: PasscodeSettingsScreenModuleOutput {
       Timer.scheduledTimer(withTimeInterval: 1, repeats: false) { [weak self] _ in
         self?.services.userInterfaceAndExperienceService.notificationService.showNotification(
           .positive(
-            title: oChatStrings.SettingsScreenFlowCoordinatorLocalization
+            title: OChatStrings.SettingsScreenFlowCoordinatorLocalization
               .State.Notification.ChangePassCode.success
           )
         )

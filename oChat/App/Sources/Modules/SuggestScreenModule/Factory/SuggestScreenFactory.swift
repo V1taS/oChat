@@ -31,24 +31,24 @@ extension SuggestScreenFactory: SuggestScreenFactoryInput {
     switch state {
     case .setAccessCode:
       return .init(
-        animationName: oChatAsset.newWalletScreenPasscode.name,
-        title: oChatStrings.SuggestScreenLocalization.State.AccessCode.title,
-        description: oChatStrings.SuggestScreenLocalization.State.AccessCode.description,
-        buttonTitle: oChatStrings.SuggestScreenLocalization.State.AccessCode.buttonTitle
+        animationName: OChatAsset.newWalletScreenPasscode.name,
+        title: OChatStrings.SuggestScreenLocalization.State.AccessCode.title,
+        description: OChatStrings.SuggestScreenLocalization.State.AccessCode.description,
+        buttonTitle: OChatStrings.SuggestScreenLocalization.State.AccessCode.buttonTitle
       )
     case .setFaceID:
       return .init(
-        animationName: oChatAsset.newWalletScreenFaceId.name,
-        title: oChatStrings.SuggestScreenLocalization.State.FaceID.title,
+        animationName: OChatAsset.newWalletScreenFaceId.name,
+        title: OChatStrings.SuggestScreenLocalization.State.FaceID.title,
         description: "",
-        buttonTitle: oChatStrings.SuggestScreenLocalization.State.FaceID.buttonTitle
+        buttonTitle: OChatStrings.SuggestScreenLocalization.State.FaceID.buttonTitle
       )
     case .setNotifications:
       return .init(
-        animationName: oChatAsset.newWalletEnableNotifications.name,
-        title: oChatStrings.SuggestScreenLocalization.State.Notifications.title,
-        description: oChatStrings.SuggestScreenLocalization.State.Notifications.description,
-        buttonTitle: oChatStrings.SuggestScreenLocalization.State.Notifications.buttonTitle
+        animationName: OChatAsset.newWalletEnableNotifications.name,
+        title: OChatStrings.SuggestScreenLocalization.State.Notifications.title,
+        description: OChatStrings.SuggestScreenLocalization.State.Notifications.description,
+        buttonTitle: OChatStrings.SuggestScreenLocalization.State.Notifications.buttonTitle
       )
     }
   }

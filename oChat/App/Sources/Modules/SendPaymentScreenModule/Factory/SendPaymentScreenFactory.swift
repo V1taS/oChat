@@ -75,37 +75,37 @@ extension SendPaymentScreenFactory: SendPaymentScreenFactoryInput {
   }
   
   func createTotalCryptoTitle() -> String {
-    return oChatStrings.SendPaymentScreenLocalization
+    return OChatStrings.SendPaymentScreenLocalization
       .State.TotalCrypto.title
   }
   
   func createWhomCryptoPlaceholderTitle() -> String {
-    return oChatStrings.SendPaymentScreenLocalization
+    return OChatStrings.SendPaymentScreenLocalization
       .State.WhomCrypto.Placeholder.title
   }
   
   func createMainButtonTitle() -> String {
-    return oChatStrings.SendPaymentScreenLocalization
+    return OChatStrings.SendPaymentScreenLocalization
       .State.MainButton.title
   }
   
   func createSendCryptoHeaderTitle() -> String {
-    return oChatStrings.SendPaymentScreenLocalization
+    return OChatStrings.SendPaymentScreenLocalization
       .State.SendCrypto.Header.title
   }
   
   func createWhomCryptoHeaderTitle() -> String {
-    return oChatStrings.SendPaymentScreenLocalization
+    return OChatStrings.SendPaymentScreenLocalization
       .State.WhomCrypto.Header.title
   }
   
   func createHeaderTitle() -> String {
-    return oChatStrings.SendPaymentScreenLocalization
+    return OChatStrings.SendPaymentScreenLocalization
       .State.Header.title
   }
   
   func createSendCryptoPlaceholderTitle() -> String {
-    return oChatStrings.SendPaymentScreenLocalization
+    return OChatStrings.SendPaymentScreenLocalization
       .State.SendCrypto.Placeholder.title
   }
 }

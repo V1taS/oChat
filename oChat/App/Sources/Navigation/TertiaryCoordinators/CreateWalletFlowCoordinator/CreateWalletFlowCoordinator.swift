@@ -82,7 +82,7 @@ extension CreateWalletFlowCoordinator: HintBackupScreenModuleOutput {
     guard let cacheWalletModel else {
       services.userInterfaceAndExperienceService.notificationService.showNotification(
         .negative(
-          title: oChatStrings.CreateWalletFlowCoordinatorLocalization
+          title: OChatStrings.CreateWalletFlowCoordinatorLocalization
             .State.SomethingWentWrong.title
         )
       )
@@ -175,13 +175,13 @@ extension CreateWalletFlowCoordinator: HighTechImageIDScreenModuleOutput {
           case true:
             self?.services.userInterfaceAndExperienceService.notificationService.showNotification(
               .positive(
-                title: oChatStrings.CreateWalletFlowCoordinatorLocalization.State.SaveHighTechImageID.success
+                title: OChatStrings.CreateWalletFlowCoordinatorLocalization.State.SaveHighTechImageID.success
               )
             )
           case false:
             self?.services.userInterfaceAndExperienceService.notificationService.showNotification(
               .negative(
-                title: oChatStrings.CreateWalletFlowCoordinatorLocalization.State.SaveHighTechImageID.failure
+                title: OChatStrings.CreateWalletFlowCoordinatorLocalization.State.SaveHighTechImageID.failure
               )
             )
           }
@@ -189,7 +189,7 @@ extension CreateWalletFlowCoordinator: HighTechImageIDScreenModuleOutput {
       case false:
         self?.services.userInterfaceAndExperienceService.notificationService.showNotification(
           .negative(
-            title: oChatStrings.CreateWalletFlowCoordinatorLocalization.State.PermissionGallery.failure
+            title: OChatStrings.CreateWalletFlowCoordinatorLocalization.State.PermissionGallery.failure
           ),
           action: { [weak self] in
             self?.services.userInterfaceAndExperienceService.systemService.openSettings()

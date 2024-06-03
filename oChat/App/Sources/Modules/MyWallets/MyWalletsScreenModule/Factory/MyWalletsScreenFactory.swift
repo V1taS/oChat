@@ -56,12 +56,12 @@ extension MyWalletsScreenFactory: MyWalletsScreenFactoryInput {
   }
   
   func createRoundButtonTitle() -> String {
-    oChatStrings.MyWalletsScreenLocalization
+    OChatStrings.MyWalletsScreenLocalization
       .State.RoundButton.title
   }
   
   func createHeaderTitle() -> String {
-    oChatStrings.MyWalletsScreenLocalization
+    OChatStrings.MyWalletsScreenLocalization
       .State.Header.title
   }
 }
@@ -79,7 +79,7 @@ private extension MyWalletsScreenFactory {
     var titleAdditionRoundedModel: WidgetCryptoView.TextModel?
     if isSelectedWallet {
       titleAdditionRoundedModel = .init(
-        text: oChatStrings.MyWalletsScreenLocalization
+        text: OChatStrings.MyWalletsScreenLocalization
           .State.Primary.title,
         lineLimit: 1,
         textStyle: .positive

@@ -84,7 +84,7 @@ extension ImportWalletScreenPresenter: ImportWalletScreenInteractorOutput {
   func somethingWentWrong() {
     interactor.showNotification(
       .negative(
-        title: oChatStrings.ImportWalletScreenLocalization
+        title: OChatStrings.ImportWalletScreenLocalization
           .State.Notification.SomethingWentWrong.title
       )
     )

@@ -94,7 +94,7 @@ private extension DetailPaymentFlowCoordinator {
         if case .success = state {
           services.userInterfaceAndExperienceService.notificationService.showNotification(
             .positive(
-              title: oChatStrings.DetailPaymentFlowCoordinatorLocalization
+              title: OChatStrings.DetailPaymentFlowCoordinatorLocalization
                 .State.SendPaymentFlow.success
             )
           )

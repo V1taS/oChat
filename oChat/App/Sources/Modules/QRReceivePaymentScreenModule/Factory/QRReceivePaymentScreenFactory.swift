@@ -34,22 +34,22 @@ final class QRReceivePaymentScreenFactory {
 
 extension QRReceivePaymentScreenFactory: QRReceivePaymentScreenFactoryInput {
   func createDescriptionTitle(tokenName: String, networkName: String) -> String {
-    return oChatStrings.QRReceivePaymentScreenLocalization
+    return OChatStrings.QRReceivePaymentScreenLocalization
       .State.Description.title(tokenName, networkName)
   }
   
   func createHeaderTitle() -> String {
-    oChatStrings.QRReceivePaymentScreenLocalization
+    OChatStrings.QRReceivePaymentScreenLocalization
       .State.Header.title
   }
   
   func createMainButtonTitle() -> String {
-    oChatStrings.QRReceivePaymentScreenLocalization
+    OChatStrings.QRReceivePaymentScreenLocalization
       .State.MainButton.title
   }
   
   func createCopyButtonTitle() -> String {
-    oChatStrings.QRReceivePaymentScreenLocalization
+    OChatStrings.QRReceivePaymentScreenLocalization
       .State.CopyButton.title
   }
 }

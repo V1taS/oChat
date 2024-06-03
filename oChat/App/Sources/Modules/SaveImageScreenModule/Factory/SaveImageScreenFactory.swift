@@ -32,17 +32,17 @@ final class SaveImageScreenFactory {
 
 extension SaveImageScreenFactory: SaveImageScreenFactoryInput {
   func createHeaderDescription() -> String {
-    oChatStrings.SaveImageScreenLocalization
+    OChatStrings.SaveImageScreenLocalization
       .State.Header.description
   }
   
   func saveButtonTitle() -> String {
-    oChatStrings.SaveImageScreenLocalization
+    OChatStrings.SaveImageScreenLocalization
       .State.Button.title
   }
   
   func createHeaderTitle() -> String {
-    oChatStrings.SaveImageScreenLocalization
+    OChatStrings.SaveImageScreenLocalization
       .State.Header.title
   }
 }

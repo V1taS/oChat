@@ -17,10 +17,10 @@ final class CreatePhraseWalletScreenPresenter: ObservableObject {
   @Published var stateNewWalletType: CreatePhraseWalletScreenType
   @Published var stateCurrentStateScreen: CreatePhraseWalletScreenState = .generatingWallet
   
-  @Published var stateGeneratingWalletAnimationName = oChatAsset.loaderCircle.name
-  @Published var stateGeneratingWalletTitle = oChatStrings.CreatePhraseWalletScreenLocalization.State.GeneratingWallet.title
-  @Published var stateWalletCreatedAnimationName = oChatAsset.loaderSuccess.name
-  @Published var stateWalletCreatedTitle = oChatStrings.CreatePhraseWalletScreenLocalization.State.WalletCreated.title
+  @Published var stateGeneratingWalletAnimationName = OChatAsset.loaderCircle.name
+  @Published var stateGeneratingWalletTitle = OChatStrings.CreatePhraseWalletScreenLocalization.State.GeneratingWallet.title
+  @Published var stateWalletCreatedAnimationName = OChatAsset.loaderSuccess.name
+  @Published var stateWalletCreatedTitle = OChatStrings.CreatePhraseWalletScreenLocalization.State.WalletCreated.title
   
   // MARK: - Internal properties
   
@@ -74,7 +74,7 @@ extension CreatePhraseWalletScreenPresenter: CreatePhraseWalletScreenInteractorO
   func somethingWentWrong() {
     interactor.showNotification(
       .negative(
-        title: oChatStrings.CreatePhraseWalletScreenLocalization
+        title: OChatStrings.CreatePhraseWalletScreenLocalization
           .State.SomethingWentWrong.title
       )
     )

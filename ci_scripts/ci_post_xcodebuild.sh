@@ -27,7 +27,7 @@ if [ -z "$CI_PULL_REQUEST_NUMBER" ] && [ -z "$CI_PULL_REQUEST_SOURCE_BRANCH" ]; 
     git push --tags
 
     # Отправка уведомления в Telegram для мастер ветки
-    python3 /Volumes/workspace/repository/Scripts/send_telegram.py "🪙 Релиз oChat iOS $MARKETING_VERSION 🪙
+    python3 /Volumes/workspace/repository/Scripts/send_telegram.py "🧅🧅🧅 Релиз oChat iOS $MARKETING_VERSION 🧅🧅🧅
 Сборка №: $CI_BUILD_NUMBER
 URL сборки: $CI_BUILD_URL
 Продукт: $CI_PRODUCT
@@ -38,7 +38,7 @@ URL сборки: $CI_BUILD_URL
 "
 else
     # Отправка уведомления в Telegram для не мастер веток
-    python3 /Volumes/workspace/repository/Scripts/send_telegram.py "🚀 Новый Pull Request для oChat! 🚀
+    python3 /Volumes/workspace/repository/Scripts/send_telegram.py "🧅 Новый Pull Request для oChat! 🧅
 Сборка №: $CI_BUILD_NUMBER
 URL сборки: $CI_BUILD_URL
 Продукт: $CI_PRODUCT

@@ -64,7 +64,7 @@ private extension ActivityScreenView {
   }
   
   func createEmptyState() -> some View {
-    LottieView(animation: .named(oChatAsset.emptyStateLottie.name))
+    LottieView(animation: .named(OChatAsset.emptyStateLottie.name))
       .resizable()
       .looping()
       .aspectRatio(contentMode: .fit)

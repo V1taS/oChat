@@ -107,7 +107,7 @@ extension SuggestScreenPresenter: SceneViewModel {
   var rightBarButtonItem: SKBarButtonItem? {
     return .init(
       .text(
-        oChatStrings.SuggestScreenLocalization.State.RightBarButton.title,
+        OChatStrings.SuggestScreenLocalization.State.RightBarButton.title,
         action: { [weak self] in
           guard let self else {
             return

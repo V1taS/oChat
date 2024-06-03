@@ -29,9 +29,9 @@ final class HighTechImageIDInfoSheetFactory {
 extension HighTechImageIDInfoSheetFactory: HighTechImageIDInfoSheetFactoryInput {
   func createHighTechImageIDProtectionModel() -> HighTechImageIDInfoSheetModel {
     HighTechImageIDInfoSheetModel(
-      title: oChatStrings.HighTechImageIDInfoSheetLocalization
+      title: OChatStrings.HighTechImageIDInfoSheetLocalization
         .State.Sheet.title,
-      description: oChatStrings.HighTechImageIDInfoSheetLocalization
+      description: OChatStrings.HighTechImageIDInfoSheetLocalization
         .State.Sheet.description
     )
   }

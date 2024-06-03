@@ -41,17 +41,17 @@ final class ConfirmSendPaymentScreenFactory {
 
 extension ConfirmSendPaymentScreenFactory: ConfirmSendPaymentScreenFactoryInput {
   func createHelperTitle(tokenName: String) -> String {
-    oChatStrings.ConfirmSendPaymentScreenLocalization
+    OChatStrings.ConfirmSendPaymentScreenLocalization
       .State.Helper.title(tokenName)
   }
   
   func createHelperSubtitle() -> String {
-    oChatStrings.ConfirmSendPaymentScreenLocalization
+    OChatStrings.ConfirmSendPaymentScreenLocalization
       .State.Helper.subtitle
   }
   
   func createMainButtonTitle() -> String {
-    oChatStrings.ConfirmSendPaymentScreenLocalization
+    OChatStrings.ConfirmSendPaymentScreenLocalization
       .State.MainButton.title
   }
   
@@ -64,14 +64,14 @@ extension ConfirmSendPaymentScreenFactory: ConfirmSendPaymentScreenFactoryInput 
     var models: [WidgetCryptoView.Model] = []
     
     let walletAddress = createWidgetModel(
-      leftTitle: oChatStrings.ConfirmSendPaymentScreenLocalization
+      leftTitle: OChatStrings.ConfirmSendPaymentScreenLocalization
         .State.MyAddress.title,
       rightTitle: myWalletAddress.formatString(minTextLength: 20)
     )
     models.append(walletAddress)
     
     let recipient = createWidgetModel(
-      leftTitle: oChatStrings.ConfirmSendPaymentScreenLocalization
+      leftTitle: OChatStrings.ConfirmSendPaymentScreenLocalization
         .State.Recipient.title,
       rightTitle: recipientAddress.formatString(minTextLength: 20)
     )
@@ -81,7 +81,7 @@ extension ConfirmSendPaymentScreenFactory: ConfirmSendPaymentScreenFactoryInput 
     let symbol = model.currency?.type.details.symbol ?? ""
     
     let amount = createWidgetModel(
-      leftTitle: oChatStrings.ConfirmSendPaymentScreenLocalization
+      leftTitle: OChatStrings.ConfirmSendPaymentScreenLocalization
         .State.TokenAmount.title,
       rightTitle: model.tokenAmount.format(currency: model.ticker),
       rightDescreption: "\(Constants.approxSign) \(model.costInCurrency.format(currency: symbol))"
@@ -89,7 +89,7 @@ extension ConfirmSendPaymentScreenFactory: ConfirmSendPaymentScreenFactoryInput 
     models.append(amount)
     
     let fee = createWidgetModel(
-      leftTitle: oChatStrings.ConfirmSendPaymentScreenLocalization
+      leftTitle: OChatStrings.ConfirmSendPaymentScreenLocalization
         .State.Fee.title,
       rightTitle: "\(Constants.approxSign) \(transactionFee.format(currency: model.ticker))",
       rightDescreption: "\(Constants.approxSign) \((transactionFee * pricePerToken).format(currency: symbol))"

@@ -67,10 +67,10 @@ extension ListTokensScreenFactory: ListTokensScreenFactoryInput {
   func createHeaderTitle(_ screenType: ListTokensScreenType) -> String {
     switch screenType {
     case .tokenSelectioList:
-      return oChatStrings.ListTokensScreenLocalization
+      return OChatStrings.ListTokensScreenLocalization
         .State.TokenSelectio.Header.title
     case .addTokenOnMainScreen:
-      return oChatStrings.ListTokensScreenLocalization
+      return OChatStrings.ListTokensScreenLocalization
         .State.AddToken.Header.title
     }
   }

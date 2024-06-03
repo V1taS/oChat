@@ -47,7 +47,7 @@ final class MyWalletSettingsScreenFactory {
 
 extension MyWalletSettingsScreenFactory: MyWalletSettingsScreenFactoryInput {
   func createHeaderTitle() -> String {
-    oChatStrings.MyWalletSettingsScreenLocalization
+    OChatStrings.MyWalletSettingsScreenLocalization
       .State.Header.title
   }
   
@@ -55,7 +55,7 @@ extension MyWalletSettingsScreenFactory: MyWalletSettingsScreenFactoryInput {
     var models: [WidgetCryptoView.Model] = []
     
     let mainWalletModel = createWidgetWithSwitcher(
-      title: oChatStrings.MyWalletSettingsScreenLocalization
+      title: OChatStrings.MyWalletSettingsScreenLocalization
         .Section.Primary.title,
       isPrimary: isPrimary) { [weak self] newValue in
         self?.output?.onChangeIsPrimary(newValue)
@@ -71,7 +71,7 @@ extension MyWalletSettingsScreenFactory: MyWalletSettingsScreenFactoryInput {
     var models: [WidgetCryptoView.Model] = []
     
     let renameWalletModel = createWidget(
-      title: oChatStrings.MyWalletSettingsScreenLocalization
+      title: OChatStrings.MyWalletSettingsScreenLocalization
         .Section.RenameWallet.title,
       action: { [weak self] in
         self?.output?.openRenameWalletScreen(walletModel)
@@ -81,7 +81,7 @@ extension MyWalletSettingsScreenFactory: MyWalletSettingsScreenFactoryInput {
     
     if walletModel.walletType.isHighTechImageID {
       let showRecoveryImageIDModel = createWidget(
-        title: oChatStrings.MyWalletSettingsScreenLocalization
+        title: OChatStrings.MyWalletSettingsScreenLocalization
           .Section.ShowRecoveryImageID.title,
         action: { [weak self] in
           self?.output?.openRecoveryImageIDScreen(walletModel)
@@ -90,7 +90,7 @@ extension MyWalletSettingsScreenFactory: MyWalletSettingsScreenFactoryInput {
       models.append(showRecoveryImageIDModel)
     } else {
       let showRecoveryPhraseModel = createWidget(
-        title: oChatStrings.MyWalletSettingsScreenLocalization
+        title: OChatStrings.MyWalletSettingsScreenLocalization
           .Section.ShowRecoveryPhrase.title,
         action: { [weak self] in
           self?.output?.openRecoveryPhraseScreen(walletModel)
@@ -105,7 +105,7 @@ extension MyWalletSettingsScreenFactory: MyWalletSettingsScreenFactoryInput {
     var models: [WidgetCryptoView.Model] = []
     
     let deleteWalletModel = createWidget(
-      title: oChatStrings.MyWalletSettingsScreenLocalization
+      title: OChatStrings.MyWalletSettingsScreenLocalization
         .Section.DeleteWallet.title,
       isNegative: true,
       action: { [weak self] in

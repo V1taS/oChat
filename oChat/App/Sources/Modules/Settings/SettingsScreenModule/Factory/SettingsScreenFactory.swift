@@ -61,16 +61,16 @@ extension SettingsScreenFactory: SettingsScreenFactoryInput {
   func createLanguageValue(from languageType: SKAbstractions.AppLanguageType) -> String {
     switch languageType {
     case .english:
-      return oChatStrings.SettingsScreenLocalization
+      return OChatStrings.SettingsScreenLocalization
         .State.LanguageType.English.title
     case .russian:
-      return  oChatStrings.SettingsScreenLocalization
+      return  OChatStrings.SettingsScreenLocalization
         .State.LanguageType.Russian.title
     }
   }
   
   func createHeaderTitle() -> String {
-    return oChatStrings.SettingsScreenLocalization
+    return OChatStrings.SettingsScreenLocalization
       .State.Header.title
   }
   
@@ -83,7 +83,7 @@ extension SettingsScreenFactory: SettingsScreenFactoryInput {
     let myWalletModel = createWidgetWithChevron(
       image: Image(systemName: "wallet.pass"),
       backgroundColor: #colorLiteral(red: 0.1844805479, green: 0.5407295227, blue: 0.9590529799, alpha: 1),
-      title: oChatStrings.SettingsScreenLocalization
+      title: OChatStrings.SettingsScreenLocalization
         .State.MyWallet.title,
       additionRightTitle: "\(myWalletsCount)",
       action: { [weak self] in
@@ -94,7 +94,7 @@ extension SettingsScreenFactory: SettingsScreenFactoryInput {
     let currencyModel = createWidgetWithChevron(
       image: Image(systemName: "dollarsign.circle"),
       backgroundColor: #colorLiteral(red: 0.5207093954, green: 0.7432913184, blue: 0.5747435093, alpha: 1),
-      title: oChatStrings.SettingsScreenLocalization
+      title: OChatStrings.SettingsScreenLocalization
         .State.Currency.title,
       additionRightTitle: stateCurrencyValue.details.symbol,
       action: { [weak self] in
@@ -115,15 +115,15 @@ extension SettingsScreenFactory: SettingsScreenFactoryInput {
     languageValue: String
   ) -> [WidgetCryptoView.Model] {
     var models: [WidgetCryptoView.Model] = []
-    let isOnTitle = oChatStrings.SettingsScreenLocalization
+    let isOnTitle = OChatStrings.SettingsScreenLocalization
       .State.IsOn.title
-    let isOffTitle = oChatStrings.SettingsScreenLocalization
+    let isOffTitle = OChatStrings.SettingsScreenLocalization
       .State.IsOff.title
     
     let securityModel = createWidgetWithChevron(
       image: Image(systemName: "lock"),
       backgroundColor: #colorLiteral(red: 0.4229286313, green: 0.5245543122, blue: 0.6798206568, alpha: 1),
-      title: oChatStrings.SettingsScreenLocalization
+      title: OChatStrings.SettingsScreenLocalization
         .State.PasscodeAndFaceID.title,
       additionRightTitle: passcodeAndFaceIDValue ? isOnTitle : isOffTitle,
       action: { [weak self] in
@@ -134,7 +134,7 @@ extension SettingsScreenFactory: SettingsScreenFactoryInput {
     _ = createWidgetWithChevron(
       image: Image(systemName: "ellipsis.message"),
       backgroundColor: #colorLiteral(red: 0.1844805479, green: 0.5407295227, blue: 0.9590529799, alpha: 1),
-      title: oChatStrings.SettingsScreenLocalization
+      title: OChatStrings.SettingsScreenLocalization
         .State.Messenger.title,
       additionRightTitle: messengerIsEnabled ? isOnTitle : isOffTitle,
       action: { [weak self] in
@@ -145,7 +145,7 @@ extension SettingsScreenFactory: SettingsScreenFactoryInput {
     let notificationsModel = createWidgetWithChevron(
       image: Image(systemName: "bell"),
       backgroundColor: #colorLiteral(red: 0.9985736012, green: 0.2762073576, blue: 0.1756034493, alpha: 1),
-      title: oChatStrings.SettingsScreenLocalization
+      title: OChatStrings.SettingsScreenLocalization
         .State.Notifications.title,
       action: { [weak self] in
         self?.output?.openNotificationsSection()
@@ -155,7 +155,7 @@ extension SettingsScreenFactory: SettingsScreenFactoryInput {
     let appearanceModel = createWidgetWithChevron(
       image: Image(systemName: "applepencil.and.scribble"),
       backgroundColor: #colorLiteral(red: 0.9988374114, green: 0.6133651733, blue: 0.03555859998, alpha: 1),
-      title: oChatStrings.SettingsScreenLocalization
+      title: OChatStrings.SettingsScreenLocalization
         .State.Appearance.title,
       action: { [weak self] in
         self?.output?.openAppearanceSection()
@@ -164,7 +164,7 @@ extension SettingsScreenFactory: SettingsScreenFactoryInput {
     let languageModel = createWidgetWithChevron(
       image: Image(systemName: "globe"),
       backgroundColor: #colorLiteral(red: 0.4229286313, green: 0.5245543122, blue: 0.6798206568, alpha: 1),
-      title: oChatStrings.SettingsScreenLocalization
+      title: OChatStrings.SettingsScreenLocalization
         .State.Language.title,
       additionRightTitle: languageValue,
       action: { [weak self] in
