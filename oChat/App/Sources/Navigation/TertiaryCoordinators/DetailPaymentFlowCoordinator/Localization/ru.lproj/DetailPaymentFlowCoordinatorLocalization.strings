@@ -1,0 +1,11 @@
+/* 
+  DetailPaymentFlowCoordinatorLocalization.strings
+  oChat
+
+  Created by Vitalii Sosin on 05.05.2024.
+  Copyright © 2024 SosinVitalii.com. All rights reserved.
+*/
+
+// MARK: - State
+
+"State.SendPaymentFlow.Success" = "Транзакция успешно прошла";

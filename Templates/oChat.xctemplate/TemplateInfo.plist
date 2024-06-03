@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Summary</key>
+    <string>Generates a VIPER module directly in the current directory</string>
+    <key>SortOrder</key>
+    <string>1</string>
+    <key>Description</key>
+    <string>This template generates a new VIPER Module directly in the current directory, organizing files into respective subfolders without creating an additional VIPER directory.</string>
+    <key>Kind</key>
+    <string>Xcode.IDEKit.TextSubstitutionFileTemplateKind</string>
+    <key>Platforms</key>
+    <array>
+        <string>com.apple.platform.iphoneos</string>
+    </array>
+    <key>Options</key>
+    <array>
+        <dict>
+            <key>Identifier</key>
+            <string>productName</string>
+            <key>Required</key>
+            <true/>
+            <key>Name</key>
+            <string>Product Name</string>
+            <key>Description</key>
+            <string>Enter the name for your VIPER module. It will be generated in the current directory without creating an additional VIPER directory.</string>
+            <key>Type</key>
+            <string>text</string>
+        </dict>
+    </array>
+</dict>
+</plist>

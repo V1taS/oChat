@@ -1,0 +1,12 @@
+{
+  "data" : [
+    {
+      "filename" : "loader_writes_with_pen.json",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}

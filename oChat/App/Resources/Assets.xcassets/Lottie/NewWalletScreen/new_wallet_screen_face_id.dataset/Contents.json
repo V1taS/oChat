@@ -1,0 +1,12 @@
+{
+  "data" : [
+    {
+      "filename" : "new_wallet_screen_face_id.json",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}

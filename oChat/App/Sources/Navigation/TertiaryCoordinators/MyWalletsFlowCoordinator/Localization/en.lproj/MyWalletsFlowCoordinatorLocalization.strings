@@ -1,0 +1,14 @@
+/* 
+  MyWalletsFlowCoordinatorLocalization.strings
+  oChat
+
+  Created by Vitalii Sosin on 22.05.2024.
+  Copyright © 2024 SosinVitalii.com. All rights reserved.
+*/
+
+// MARK: - State
+
+"State.SaveHighTechImageID.Success" = "Изображение успешно сохранено в галерею";
+"State.SaveHighTechImageID.Failure" = "Ошибка сохранения изображения";
+"State.PermissionGallery.Failure" = "Нет доступа к галерее";
+"State.SomethingWentWrong.Title" = "Что-то пошло не так";

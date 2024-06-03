@@ -1,0 +1,12 @@
+//
+//  MyWalletsScreenLocalization.strings
+//  oChat
+//
+//  Created by Vitalii Sosin on 08.05.2024.
+//
+
+// MARK: - State
+
+"State.RoundButton.Title" = "Добавить кошелёк";
+"State.Header.Title" = "Мои кошельки";
+"State.Primary.Title" = "Основной";

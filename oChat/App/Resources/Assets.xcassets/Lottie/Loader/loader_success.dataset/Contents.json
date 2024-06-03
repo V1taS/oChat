@@ -1,0 +1,12 @@
+{
+  "data" : [
+    {
+      "filename" : "loader_success.json",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}

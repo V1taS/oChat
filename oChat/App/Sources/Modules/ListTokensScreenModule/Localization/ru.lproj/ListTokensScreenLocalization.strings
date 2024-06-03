@@ -1,0 +1,11 @@
+//
+//  ListTokensScreenLocalization.strings
+//  oChat
+//
+//  Created by Vitalii Sosin on 25.04.2024.
+//
+
+// MARK: - State
+
+"State.TokenSelectio.Header.Title" = "Список токенов";
+"State.AddToken.Header.Title" = "Управление токенами";

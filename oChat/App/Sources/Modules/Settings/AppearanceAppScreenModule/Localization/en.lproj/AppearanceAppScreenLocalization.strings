@@ -1,0 +1,13 @@
+//
+//  AppearanceAppScreenLocalization.strings
+//  oChat
+//
+//  Created by Vitalii Sosin on 08.05.2024.
+//
+
+// MARK: - State
+
+"State.Theme.Automatic" = "Автоматический";
+"State.Theme.Light" = "Светлый";
+"State.Theme.Dark" = "Темный";
+"State.Header.Title" = "Внешний вид";

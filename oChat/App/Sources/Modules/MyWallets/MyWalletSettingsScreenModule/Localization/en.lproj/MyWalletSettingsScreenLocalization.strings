@@ -1,0 +1,15 @@
+//
+//  MyWalletSettingsScreenLocalization.strings
+//  oChat
+//
+//  Created by Vitalii Sosin on 08.05.2024.
+//
+
+// MARK: - State
+
+"State.Header.Title" = "Настройки";
+"Section.Primary.Title" = "Основной";
+"Section.RenameWallet.Title" = "Переименовать";
+"Section.ShowRecoveryPhrase.Title" = "Показать фразу восстановления";
+"Section.DeleteWallet.Title" = "Удалить кошелек";
+"Section.ShowRecoveryImageID.Title" = "Показать ImageID восстановления";

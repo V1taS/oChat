@@ -1,0 +1,16 @@
+//
+//  SendPaymentScreenLocalization.strings
+//  oChat
+//
+//  Created by Vitalii Sosin on 23.04.2024.
+//
+
+// MARK: - State
+
+"State.TotalCrypto.Title" = "макс.:";
+"State.WhomCrypto.Placeholder.Title" = "Адрес или домен";
+"State.MainButton.Title" = "Продолжить";
+"State.SendCrypto.Header.Title" = "Отправить";
+"State.WhomCrypto.Header.Title" = "Кому";
+"State.Header.Title" = "Отправить";
+"State.SendCrypto.Placeholder.Title" = "0";

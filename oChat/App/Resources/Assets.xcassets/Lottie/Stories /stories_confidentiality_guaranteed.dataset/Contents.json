@@ -1,0 +1,12 @@
+{
+  "data" : [
+    {
+      "filename" : "stories_confidentiality_guaranteed.json",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}

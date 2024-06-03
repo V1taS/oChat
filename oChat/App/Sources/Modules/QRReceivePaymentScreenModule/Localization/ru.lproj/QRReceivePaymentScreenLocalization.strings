@@ -1,0 +1,14 @@
+//
+//  QRReceivePaymentScreenLocalization.strings
+//  oChat
+//
+//  Created by Vitalii Sosin on 03.05.2024.
+//
+
+// MARK: - State
+
+"State.Notification.Copy.Title" = "Скопировано в буфер обмена";
+"State.Description.Title" = "Отправляйте на этот адрес только %@ токены в сети %@, иначе вы можете потерять свои средства.";
+"State.Header.Title" = "Получить";
+"State.MainButton.Title" = "Закрыть";
+"State.CopyButton.Title" = "Скопировать";

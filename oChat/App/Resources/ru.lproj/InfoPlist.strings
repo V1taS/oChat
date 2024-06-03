@@ -1,0 +1,11 @@
+/*
+  InfoPlist.strings
+
+  Created by Vitalii Sosin on 12.01.2022.
+  Copyright © 2022 SosinVitalii.com. All rights reserved.
+*/
+
+"NSPhotoLibraryAddUsageDescription" = "Предоставьте доступ к своей галерее, чтобы вы могли сохранять изображения с Image ID.";
+"NSPhotoLibraryUsageDescription" = "Предоставьте доступ к своей галерее, чтобы вы могли загружать фото для создания вашего Image ID.";
+"NSCameraUsageDescription" = "Предоставьте доступ к своей камере, чтобы вы могли сделать фото для создания вашего Image ID.";
+"NSFaceIDUsageDescription" = "Предоставьте доступ к Face ID для быстрой и безопасной аутентификации.";

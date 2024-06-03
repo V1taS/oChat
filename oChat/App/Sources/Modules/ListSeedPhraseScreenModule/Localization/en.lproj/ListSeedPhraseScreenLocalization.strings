@@ -1,0 +1,16 @@
+//
+//  ListSeedPhraseScreenLocalization.strings
+//  oChat
+//
+//  Created by Vitalii Sosin on 18.04.2024.
+//
+
+// MARK: - State
+
+"State.Button.Continue.Title" = "Продолжить";
+"State.Button.Copy.Title" = "Скопировать";
+"State.Header.Title" = "Ваша фраза восстановления";
+"State.Header.Description" = "Запишите эти слова в порядке, указанном ниже, и сохраните их в секретном и надежном месте";
+"State.TermsOfAgreement.Title" = "Я понимаю, что в случае утери фразы восстановления потеряю также доступ к кошельку";
+"State.Copy.SeedPhrase.Success" = "Скопировано в буфер обмена";
+"State.Copy.SeedPhrase.failure" = "Ошибка копирования в буфер обмена";

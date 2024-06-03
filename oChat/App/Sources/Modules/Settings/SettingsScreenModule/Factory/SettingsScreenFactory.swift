@@ -1,0 +1,237 @@
+//
+//  SettingsScreenFactory.swift
+//  oChat
+//
+//  Created by Vitalii Sosin on 21.04.2024.
+//
+
+import SwiftUI
+import SKUIKit
+import SKStyle
+import SKAbstractions
+
+/// Cобытия которые отправляем из Factory в Presenter
+protocol SettingsScreenFactoryOutput: AnyObject {
+  /// Открыть экран с моими кошельками
+  func openMyWalletsSection()
+  /// Открыть экран настроек выбора валюты
+  func openCurrencySection()
+  /// Открыть экран настроек по безопасности
+  func openPasscodeAndFaceIDSection()
+  /// Открыть экран настроек мессенджера
+  func openMessengerSection()
+  /// Открыть экран настроек уведомлений
+  func openNotificationsSection()
+  /// Открыть экран настроек внешнего вида
+  func openAppearanceSection()
+  /// Открыть экран настроек языка
+  func openLanguageSection()
+}
+
+/// Cобытия которые отправляем от Presenter к Factory
+protocol SettingsScreenFactoryInput {
+  /// Создать заголовок для экрана
+  func createHeaderTitle() -> String
+  /// Создать верхнюю секцию
+  func createHeaderSectionsModels(
+    myWalletsCount: Int,
+    stateCurrencyValue: CurrencyModel.CurrencyType
+  ) -> [WidgetCryptoView.Model]
+  /// Создать среднюю секцию
+  func createSecuritySectionsModels(
+    passcodeAndFaceIDValue: Bool,
+    messengerIsEnabled: Bool,
+    languageValue: String
+  ) -> [WidgetCryptoView.Model]
+  /// Создаем заголовок, какой язык выбран в приложении Русский или Английский
+  func createLanguageValue(from languageType: AppLanguageType) -> String
+}
+
+/// Фабрика
+final class SettingsScreenFactory {
+  
+  // MARK: - Internal properties
+  
+  weak var output: SettingsScreenFactoryOutput?
+}
+
+// MARK: - SettingsScreenFactoryInput
+
+extension SettingsScreenFactory: SettingsScreenFactoryInput {
+  func createLanguageValue(from languageType: SKAbstractions.AppLanguageType) -> String {
+    switch languageType {
+    case .english:
+      return oChatStrings.SettingsScreenLocalization
+        .State.LanguageType.English.title
+    case .russian:
+      return  oChatStrings.SettingsScreenLocalization
+        .State.LanguageType.Russian.title
+    }
+  }
+  
+  func createHeaderTitle() -> String {
+    return oChatStrings.SettingsScreenLocalization
+      .State.Header.title
+  }
+  
+  func createHeaderSectionsModels(
+    myWalletsCount: Int,
+    stateCurrencyValue: CurrencyModel.CurrencyType
+  ) -> [WidgetCryptoView.Model] {
+    var models: [WidgetCryptoView.Model] = []
+    
+    let myWalletModel = createWidgetWithChevron(
+      image: Image(systemName: "wallet.pass"),
+      backgroundColor: #colorLiteral(red: 0.1844805479, green: 0.5407295227, blue: 0.9590529799, alpha: 1),
+      title: oChatStrings.SettingsScreenLocalization
+        .State.MyWallet.title,
+      additionRightTitle: "\(myWalletsCount)",
+      action: { [weak self] in
+        self?.output?.openMyWalletsSection()
+      }
+    )
+    
+    let currencyModel = createWidgetWithChevron(
+      image: Image(systemName: "dollarsign.circle"),
+      backgroundColor: #colorLiteral(red: 0.5207093954, green: 0.7432913184, blue: 0.5747435093, alpha: 1),
+      title: oChatStrings.SettingsScreenLocalization
+        .State.Currency.title,
+      additionRightTitle: stateCurrencyValue.details.symbol,
+      action: { [weak self] in
+        self?.output?.openCurrencySection()
+      }
+    )
+    
+    models = [
+      myWalletModel,
+      currencyModel
+    ]
+    return models
+  }
+  
+  func createSecuritySectionsModels(
+    passcodeAndFaceIDValue: Bool,
+    messengerIsEnabled: Bool,
+    languageValue: String
+  ) -> [WidgetCryptoView.Model] {
+    var models: [WidgetCryptoView.Model] = []
+    let isOnTitle = oChatStrings.SettingsScreenLocalization
+      .State.IsOn.title
+    let isOffTitle = oChatStrings.SettingsScreenLocalization
+      .State.IsOff.title
+    
+    let securityModel = createWidgetWithChevron(
+      image: Image(systemName: "lock"),
+      backgroundColor: #colorLiteral(red: 0.4229286313, green: 0.5245543122, blue: 0.6798206568, alpha: 1),
+      title: oChatStrings.SettingsScreenLocalization
+        .State.PasscodeAndFaceID.title,
+      additionRightTitle: passcodeAndFaceIDValue ? isOnTitle : isOffTitle,
+      action: { [weak self] in
+        self?.output?.openPasscodeAndFaceIDSection()
+      }
+    )
+    
+    _ = createWidgetWithChevron(
+      image: Image(systemName: "ellipsis.message"),
+      backgroundColor: #colorLiteral(red: 0.1844805479, green: 0.5407295227, blue: 0.9590529799, alpha: 1),
+      title: oChatStrings.SettingsScreenLocalization
+        .State.Messenger.title,
+      additionRightTitle: messengerIsEnabled ? isOnTitle : isOffTitle,
+      action: { [weak self] in
+        self?.output?.openMessengerSection()
+      }
+    )
+    
+    let notificationsModel = createWidgetWithChevron(
+      image: Image(systemName: "bell"),
+      backgroundColor: #colorLiteral(red: 0.9985736012, green: 0.2762073576, blue: 0.1756034493, alpha: 1),
+      title: oChatStrings.SettingsScreenLocalization
+        .State.Notifications.title,
+      action: { [weak self] in
+        self?.output?.openNotificationsSection()
+      }
+    )
+    
+    let appearanceModel = createWidgetWithChevron(
+      image: Image(systemName: "applepencil.and.scribble"),
+      backgroundColor: #colorLiteral(red: 0.9988374114, green: 0.6133651733, blue: 0.03555859998, alpha: 1),
+      title: oChatStrings.SettingsScreenLocalization
+        .State.Appearance.title,
+      action: { [weak self] in
+        self?.output?.openAppearanceSection()
+      }
+    )
+    let languageModel = createWidgetWithChevron(
+      image: Image(systemName: "globe"),
+      backgroundColor: #colorLiteral(red: 0.4229286313, green: 0.5245543122, blue: 0.6798206568, alpha: 1),
+      title: oChatStrings.SettingsScreenLocalization
+        .State.Language.title,
+      additionRightTitle: languageValue,
+      action: { [weak self] in
+        self?.output?.openLanguageSection()
+      }
+    )
+    
+    models = [
+      securityModel,
+      
+      // TODO: - Включить когда будет что настраивать
+      //      messengerModel,
+      notificationsModel,
+      appearanceModel,
+      languageModel
+    ]
+    return models
+  }
+}
+
+// MARK: - Private
+
+private extension SettingsScreenFactory {
+  func createWidgetWithChevron(
+    image: Image,
+    backgroundColor: UIColor,
+    title: String,
+    additionRightTitle: String? = nil,
+    action: (() -> Void)?
+  ) -> WidgetCryptoView.Model {
+    var textModel: WidgetCryptoView.TextModel?
+    if let additionRightTitle {
+      textModel = .init(text: additionRightTitle, textStyle: .netural)
+    }
+    
+    return .init(
+      leftSide: .init(
+        itemModel: .custom(
+          item: AnyView(
+            Color(backgroundColor)
+              .clipShape(RoundedRectangle(cornerRadius: .s2 / 1.3))
+              .overlay {
+                image
+                  .resizable()
+                  .aspectRatio(contentMode: .fit)
+                  .fontWeight(.bold)
+                  .frame(height: .s5)
+                  .foregroundColor(SKStyleAsset.constantGhost.swiftUIColor)
+                  .allowsHitTesting(false)
+              }
+          ),
+          size: .custom(width: .s8, height: .s8),
+          isHitTesting: false
+        ),
+        titleModel: nil,
+        descriptionModel: .init(text: title, textStyle: .standart)
+      ),
+      rightSide: .init(
+        imageModel: .chevron,
+        titleModel: nil,
+        descriptionModel: textModel
+      ),
+      action: action
+    )
+  }
+}
+
+// MARK: - Constants
+
+private enum Constants {}

@@ -1,0 +1,22 @@
+//
+//  SettingsScreenLocalization.strings
+//  oChat
+//
+//  Created by Vitalii Sosin on 21.04.2024.
+//
+
+// MARK: - State
+
+"State.Header.Title" = "Настройки";
+"State.MyWallet.Title" = "Мои Кошельки";
+"State.Currency.Title" = "Валюта";
+"State.PasscodeAndFaceID.Title" = "Код доступа & Face ID";
+"State.Messenger.Title" = "Мессенджер";
+"State.Notifications.Title" = "Уведомления";
+"State.Appearance.Title" = "Внешний вид";
+"State.Language.Title" = "Язык";
+"State.languageType.English.Title" = "Английский";
+"State.languageType.Russian.Title" = "Русский";
+"State.IsOn.Title" = "Включен";
+"State.IsOff.Title" = "Выключен";
+"State.Version.Title" = "Версия";

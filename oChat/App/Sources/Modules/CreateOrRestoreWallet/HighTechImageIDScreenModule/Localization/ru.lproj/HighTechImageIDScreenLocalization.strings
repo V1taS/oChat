@@ -1,0 +1,54 @@
+//
+//  HighTechImageIDScreenLocalization.strings
+//  oChat
+//
+//  Created by Vitalii Sosin on 19.04.2024.
+//
+
+// MARK: - Presenter
+
+"State.Button.SaveImageID.Title" = "Сохранить ImageID";
+
+// MARK: - Factory
+
+"State.GenerateImageID.Header.Title" = "Создайте Image ID";
+"State.LoginImageID.Header.Title" = "Загрузите Image ID для входа";
+"State.AdditionProtection.Title" = "Защита для ImageID";
+"State.Button.Main.GenerateImageIDFinish.Title" = "Проверить ImageID";
+"State.Button.Main.GenerateImageIDDefault.Title" = "Продолжить";
+"State.Button.Main.LoginImageIDFinish.Title" = "Войти в кошелек";
+"State.Button.Main.LoginImageIDDefault.Title" = "Продолжить";
+"State.TermsOfAgreement.Title" = "Я понимаю, что в случае утери Image ID потеряю также доступ к кошельку";
+
+"Step.GenerateImageID.InitialState.Description" = "Шаг %@: Выберите изображение, которое будет использоваться для создания вашего уникального Image ID";
+"Step.GenerateImageID.PassCodeImage.Description" = "Шаг %@: Придумайте пароль, который будет использоваться для шифрования вашего уникального Image ID";
+"Step.GenerateImageID.StartUploadImage.Description" = "Шаг %@: Автоматически встраиваем в ваше изображение секретные данные кошелька";
+"Step.GenerateImageID.Finish.Description" = "Шаг %@: Image ID успешно создан, сохраните его в безопасном месте";
+
+"Step.LoginImageID.InitialState.Description" = "Шаг %@: Выберите ваш уникальный Image ID для аутентификации";
+"Step.LoginImageID.PassCodeImage.Description" = "Шаг %@: Введите пароль, связанный с вашим Image ID";
+"Step.LoginImageID.StartUploadImage.Description" = "Шаг %@: Проверяем и анализируем ваше изображение для извлечения секретных данных";
+"Step.LoginImageID.Finish.Description" = "Шаг %@: Подтверждение аутентификации и предоставление доступа к кошельку";
+
+"State.GenerateImageID.Header.Description" = "Image ID будет использоваться для защищённого входа и восстановления доступа к Вашему кошельку";
+"State.LoginImageID.Header.Description" = "Image ID будет использоваться для защищённого входа и восстановления доступа к Вашему кошельку";
+
+"State.GenerateImageID.Input.First.Placeholder" = "0000";
+"State.GenerateImageID.Input.First.LeftHelper" = "ПИН код:";
+"State.GenerateImageID.Input.Second.Placeholder" = "0000";
+"State.GenerateImageID.Input.Second.LeftHelper" = "Подтвердите код:";
+"State.LoginImageID.Input.First.Placeholder" = "0000";
+"State.LoginImageID.Input.First.LeftHelper" = "ПИН код:";
+
+"State.Validation.MinimalAmount.Title" = "Пароль должен содержать не менее %@ символов";
+"State.Validation.PasswordMismatch.Title" = "Введенные пароли не совпадают";
+
+"State.Error.SomethingWentWrong.Title" = "Что-то пошло не так";
+"State.Error.NoDataInImage.Title" = "Нет данных в изображении";
+"State.Error.ImageTooSmall.Title" = "Изображение слишком мало";
+"State.Error.DataTooBig.Title" = "Данные слишком велики";
+"State.Error.NotDefined.Title" = "Произошла неопределенная ошибка";
+
+// MARK: - Interactor
+
+"State.Wallet.Title" = "Кошелек";

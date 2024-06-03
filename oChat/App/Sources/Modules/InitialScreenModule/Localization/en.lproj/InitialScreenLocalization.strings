@@ -1,0 +1,25 @@
+//
+//  InitialScreenLocalization.strings
+//  oChat
+//
+//  Created by Vitalii Sosin on 17.04.2024.
+//
+
+// MARK: - Stories
+
+"Stories.Title.First" = "Встречайте oChat";
+"Stories.Title.Second" = "Непробиваемая защита";
+"Stories.Title.Third" = "Конфиденциальность гарантирована";
+"Stories.Title.Fourth" = "Передовое шифрование";
+"Stories.Title.Fifth" = "Поддержка 1000+ криптовалют";
+
+"Stories.Subtitle.First" = "";
+"Stories.Subtitle.Second" = "Выбор между 12 и 24 сид-фразами с использованием сложных алгоритмов шифрования для обеспечения высочайшего уровня безопасности";
+"Stories.Subtitle.Third" = "Нулевой сбор данных и аналитики для полной приватности ваших финансовых операций";
+"Stories.Subtitle.Fourth" = "Использование последних достижений в криптографии, включая AES и RSA, для обеспечения безопасности кошелька";
+"Stories.Subtitle.Fifth" = "Возможность хранения и управления более чем тысячей различных криптовалют и токенов в одном приложении";
+
+// MARK: - State
+
+"State.NewWalletButton.Title" = "Создать новый кошелек";
+"State.ImportWalletButton.Title" = "Добавить существующий кошелек";

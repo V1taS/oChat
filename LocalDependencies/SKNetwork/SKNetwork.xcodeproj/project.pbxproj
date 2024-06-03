@@ -1,0 +1,402 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 55;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		0BE65A41FD0DD994640379C2 /* HeadersType.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6355CB80307B7964093B720 /* HeadersType.swift */; };
+		6C8E8D66A0690414D99B1789 /* NetworkService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19FBA31490A8BF12EA8A1C1B /* NetworkService.swift */; };
+		7193C2AF98D96F4750E9060F /* NetworkError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18C4C32CE885C18AEB29D698 /* NetworkError.swift */; };
+		8E5E6E952E69A3C6E5C67480 /* NetworkReachability.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2999505C7846FBA51A5B42A /* NetworkReachability.swift */; };
+		8FFA48A70F726CC280CF24EE /* Network+Curl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27A957D7BF5D08E9269482A4 /* Network+Curl.swift */; };
+		BB4FA39784A2D3AE93699768 /* NetworkMethod.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94230E06AC85245F684EBDE1 /* NetworkMethod.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		A62233E30AD762A1967A0114 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		18C4C32CE885C18AEB29D698 /* NetworkError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkError.swift; sourceTree = "<group>"; };
+		19FBA31490A8BF12EA8A1C1B /* NetworkService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkService.swift; sourceTree = "<group>"; };
+		27A957D7BF5D08E9269482A4 /* Network+Curl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Network+Curl.swift"; sourceTree = "<group>"; };
+		6A87FE40E3599C821C29EA57 /* oChat.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = oChat.xcconfig; path = ../../oChat.xcconfig; sourceTree = "<group>"; };
+		8F22EDE2A98D0C18F9148146 /* SKNetwork-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "SKNetwork-Info.plist"; sourceTree = "<group>"; };
+		94230E06AC85245F684EBDE1 /* NetworkMethod.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkMethod.swift; sourceTree = "<group>"; };
+		A33E44D74F082121EF0E74D2 /* SKNetwork.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SKNetwork.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		B2999505C7846FBA51A5B42A /* NetworkReachability.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkReachability.swift; sourceTree = "<group>"; };
+		C6355CB80307B7964093B720 /* HeadersType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeadersType.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		0EB9A418AB6D8A8F0A9AF2DA /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		0E32ABECF0067DE4249D93F2 /* InfoPlists */ = {
+			isa = PBXGroup;
+			children = (
+				8F22EDE2A98D0C18F9148146 /* SKNetwork-Info.plist */,
+			);
+			path = InfoPlists;
+			sourceTree = "<group>";
+		};
+		247E65AB103D587B565A1E6E /* Project */ = {
+			isa = PBXGroup;
+			children = (
+				E0CC24F09189104D2FB2015A /* Derived */,
+				E7CDE1A160FDC8DC747203A7 /* Sources */,
+				6A87FE40E3599C821C29EA57 /* oChat.xcconfig */,
+			);
+			name = Project;
+			sourceTree = "<group>";
+		};
+		32F3DBCA11671D6CECC73203 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		A84D9F8B975CBC58D7E4DDA5 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				A33E44D74F082121EF0E74D2 /* SKNetwork.framework */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		C201AE243008E0F7C97DFEB9 = {
+			isa = PBXGroup;
+			children = (
+				247E65AB103D587B565A1E6E /* Project */,
+				32F3DBCA11671D6CECC73203 /* Frameworks */,
+				A84D9F8B975CBC58D7E4DDA5 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		E0CC24F09189104D2FB2015A /* Derived */ = {
+			isa = PBXGroup;
+			children = (
+				0E32ABECF0067DE4249D93F2 /* InfoPlists */,
+			);
+			path = Derived;
+			sourceTree = "<group>";
+		};
+		E7CDE1A160FDC8DC747203A7 /* Sources */ = {
+			isa = PBXGroup;
+			children = (
+				C6355CB80307B7964093B720 /* HeadersType.swift */,
+				27A957D7BF5D08E9269482A4 /* Network+Curl.swift */,
+				18C4C32CE885C18AEB29D698 /* NetworkError.swift */,
+				94230E06AC85245F684EBDE1 /* NetworkMethod.swift */,
+				B2999505C7846FBA51A5B42A /* NetworkReachability.swift */,
+				19FBA31490A8BF12EA8A1C1B /* NetworkService.swift */,
+			);
+			path = Sources;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		321DBE22B18C5FA04CE491D2 /* SKNetwork */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 9010836872E08E2D96A7A816 /* Build configuration list for PBXNativeTarget "SKNetwork" */;
+			buildPhases = (
+				6BEE14FBE18F19141A48A8C7 /* Sources */,
+				0CE0F774BB959EC0E8B17888 /* Resources */,
+				A62233E30AD762A1967A0114 /* Embed Frameworks */,
+				0EB9A418AB6D8A8F0A9AF2DA /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = SKNetwork;
+			productName = SKNetwork;
+			productReference = A33E44D74F082121EF0E74D2 /* SKNetwork.framework */;
+			productType = "com.apple.product-type.framework";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		580A95D35BDAFBA14D8F3A69 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				TargetAttributes = {
+				};
+			};
+			buildConfigurationList = 2B29C455FCE3D63CD786B237 /* Build configuration list for PBXProject "SKNetwork" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = C201AE243008E0F7C97DFEB9;
+			productRefGroup = A84D9F8B975CBC58D7E4DDA5 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				321DBE22B18C5FA04CE491D2 /* SKNetwork */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		0CE0F774BB959EC0E8B17888 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		6BEE14FBE18F19141A48A8C7 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				0BE65A41FD0DD994640379C2 /* HeadersType.swift in Sources */,
+				8FFA48A70F726CC280CF24EE /* Network+Curl.swift in Sources */,
+				7193C2AF98D96F4750E9060F /* NetworkError.swift in Sources */,
+				BB4FA39784A2D3AE93699768 /* NetworkMethod.swift in Sources */,
+				8E5E6E952E69A3C6E5C67480 /* NetworkReachability.swift in Sources */,
+				6C8E8D66A0690414D99B1789 /* NetworkService.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		15C6D900BA9B8C24326FFFDC /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_IDENTITY = "";
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				INFOPLIST_FILE = "Derived/InfoPlists/SKNetwork-Info.plist";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.sosinvitalii.oChat.SKNetwork;
+				PRODUCT_NAME = SKNetwork;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = YES;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_COMPILATION_MODE = singlefile;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Debug;
+		};
+		2D36624A6F2962D53CFD4731 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 6A87FE40E3599C821C29EA57 /* oChat.xcconfig */;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sosinvitalii.oChat;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		AB036968E1E0A30AE8B03988 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 6A87FE40E3599C821C29EA57 /* oChat.xcconfig */;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sosinvitalii.oChat;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		DE774F25AB73A696FAE3811C /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_IDENTITY = "";
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				INFOPLIST_FILE = "Derived/InfoPlists/SKNetwork-Info.plist";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.sosinvitalii.oChat.SKNetwork;
+				PRODUCT_NAME = SKNetwork;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = YES;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		2B29C455FCE3D63CD786B237 /* Build configuration list for PBXProject "SKNetwork" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				2D36624A6F2962D53CFD4731 /* Debug */,
+				AB036968E1E0A30AE8B03988 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		9010836872E08E2D96A7A816 /* Build configuration list for PBXNativeTarget "SKNetwork" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				15C6D900BA9B8C24326FFFDC /* Debug */,
+				DE774F25AB73A696FAE3811C /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 580A95D35BDAFBA14D8F3A69 /* Project object */;
+}

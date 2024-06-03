@@ -1,0 +1,81 @@
+## User settings
+xcuserdata/
+.DS_Store
+
+## compatibility with Xcode 8 and earlier (ignoring not required starting Xcode 9)
+*.xcscmblueprint
+*.xccheckout
+
+## compatibility with Xcode 3 and earlier (ignoring not required starting Xcode 4)
+build/
+.build/
+DerivedData/
+*.moved-aside
+*.pbxuser
+!default.pbxuser
+*.mode1v3
+!default.mode1v3
+*.mode2v3
+!default.mode2v3
+*.perspectivev3
+!default.perspectivev3
+
+## Obj-C/Swift specific
+*.hmap
+
+## App packaging
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+## Playgrounds
+timeline.xctimeline
+playground.xcworkspace
+
+# Swift Package Manager
+# Add this line if you want to avoid checking in source code from Swift Package Manager dependencies.
+Packages/
+Package.pins
+.swiftpm
+
+# CocoaPods
+Pods/
+# Add this line if you want to avoid checking in source code from the Xcode workspace
+ *.xcworkspace
+
+# Accio dependency management
+Tuist/Dependencies/
+.accio/
+
+# fastlane
+# It is recommended to not store the screenshots in the git repo.
+# Instead, use fastlane to re-generate the screenshots whenever they are needed.
+# For more information about the recommended setup visit:
+# https://docs.fastlane.tools/best-practices/source-control/#source-control
+
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/**/*.png
+fastlane/test_output
+Derived
+graph.png
+derived_data
+oChat.xcodeproj
+oChat.xcworkspace
+Tuist/Package.resolved
+LocalDependencies/SKServices/SKServices.xcodeproj/project.pbxproj
+LocalDependencies/SKUIKit/SKUIKit.xcodeproj/project.pbxproj
+LocalDependencies/SKMySecret/Package.resolved
+LocalDependencies/SKFoundation/SKFoundation.xcodeproj/project.pbxproj
+LocalDependencies/SKAbstractions/SKAbstractions.xcodeproj/project.pbxproj
+LocalDependencies/SKMySecret/Sources/MySecret/MySecretObjc/SKMySecretObjc.modulemap
+LocalDependencies/SKStyle/SKStyle.xcodeproj/project.pbxproj
+LocalDependencies/SKMySecret/SKMySecret.xcodeproj/project.pbxproj
+LocalDependencies/SwiftUICharts/SwiftUICharts.xcodeproj
+LocalDependencies/Wormholy/Wormholy.xcodeproj
+LocalDependencies/Ecies/Ecies.xcodeproj
+LocalDependencies/Ecies/SwiftECC.xcodeproj
+LocalDependencies/SKMySecret/Example/Example.xcodeproj
+LocalDependencies/SKMySecret/Example/Example.xcworkspace
+LocalDependencies/SKMySecret/Example/Project.swift
+venv

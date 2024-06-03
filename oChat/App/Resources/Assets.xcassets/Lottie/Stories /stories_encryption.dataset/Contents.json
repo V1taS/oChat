@@ -1,0 +1,12 @@
+{
+  "data" : [
+    {
+      "filename" : "stories_encryption.json",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}

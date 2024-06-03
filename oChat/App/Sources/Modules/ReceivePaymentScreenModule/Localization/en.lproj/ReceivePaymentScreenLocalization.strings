@@ -1,0 +1,13 @@
+//
+//  ReceivePaymentScreenLocalization.strings
+//  oChat
+//
+//  Created by Vitalii Sosin on 03.05.2024.
+//
+
+// MARK: - State
+
+"State.Button.Title" = "Продолжить";
+"State.Header.Title" = "Получить";
+"State.NetworkSection.Title" = "Сеть";
+"State.TokenSection.Title" = "Токен";

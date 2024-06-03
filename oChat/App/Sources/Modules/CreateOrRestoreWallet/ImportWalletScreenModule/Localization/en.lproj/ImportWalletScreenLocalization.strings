@@ -1,0 +1,17 @@
+//
+//  ImportWalletScreenLocalization.strings
+//  oChat
+//
+//  Created by Vitalii Sosin on 20.04.2024.
+//
+
+// MARK: - State
+
+"State.Notification.SomethingWentWrong.Title" = "Что-то пошло не так";
+"State.Button.Title" = "Импортировать";
+
+"State.SeedPhrase.Header.Title" = "Импорт кошелька";
+"State.TrackingWallet.Header.Title" = "Добавить кошелек для просмотра";
+
+"State.SeedPhrase.Description" = "Приватный ключ / Фраза восстановления";
+"State.TrackingWallet.Description" = "В кошельке для просмотра можно отслеживать движения средств, но не расходовать";

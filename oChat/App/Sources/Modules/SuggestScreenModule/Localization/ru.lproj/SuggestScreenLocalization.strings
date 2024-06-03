@@ -1,0 +1,10 @@
+//
+//  SuggestScreenLocalization.strings
+//  oChat
+//
+//  Created by Vitalii Sosin on 19.04.2024.
+//
+
+// MARK: - SuggestScreenLocalization
+
+"State.Button.Title" = "Hello World";

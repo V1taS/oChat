@@ -1,0 +1,12 @@
+{
+  "data" : [
+    {
+      "filename" : "new_wallet_enable_notifications.json",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}

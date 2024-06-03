@@ -1,0 +1,22 @@
+//
+//  AuthenticationScreenLocalization.strings
+//  oChat
+//
+//  Created by Vitalii Sosin on 18.04.2024.
+//
+
+// MARK: - State
+
+"State.EnterPasscode.Title" = "Введите новый код доступа";
+"State.EnterOldPasscode.Title" = "Введите старый код доступа";
+"State.ReEnterPasscode.Title" = "Подтвердите ваш новый код доступа";
+"State.LoginPasscode.Title" = "Введите код доступа";
+
+"State.CreatePasscode.Success.Title" = "Вы установили новый код доступа";
+"State.CreatePasscode.Failure.Title" = "Код доступа неверен";
+
+"State.LoginPasscode.Success.Title" = "Код доступа верен";
+"State.LoginPasscode.Failure.Title" = "Код доступа неверен";
+
+"State.ValidationCount.Failure.Title" = "Код доступа должен состоять из %@ цифр";
+"State.SimplePasswords.Failure.Title" = "Пароль слишком простой";

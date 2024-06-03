@@ -1,0 +1,29 @@
+//
+//  MyNewWalletSheetLocalization.strings
+//  oChat
+//
+//  Created by Vitalii Sosin on 08.05.2024.
+//
+
+// MARK: - State
+
+"State.NewWallet.Header" = "Создать новый кошелек";
+"State.ImportWallet.Header" = "Добавить существующий кошелек";
+
+// MARK: - Create Wallet
+
+"SeedPhrase12.Title" = "Стандартный кошелек";
+"SeedPhrase12.Description" = "12 Seed Phrase";
+"SeedPhrase24.Title" = "Нерушимый кошелек";
+"SeedPhrase24.Description" = "24 Seed Phrase";
+"ImageHighTech.Title" = "Hi-Tech кошелек";
+"ImageHighTech.Description" = "Image ID";
+
+// MARK: - Restore Wallet
+
+"ImportSeedPhrase.Title" = "Импорт кошелька";
+"ImportSeedPhrase.Description" = "Сид фраза восстановления";
+"ImportImageHighTech.Title" = "Импорт Hi-Tech кошелека";
+"ImportImageHighTech.Description" = "Image ID восстановления";
+"TrackWallet.Title" = "Отслеживать кошелек";
+"TrackWallet.Description" = "Введите адрес или домен";

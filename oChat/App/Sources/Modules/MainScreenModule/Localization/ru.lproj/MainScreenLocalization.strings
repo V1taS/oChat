@@ -1,0 +1,13 @@
+//
+//  MainScreenLocalization.strings
+//  oChat
+//
+//  Created by Vitalii Sosin on 21.04.2024.
+//
+
+// MARK: - State
+
+"State.Button.Send.Title" = "Отправить";
+"State.Button.Receive.Title" = "Получить";
+"State.Header.Title" = "Кошелек";
+"State.AddToken.Title" = "Добавить токены";
