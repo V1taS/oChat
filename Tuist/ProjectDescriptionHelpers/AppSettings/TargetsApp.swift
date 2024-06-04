@@ -30,10 +30,12 @@ public extension Array<Target> {
           .swiftlint(configPath: "\(Constants.appNameRelease)/\(Constants.appPath)/Sources"),
         ],
         dependencies: [
-          .project(target: "SKServices", path: .relativeToRoot("\(Constants.dependenciesPath)/SKServices")),
-          .project(target: "SKStoriesWidget", path: .relativeToRoot("\(Constants.dependenciesPath)/SKStoriesWidget")),
-          .project(target: "SKUIKit", path: .relativeToRoot("\(Constants.dependenciesPath)/SKUIKit")),
-          .project(target: "Wormholy", path: .relativeToRoot("\(Constants.dependenciesPath)/Wormholy"))
+          .external(name: "SKStoriesWidget"),
+          .external(name: "SKServices"),
+          .external(name: "SKUIKit"),
+          .external(name: "Wormholy"),
+          .external(name: "AuthenticationSDK"),
+          .external(name: "MessengerSDK")
         ],
         settings: Settings.app
       ),

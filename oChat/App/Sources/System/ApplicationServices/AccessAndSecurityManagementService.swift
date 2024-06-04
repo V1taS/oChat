@@ -13,7 +13,7 @@ import SKServices
 // MARK: - AccessAndSecurityManagementService
 
 final class AccessAndSecurityManagementService: IAccessAndSecurityManagementService {
-  
+
   // MARK: - Properties
   
   /// Сервис для управления сессиями в приложении.
@@ -34,6 +34,11 @@ final class AccessAndSecurityManagementService: IAccessAndSecurityManagementServ
   /// Возвращает сервис шифрования с использованием ECIES.
   var cryptoService: ICryptoService {
     CryptoService()
+  }
+  
+  /// Возвращает сервис для управления чатом P2P через Tor.
+  var p2pChatManager: IP2PChatManager {
+    P2PChatManager()
   }
 }
 

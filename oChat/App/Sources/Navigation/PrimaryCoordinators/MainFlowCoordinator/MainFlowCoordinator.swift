@@ -8,6 +8,7 @@
 
 import SKAbstractions
 import UIKit
+import MessengerSDK
 
 final class MainFlowCoordinator: Coordinator<Void, MainFinishFlowType> {
   

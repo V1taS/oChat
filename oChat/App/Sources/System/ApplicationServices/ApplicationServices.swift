@@ -46,4 +46,14 @@ final class ApplicationServices: IApplicationServices {
   var messengerService: IMessengerService {
     MessengerService()
   }
+  
+  /// Определяет интерфейс для взаимодействия с блокчейн-сервисами.
+  var blockchainService: IBlockchainService {
+    BlockchainService()
+  }
+  
+  /// Управляет чатом P2P через Tor.
+  var p2pChatManager: IP2PChatManager {
+    P2PChatManager()
+  }
 }

@@ -10,6 +10,7 @@ import Foundation
 import SKAbstractions
 import SKStyle
 import UIKit
+import AuthenticationSDK
 
 final class RootCoordinator: Coordinator<Void, Void> {
   

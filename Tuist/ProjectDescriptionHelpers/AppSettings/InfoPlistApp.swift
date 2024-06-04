@@ -34,9 +34,6 @@ public extension InfoPlist {
       ]),
       "UISupportedInterfaceOrientations": .array([
         .string("UIInterfaceOrientationPortrait")
-      ]),
-      "NSAppTransportSecurity": .dictionary([
-        "NSAllowsArbitraryLoads": .boolean(true)
       ])
     ]
   }
@@ -82,6 +79,9 @@ public extension InfoPlist {
           ])
         ])
       ]),
+      "NSAppTransportSecurity": .dictionary([
+        "NSAllowsArbitraryLoads": .boolean(true)
+      ])
     ]
     extendedPlist.merge(self.common) { current, _ in
       current

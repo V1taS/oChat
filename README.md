@@ -32,4 +32,14 @@ tuist generate
 
 By running these commands, you will fetch all necessary project dependencies and generate the project files needed to open and run your project in Xcode.
 
+**Generates three files**
+
+This script scans the current directory for localization files (.strings) and images (.png, .jpg), 
+and generates three files:
+- GeneratedLocalizedStrings.swift - contains localized strings.
+- GeneratedImageAssets.swift - contains references to images.
+- GeneratedBundleAccessor.swift - provides access to the bundle.
+
+To use: save this script and run it in the terminal with the command `swift CreateLocalizedStrings.swift`.
+
 ![Tuist badge](https://img.shields.io/badge/Powered%20by-Tuist-blue)

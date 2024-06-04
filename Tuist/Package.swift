@@ -11,12 +11,15 @@ import PackageDescription
 let package = Package(
   name: "Package",
   dependencies: [
-    .package(url: "https://github.com/airbnb/lottie-ios.git", exact: "4.3.4"),
+    .package(url: "https://github.com/V1taS/MessengerSDK", exact: "1.2.0"),
+    .package(url: "https://github.com/V1taS/AuthenticationSDK", exact: "1.2.0"),
+    .package(url: "https://github.com/V1taS/SKStoriesWidget", exact: "1.0.0"),
+    .package(url: "https://github.com/V1taS/SKUIKit", exact: "1.1.0"),
+    .package(url: "https://github.com/V1taS/Wormholy", exact: "1.0.0"),
+    .package(url: "https://github.com/V1taS/SKServices", exact: "1.7.0"),
     
-    .package(url: "https://github.com/robbiehanson/CocoaAsyncSocket", exact: "7.6.5"),
-    
-    .package(path: "../../../LocalDependencies/SKMySecret"),
-    .package(path: "../../../LocalDependencies/Ecies"),
-    .package(path: "../../../LocalDependencies/SwiftTor")
+//    .package(path: "../../../../General/SKAbstractions"),
+//    .package(path: "../../../../General/MessengerSDK"),
+//    .package(path: "../../../../General/SKServices")
   ]
 )
