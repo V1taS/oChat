@@ -11,15 +11,15 @@ import PackageDescription
 let package = Package(
   name: "Package",
   dependencies: [
-    .package(url: "https://github.com/airbnb/lottie-ios.git", exact: "4.3.4"),
-    .package(url: "https://github.com/robbiehanson/CocoaAsyncSocket", exact: "7.6.5"),
+    .package(url: "https://github.com/V1taS/MessengerSDK", exact: "1.2.0"),
+    .package(url: "https://github.com/V1taS/AuthenticationSDK", exact: "1.2.0"),
+    .package(url: "https://github.com/V1taS/SKStoriesWidget", exact: "1.0.0"),
+    .package(url: "https://github.com/V1taS/SKUIKit", exact: "1.1.0"),
+    .package(url: "https://github.com/V1taS/Wormholy", exact: "1.0.0"),
+    .package(url: "https://github.com/V1taS/SKServices", exact: "1.7.0"),
     
-    .package(url: "https://github.com/V1taS/Ecies", exact: "1.0.0"),
-    .package(url: "https://github.com/V1taS/SKAbstractions", exact: "1.3.0"),
 //    .package(path: "../../../../General/SKAbstractions"),
-    
-    .package(path: "../../../LocalDependencies/SKMySecret"),
-    .package(path: "../../../LocalDependencies/SwiftTor"),
-    .package(path: "../../../LocalDependencies/SwiftUICharts")
+//    .package(path: "../../../../General/MessengerSDK"),
+//    .package(path: "../../../../General/SKServices")
   ]
 )

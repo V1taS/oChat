@@ -8,6 +8,7 @@
 
 import SKAbstractions
 import UIKit
+import AuthenticationSDK
 
 final class SettingsScreenFlowCoordinator: Coordinator<Void, SettingsScreenFinishFlowType> {
   
