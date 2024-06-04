@@ -17,18 +17,17 @@
                         <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="oChat!" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="7ri-yX-XGt">
-                                <rect key="frame" x="133.66666666666666" y="244" width="125.99999999999997" height="48"/>
-                                <fontDescription key="fontDescription" type="boldSystem" pointSize="40"/>
-                                <color key="textColor" name="ghost"/>
-                                <nil key="highlightedColor"/>
-                            </label>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="launchScreenImage" translatesAutoresizingMaskIntoConstraints="NO" id="kp1-Cq-S96">
+                                <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
+                            </imageView>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="Bcu-3y-fUS"/>
                         <color key="backgroundColor" name="onyx"/>
                         <constraints>
-                            <constraint firstItem="7ri-yX-XGt" firstAttribute="top" secondItem="Bcu-3y-fUS" secondAttribute="top" constant="185" id="Tvo-HY-HbJ"/>
-                            <constraint firstItem="7ri-yX-XGt" firstAttribute="centerX" secondItem="Ze5-6b-2t3" secondAttribute="centerX" id="WUT-M8-bTi"/>
+                            <constraint firstItem="kp1-Cq-S96" firstAttribute="trailing" secondItem="Bcu-3y-fUS" secondAttribute="trailing" id="2LV-lX-doV"/>
+                            <constraint firstAttribute="bottom" secondItem="kp1-Cq-S96" secondAttribute="bottom" id="S8y-e7-dD1"/>
+                            <constraint firstItem="kp1-Cq-S96" firstAttribute="top" secondItem="Ze5-6b-2t3" secondAttribute="top" id="TXj-Ez-Jla"/>
+                            <constraint firstItem="kp1-Cq-S96" firstAttribute="leading" secondItem="Bcu-3y-fUS" secondAttribute="leading" id="VwM-D2-kZO"/>
                         </constraints>
                     </view>
                 </viewController>
@@ -38,9 +37,7 @@
         </scene>
     </scenes>
     <resources>
-        <namedColor name="ghost">
-            <color red="0.11400000005960464" green="0.14900000393390656" blue="0.20000000298023224" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-        </namedColor>
+        <image name="launchScreenImage" width="1000" height="2000"/>
         <namedColor name="onyx">
             <color red="0.94900000095367432" green="0.94900000095367432" blue="0.96899998188018799" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
         </namedColor>

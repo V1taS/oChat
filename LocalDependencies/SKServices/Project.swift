@@ -9,7 +9,6 @@ import ProjectDescriptionHelpers
 let project = ModuleProject.makeProject(
   name: "SKServices",
   dependencies: [
-    .project(target: "SKAbstractions", path: .relativeToManifest("../SKAbstractions")),
     .project(target: "SKFoundation", path: .relativeToManifest("../SKFoundation")),
     .project(target: "SKNotifications", path: .relativeToManifest("../SKNotifications")),
     .project(target: "SKNetwork", path: .relativeToManifest("../SKNetwork")),
@@ -17,7 +16,8 @@ let project = ModuleProject.makeProject(
     .external(name: "SKMySecret"),
     .external(name: "Ecies"),
     .external(name: "SwiftTor"),
-    .external(name: "CocoaAsyncSocket")
+    .external(name: "CocoaAsyncSocket"),
+    .external(name: "SKAbstractions")
   ],
   settings: .common()
 )

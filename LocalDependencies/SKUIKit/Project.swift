@@ -15,9 +15,9 @@ let project = ModuleProject.makeProject(
   dependencies: [
     .project(target: "SKStyle", path: .relativeToManifest("../SKStyle")),
     .project(target: "SKFoundation", path: .relativeToManifest("../SKFoundation")),
-    .project(target: "SKAbstractions", path: .relativeToManifest("../SKAbstractions")),
     .external(name: "Lottie"),
-    .external(name: "SwiftUICharts")
+    .external(name: "SwiftUICharts"),
+    .external(name: "SKAbstractions")
   ],
   resourceSynthesizers: [
     .assets(),
