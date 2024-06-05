@@ -21,6 +21,10 @@ final class RootCoordinator: Coordinator<Void, Void> {
   private var mainFlowCoordinator: MainFlowCoordinator?
   private var initialFlowCoordinator: InitialFlowCoordinator?
   private var authenticationFlowCoordinator: AuthenticationFlowCoordinator?
+  private lazy var p2pChatManager: IP2PChatManager = services.p2pChatManager
+  private var notificationService: INotificationService {
+    services.userInterfaceAndExperienceService.notificationService
+  }
   
   // MARK: - Initialization
   
@@ -39,8 +43,9 @@ final class RootCoordinator: Coordinator<Void, Void> {
   override func start(parameter: Void) {
     setupSessionService()
     setupLaunchScreen()
+    stratTORService()
   }
-    
+  
   @objc func appDidBecomeActive() {
     sessionCheck()
     passcodeNotSetInSystemIOSheck()
@@ -136,22 +141,22 @@ private extension RootCoordinator {
   
   func setupLaunchScreen() {
     openMainFlowCoordinator(isPresentScreenAnimated: true)
-//    services.dataManagementService.modelHandlerService.getoChatModel { [weak self] model in
-//      guard let self else {
-//        return
-//      }
-//      
-//      if !model.wallets.isEmpty {
-//        if model.appSettingsModel.appPassword != nil {
-//          openAuthenticationFlowCoordinator(.loginPasscode(.loginFaceID))
-//        } else {
-//          openMainFlowCoordinator(isPresentScreenAnimated: true)
-//        }
-//        return
-//      }
-//      
-//      openInitialFlowCoordinator(isPresentScreenAnimated: true)
-//    }
+    //    services.dataManagementService.modelHandlerService.getoChatModel { [weak self] model in
+    //      guard let self else {
+    //        return
+    //      }
+    //
+    //      if !model.wallets.isEmpty {
+    //        if model.appSettingsModel.appPassword != nil {
+    //          openAuthenticationFlowCoordinator(.loginPasscode(.loginFaceID))
+    //        } else {
+    //          openMainFlowCoordinator(isPresentScreenAnimated: true)
+    //        }
+    //        return
+    //      }
+    //
+    //      openInitialFlowCoordinator(isPresentScreenAnimated: true)
+    //    }
   }
   
   func sessionCheck() {
@@ -177,6 +182,92 @@ private extension RootCoordinator {
               .State.Notification.PasscodeNotSet.title
           )
         )
+      }
+    }
+  }
+  
+  func stratTORService() {
+    startSessionlistener()
+    startServerlistener()
+    
+    p2pChatManager.start { [weak self] result in
+      guard let self else {
+        return
+      }
+      
+      switch result {
+      case .success:
+        notificationService.showNotification(.positive(title: "Сервер ТОР запустился"))
+      case let .failure(error):
+        switch error {
+        case .onionAddressForTorHiddenServiceCouldNotBeLoaded:
+          notificationService.showNotification(.negative(title: "Не удалось загрузить адрес onion-сервиса"))
+        case .errorLoadingPrivateKey:
+          notificationService.showNotification(.negative(title: "Ошибка при загрузке приватного ключа"))
+        case .errorWhenDeletingKeys:
+          notificationService.showNotification(.negative(title: "Ошибка при удалении ключей"))
+        case let .somethingWentWrong(text):
+          notificationService.showNotification(.negative(title: "Произошла непредвиденная ошибка \(text ?? "")"))
+        case .failedToSetPermissions:
+          notificationService.showNotification(.negative(title: "Не удалось установить права доступа"))
+        case .failedToWriteTorrc:
+          notificationService.showNotification(.negative(title: "Ошибка при записи файла конфигурации torrc"))
+        case .failedToCreateDirectory:
+          notificationService.showNotification(.negative(title: "Ошибка при создании директории"))
+        case .authDirectoryPreviouslyCreated:
+          notificationService.showNotification(.negative(title: "Директория авторизации уже была создана ранее"))
+        case .torrcFileIsEmpty:
+          notificationService.showNotification(.negative(title: "Файл конфигурации torrc пуст"))
+        case .unableToAccessTheCachesDirectory:
+          notificationService.showNotification(.negative(title: "Невозможно получить доступ к кэш-директории"))
+        }
+      }
+    }
+  }
+  
+  func startSessionlistener() {
+    p2pChatManager.sessionStateAction = { [weak self] result in
+      guard let self else {
+        return
+      }
+      
+      switch result {
+      case .none: break
+      case .started:
+        notificationService.showNotification(.neutral(title: "Подключение начато, идет процесс инициализации."))
+      case let .connectingProgress(progress):
+        notificationService.showNotification(.neutral(title: "Прогресс подключения к TOR: \(progress)%"))
+      case .connected:
+        notificationService.showNotification(.positive(title: "Подключение успешно установлено."))
+      case .stopped:
+        notificationService.showNotification(.negative(title: "Подключение остановлено."))
+      case .refreshing:
+        notificationService.showNotification(.neutral(title: "Подключение обновляется."))
+      }
+    }
+  }
+  
+  func startServerlistener() {
+    p2pChatManager.serverStateAction = { [weak self] result in
+      guard let self else {
+        return
+      }
+      
+      switch result {
+      case let .serverIsRunning(onPort):
+        notificationService.showNotification(.positive(title: "Сервер запущен и слушает порт: \(onPort)"))
+      case let .errorStartingServer(error):
+        notificationService.showNotification(.negative(title: "Произошла ошибка при запуске сервера. \(error)"))
+      case .didAcceptNewSocket:
+        notificationService.showNotification(.positive(title: "Сервер принял новое соединение."))
+      case .didReadData:
+        notificationService.showNotification(.positive(title: "Сервер прочитал данные."))
+      case let .didReceiveMessage(message):
+        notificationService.showNotification(.positive(title: "Сервер получил сообщение: \(message)"))
+      case .didSentResponse:
+        notificationService.showNotification(.positive(title: "Сервер отправил ответ."))
+      case .socketDidDisconnect:
+        notificationService.showNotification(.negative(title: "Соединение с собеседникомм закончилось."))
       }
     }
   }
