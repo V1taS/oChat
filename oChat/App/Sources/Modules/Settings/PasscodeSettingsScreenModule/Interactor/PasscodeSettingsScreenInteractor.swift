@@ -41,7 +41,7 @@ final class PasscodeSettingsScreenInteractor {
   // MARK: - Private properties
   
   private let permissionService: IPermissionService
-  private let modelHandlerService: IModelHandlerService
+  private let modelHandlerService: IMessengerModelHandlerService
   private let appSettingsManager: IAppSettingsManager
   
   // MARK: - Initialization
@@ -50,8 +50,8 @@ final class PasscodeSettingsScreenInteractor {
   ///   - services: Сервисы
   init(_ services: IApplicationServices) {
     permissionService = services.accessAndSecurityManagementService.permissionService
-    modelHandlerService = services.dataManagementService.modelHandlerService
-    appSettingsManager = services.dataManagementService.appSettingsManager
+    modelHandlerService = services.messengerService.modelHandlerService
+    appSettingsManager = services.messengerService.appSettingsManager
   }
 }
 

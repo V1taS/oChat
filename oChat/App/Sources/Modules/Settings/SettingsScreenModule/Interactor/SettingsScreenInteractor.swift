@@ -19,14 +19,6 @@ protocol SettingsScreenInteractorInput {
   /// - Returns: Текущий язык приложения как значение перечисления `AppLanguageType`.
   func getCurrentLanguage() -> AppLanguageType
   
-  /// Возвращает количество кошельков.
-  /// - Parameter completion: Замыкание, которое принимает количество кошельков.
-  func getWalletsCount(completion: ((_ count: Int) -> Void)?)
-  
-  /// Возвращает текущую валюту.
-  /// - Parameter completion: Замыкание, которое принимает модель текущей валюты.
-  func getCurrentCurrency(completion: ((_ currencyModel: CurrencyModel) -> Void)?)
-  
   /// Возвращает статус включения кода доступа.
   /// - Parameter completion: Замыкание, которое принимает значение `true`, если код доступа включен, и `false`, если отключен.
   func getIsAccessCodeEnabled(completion: ((_ isEnabled: Bool) -> Void)?)
@@ -34,6 +26,21 @@ protocol SettingsScreenInteractorInput {
   /// Возвращает текущую версию приложения.
   /// - Returns: Строка с версией приложения, например, "1.0".
   func getAppVersion() -> String
+  
+  /// Копирует текст в буфер обмена.
+  /// - Parameters:
+  ///   - text: Текст для копирования.
+  func copyToClipboard(text: String)
+  
+  /// Показать уведомление
+  /// - Parameters:
+  ///   - type: Тип уведомления
+  func showNotification(_ type: NotificationServiceType)
+  
+  
+  /// Получает адрес onion-сервиса.
+  /// - Returns: Адрес сервиса или ошибка.
+  func getOnionAddress(completion: ((Result<String, TorServiceError>) -> Void)?)
 }
 
 /// Интерактор
@@ -46,7 +53,9 @@ final class SettingsScreenInteractor {
   // MARK: - Private properties
   
   private let systemService: ISystemService
-  private let modelHandlerService: IModelHandlerService
+  private let modelHandlerService: IMessengerModelHandlerService
+  private let notificationService: INotificationService
+  private let p2pChatManager: IP2PChatManager
   
   // MARK: - Initialization
   
@@ -54,27 +63,29 @@ final class SettingsScreenInteractor {
   ///   - services: Сервисы
   init(_ services: IApplicationServices) {
     systemService = services.userInterfaceAndExperienceService.systemService
-    modelHandlerService = services.dataManagementService.modelHandlerService
+    modelHandlerService = services.messengerService.modelHandlerService
+    notificationService = services.userInterfaceAndExperienceService.notificationService
+    p2pChatManager = services.messengerService.p2pChatManager
   }
 }
 
 // MARK: - SettingsScreenInteractorInput
 
 extension SettingsScreenInteractor: SettingsScreenInteractorInput {
+  func getOnionAddress(completion: ((Result<String, TorServiceError>) -> Void)?) {
+    p2pChatManager.getOnionAddress(completion: completion)
+  }
+  
+  func copyToClipboard(text: String) {
+    systemService.copyToClipboard(text: text)
+  }
+  
+  func showNotification(_ type: SKAbstractions.NotificationServiceType) {
+    notificationService.showNotification(type)
+  }
+  
   func getAppVersion() -> String {
     systemService.getAppVersion()
-  }
-  
-  func getWalletsCount(completion: ((_ count: Int) -> Void)?) {
-    modelHandlerService.getWalletModels { wallets in
-      completion?(wallets.count)
-    }
-  }
-  
-  func getCurrentCurrency(completion: ((_ currencyModel: CurrencyModel) -> Void)?) {
-    modelHandlerService.getAppSettingsModel { appSettingsModel in
-      completion?(appSettingsModel.currentCurrency)
-    }
   }
   
   func getIsAccessCodeEnabled(completion: ((_ isEnabled: Bool) -> Void)?) {

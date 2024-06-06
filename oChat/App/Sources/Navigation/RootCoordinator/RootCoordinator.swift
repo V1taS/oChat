@@ -21,7 +21,7 @@ final class RootCoordinator: Coordinator<Void, Void> {
   private var mainFlowCoordinator: MainFlowCoordinator?
   private var initialFlowCoordinator: InitialFlowCoordinator?
   private var authenticationFlowCoordinator: AuthenticationFlowCoordinator?
-  private lazy var p2pChatManager: IP2PChatManager = services.p2pChatManager
+  private lazy var p2pChatManager: IP2PChatManager = services.messengerService.p2pChatManager
   private var notificationService: INotificationService {
     services.userInterfaceAndExperienceService.notificationService
   }
@@ -260,10 +260,6 @@ private extension RootCoordinator {
         notificationService.showNotification(.negative(title: "Произошла ошибка при запуске сервера. \(error)"))
       case .didAcceptNewSocket:
         notificationService.showNotification(.positive(title: "Сервер принял новое соединение."))
-      case .didReadData:
-        notificationService.showNotification(.positive(title: "Сервер прочитал данные."))
-      case let .didReceiveMessage(message):
-        notificationService.showNotification(.positive(title: "Сервер получил сообщение: \(message)"))
       case .didSentResponse:
         notificationService.showNotification(.positive(title: "Сервер отправил ответ."))
       case .socketDidDisconnect:

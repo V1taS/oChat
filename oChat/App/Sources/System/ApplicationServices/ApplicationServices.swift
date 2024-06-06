@@ -54,6 +54,6 @@ final class ApplicationServices: IApplicationServices {
   
   /// Управляет чатом P2P через Tor.
   var p2pChatManager: IP2PChatManager {
-    P2PChatManager()
+    P2PChatManager.shared
   }
 }

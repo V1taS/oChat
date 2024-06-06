@@ -14,10 +14,6 @@ final class SettingsScreenPresenter: ObservableObject {
   
   // MARK: - View state
   
-  /// Количество моих кошельков
-  @Published var stateMyWalletsCount: Int = .zero
-  /// Выбраная валюта
-  @Published var stateCurrencyValue: CurrencyModel.CurrencyType = .usd
   /// Включена опция или нет
   @Published var statePasscodeAndFaceIDValue = false
   /// Включин или выключен Мессенджер
@@ -27,6 +23,8 @@ final class SettingsScreenPresenter: ObservableObject {
   
   /// Название приложения
   @Published var stateApplicationTitle = "oChat"
+  
+  @Published var stateSectionsModels: [WidgetCryptoView.Model] = []
   
   // MARK: - Internal properties
   
@@ -50,7 +48,12 @@ final class SettingsScreenPresenter: ObservableObject {
   
   // MARK: - The lifecycle of a UIViewController
   
-  lazy var viewDidLoad: (() -> Void)? = {}
+  lazy var viewDidLoad: (() -> Void)? = { [weak self] in
+    guard let self else {
+      return
+    }
+    initialSetup()
+  }
   
   lazy var viewWillAppear: (() -> Void)? = { [weak self] in
     self?.updateValue()
@@ -63,16 +66,6 @@ final class SettingsScreenPresenter: ObservableObject {
     let versionTitle = OChatStrings.SettingsScreenLocalization
       .State.Version.title
     return "\(versionTitle) \(appVersion)"
-  }
-  
-  func getSecuritySectionsModels() -> [WidgetCryptoView.Model] {
-    let languageValue = factory.createLanguageValue(from: stateCurrentLanguage)
-    
-    return factory.createSecuritySectionsModels(
-      passcodeAndFaceIDValue: statePasscodeAndFaceIDValue,
-      messengerIsEnabled: stateMessengerIsEnabled,
-      languageValue: languageValue
-    )
   }
 }
 
@@ -87,6 +80,10 @@ extension SettingsScreenPresenter: SettingsScreenInteractorOutput {}
 // MARK: - SettingsScreenFactoryOutput
 
 extension SettingsScreenPresenter: SettingsScreenFactoryOutput {
+  func copyOnionAdress() {
+    // TODO: -
+  }
+  
   func openMyWalletsSection() {
     moduleOutput?.openMyWalletsSection()
   }
@@ -132,19 +129,29 @@ extension SettingsScreenPresenter: SceneViewModel {
 
 private extension SettingsScreenPresenter {
   func updateValue() {
-    interactor.getWalletsCount(completion: { [weak self] count in
-      self?.stateMyWalletsCount = count
-    })
-    
-    interactor.getCurrentCurrency { [weak self] currencyModel in
-      self?.stateCurrencyValue = currencyModel.type
-    }
-    
     interactor.getIsAccessCodeEnabled { [weak self] isEnabled in
       self?.statePasscodeAndFaceIDValue = isEnabled
     }
     
     stateCurrentLanguage = interactor.getCurrentLanguage()
+  }
+  
+  func initialSetup() {
+    let languageValue = factory.createLanguageValue(from: stateCurrentLanguage)
+    
+    interactor.getOnionAddress { [weak self] result in
+      guard let self else {
+        return
+      }
+      
+      let onionAddress = try? result.get()
+      stateSectionsModels = factory.createSecuritySectionsModels(
+        passcodeAndFaceIDValue: statePasscodeAndFaceIDValue,
+        messengerIsEnabled: stateMessengerIsEnabled,
+        languageValue: languageValue,
+        myOnionAddress: onionAddress ?? ""
+      )
+    }
   }
 }
 

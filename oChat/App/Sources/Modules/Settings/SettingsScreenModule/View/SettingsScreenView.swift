@@ -23,7 +23,7 @@ struct SettingsScreenView: View {
     VStack(spacing: .zero) {
       ScrollView(.vertical, showsIndicators: false) {
         VStack(spacing: .s6) {
-          WidgetCryptoView(presenter.getSecuritySectionsModels())
+          WidgetCryptoView(presenter.stateSectionsModels)
         }
         .padding(.horizontal, .s4)
         .padding(.top, .s3)

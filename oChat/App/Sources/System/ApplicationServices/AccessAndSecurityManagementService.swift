@@ -35,11 +35,6 @@ final class AccessAndSecurityManagementService: IAccessAndSecurityManagementServ
   var cryptoService: ICryptoService {
     CryptoService()
   }
-  
-  /// Возвращает сервис для управления чатом P2P через Tor.
-  var p2pChatManager: IP2PChatManager {
-    P2PChatManager()
-  }
 }
 
 // MARK: - Impl
