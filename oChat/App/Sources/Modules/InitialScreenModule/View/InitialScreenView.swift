@@ -34,13 +34,6 @@ struct InitialScreenView: View {
       ) {
         presenter.moduleOutput?.newWalletButtonTapped()
       }
-      
-      MainButtonView(
-        text: presenter.stateImportWalletButtonTitle,
-        style: .secondary
-      ) {
-        presenter.moduleOutput?.importWalletButtonTapped()
-      }
     }
     .padding(.horizontal, .s4)
     .padding(.bottom, .s4)
