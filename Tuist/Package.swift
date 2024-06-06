@@ -11,8 +11,8 @@ import PackageDescription
 let package = Package(
   name: "Package",
   dependencies: [
-  .package(url: "https://github.com/V1taS/MessengerSDK", exact: "1.5.0"),
-   .package(url: "https://github.com/V1taS/AuthenticationSDK", exact: "1.4.0"),
+  .package(url: "https://github.com/V1taS/MessengerSDK", exact: "1.6.0"),
+   .package(url: "https://github.com/V1taS/AuthenticationSDK", exact: "1.5.0"),
    .package(url: "https://github.com/V1taS/SKStoriesWidget", exact: "1.0.0"),
    .package(url: "https://github.com/V1taS/SKUIKit", exact: "1.3.0"),
    .package(url: "https://github.com/V1taS/Wormholy", exact: "1.0.0"),
