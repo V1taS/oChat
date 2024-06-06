@@ -7,17 +7,17 @@
 
 // MARK: - Stories
 
-"InitialScreenLocalization.Stories.Title.First" = "Встречайте oChat";
-"InitialScreenLocalization.Stories.Title.Second" = "Непробиваемая защита";
-"InitialScreenLocalization.Stories.Title.Third" = "Конфиденциальность гарантирована";
-"InitialScreenLocalization.Stories.Title.Fourth" = "Передовое шифрование";
-"InitialScreenLocalization.Stories.Title.Fifth" = "Поддержка 1000+ криптовалют";
+"Stories.Title.First" = "Встречайте oChat";
+"Stories.Title.Second" = "Оставайтесь в безопасности, оставайтесь отдельно";
+"Stories.Title.Third" = "Прямое соединение, максимальная свобода";
+"Stories.Title.Fourth" = "Ваша конфиденциальность под надежной защитой";
+"Stories.Title.Fifth" = "Ещё одна вещь...";
 
-"InitialScreenLocalization.Stories.Subtitle.First" = "";
-"InitialScreenLocalization.Stories.Subtitle.Second" = "Выбор между 12 и 24 сид-фразами с использованием сложных алгоритмов шифрования для обеспечения высочайшего уровня безопасности";
-"InitialScreenLocalization.Stories.Subtitle.Third" = "Нулевой сбор данных и аналитики для полной приватности ваших финансовых операций";
-"InitialScreenLocalization.Stories.Subtitle.Fourth" = "Использование последних достижений в криптографии, включая AES и RSA, для обеспечения безопасности кошелька";
-"InitialScreenLocalization.Stories.Subtitle.Fifth" = "Возможность хранения и управления более чем тысячей различных криптовалют и токенов в одном приложении";
+"Stories.Subtitle.First" = "";
+"Stories.Subtitle.Second" = "Оставайтесь в безопасности, оставайтесь отдельно";
+"Stories.Subtitle.Third" = "Subtitle";
+"Stories.Subtitle.Fourth" = "Subtitle";
+"Stories.Subtitle.Fifth" = "Subtitle";
 
 // MARK: - State
 

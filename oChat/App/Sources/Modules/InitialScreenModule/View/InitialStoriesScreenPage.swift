@@ -60,13 +60,7 @@ private extension InitialStoriesScreenPage {
     AnyView(
       NavigationCustomView {
         VStack(spacing: .s8) {
-          switch storiesType {
-          case .first:
-            titleBuilder()
-          default:
-            titleAndSubtitleBuilder()
-          }
-          
+          titleAndSubtitleBuilder()
           imageBuilder()
         }
         .padding(.top, .s20)
@@ -94,16 +88,21 @@ private extension InitialStoriesScreenPage {
       Group {
         switch storiesType {
         case .first:
-          OChatAsset.storiesLogo.swiftUIImage
-            .resizable()
-            .aspectRatio(contentMode: .fit)
+          VStack {
+            Spacer()
+            OChatAsset.storiesLogo.swiftUIImage
+              .resizable()
+              .scaledToFit()
+              .frame(width: .s26)
+            Spacer()
+          }
         case .second:
-          LottieView(animation: .named(OChatAsset.storiesImpenetrableProtection.name))
+          LottieView(animation: .named(OChatAsset.storiesIsolation.name))
             .resizable()
             .looping()
             .aspectRatio(contentMode: .fit)
         case .third:
-          LottieView(animation: .named(OChatAsset.storiesConfidentialityGuaranteed.name))
+          LottieView(animation: .named(OChatAsset.storiesP2p.name))
             .resizable()
             .looping()
             .aspectRatio(contentMode: .fit)
@@ -113,7 +112,7 @@ private extension InitialStoriesScreenPage {
             .looping()
             .aspectRatio(contentMode: .fit)
         case .fifth:
-          LottieView(animation: .named(OChatAsset.storiesMoreThanThousandCryptocurrencies.name))
+          LottieView(animation: .named(OChatAsset.storiesMore.name))
             .resizable()
             .looping()
             .aspectRatio(contentMode: .fit)
@@ -122,17 +121,6 @@ private extension InitialStoriesScreenPage {
         .allowsHitTesting(false)
         .padding(.horizontal, paddingSize)
     )
-  }
-  
-  func titleBuilder() -> some View {
-    Text(title)
-      .font(.fancy.text.largeTitle)
-      .foregroundColor(SKStyleAsset.ghost.swiftUIColor)
-      .multilineTextAlignment(.center)
-      .offset(y: titleIsIsAnimating ? 0 : 50)
-      .opacity(titleIsHidden ? .zero : 1)
-      .allowsHitTesting(false)
-      .padding(.horizontal, .s4)
   }
   
   func titleAndSubtitleBuilder() -> some View {
@@ -147,7 +135,7 @@ private extension InitialStoriesScreenPage {
           .allowsHitTesting(false)
         
         Text(subtitle)
-          .font(.fancy.text.regularMedium)
+          .font(.fancy.text.title)
           .foregroundColor(SKStyleAsset.slate.swiftUIColor)
           .multilineTextAlignment(.center)
           .offset(y: subtitleIsIsAnimating ? 0 : 50)

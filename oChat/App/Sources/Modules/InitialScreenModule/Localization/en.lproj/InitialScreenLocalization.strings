@@ -7,17 +7,17 @@
 
 // MARK: - Stories
 
-"Stories.Title.First" = "Встречайте oChat";
-"Stories.Title.Second" = "Непробиваемая защита";
-"Stories.Title.Third" = "Конфиденциальность гарантирована";
-"Stories.Title.Fourth" = "Передовое шифрование";
-"Stories.Title.Fifth" = "Поддержка 1000+ криптовалют";
+"Stories.Title.First" = "Welcome to oChat";
+"Stories.Title.Second" = "Stay secure, stay separate";
+"Stories.Title.Third" = "Direct connections, maximum Freedom";
+"Stories.Title.Fourth" = "Your privacy is securely protected";
+"Stories.Title.Fifth" = "One more thing...";
 
-"Stories.Subtitle.First" = "";
-"Stories.Subtitle.Second" = "Выбор между 12 и 24 сид-фразами с использованием сложных алгоритмов шифрования для обеспечения высочайшего уровня безопасности";
-"Stories.Subtitle.Third" = "Нулевой сбор данных и аналитики для полной приватности ваших финансовых операций";
-"Stories.Subtitle.Fourth" = "Использование последних достижений в криптографии, включая AES и RSA, для обеспечения безопасности кошелька";
-"Stories.Subtitle.Fifth" = "Возможность хранения и управления более чем тысячей различных криптовалют и токенов в одном приложении";
+"Stories.Subtitle.First" = "Isolation, P2P, Encryption";
+"Stories.Subtitle.Second" = "Your privacy is securely protected Your privacy is securely protected";
+"Stories.Subtitle.Third" = "Subtitle";
+"Stories.Subtitle.Fourth" = "Subtitle";
+"Stories.Subtitle.Fifth" = "Subtitle";
 
 // MARK: - State
 
