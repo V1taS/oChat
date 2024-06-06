@@ -1,7 +1,7 @@
 {
-  "images" : [
+  "data" : [
     {
-      "filename" : "stories_logo.pdf",
+      "filename" : "encryption.json",
       "idiom" : "universal"
     }
   ],
