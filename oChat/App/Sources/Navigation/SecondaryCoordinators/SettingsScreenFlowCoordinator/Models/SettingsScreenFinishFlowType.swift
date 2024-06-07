@@ -12,6 +12,9 @@ import SKUIKit
 // MARK: - SettingsScreenFinishFlowType
 
 public enum SettingsScreenFinishFlowType {
-  /// Выйти из кошелька на экран инициализации
-  case exitWallet
+  /// Заблокировать экран
+  case lockOChat
+  
+  /// Удалить и выйти
+  case deleteOChat
 }

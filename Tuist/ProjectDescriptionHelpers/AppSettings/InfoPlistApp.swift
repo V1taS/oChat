@@ -81,8 +81,19 @@ public extension InfoPlist {
       ]),
       "NSAppTransportSecurity": .dictionary([
         "NSAllowsArbitraryLoads": .boolean(true)
+      ]),
+      "com.apple.developer.associated-domains": .array([
+        .string("applinks:\(Constants.appLink)")
       ])
     ]
+    
+    // Добавление кастомной URL схемы
+    extendedPlist["CFBundleURLTypes"] = .array([
+      .dictionary([
+        "CFBundleURLSchemes": .array([.string("\(Constants.appLink)")])
+      ])
+    ])
+    
     extendedPlist.merge(self.common) { current, _ in
       current
     }

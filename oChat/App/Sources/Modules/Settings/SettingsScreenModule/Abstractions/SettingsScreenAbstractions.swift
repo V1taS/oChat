@@ -9,20 +9,16 @@ import SwiftUI
 
 /// События которые отправляем из `SettingsScreenModule` в `Coordinator`
 public protocol SettingsScreenModuleOutput: AnyObject {
-  /// Открыть экран с моими кошельками
-  func openMyWalletsSection()
-  /// Открыть экран настроек выбора валюты
-  func openCurrencySection()
   /// Открыть экран настроек по безопасности
   func openPasscodeAndFaceIDSection()
-  /// Открыть экран настроек мессенджера
-  func openMessengerSection()
   /// Открыть экран настроек уведомлений
   func openNotificationsSection()
   /// Открыть экран настроек внешнего вида
   func openAppearanceSection()
   /// Открыть экран настроек языка
   func openLanguageSection()
+  /// Открыть секцию с профилем
+  func openMyProfileSection()
 }
 
 /// События которые отправляем из `Coordinator` в `SettingsScreenModule`

@@ -12,22 +12,16 @@ import SKAbstractions
 
 /// Cобытия которые отправляем из Factory в Presenter
 protocol SettingsScreenFactoryOutput: AnyObject {
-  /// Открыть экран с моими кошельками
-  func openMyWalletsSection()
-  /// Открыть экран настроек выбора валюты
-  func openCurrencySection()
   /// Открыть экран настроек по безопасности
   func openPasscodeAndFaceIDSection()
-  /// Открыть экран настроек мессенджера
-  func openMessengerSection()
   /// Открыть экран настроек уведомлений
   func openNotificationsSection()
   /// Открыть экран настроек внешнего вида
   func openAppearanceSection()
   /// Открыть экран настроек языка
   func openLanguageSection()
-  /// Адрес Onion скопирован
-  func copyOnionAdress()
+  /// Открыть секцию с профилем
+  func openMyProfileSection()
 }
 
 /// Cобытия которые отправляем от Presenter к Factory
@@ -84,6 +78,16 @@ extension SettingsScreenFactory: SettingsScreenFactoryInput {
     let isOffTitle = OChatStrings.SettingsScreenLocalization
       .State.IsOff.title
     
+    let profileModel = createWidgetWithChevron(
+      image: Image(systemName: "person.fill"),
+      backgroundColor: #colorLiteral(red: 0.1844805479, green: 0.5407295227, blue: 0.9590529799, alpha: 1),
+      title: "My Profile",
+      additionRightTitle: "",
+      action: { [weak self] in
+        self?.output?.openMyProfileSection()
+      }
+    )
+    
     let securityModel = createWidgetWithChevron(
       image: Image(systemName: "lock"),
       backgroundColor: #colorLiteral(red: 0.4229286313, green: 0.5245543122, blue: 0.6798206568, alpha: 1),
@@ -92,17 +96,6 @@ extension SettingsScreenFactory: SettingsScreenFactoryInput {
       additionRightTitle: passcodeAndFaceIDValue ? isOnTitle : isOffTitle,
       action: { [weak self] in
         self?.output?.openPasscodeAndFaceIDSection()
-      }
-    )
-    
-    _ = createWidgetWithChevron(
-      image: Image(systemName: "ellipsis.message"),
-      backgroundColor: #colorLiteral(red: 0.1844805479, green: 0.5407295227, blue: 0.9590529799, alpha: 1),
-      title: OChatStrings.SettingsScreenLocalization
-        .State.Messenger.title,
-      additionRightTitle: messengerIsEnabled ? isOnTitle : isOffTitle,
-      action: { [weak self] in
-        self?.output?.openMessengerSection()
       }
     )
     
@@ -136,17 +129,12 @@ extension SettingsScreenFactory: SettingsScreenFactoryInput {
       }
     )
     
-    let onionAdresModel = createWidgetOnionAdress(myOnionAddress: myOnionAddress)
-    
     models = [
+      profileModel,
       securityModel,
-      
-      // TODO: - Включить когда будет что настраивать
-      //      messengerModel,
       notificationsModel,
       appearanceModel,
-      languageModel,
-      onionAdresModel
+      languageModel
     ]
     return models
   }
@@ -155,42 +143,6 @@ extension SettingsScreenFactory: SettingsScreenFactoryInput {
 // MARK: - Private
 
 private extension SettingsScreenFactory {
-  func createWidgetOnionAdress(myOnionAddress: String)-> WidgetCryptoView.Model {
-    .init(
-      leftSide: .init(
-        titleModel: .init(
-          text: myOnionAddress,
-          lineLimit: .max,
-          textStyle: .positive,
-          textIsSecure: false
-        ),
-        descriptionModel: .init(
-          text: "Отправте свой адрес собеседнику",
-          lineLimit: 1,
-          textStyle: .netural,
-          textIsSecure: false
-        )
-      ),
-      rightSide: .init(
-        itemModel: .custom(
-          item: AnyView(
-            RoundButtonView(
-              style: .copy(text: "Скопировать"),
-              action: { [weak self] in
-                self?.output?.copyOnionAdress()
-              }
-            )
-          ),
-          size: .standart,
-          isHitTesting: true
-        )
-      ),
-      isSelectable: false,
-      backgroundColor: nil,
-      action: {}
-    )
-  }
-  
   func createWidgetWithChevron(
     image: Image,
     backgroundColor: UIColor,

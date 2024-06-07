@@ -9,6 +9,7 @@
 import SKAbstractions
 import UIKit
 import AuthenticationSDK
+import MessengerSDK
 
 final class SettingsScreenFlowCoordinator: Coordinator<Void, SettingsScreenFinishFlowType> {
   
@@ -25,6 +26,7 @@ final class SettingsScreenFlowCoordinator: Coordinator<Void, SettingsScreenFinis
   private var notificationsSettingsScreenModule: NotificationsSettingsScreenModule?
   private var passcodeSettingsScreenModule: PasscodeSettingsScreenModule?
   private var authenticationFlowCoordinator: AuthenticationFlowCoordinator?
+  private var messengerProfileModule: MessengerProfileModule?
   
   // MARK: - Initialization
   
@@ -44,9 +46,9 @@ final class SettingsScreenFlowCoordinator: Coordinator<Void, SettingsScreenFinis
 // MARK: - MainScreenModuleOutput
 
 extension SettingsScreenFlowCoordinator: SettingsScreenModuleOutput {
-  func openMessengerSection() {}
-  func openMyWalletsSection() {}
-  func openCurrencySection() {}
+  func openMyProfileSection() {
+    openmessengerProfileModule()
+  }
   
   func openPasscodeAndFaceIDSection() {
     openPasscodeSettingsScreenModule()
@@ -121,6 +123,18 @@ extension SettingsScreenFlowCoordinator: PasscodeSettingsScreenModuleOutput {
   }
 }
 
+// MARK: - MessengerProfileModuleModuleOutput
+
+extension SettingsScreenFlowCoordinator: MessengerProfileModuleModuleOutput {
+  func closeMessengerProfileScreenTapped() {
+    navigationController?.popViewController(animated: true)
+  }
+  
+  func shareQRMessengerProfileScreenTapped(_ image: UIImage?, name: String) {
+    shareButtonAction(image: image, name: name)
+  }
+}
+
 // MARK: - Open modules
 
 private extension SettingsScreenFlowCoordinator {
@@ -192,6 +206,18 @@ private extension SettingsScreenFlowCoordinator {
     }
     authenticationFlowCoordinator.start(parameter: state)
   }
+  
+  func openmessengerProfileModule() {
+    var messengerProfileModule = MessengerProfileModuleAssembly().createModule(services: services)
+    self.messengerProfileModule = messengerProfileModule
+    messengerProfileModule.input.moduleOutput = self
+    
+    messengerProfileModule.viewController.hidesBottomBarWhenPushed = true
+    navigationController?.pushViewController(
+      messengerProfileModule.viewController,
+      animated: true
+    )
+  }
 }
 
 // MARK: - Private
@@ -203,6 +229,63 @@ private extension SettingsScreenFlowCoordinator {
     notificationsSettingsScreenModule = nil
     passcodeSettingsScreenModule = nil
     authenticationFlowCoordinator = nil
+    messengerProfileModule = nil
     finishFlow?(flowType)
+  }
+  
+  func shareButtonAction(image: UIImage?, name: String) {
+    guard let image,
+          let imageData = image.jpegData(compressionQuality: 0.1),
+          let imageFile = services.dataManagementService.dataManagerService.saveObjectWith(
+            fileName: name,
+            fileExtension: ".jpg",
+            data: imageData
+          ) else {
+      return
+    }
+    
+    let activityViewController = UIActivityViewController(activityItems: [imageFile],
+                                                          applicationActivities: nil)
+    activityViewController.popoverPresentationController?.sourceView = messengerProfileModule?.viewController.view
+    activityViewController.excludedActivityTypes = [UIActivity.ActivityType.airDrop,
+                                                    UIActivity.ActivityType.postToFacebook,
+                                                    UIActivity.ActivityType.message,
+                                                    UIActivity.ActivityType.addToReadingList,
+                                                    UIActivity.ActivityType.assignToContact,
+                                                    UIActivity.ActivityType.copyToPasteboard,
+                                                    UIActivity.ActivityType.markupAsPDF,
+                                                    UIActivity.ActivityType.openInIBooks,
+                                                    UIActivity.ActivityType.postToFlickr,
+                                                    UIActivity.ActivityType.postToTencentWeibo,
+                                                    UIActivity.ActivityType.postToTwitter,
+                                                    UIActivity.ActivityType.postToVimeo,
+                                                    UIActivity.ActivityType.postToWeibo,
+                                                    UIActivity.ActivityType.print]
+    
+    if UIDevice.current.userInterfaceIdiom == .pad {
+      if let popup = activityViewController.popoverPresentationController {
+        popup.sourceView = messengerProfileModule?.viewController.view
+        popup.sourceRect = CGRect(x: (messengerProfileModule?.viewController.view.frame.size.width ?? .zero) / 2,
+                                  y: (messengerProfileModule?.viewController.view.frame.size.height ?? .zero) / 4,
+                                  width: .zero,
+                                  height: .zero)
+      }
+    }
+    
+    messengerProfileModule?.viewController.present(
+      activityViewController,
+      animated: true,
+      completion: {
+        [weak self] in
+        Timer.scheduledTimer(withTimeInterval: 10, repeats: false) { [weak self] _ in
+          self?.services.dataManagementService.dataManagerService.deleteObjectWith(
+            fileURL: imageFile,
+            isRemoved: {
+              _ in
+            }
+          )
+        }
+      }
+    )
   }
 }

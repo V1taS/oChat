@@ -80,26 +80,14 @@ extension SettingsScreenPresenter: SettingsScreenInteractorOutput {}
 // MARK: - SettingsScreenFactoryOutput
 
 extension SettingsScreenPresenter: SettingsScreenFactoryOutput {
-  func copyOnionAdress() {
-    // TODO: -
-  }
-  
-  func openMyWalletsSection() {
-    moduleOutput?.openMyWalletsSection()
-  }
-  
-  func openCurrencySection() {
-    moduleOutput?.openCurrencySection()
+  func openMyProfileSection() {
+    moduleOutput?.openMyProfileSection()
   }
   
   func openPasscodeAndFaceIDSection() {
     moduleOutput?.openPasscodeAndFaceIDSection()
   }
-  
-  func openMessengerSection() {
-    moduleOutput?.openMessengerSection()
-  }
-  
+
   func openNotificationsSection() {
     moduleOutput?.openNotificationsSection()
   }

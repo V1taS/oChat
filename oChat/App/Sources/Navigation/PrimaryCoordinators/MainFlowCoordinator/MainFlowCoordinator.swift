@@ -67,8 +67,10 @@ private extension MainFlowCoordinator {
     self.messengerScreenFlowCoordinator = messengerScreenFlowCoordinator
     messengerScreenFlowCoordinator.finishFlow = { [weak self] state in
       switch state {
-      case .exitWallet:
-        self?.finishMainFlow(.exitWallet)
+      case .lockOChat:
+        self?.finishMainFlow(.lockOChat)
+      case .deleteOChat:
+        self?.finishMainFlow(.deleteOChat)
       }
       self?.messengerScreenFlowCoordinator = nil
     }
@@ -97,8 +99,10 @@ private extension MainFlowCoordinator {
     self.settingsScreenFlowCoordinator = settingsScreenFlowCoordinator
     settingsScreenFlowCoordinator.finishFlow = { [weak self] state in
       switch state {
-      case .exitWallet:
-        self?.finishMainFlow(.exitWallet)
+      case .lockOChat:
+        self?.finishMainFlow(.lockOChat)
+      case .deleteOChat:
+        self?.finishMainFlow(.deleteOChat)
       }
       self?.settingsScreenFlowCoordinator = nil
     }

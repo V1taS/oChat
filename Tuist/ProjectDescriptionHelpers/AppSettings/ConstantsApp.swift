@@ -14,7 +14,8 @@ public enum Constants {
   static public let dependenciesPath = "LocalDependencies"
   static public let bundleApp = "com.sosinvitalii.oChat"
   static public let developmentRegion = "en"
-  
+  static public let appLink = "oChatTOR"
+
   // Settings
   static public let iOSTargetVersion = "16.0"
   static public let developmentTeam = "34VDSPZYU9"

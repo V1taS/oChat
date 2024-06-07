@@ -52,6 +52,12 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     Wormholy.awake()
     //#endif
   }
+  
+  func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
+    if let url = URLContexts.first?.url {
+      services.userInterfaceAndExperienceService.deepLinkService.saveDeepLinkURL(url, completion: {})
+    }
+  }
 }
 
 // MARK: - Private

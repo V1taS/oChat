@@ -64,7 +64,9 @@ private extension RootCoordinator {
     self.mainFlowCoordinator = mainFlowCoordinator
     mainFlowCoordinator.finishFlow = { [weak self] state in
       switch state {
-      case .exitWallet:
+      case .lockOChat:
+        self?.openAuthenticationFlowCoordinator(.loginPasscode(.loginFaceID))
+      case .deleteOChat:
         self?.openInitialFlowCoordinator(isPresentScreenAnimated: true)
       }
       self?.mainFlowCoordinator = nil
@@ -190,6 +192,19 @@ private extension RootCoordinator {
     startSessionlistener()
     startServerlistener()
     
+    NotificationCenter.default.addObserver(
+      self,
+      selector: #selector(handleMessage(_:)),
+      name: Notification.Name(NotificationConstants.didReceiveMessageName),
+      object: nil
+    )
+    NotificationCenter.default.addObserver(
+      self,
+      selector: #selector(handleInitial(_:)),
+      name: Notification.Name(NotificationConstants.didInitiateChatName),
+      object: nil
+    )
+    
     p2pChatManager.start { [weak self] result in
       guard let self else {
         return
@@ -197,7 +212,8 @@ private extension RootCoordinator {
       
       switch result {
       case .success:
-        notificationService.showNotification(.positive(title: "Сервер ТОР запустился"))
+//        notificationService.showNotification(.positive(title: "Сервер ТОР запустился"))
+        updateOnlineStatus(status: .online)
       case let .failure(error):
         switch error {
         case .onionAddressForTorHiddenServiceCouldNotBeLoaded:
@@ -221,7 +237,10 @@ private extension RootCoordinator {
         case .unableToAccessTheCachesDirectory:
           notificationService.showNotification(.negative(title: "Невозможно получить доступ к кэш-директории"))
         }
+        updateOnlineStatus(status: .offline)
+        p2pChatManager.start(completion: { _ in })
       }
+//      checkServerAvailability()
     }
   }
   
@@ -234,15 +253,21 @@ private extension RootCoordinator {
       switch result {
       case .none: break
       case .started:
-        notificationService.showNotification(.neutral(title: "Подключение начато, идет процесс инициализации."))
+//        notificationService.showNotification(.neutral(title: "Подключение начато, идет процесс инициализации."))
+        updateOnlineStatus(status: .inProgress)
       case let .connectingProgress(progress):
-        notificationService.showNotification(.neutral(title: "Прогресс подключения к TOR: \(progress)%"))
+//        notificationService.showNotification(.neutral(title: "Прогресс подключения к TOR: \(progress)%"))
+        updateOnlineStatus(status: .inProgress)
       case .connected:
-        notificationService.showNotification(.positive(title: "Подключение успешно установлено."))
+//        notificationService.showNotification(.positive(title: "Подключение успешно установлено."))
+        updateOnlineStatus(status: .online)
       case .stopped:
         notificationService.showNotification(.negative(title: "Подключение остановлено."))
+        updateOnlineStatus(status: .offline)
+        p2pChatManager.start(completion: { _ in })
       case .refreshing:
-        notificationService.showNotification(.neutral(title: "Подключение обновляется."))
+//        notificationService.showNotification(.neutral(title: "Подключение обновляется."))
+        updateOnlineStatus(status: .inProgress)
       }
     }
   }
@@ -255,15 +280,152 @@ private extension RootCoordinator {
       
       switch result {
       case let .serverIsRunning(onPort):
-        notificationService.showNotification(.positive(title: "Сервер запущен и слушает порт: \(onPort)"))
+//        notificationService.showNotification(.positive(title: "Сервер запущен и слушает порт: \(onPort)"))
+        break
       case let .errorStartingServer(error):
         notificationService.showNotification(.negative(title: "Произошла ошибка при запуске сервера. \(error)"))
+        p2pChatManager.stop { [weak self] _ in
+          self?.p2pChatManager.start(completion: { _ in })
+        }
       case .didAcceptNewSocket:
-        notificationService.showNotification(.positive(title: "Сервер принял новое соединение."))
+//        notificationService.showNotification(.positive(title: "Сервер принял новое соединение."))
+        break
       case .didSentResponse:
-        notificationService.showNotification(.positive(title: "Сервер отправил ответ."))
+//        notificationService.showNotification(.positive(title: "Сервер отправил ответ."))
+        break
       case .socketDidDisconnect:
-        notificationService.showNotification(.negative(title: "Соединение с собеседникомм закончилось."))
+//        notificationService.showNotification(.negative(title: "Соединение с собеседникомм закончилось."))
+        break
+      }
+    }
+  }
+  
+  @objc
+  func handleMessage(_ notification: Notification) {
+    if let recipientMessageModel = notification.userInfo?["data"] as? MessengerNetworkRequest {
+      services.messengerService.modelHandlerService.getContactModels { [weak self] contactModels in
+        guard let self else { return }
+        if let indexContact = contactModels.firstIndex(where: {
+          $0.onionAddress == recipientMessageModel.onionAddress
+        }) {
+          var updatedContact = contactModels[indexContact]
+//          let decryptMessage = services.accessAndSecurityManagementService.cryptoService.decrypt(
+//            recipientMessageModel.message,
+//            privateKey: services.userInterfaceAndExperienceService.systemService.getDeviceIdentifier()
+//          )
+          
+          updatedContact.messenges.append(
+            .init(
+              messageType: .received,
+              messageStatus: .delivered,
+              message: recipientMessageModel.message,
+              file: nil
+            )
+          )
+          updatedContact.onionAddress = recipientMessageModel.onionAddress
+          updatedContact.meshAddress = recipientMessageModel.message
+          updatedContact.encryptionPublicKey = recipientMessageModel.publicKey
+          updatedContact.status = .init(rawValue: recipientMessageModel.status) ?? .online
+          services.messengerService.modelHandlerService.saveContactModel(updatedContact, completion: {})
+        } else {
+          let contact = ContactModel(
+            name: nil,
+            onionAddress: recipientMessageModel.onionAddress,
+            meshAddress: nil,
+            messenges: [
+              .init(
+                messageType: .received,
+                messageStatus: .delivered,
+                message: "",
+                file: nil
+              )
+            ],
+            status: .requested,
+            encryptionPublicKey: nil,
+            isPasswordDialogProtected: false
+          )
+          services.messengerService.modelHandlerService.saveContactModel(contact, completion: {})
+        }
+      }
+    }
+    updateListContacts()
+  }
+  
+  @objc
+  func handleInitial(_ notification: Notification) {
+    if let recipientMessageModel = notification.userInfo?["initiateChat"] as? MessengerNetworkRequest {
+      let contact = ContactModel(
+        name: nil,
+        onionAddress: recipientMessageModel.onionAddress,
+        meshAddress: nil,
+        messenges: [
+          .init(
+            messageType: .received,
+            messageStatus: .delivered,
+            message: "",
+            file: nil
+          )
+        ],
+        status: .requested,
+        encryptionPublicKey: nil,
+        isPasswordDialogProtected: false
+      )
+      services.messengerService.modelHandlerService.saveContactModel(contact, completion: {})
+      updateListContacts()
+    }
+  }
+  
+  func updateOnlineStatus(status: ContactModel.Status) {
+    // Отправка уведомления о начале нового чата
+    NotificationCenter.default.post(
+      name: Notification.Name(NotificationConstants.didUpdateOnlineStatusName),
+      object: nil,
+      userInfo: ["onlineStatus": status]
+    )
+  }
+  
+  func updateListContacts() {
+    // Обновляем список контактов на главном экране
+    NotificationCenter.default.post(
+      name: Notification.Name(NotificationConstants.updateListContacts),
+      object: nil,
+      userInfo: [:]
+    )
+  }
+  
+  func checkServerAvailability() {
+    DispatchQueue.global().async { [weak self] in
+      self?.services.messengerService.modelHandlerService.getContactModels { [weak self] contactModels in
+        guard let self else { return }
+        contactModels.forEach { [weak self] contact in
+          guard let self else { return }
+          services.messengerService.p2pChatManager.checkServerAvailability(
+            onionAddress: contact.onionAddress ?? "") { [weak self] isAvailable in
+              guard let self else { return }
+//              if isAvailable {
+//                DispatchQueue.main.async { [weak self] in
+//                  guard let self else { return }
+//                  services.userInterfaceAndExperienceService.notificationService
+//                    .showNotification(.positive(title: "Контакт в сети: \(contact.onionAddress ?? "")"))
+//                }
+//                
+//              } else {
+//                DispatchQueue.main.async { [weak self] in
+//                  guard let self else { return }
+//                  services.userInterfaceAndExperienceService.notificationService
+//                    .showNotification(.negative(title: "Контакт не в сети: \(contact.onionAddress ?? "")"))
+//                }
+//              }
+              
+              services.messengerService.modelSettingsManager.setStatus(
+                contact,
+                isAvailable ? .online : .offline,
+                completion: {}
+              )
+              updateListContacts()
+              checkServerAvailability()
+            }
+        }
       }
     }
   }

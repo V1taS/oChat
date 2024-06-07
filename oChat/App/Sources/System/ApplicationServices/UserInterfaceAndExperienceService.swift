@@ -30,4 +30,12 @@ final class UserInterfaceAndExperienceService: IUserInterfaceAndExperienceServic
   var notificationService: INotificationService {
     NotificationService()
   }
+  
+  /// Возвращает сервис deepLink.
+  /// - Returns: Сервис deepLink.
+  var deepLinkService: IDeepLinkService {
+    deepLinkServiceImpl
+  }
 }
+
+private let deepLinkServiceImpl = DeepLinkService()
