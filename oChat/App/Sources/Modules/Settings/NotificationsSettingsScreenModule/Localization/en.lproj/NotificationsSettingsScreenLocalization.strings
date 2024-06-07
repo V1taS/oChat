@@ -8,5 +8,5 @@
 // MARK: - State
 
 "State.Header.Title" = "Уведомления";
-"State.Notifications.Title" = "Push-уведомления";
+"State.Notifications.Title" = "Уведомления";
 "State.Notifications.Description" = "Получайте уведомления при получении сообщения";

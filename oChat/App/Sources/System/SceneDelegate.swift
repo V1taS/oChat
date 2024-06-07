@@ -76,7 +76,7 @@ private extension SceneDelegate {
     guard !UserDefaults.standard.bool(forKey: isFirstLaunchKey) else {
       return
     }
-    services.dataManagementService.modelHandlerService.deleteAllData()
+    services.messengerService.modelHandlerService.deleteAllData()
     
     /// Первый запуск приложения
     UserDefaults.standard.set(true, forKey: isFirstLaunchKey)

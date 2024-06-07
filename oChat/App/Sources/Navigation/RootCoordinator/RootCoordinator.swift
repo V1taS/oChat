@@ -11,6 +11,7 @@ import SKAbstractions
 import SKStyle
 import UIKit
 import AuthenticationSDK
+import MessengerSDK
 
 final class RootCoordinator: Coordinator<Void, Void> {
   
@@ -21,6 +22,8 @@ final class RootCoordinator: Coordinator<Void, Void> {
   private var mainFlowCoordinator: MainFlowCoordinator?
   private var initialFlowCoordinator: InitialFlowCoordinator?
   private var authenticationFlowCoordinator: AuthenticationFlowCoordinator?
+  private var torConnectScreenModule: TorConnectScreenModule?
+  
   private lazy var p2pChatManager: IP2PChatManager = services.messengerService.p2pChatManager
   private var notificationService: INotificationService {
     services.userInterfaceAndExperienceService.notificationService
@@ -41,9 +44,7 @@ final class RootCoordinator: Coordinator<Void, Void> {
   // MARK: - Internal func
   
   override func start(parameter: Void) {
-    setupSessionService()
     setupLaunchScreen()
-    stratTORService()
   }
   
   @objc func appDidBecomeActive() {
@@ -53,6 +54,27 @@ final class RootCoordinator: Coordinator<Void, Void> {
   
   @objc func userDidScreenshot() {
     // TODO: - 🟡 Был сделан скриншот
+  }
+}
+
+// MARK: - TorConnectScreenModuleOutput
+
+extension RootCoordinator: TorConnectScreenModuleOutput {
+  func refreshTorConnectService() {
+    updateOnlineStatus(status: .offline)
+    p2pChatManager.stop { [weak self] _ in
+      self?.p2pChatManager.start(completion: { _ in })
+    }
+  }
+  
+  func torServiceConnected() {
+    torConnectScreenModule?.viewController.dismiss(animated: true)
+    torConnectScreenModule = nil
+  }
+  
+  func stratTorConnectService() {
+    setupSessionService()
+    stratTORService()
   }
 }
 
@@ -81,6 +103,7 @@ private extension RootCoordinator {
       switch state {
       case .success:
         self?.openMainFlowCoordinator(isPresentScreenAnimated: true)
+        self?.openTorConnectScreenModule()
       case .failure:
         break
       }
@@ -96,12 +119,23 @@ private extension RootCoordinator {
       switch state {
       case .success:
         self?.openMainFlowCoordinator(isPresentScreenAnimated: true)
+        self?.openTorConnectScreenModule()
       case .failure:
         break
       }
       self?.authenticationFlowCoordinator = nil
     }
     authenticationFlowCoordinator.start(parameter: state)
+  }
+  
+  func openTorConnectScreenModule() {
+    Timer.scheduledTimer(withTimeInterval: 0.2, repeats: false) { [weak self] _ in
+      guard let self else { return }
+      var torConnectScreenModule = TorConnectScreenAssembly().createModule(services: services)
+      self.torConnectScreenModule = torConnectScreenModule
+      torConnectScreenModule.input.moduleOutput = self
+      UIViewController.topController?.presentFullScreen(torConnectScreenModule.viewController)
+    }
   }
 }
 
@@ -142,24 +176,22 @@ private extension RootCoordinator {
   }
   
   func setupLaunchScreen() {
-    runInitialFlowOnce()
+    guard !isFirstLaunchScreen() else {
+      return
+    }
     
-    //    services.dataManagementService.modelHandlerService.getoChatModel { [weak self] model in
-    //      guard let self else {
-    //        return
-    //      }
-    //
-    //      if !model.wallets.isEmpty {
-    //        if model.appSettingsModel.appPassword != nil {
-    //          openAuthenticationFlowCoordinator(.loginPasscode(.loginFaceID))
-    //        } else {
-    //          openMainFlowCoordinator(isPresentScreenAnimated: true)
-    //        }
-    //        return
-    //      }
-    //
-    //      openInitialFlowCoordinator(isPresentScreenAnimated: true)
-    //    }
+    services.messengerService.modelHandlerService.getMessengerModel { [weak self] model in
+      guard let self else {
+        return
+      }
+      
+      if model.appSettingsModel.appPassword != nil {
+        openAuthenticationFlowCoordinator(.loginPasscode(.loginFaceID))
+      } else {
+        openMainFlowCoordinator(isPresentScreenAnimated: true)
+        openTorConnectScreenModule()
+      }
+    }
   }
   
   func sessionCheck() {
@@ -192,19 +224,6 @@ private extension RootCoordinator {
   func stratTORService() {
     startSessionlistener()
     startServerlistener()
-    
-    NotificationCenter.default.addObserver(
-      self,
-      selector: #selector(handleMessage(_:)),
-      name: Notification.Name(NotificationConstants.didReceiveMessageName),
-      object: nil
-    )
-    NotificationCenter.default.addObserver(
-      self,
-      selector: #selector(handleInitial(_:)),
-      name: Notification.Name(NotificationConstants.didInitiateChatName),
-      object: nil
-    )
     
     p2pChatManager.start { [weak self] result in
       guard let self else {
@@ -240,8 +259,9 @@ private extension RootCoordinator {
         }
         updateOnlineStatus(status: .offline)
         p2pChatManager.start(completion: { _ in })
+        openTorConnectScreenModule()
       }
-      //      checkServerAvailability()
+      checkServerAvailability()
     }
   }
   
@@ -254,22 +274,21 @@ private extension RootCoordinator {
       switch result {
       case .none: break
       case .started:
-        //        notificationService.showNotification(.neutral(title: "Подключение начато, идет процесс инициализации."))
         updateOnlineStatus(status: .inProgress)
       case let .connectingProgress(progress):
-        //        notificationService.showNotification(.neutral(title: "Прогресс подключения к TOR: \(progress)%"))
         updateOnlineStatus(status: .inProgress)
       case .connected:
-        //        notificationService.showNotification(.positive(title: "Подключение успешно установлено."))
         updateOnlineStatus(status: .online)
       case .stopped:
-        notificationService.showNotification(.negative(title: "Подключение остановлено."))
         updateOnlineStatus(status: .offline)
+        openTorConnectScreenModule()
         p2pChatManager.start(completion: { _ in })
       case .refreshing:
-        //        notificationService.showNotification(.neutral(title: "Подключение обновляется."))
         updateOnlineStatus(status: .inProgress)
+      case .circuitsUpdated:
+        break
       }
+      postSessionState(state: result)
     }
   }
   
@@ -280,100 +299,32 @@ private extension RootCoordinator {
       }
       
       switch result {
-      case let .serverIsRunning(onPort):
-        //        notificationService.showNotification(.positive(title: "Сервер запущен и слушает порт: \(onPort)"))
-        break
       case let .errorStartingServer(error):
-        notificationService.showNotification(.negative(title: "Произошла ошибка при запуске сервера. \(error)"))
+        updateOnlineStatus(status: .offline)
+        openTorConnectScreenModule()
         p2pChatManager.stop { [weak self] _ in
           self?.p2pChatManager.start(completion: { _ in })
         }
-      case .didAcceptNewSocket:
-        //        notificationService.showNotification(.positive(title: "Сервер принял новое соединение."))
-        break
-      case .didSentResponse:
-        //        notificationService.showNotification(.positive(title: "Сервер отправил ответ."))
-        break
-      case .socketDidDisconnect:
-        //        notificationService.showNotification(.negative(title: "Соединение с собеседникомм закончилось."))
-        break
+      default: break
       }
+      postServerState(state: result)
     }
   }
   
-  @objc
-  func handleMessage(_ notification: Notification) {
-    if let recipientMessageModel = notification.userInfo?["data"] as? MessengerNetworkRequest {
-      services.messengerService.modelHandlerService.getContactModels { [weak self] contactModels in
-        guard let self else { return }
-        if let indexContact = contactModels.firstIndex(where: {
-          $0.onionAddress == recipientMessageModel.onionAddress
-        }) {
-          var updatedContact = contactModels[indexContact]
-          //          let decryptMessage = services.accessAndSecurityManagementService.cryptoService.decrypt(
-          //            recipientMessageModel.message,
-          //            privateKey: services.userInterfaceAndExperienceService.systemService.getDeviceIdentifier()
-          //          )
-          
-          updatedContact.messenges.append(
-            .init(
-              messageType: .received,
-              messageStatus: .delivered,
-              message: recipientMessageModel.message,
-              file: nil
-            )
-          )
-          updatedContact.onionAddress = recipientMessageModel.onionAddress
-          updatedContact.meshAddress = recipientMessageModel.message
-          updatedContact.encryptionPublicKey = recipientMessageModel.publicKey
-          updatedContact.status = .init(rawValue: recipientMessageModel.status) ?? .online
-          services.messengerService.modelHandlerService.saveContactModel(updatedContact, completion: {})
-        } else {
-          let contact = ContactModel(
-            name: nil,
-            onionAddress: recipientMessageModel.onionAddress,
-            meshAddress: nil,
-            messenges: [
-              .init(
-                messageType: .received,
-                messageStatus: .delivered,
-                message: "",
-                file: nil
-              )
-            ],
-            status: .requested,
-            encryptionPublicKey: nil,
-            isPasswordDialogProtected: false
-          )
-          services.messengerService.modelHandlerService.saveContactModel(contact, completion: {})
-        }
-      }
-    }
-    updateListContacts()
+  func postSessionState(state: TorSessionState) {
+    NotificationCenter.default.post(
+      name: Notification.Name(NotificationConstants.sessionState),
+      object: nil,
+      userInfo: ["sessionState": state]
+    )
   }
   
-  @objc
-  func handleInitial(_ notification: Notification) {
-    if let recipientMessageModel = notification.userInfo?["initiateChat"] as? MessengerNetworkRequest {
-      let contact = ContactModel(
-        name: nil,
-        onionAddress: recipientMessageModel.onionAddress,
-        meshAddress: nil,
-        messenges: [
-          .init(
-            messageType: .received,
-            messageStatus: .delivered,
-            message: "",
-            file: nil
-          )
-        ],
-        status: .requested,
-        encryptionPublicKey: nil,
-        isPasswordDialogProtected: false
-      )
-      services.messengerService.modelHandlerService.saveContactModel(contact, completion: {})
-      updateListContacts()
-    }
+  func postServerState(state: TorServerState) {
+    NotificationCenter.default.post(
+      name: Notification.Name(NotificationConstants.serverState),
+      object: nil,
+      userInfo: ["serverState": state]
+    )
   }
   
   func updateOnlineStatus(status: ContactModel.Status) {
@@ -394,44 +345,7 @@ private extension RootCoordinator {
     )
   }
   
-  func checkServerAvailability() {
-    DispatchQueue.global().async { [weak self] in
-      self?.services.messengerService.modelHandlerService.getContactModels { [weak self] contactModels in
-        guard let self else { return }
-        contactModels.forEach { [weak self] contact in
-          guard let self else { return }
-          services.messengerService.p2pChatManager.checkServerAvailability(
-            onionAddress: contact.onionAddress ?? "") { [weak self] isAvailable in
-              guard let self else { return }
-              //              if isAvailable {
-              //                DispatchQueue.main.async { [weak self] in
-              //                  guard let self else { return }
-              //                  services.userInterfaceAndExperienceService.notificationService
-              //                    .showNotification(.positive(title: "Контакт в сети: \(contact.onionAddress ?? "")"))
-              //                }
-              //
-              //              } else {
-              //                DispatchQueue.main.async { [weak self] in
-              //                  guard let self else { return }
-              //                  services.userInterfaceAndExperienceService.notificationService
-              //                    .showNotification(.negative(title: "Контакт не в сети: \(contact.onionAddress ?? "")"))
-              //                }
-              //              }
-              
-              services.messengerService.modelSettingsManager.setStatus(
-                contact,
-                isAvailable ? .online : .offline,
-                completion: {}
-              )
-              updateListContacts()
-              checkServerAvailability()
-            }
-        }
-      }
-    }
-  }
-  
-  func runInitialFlowOnce() {
+  func isFirstLaunchScreen() -> Bool {
     let defaults = UserDefaults.standard
     let hasLaunchedKey = "HasLaunchedInitialFlow"
     
@@ -440,8 +354,55 @@ private extension RootCoordinator {
       openInitialFlowCoordinator(isPresentScreenAnimated: true)
       // Сохраняем, что функция была выполнена
       defaults.set(true, forKey: hasLaunchedKey)
+      return true
+    }
+    return false
+  }
+  
+  func checkServerAvailability() {
+    DispatchQueue.global().async { [weak self] in
+      self?.services.messengerService.modelHandlerService.getContactModels { [weak self] contactModels in
+        guard let self else { return }
+        contactModels.forEach { contact in
+          self.checkContactOnline(contact, attempts: .zero)
+        }
+      }
+    }
+  }
+  
+  func checkContactOnline(_ contact: ContactModel, attempts: Int, maxAttempts: Int = 20) {
+    guard attempts < maxAttempts else {
+      // Если достигли максимального количества попыток и все были неудачными, ставим статус offline и начинаем заново
+      updateContactStatus(contact, isOnline: false)
       return
     }
-    openMainFlowCoordinator(isPresentScreenAnimated: true)
+    
+    services.messengerService.p2pChatManager.checkServerAvailability(
+      onionAddress: contact.onionAddress ?? ""
+    ) { [weak self] isAvailable in
+      guard let self = self else { return }
+      
+      if isAvailable {
+        // Если контакт онлайн, обновляем статус и начинаем заново
+        self.updateContactStatus(contact, isOnline: true)
+      } else {
+        // Продолжаем делать запросы
+        self.checkContactOnline(contact, attempts: attempts + 1)
+      }
+    }
+  }
+  
+  func updateContactStatus(_ contact: ContactModel, isOnline: Bool) {
+    DispatchQueue.main.async { [weak self] in
+      guard let self else { return }
+      
+      if contact.status != .requested {
+        services.messengerService.modelSettingsManager.setStatus(contact, isOnline ? .online : .offline) {}
+        updateListContacts()
+      }
+    }
+    
+    // Рестарт проверки статуса
+    checkServerAvailability()
   }
 }
