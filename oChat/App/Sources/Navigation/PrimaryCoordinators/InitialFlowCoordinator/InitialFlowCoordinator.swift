@@ -47,9 +47,9 @@ final class InitialFlowCoordinator: Coordinator<Void, InitialFinishFlowType> {
 // MARK: - InitialScreenModuleOutput
 
 extension InitialFlowCoordinator: InitialScreenModuleOutput {
-  func newWalletButtonTapped() {}
-  
-  func importWalletButtonTapped() {}
+  func continueButtonTapped() {
+    finishInitialFlow(.success)
+  }
 }
 
 // MARK: - Open modules

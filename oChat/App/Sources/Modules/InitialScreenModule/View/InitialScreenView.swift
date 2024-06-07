@@ -30,9 +30,9 @@ struct InitialScreenView: View {
       Spacer()
       
       MainButtonView(
-        text: presenter.stateNewWalletButtonTitle
+        text: presenter.stateContinueButtonTitle
       ) {
-        presenter.moduleOutput?.newWalletButtonTapped()
+        presenter.moduleOutput?.continueButtonTapped()
       }
     }
     .padding(.horizontal, .s4)

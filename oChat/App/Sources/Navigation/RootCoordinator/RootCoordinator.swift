@@ -142,7 +142,8 @@ private extension RootCoordinator {
   }
   
   func setupLaunchScreen() {
-    openMainFlowCoordinator(isPresentScreenAnimated: true)
+    runInitialFlowOnce()
+    
     //    services.dataManagementService.modelHandlerService.getoChatModel { [weak self] model in
     //      guard let self else {
     //        return
@@ -212,7 +213,7 @@ private extension RootCoordinator {
       
       switch result {
       case .success:
-//        notificationService.showNotification(.positive(title: "Сервер ТОР запустился"))
+        //        notificationService.showNotification(.positive(title: "Сервер ТОР запустился"))
         updateOnlineStatus(status: .online)
       case let .failure(error):
         switch error {
@@ -240,7 +241,7 @@ private extension RootCoordinator {
         updateOnlineStatus(status: .offline)
         p2pChatManager.start(completion: { _ in })
       }
-//      checkServerAvailability()
+      //      checkServerAvailability()
     }
   }
   
@@ -253,20 +254,20 @@ private extension RootCoordinator {
       switch result {
       case .none: break
       case .started:
-//        notificationService.showNotification(.neutral(title: "Подключение начато, идет процесс инициализации."))
+        //        notificationService.showNotification(.neutral(title: "Подключение начато, идет процесс инициализации."))
         updateOnlineStatus(status: .inProgress)
       case let .connectingProgress(progress):
-//        notificationService.showNotification(.neutral(title: "Прогресс подключения к TOR: \(progress)%"))
+        //        notificationService.showNotification(.neutral(title: "Прогресс подключения к TOR: \(progress)%"))
         updateOnlineStatus(status: .inProgress)
       case .connected:
-//        notificationService.showNotification(.positive(title: "Подключение успешно установлено."))
+        //        notificationService.showNotification(.positive(title: "Подключение успешно установлено."))
         updateOnlineStatus(status: .online)
       case .stopped:
         notificationService.showNotification(.negative(title: "Подключение остановлено."))
         updateOnlineStatus(status: .offline)
         p2pChatManager.start(completion: { _ in })
       case .refreshing:
-//        notificationService.showNotification(.neutral(title: "Подключение обновляется."))
+        //        notificationService.showNotification(.neutral(title: "Подключение обновляется."))
         updateOnlineStatus(status: .inProgress)
       }
     }
@@ -280,7 +281,7 @@ private extension RootCoordinator {
       
       switch result {
       case let .serverIsRunning(onPort):
-//        notificationService.showNotification(.positive(title: "Сервер запущен и слушает порт: \(onPort)"))
+        //        notificationService.showNotification(.positive(title: "Сервер запущен и слушает порт: \(onPort)"))
         break
       case let .errorStartingServer(error):
         notificationService.showNotification(.negative(title: "Произошла ошибка при запуске сервера. \(error)"))
@@ -288,13 +289,13 @@ private extension RootCoordinator {
           self?.p2pChatManager.start(completion: { _ in })
         }
       case .didAcceptNewSocket:
-//        notificationService.showNotification(.positive(title: "Сервер принял новое соединение."))
+        //        notificationService.showNotification(.positive(title: "Сервер принял новое соединение."))
         break
       case .didSentResponse:
-//        notificationService.showNotification(.positive(title: "Сервер отправил ответ."))
+        //        notificationService.showNotification(.positive(title: "Сервер отправил ответ."))
         break
       case .socketDidDisconnect:
-//        notificationService.showNotification(.negative(title: "Соединение с собеседникомм закончилось."))
+        //        notificationService.showNotification(.negative(title: "Соединение с собеседникомм закончилось."))
         break
       }
     }
@@ -309,10 +310,10 @@ private extension RootCoordinator {
           $0.onionAddress == recipientMessageModel.onionAddress
         }) {
           var updatedContact = contactModels[indexContact]
-//          let decryptMessage = services.accessAndSecurityManagementService.cryptoService.decrypt(
-//            recipientMessageModel.message,
-//            privateKey: services.userInterfaceAndExperienceService.systemService.getDeviceIdentifier()
-//          )
+          //          let decryptMessage = services.accessAndSecurityManagementService.cryptoService.decrypt(
+          //            recipientMessageModel.message,
+          //            privateKey: services.userInterfaceAndExperienceService.systemService.getDeviceIdentifier()
+          //          )
           
           updatedContact.messenges.append(
             .init(
@@ -402,20 +403,20 @@ private extension RootCoordinator {
           services.messengerService.p2pChatManager.checkServerAvailability(
             onionAddress: contact.onionAddress ?? "") { [weak self] isAvailable in
               guard let self else { return }
-//              if isAvailable {
-//                DispatchQueue.main.async { [weak self] in
-//                  guard let self else { return }
-//                  services.userInterfaceAndExperienceService.notificationService
-//                    .showNotification(.positive(title: "Контакт в сети: \(contact.onionAddress ?? "")"))
-//                }
-//                
-//              } else {
-//                DispatchQueue.main.async { [weak self] in
-//                  guard let self else { return }
-//                  services.userInterfaceAndExperienceService.notificationService
-//                    .showNotification(.negative(title: "Контакт не в сети: \(contact.onionAddress ?? "")"))
-//                }
-//              }
+              //              if isAvailable {
+              //                DispatchQueue.main.async { [weak self] in
+              //                  guard let self else { return }
+              //                  services.userInterfaceAndExperienceService.notificationService
+              //                    .showNotification(.positive(title: "Контакт в сети: \(contact.onionAddress ?? "")"))
+              //                }
+              //
+              //              } else {
+              //                DispatchQueue.main.async { [weak self] in
+              //                  guard let self else { return }
+              //                  services.userInterfaceAndExperienceService.notificationService
+              //                    .showNotification(.negative(title: "Контакт не в сети: \(contact.onionAddress ?? "")"))
+              //                }
+              //              }
               
               services.messengerService.modelSettingsManager.setStatus(
                 contact,
@@ -428,5 +429,19 @@ private extension RootCoordinator {
         }
       }
     }
+  }
+  
+  func runInitialFlowOnce() {
+    let defaults = UserDefaults.standard
+    let hasLaunchedKey = "HasLaunchedInitialFlow"
+    
+    // Проверяем, была ли функция уже выполнена
+    if !defaults.bool(forKey: hasLaunchedKey) {
+      openInitialFlowCoordinator(isPresentScreenAnimated: true)
+      // Сохраняем, что функция была выполнена
+      defaults.set(true, forKey: hasLaunchedKey)
+      return
+    }
+    openMainFlowCoordinator(isPresentScreenAnimated: true)
   }
 }

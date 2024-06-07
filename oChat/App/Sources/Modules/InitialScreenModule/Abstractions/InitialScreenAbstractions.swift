@@ -10,7 +10,7 @@ import SwiftUI
 /// События которые отправляем из `InitialScreenModule` в `Coordinator`
 public protocol InitialScreenModuleOutput: AnyObject {
   /// Была нажата кнопка "Создать новый кошелек"
-  func newWalletButtonTapped()
+  func continueButtonTapped()
 }
 
 /// События которые отправляем из `Coordinator` в `InitialScreenModule`

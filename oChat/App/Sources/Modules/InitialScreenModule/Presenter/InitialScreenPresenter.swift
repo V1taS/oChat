@@ -16,7 +16,7 @@ final class InitialScreenPresenter: ObservableObject {
   
   /// Заголовок кнопки `Создать новый кошелек`
   @Published
-  var stateNewWalletButtonTitle = OChatStrings.InitialScreenLocalization.State.NewWalletButton.title
+  var stateContinueButtonTitle = "Продолжить"
   
   /// Заголовок кнопки `Добавить существующий кошелек`
   @Published
