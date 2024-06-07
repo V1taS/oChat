@@ -8,16 +8,16 @@
 // MARK: - Stories
 
 "Stories.Title.First" = "Welcome to oChat";
-"Stories.Title.Second" = "Stay secure, stay separate";
-"Stories.Title.Third" = "Direct connections, maximum Freedom";
+"Stories.Title.Second" = "Be invisible, stay anonymous";
+"Stories.Title.Third" = "Direct connections, maximum freedom";
 "Stories.Title.Fourth" = "Your privacy is securely protected";
 "Stories.Title.Fifth" = "One more thing...";
 
-"Stories.Subtitle.First" = "Isolation, P2P, Encryption";
-"Stories.Subtitle.Second" = "Your privacy is securely protected Your privacy is securely protected";
-"Stories.Subtitle.Third" = "Subtitle";
-"Stories.Subtitle.Fourth" = "Subtitle";
-"Stories.Subtitle.Fifth" = "Subtitle";
+"Stories.Subtitle.First" = "Anonymity, P2P, Encryption";
+"Stories.Subtitle.Second" = "We use TOR.\nDefend yourself against tracking and surveillance.";
+"Stories.Subtitle.Third" = "Peer-to-peer (P2P) technology facilitates direct communication users without the need for central servers. ";
+"Stories.Subtitle.Fourth" = "Encryption is a powerful security technique that converts data into an unreadable format, protecting it from unauthorized access.";
+"Stories.Subtitle.Fifth" = "";
 
 // MARK: - State
 

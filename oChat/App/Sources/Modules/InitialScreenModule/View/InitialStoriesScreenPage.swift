@@ -14,21 +14,21 @@ import Lottie
 
 /// Переиспользуемая страница для сторис
 struct InitialStoriesScreenPage: View {
-  
+
   // MARK: - Private properties
-  
+
   @Binding private var progress: CGFloat
   private let title: String
   private let subtitle: String
   private let storiesType: InitialStoriesScreenModel
-  
+
   @State private var titleIsIsAnimating = false
   @State private var titleIsHidden = true
   @State private var subtitleIsIsAnimating = false
   @State private var subtitleIsHidden = true
-  
+
   // MARK: - Initialization
-  
+
   /// Инициализатор
   /// - Parameters:
   ///   - progress: Прогресс выполнения. Начинается с 1 и идет к 0
@@ -46,7 +46,7 @@ struct InitialStoriesScreenPage: View {
     self.subtitle = subtitle
     self.storiesType = storiesType
   }
-  
+
   var body: some View {
     screenBuilder()
   }
@@ -82,22 +82,19 @@ private extension InitialStoriesScreenPage {
       }
     )
   }
-  
+
   func imageBuilder(paddingSize: CGFloat = .s4) -> AnyView {
     return AnyView(
       Group {
         switch storiesType {
         case .first:
-          VStack {
-            Spacer()
-            OChatAsset.storiesLogo.swiftUIImage
-              .resizable()
-              .scaledToFit()
-              .frame(width: .s26)
-            Spacer()
-          }
+          OChatAsset.storiesLogo.swiftUIImage
+            .resizable()
+            .aspectRatio(contentMode: .fit)
+            .padding(.top, .s15)
+            .padding(.horizontal, .s20)
         case .second:
-          LottieView(animation: .named(OChatAsset.storiesIsolation.name))
+          LottieView(animation: .named(OChatAsset.storiesAnonymity.name))
             .resizable()
             .looping()
             .aspectRatio(contentMode: .fit)
@@ -122,7 +119,7 @@ private extension InitialStoriesScreenPage {
         .padding(.horizontal, paddingSize)
     )
   }
-  
+
   func titleAndSubtitleBuilder() -> some View {
     Group {
       VStack(spacing: .s4) {
@@ -133,7 +130,7 @@ private extension InitialStoriesScreenPage {
           .offset(y: titleIsIsAnimating ? 0 : 50)
           .opacity(titleIsHidden ? .zero : 1)
           .allowsHitTesting(false)
-        
+
         Text(subtitle)
           .font(.fancy.text.title)
           .foregroundColor(SKStyleAsset.slate.swiftUIColor)
@@ -145,10 +142,10 @@ private extension InitialStoriesScreenPage {
       .padding(.horizontal, .s4)
     }
   }
-  
+
   func setTitleAnimation() {
     resetSubtitleAnimation()
-    
+
     Timer.scheduledTimer(withTimeInterval: 0.2, repeats: false) { _ in
       withAnimation(.spring(response: 0.3, dampingFraction: 0.5, blendDuration: 0)) {
         titleIsIsAnimating = true
@@ -156,10 +153,10 @@ private extension InitialStoriesScreenPage {
       }
     }
   }
-  
+
   func setSubtitleAnimation() {
     resetSubtitleAnimation()
-    
+
     Timer.scheduledTimer(withTimeInterval: 0.4, repeats: false) { _ in
       withAnimation(.spring(response: 0.3, dampingFraction: 0.5, blendDuration: 0)) {
         subtitleIsIsAnimating = true
@@ -167,11 +164,11 @@ private extension InitialStoriesScreenPage {
       }
     }
   }
-  
+
   func resetSubtitleAnimation() {
     subtitleIsIsAnimating = false
     subtitleIsHidden = true
-    
+
     titleIsIsAnimating = false
     titleIsHidden = true
   }
