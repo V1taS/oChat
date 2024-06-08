@@ -96,5 +96,7 @@ LocalDependencies/SKUIKit/SKUIKit.xcodeproj
 LocalDependencies/SwiftTor/SwiftTor.xcodeproj/project.xcworkspace
 LocalDependencies/SwiftTor/SwiftTor.xcodeproj
 LocalDependencies/lottie-ios/lottie-ios.xcodeproj
+LocalDependencies/lottie-ios/Lottie.xcodeproj
+Tuist/Dependencies/graph.json
 LocalDependencies/AuthenticationSDK/AuthenticationSDK.xcodeproj
 LocalDependencies/CocoaAsyncSocket/CocoaAsyncSocket.xcodeproj
