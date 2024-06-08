@@ -25,9 +25,6 @@ public protocol IApplicationServices {
   /// Возвращает сервис CloudKit для получения конфигурационных данных.
   var cloudKitService: ICloudKitService { get }
   
-  /// Определяет интерфейс для взаимодействия с блокчейн-сервисами.
-  var blockchainService: IBlockchainService { get }
-  
   /// Возвращает сервис  для управления сервисами, связанными с мессенджером
   var messengerService: IMessengerService { get }
 }

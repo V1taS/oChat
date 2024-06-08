@@ -26,21 +26,6 @@ final class DataManagementService: IDataManagementService {
     DataMappingService()
   }
   
-  /// Предназначен для обработки и управления моделями данных в приложении.
-  var modelHandlerService: IModelHandlerService {
-    modelHandlerServiceImpl
-  }
-  
-  /// Предназначен для управления настройками приложения.
-  var appSettingsManager: IAppSettingsManager {
-    modelHandlerServiceImpl
-  }
-  
-  /// Управление настройками модели кошелька.
-  var modelSettingsManager: IModelSettingsManager {
-    modelHandlerServiceImpl
-  }
-  
   // MARK: - Funcs
   
   /// Возвращает сервис управления безопасным хранением данных.
@@ -48,7 +33,3 @@ final class DataManagementService: IDataManagementService {
     SecureDataManagerService(serviceName)
   }
 }
-
-// MARK: - Impl
-
-private let modelHandlerServiceImpl = ModelHandlerService()

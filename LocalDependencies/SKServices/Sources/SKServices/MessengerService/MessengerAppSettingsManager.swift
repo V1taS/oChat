@@ -41,20 +41,6 @@ extension MessengerModelHandlerService: IAppSettingsManager {
     }
   }
   
-  public func setCurrentCurrency(_ value: CurrencyModel, completion: (() -> Void)? = nil) {
-    getMessengerModel { [weak self] model in
-      guard let self else {
-        return
-      }
-      var updatedModel = model
-      updatedModel.appSettingsModel.currentCurrency = value
-      
-      DispatchQueue.main.async {
-        self.saveMessengerModel(updatedModel, completion: completion)
-      }
-    }
-  }
-  
   public func setIsEnabledNotifications(_ value: Bool, completion: (() -> Void)? = nil) {
     getMessengerModel { [weak self] model in
       guard let self else {

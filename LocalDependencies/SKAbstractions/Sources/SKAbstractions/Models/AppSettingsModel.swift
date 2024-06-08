@@ -16,9 +16,6 @@ public struct AppSettingsModel {
   /// Пароль для входа в приложение.
   public var appPassword: String?
   
-  /// Текущая валюта.
-  public var currentCurrency: CurrencyModel
-  
   /// Указывает, включены ли уведомления.
   public var isNotificationsEnabled: Bool
   
@@ -26,17 +23,14 @@ public struct AppSettingsModel {
   /// - Parameters:
   ///   - isFaceIDEnabled: Булево значение, указывающее, включена ли разблокировка по FaceID.
   ///   - appPassword: Строка, представляющая пароль для входа в приложение.
-  ///   - currentCurrency: Модель текущей валюты.
   ///   - isNotificationsEnabled: Булево значение, указывающее, включены ли уведомления.
   public init(
     isFaceIDEnabled: Bool,
     appPassword: String?,
-    currentCurrency: CurrencyModel,
     isNotificationsEnabled: Bool
   ) {
     self.isFaceIDEnabled = isFaceIDEnabled
     self.appPassword = appPassword
-    self.currentCurrency = currentCurrency
     self.isNotificationsEnabled = isNotificationsEnabled
   }
 }
@@ -48,7 +42,6 @@ extension AppSettingsModel {
     return .init(
       isFaceIDEnabled: false,
       appPassword: nil,
-      currentCurrency: .init(type: .usd, pricePerToken: .zero),
       isNotificationsEnabled: false
     )
   }

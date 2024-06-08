@@ -17,18 +17,6 @@ public protocol IDataManagementService {
   /// - Returns: Сервис для маппинга данных.
   var dataMappingService: IDataMappingService { get }
   
-  /// Возвращает сервис для обработки и управления моделями данных в приложении.
-  /// - Returns: Сервис обработки моделей данных.
-  var modelHandlerService: IModelHandlerService { get }
-  
-  /// Возвращает сервис для управления настройками приложения.
-  /// - Returns: Сервис управления настройками приложения.
-  var appSettingsManager: IAppSettingsManager { get }
-  
-  /// Возвращает сервис для управления настройками модели кошелька.
-  /// - Returns: Сервис управления настройками модели кошелька.
-  var modelSettingsManager: IModelSettingsManager { get }
-  
   /// Возвращает сервис управления безопасным хранением данных.
   /// - Parameters:
   ///   - serviceName: Ключ для определения типа сервиса безопасного хранения данных.

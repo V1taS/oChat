@@ -165,7 +165,7 @@ private extension RootCoordinator {
         return
       }
       
-      services.dataManagementService.modelHandlerService.getAppSettingsModel { [weak self] model in
+      services.messengerService.modelHandlerService.getAppSettingsModel { [weak self] model in
         guard let self, model.appPassword != nil else {
           return
         }
@@ -195,7 +195,7 @@ private extension RootCoordinator {
   }
   
   func sessionCheck() {
-    services.dataManagementService.modelHandlerService.getAppSettingsModel { [weak self] model in
+    services.messengerService.modelHandlerService.getAppSettingsModel { [weak self] model in
       guard let self, model.appPassword != nil else {
         return
       }

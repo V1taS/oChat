@@ -13,19 +13,15 @@ public final class ApplicationServicesStub: IApplicationServices, IDataManagerSe
                                             INotificationService, IPermissionService, ISessionService,
                                             ISteganographyService, ISystemService, IUIService,
                                             IAnalyticsService, ISecureDataManagerService, ICryptoService,
-                                            ICloudKitService, IModelHandlerService, IAppSettingsManager,
-                                            IBlockchainService,
-                                            IWalletsManager, IModelSettingsManager, IDataManagementService,
+                                            ICloudKitService, IAppSettingsManager, IDataManagementService,
                                             IAccessAndSecurityManagementService, IUserInterfaceAndExperienceService,
-                                            ITokenService, IDeepLinkService {
+                                            IDeepLinkService {
   public func saveDeepLinkURL(_ url: URL, completion: (() -> Void)?) {}
   public func deleteDeepLinkURL() {}
   public func getMessengerAdress(completion: ((String?) -> Void)?) {}
   public var deepLinkService: any IDeepLinkService { self }
   public func generateQRCode(from string: String, backgroundColor: Color, foregroundColor: Color, iconIntoQR: UIImage?, iconSize: CGSize, iconBackgroundColor: Color?, completion: ((UIImage?) -> Void)?) {}
   public var messengerService: any IMessengerService { MessengerServiceStub() }
-  public var modelHandlerService: any IModelHandlerService { self }
-  public var modelSettingsManager: any IModelSettingsManager { self }
   
   public func deleteAllData() -> Bool { false }
   public init() {}
@@ -41,10 +37,7 @@ public final class ApplicationServicesStub: IApplicationServices, IDataManagerSe
   public func getSecureDataManagerService(_ serviceName: SecureDataManagerServiceKey) -> any ISecureDataManagerService { self }
   public func getCryptoService() -> any ICryptoService { self }
   public func getCloudKitService() -> any ICloudKitService { self }
-  public func getModelHandlerService() -> IModelHandlerService { self }
   public func getAppSettingsManager() -> IAppSettingsManager { self }
-  public var walletsManager: any IWalletsManager { get { self } set {} }
-  public func getBlockchainService() -> IBlockchainService { self }
   public func getDataManagementService() -> any IDataManagementService { self }
   public func getAccessAndSecurityManagementService() -> any IAccessAndSecurityManagementService { self }
   public func getUserInterfaceAndExperienceService() -> any IUserInterfaceAndExperienceService { self }
@@ -53,7 +46,6 @@ public final class ApplicationServicesStub: IApplicationServices, IDataManagerSe
   public var userInterfaceAndExperienceService: any IUserInterfaceAndExperienceService { self }
   public var analyticsService: any IAnalyticsService { self }
   public var cloudKitService: any ICloudKitService { self }
-  public var blockchainService: any IBlockchainService { self }
   public var permissionService: any IPermissionService { self }
   public var steganographyService: any ISteganographyService { self }
   public var cryptoService: any ICryptoService { self }
@@ -64,7 +56,6 @@ public final class ApplicationServicesStub: IApplicationServices, IDataManagerSe
   public var systemService: any ISystemService { self }
   public var notificationService: any INotificationService { self }
   public func messagesEncryptionService(privateKey: String) -> any IMessagesService { MessengerServiceStub() }
-  public var tokenService: any ITokenService { self }
   
   public func loadFromKeychain(completion: @escaping (Result<Data, any Error>) -> Void) {}
   public func saveToKeychain(_ data: Data, completion: @escaping (Result<Void, any Error>) -> Void) {}
@@ -139,15 +130,10 @@ public final class ApplicationServicesStub: IApplicationServices, IDataManagerSe
   public func sessionDidExpire() {}
   public func getConfigurationValue<T>(from keyName: String, completion: @escaping (T?) -> Void) {}
   public func getImage(for url: URL?, completion: @escaping (UIImage?) -> Void) {}
-  public func getSafeKeeperModel(completion: @escaping (SafeKeeperModel) -> Void) {}
-  public func saveSafeKeeperModel(_ model: SafeKeeperModel, completion: (() -> Void)?) {}
   public func getAppSettingsModel(completion: @escaping (AppSettingsModel) -> Void) {}
   public func saveAppSettingsModel(_ model: AppSettingsModel, completion: (() -> Void)?) {}
-  public func getWalletModels(completion: @escaping ([WalletModel]) -> Void) {}
-  public func saveWalletModels(_ models: [WalletModel], completion: (() -> Void)?) {}
   public func setIsEnabledFaceID(_ value: Bool, completion: (() -> Void)?) {}
   public func setAppPassword(_ value: String?, completion: (() -> Void)?) {}
-  public func setCurrentCurrency(_ value: CurrencyModel, completion: (() -> Void)?) {}
   public func setIsEnabledNotifications(_ value: Bool, completion: (() -> Void)?) {}
   public func createWallet12Words() -> String? { nil }
   public func createWallet24Words() -> String? { nil }
@@ -155,7 +141,6 @@ public final class ApplicationServicesStub: IApplicationServices, IDataManagerSe
   public func isValidMnemonic(_ input: String) -> Bool { false }
   public func isValidPrivateKey(_ input: String) -> Bool { false }
   public func getWalletDetails(mnemonic: String) -> (publicKey: String, privateKey: String)? { nil }
-  public func saveWalletModel(_ model: WalletModel, completion: (() -> Void)?) {}
   public func sha512(from input: String) -> String { "" }
   public func sha512(from inputData: Data) -> String { "" }
   public func sha256(from input: String) -> String { "" }
@@ -163,14 +148,6 @@ public final class ApplicationServicesStub: IApplicationServices, IDataManagerSe
   public func hideTextBase64(_ textBase64: String?, withImage image: Data, completionBlock: @escaping EncoderCompletionBlock) {}
   public func getTextBase64From(image: Data, completionBlock: @escaping DecoderCompletionBlock) {}
   public func checkIfPasscodeIsSet(completion: ((Result<Void, SystemServiceError>) -> Void)?) {}
-  public func setIsPrimaryWallet(_ model: WalletModel, _ value: Bool, completion: (() -> Void)?) {}
-  public func getModelSettingsManager() -> any IModelSettingsManager { self }
-  public func setNameWallet(_ model: WalletModel, _ name: String, completion: (() -> Void)?) {}
-  public func setNameWallet(_ model: WalletModel, _ name: String, completion: ((WalletModel?) -> Void)?) {}
-  public func deleteWallet(_ model: WalletModel, completion: (() -> Void)?) {}
-  public func getValueForChart(token: TokenModel, timeRange: TimeRangeChart, completion: ((Result<[TokenChartValue], NetworkError>) -> Void)?) {}
-  public func getPricesForTokens(tokens: [TokenModel], currency: CurrencyModel, completion: ((Result<[TokenModel], NetworkError>) -> Void)?) {}
-  public func searchTokensByNameOrSymbol(chain: TokenNetworkType?, text: String, limit: Int, completion: ((Result<[TokenModel], NetworkError>) -> Void)?) {}
   public var serverStateAction: ((TorServerState) -> Void)?
   public var sessionStateAction: ((TorSessionState) -> Void)?
   public var stateErrorServiceAction: ((Result<Void, TorServiceError>) -> Void)?
@@ -197,7 +174,6 @@ public final class MessengerServiceStub: IMessengerModelSettingsManager, IMessen
   public func sendChatRequest(peerAddress: String, completion: ((Result<Void, any Error>) -> Void)?) {}
   public func setIsEnabledFaceID(_ value: Bool, completion: (() -> Void)?) {}
   public func setAppPassword(_ value: String?, completion: (() -> Void)?) {}
-  public func setCurrentCurrency(_ value: CurrencyModel, completion: (() -> Void)?) {}
   public func setIsEnabledNotifications(_ value: Bool, completion: (() -> Void)?) {}
   
   public var appSettingsManager: any IAppSettingsManager { self }

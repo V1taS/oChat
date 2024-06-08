@@ -22,12 +22,6 @@ public protocol IAppSettingsManager {
   ///   - completion: Опциональный блок завершения, вызываемый после сохранения изменений.
   func setAppPassword(_ value: String?, completion: (() -> Void)?)
   
-  /// Устанавливает валюту по умолчанию в приложении.
-  /// - Parameters:
-  ///   - value: Модель валюты, которая будет установлена как текущая.
-  ///   - completion: Опциональный блок завершения, вызываемый после сохранения изменений.
-  func setCurrentCurrency(_ value: CurrencyModel, completion: (() -> Void)?)
-  
   /// Включает или отключает уведомления в приложении.
   /// - Parameters:
   ///   - value: Значение, указывающее, следует ли включить уведомления.
