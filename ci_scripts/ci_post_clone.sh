@@ -36,8 +36,5 @@ defaults write com.apple.dt.Xcode IDESkipMacroFingerprintValidation -bool YES
 # Переход в папку с проектом
 cd /Volumes/workspace/repository/
 
-# Получаем зависимости с использованием Tuist на основе определенной конфигурации
-tuist fetch
-
-# Генерирует Xcode проект с использованием Tuist на основе определенной конфигурации
-tuist generate
+# Запускаем Tuist
+tuist clean && tuist fetch && tuist generate

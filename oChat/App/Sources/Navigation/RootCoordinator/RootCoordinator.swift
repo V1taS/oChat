@@ -275,7 +275,7 @@ private extension RootCoordinator {
       case .none: break
       case .started:
         updateOnlineStatus(status: .inProgress)
-      case let .connectingProgress(progress):
+      case .connectingProgress:
         updateOnlineStatus(status: .inProgress)
       case .connected:
         updateOnlineStatus(status: .online)
@@ -299,7 +299,7 @@ private extension RootCoordinator {
       }
       
       switch result {
-      case let .errorStartingServer(error):
+      case .errorStartingServer:
         updateOnlineStatus(status: .offline)
         openTorConnectScreenModule()
         p2pChatManager.stop { [weak self] _ in

@@ -129,7 +129,7 @@ private extension TorConnectScreenPresenter {
       case .started:
         stateSystemMessage = "started"
       case let .connectingProgress(result):
-        stateConnectionProgress = Double(result)
+        stateConnectionProgress = Double(result / 100)
       case .connected:
         stateSystemMessage = "connected"
         moduleOutput?.torServiceConnected()
