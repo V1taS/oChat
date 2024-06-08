@@ -1,0 +1,10 @@
+//
+//  TorConnectScreenLocalization.strings
+//  MessengerSDK
+//
+//  Created by Vitalii Sosin on 07.06.2024.
+//
+
+// MARK: - TorConnectScreenLocalization
+
+"State.Button.Title" = "Hello World";

@@ -1,0 +1,10 @@
+//
+//  MessengerProfileModuleLocalization.strings
+//  MessengerSDK
+//
+//  Created by Vitalii Sosin on 06.06.2024.
+//
+
+// MARK: - MessengerProfileModuleLocalization
+
+"State.Button.Title" = "Hello World";

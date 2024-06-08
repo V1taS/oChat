@@ -1,0 +1,12 @@
+{
+  "data" : [
+    {
+      "filename" : "p2p_chating.json",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}

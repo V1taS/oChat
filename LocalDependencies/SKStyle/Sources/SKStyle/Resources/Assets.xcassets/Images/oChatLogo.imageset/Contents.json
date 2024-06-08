@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "oChatLogo.pdf",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}
