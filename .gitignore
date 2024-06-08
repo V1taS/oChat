@@ -83,9 +83,6 @@ LocalDependencies/Ecies/SwiftECC.xcodeproj
 LocalDependencies/SKMySecret/Example/Example.xcodeproj
 LocalDependencies/SKMySecret/Example/Example.xcworkspace
 LocalDependencies/SKMySecret/Example/Project.swift
-venv
-LocalDependencies/AuthenticationSDK
-LocalDependencies/CocoaAsyncSocket
 LocalDependencies/MessengerSDK/MessengerSDK.xcodeproj
 LocalDependencies/SKAbstractions/SKAbstractions.xcodeproj
 LocalDependencies/SKFoundation/SKFoundation.xcodeproj
@@ -99,3 +96,5 @@ LocalDependencies/SKUIKit/SKUIKit.xcodeproj
 LocalDependencies/SwiftTor/SwiftTor.xcodeproj/project.xcworkspace
 LocalDependencies/SwiftTor/SwiftTor.xcodeproj
 LocalDependencies/lottie-ios/lottie-ios.xcodeproj
+LocalDependencies/AuthenticationSDK/AuthenticationSDK.xcodeproj
+LocalDependencies/CocoaAsyncSocket/CocoaAsyncSocket.xcodeproj

@@ -1,0 +1,4 @@
+module CocoaAsyncSocket {
+    umbrella "/Users/v1tas/Desktop/oChat/LocalDependencies/CocoaAsyncSocket/Source/GCD"
+    export *
+}
