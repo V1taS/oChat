@@ -14,7 +14,7 @@ final class TorConnectScreenPresenter: ObservableObject {
   
   // MARK: - View state
   
-  @Published var stateConnectionProgress: Double = 0.14
+  @Published var stateConnectionProgress: Double = .zero
   @Published var stateSystemMessage = ""
   
   // MARK: - Internal properties
@@ -108,15 +108,15 @@ private extension TorConnectScreenPresenter {
     if let serverState = notification.userInfo?["serverState"] as? TorServerState {
       switch serverState {
       case let .serverIsRunning(onPort):
-        stateSystemMessage = "serverIsRunning on port: \(onPort)"
-      case .errorStartingServer(error: let error):
-        stateSystemMessage = "errorStartingServer"
+        print("✅ ServerIsRunning on port: \(onPort)")
+      case let .errorStartingServer(error):
+        print("❌ \(error)")
       case .didAcceptNewSocket:
-        stateSystemMessage = "didAcceptNewSocket"
+        print("✅ DidAcceptNewSocket")
       case .didSentResponse:
-        stateSystemMessage = "didSentResponse"
+        print("✅ didSentResponse")
       case .socketDidDisconnect:
-        stateSystemMessage = "socketDidDisconnect"
+        print("🟡 socketDidDisconnect")
       }
     }
   }
@@ -127,18 +127,18 @@ private extension TorConnectScreenPresenter {
       switch sessionState {
       case .none: break
       case .started:
-        stateSystemMessage = "started"
+        stateSystemMessage = "Started"
       case let .connectingProgress(result):
         stateConnectionProgress = Double(result / 100)
       case .connected:
-        stateSystemMessage = "connected"
+        stateSystemMessage = "Connected"
         moduleOutput?.torServiceConnected()
       case .stopped:
-        stateSystemMessage = "stopped"
+        stateSystemMessage = "Stopped"
       case .refreshing:
-        stateSystemMessage = "refreshing"
+        stateSystemMessage = "Refreshing"
       case let .circuitsUpdated(status):
-        stateSystemMessage = "status"
+        stateSystemMessage = "\(status)"
       }
     }
   }

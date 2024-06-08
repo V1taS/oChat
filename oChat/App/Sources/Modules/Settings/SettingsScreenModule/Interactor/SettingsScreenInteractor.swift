@@ -37,7 +37,6 @@ protocol SettingsScreenInteractorInput {
   ///   - type: Тип уведомления
   func showNotification(_ type: NotificationServiceType)
   
-  
   /// Получает адрес onion-сервиса.
   /// - Returns: Адрес сервиса или ошибка.
   func getOnionAddress(completion: ((Result<String, TorServiceError>) -> Void)?)
