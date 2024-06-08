@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import SKStyle
 
 /// Структура для описания контакта в мессенджере.
 public struct ContactModel {
@@ -108,30 +107,6 @@ extension ContactModel {
         "Подключение..."
       case .requested:
         "Инвайт"
-      }
-    }
-    
-    /// Изображения по статусам
-    public var imageStatus: UIImage? {
-      switch self {
-      case .online:
-        UIImage(
-          named: SKStyleAsset.oChatOnline.name,
-          in: SKStyleResources.bundle,
-          with: nil
-        )
-      case .offline:
-        UIImage(
-          named: SKStyleAsset.oChatOffline.name,
-          in: SKStyleResources.bundle,
-          with: nil
-        )
-      case .inProgress, .requested:
-        UIImage(
-          named: SKStyleAsset.oChatInProgress.name,
-          in: SKStyleResources.bundle,
-          with: nil
-        )
       }
     }
   }
