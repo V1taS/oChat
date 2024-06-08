@@ -2,8 +2,7 @@
   "data" : [
     {
       "filename" : "more.json",
-      "idiom" : "universal",
-      "universal-type-identifier" : "public.json"
+      "idiom" : "universal"
     }
   ],
   "info" : {
