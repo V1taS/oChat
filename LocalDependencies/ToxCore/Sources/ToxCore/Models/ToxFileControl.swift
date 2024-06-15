@@ -1,0 +1,25 @@
+//
+//  ToxFileControl.swift
+//
+//
+//  Created by Vitalii Sosin on 10.06.2024.
+//
+
+import Foundation
+import ToxCoreCpp
+
+enum ToxFileControl: UInt32 {
+  /// Принять запрос на отправку файла или продолжить отправку/прием после паузы.
+  case resume = 0
+  
+  /// Пауза в передаче файла. Первоначальное состояние приема файла всегда находится на паузе, а отправка файла - в процессе. Если обе стороны ставят передачу на паузу, то обе стороны должны отправить `resume` для продолжения.
+  case pause = 1
+  
+  /// Отклонить запрос на отправку файла или завершить передачу файла.
+  case cancel = 2
+}
+
+// Для удобства можно создать глобальные константы
+let TOX_FILE_CONTROL_RESUME = ToxFileControl.resume.rawValue
+let TOX_FILE_CONTROL_PAUSE = ToxFileControl.pause.rawValue
+let TOX_FILE_CONTROL_CANCEL = ToxFileControl.cancel.rawValue

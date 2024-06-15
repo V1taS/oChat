@@ -1,0 +1,4 @@
+module ToxCoreCpp {
+    umbrella "/Users/v1tas/Desktop/iOS Develop/oChat/LocalDependencies/ToxCore/Sources/ToxCoreCpp/Headers"
+    export *
+}
