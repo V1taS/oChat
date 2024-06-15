@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import ToxCoreCpp
 
 /// Перечисление для статусов пользователя.
 /// - online: Пользователь в сети и доступен.
@@ -20,4 +21,20 @@ public enum UserStatus {
   
   /// Пользователь занят и не хочет общаться в данный момент.
   case busy
+  
+  /// Преобразует статус из C в Swift-совместимое перечисление `UserStatus`.
+  /// - Parameter cStatus: Статус из библиотеки Tox.
+  /// - Returns: Соответствующий статус в виде `UserStatus`.
+  static func userStatusFromCUserStatus(_ cStatus: TOX_USER_STATUS) -> UserStatus? {
+    switch cStatus {
+    case TOX_USER_STATUS_NONE:
+      return .online
+    case TOX_USER_STATUS_AWAY:
+      return .away
+    case TOX_USER_STATUS_BUSY:
+      return .busy
+    default:
+      return nil
+    }
+  }
 }

@@ -31,4 +31,20 @@ public enum ConnectionStatus {
       self = .none
     }
   }
+  
+  /// Преобразует статус подключения из C в Swift-совместимое перечисление `ConnectionStatus`.
+  /// - Parameter cStatus: Статус подключения из библиотеки Tox.
+  /// - Returns: Соответствующий статус в виде `ConnectionStatus`.
+  static func fromCConnectionStatus(_ cStatus: TOX_CONNECTION) -> ConnectionStatus? {
+    switch cStatus {
+    case TOX_CONNECTION_NONE:
+      return .none
+    case TOX_CONNECTION_TCP:
+      return .tcp
+    case TOX_CONNECTION_UDP:
+      return .udp
+    default:
+      return nil
+    }
+  }
 }

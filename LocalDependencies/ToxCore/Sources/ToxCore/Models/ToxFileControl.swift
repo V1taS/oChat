@@ -18,8 +18,3 @@ enum ToxFileControl: UInt32 {
   /// Отклонить запрос на отправку файла или завершить передачу файла.
   case cancel = 2
 }
-
-// Для удобства можно создать глобальные константы
-let TOX_FILE_CONTROL_RESUME = ToxFileControl.resume.rawValue
-let TOX_FILE_CONTROL_PAUSE = ToxFileControl.pause.rawValue
-let TOX_FILE_CONTROL_CANCEL = ToxFileControl.cancel.rawValue

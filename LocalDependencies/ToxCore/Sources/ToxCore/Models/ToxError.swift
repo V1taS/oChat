@@ -126,6 +126,39 @@ public enum ToxError: Error {
   
   /// Ошибка: Неверная позиция для отправки данных.
   case fileChunkWrongPosition
+  
+  /// Указан неверный номер друга.
+  case invalidFriendNumber
+  
+  /// Сообщение пустое и не может быть отправлено.
+  case messageEmpty
+  
+  /// Указан неверный номер конференции.
+  case invalidConferenceNumber
+  
+  /// Конференция не подключена.
+  case conferenceNotConnected
+  
+  /// Не удалось отправить сообщение.
+  case failSend
+  
+  /// Никнейм слишком длинный.
+  case nicknameTooLong
+  
+  /// Имя пользователя пустое и должно быть задано.
+  case emptyUserName
+  
+  /// Неверная кодировка строки.
+  case invalidStringEncoding
+  
+  /// Имя друга пустое.
+  case emptyFriendName
+  
+  /// Статусное сообщение пустое.
+  case emptyStatusMessage
+  
+  /// Статусное сообщение друга пустое.
+  case emptyFriendStatusMessage
 }
 
 extension ToxError {
@@ -200,25 +233,6 @@ extension ToxError {
     }
   }
   
-  // Инициализация ToxError из значения C-перечисления TOX_ERR_FRIEND_SEND_MESSAGE.
-  /// - Parameter messageSendError: Значение C-перечисления TOX_ERR_FRIEND_SEND_MESSAGE.
-  public init(messageSendError: TOX_ERR_FRIEND_SEND_MESSAGE) {
-    switch messageSendError {
-    case TOX_ERR_FRIEND_SEND_MESSAGE_OK:
-      self = .ok
-    case TOX_ERR_FRIEND_SEND_MESSAGE_FRIEND_NOT_FOUND:
-      self = .friendNotFound
-    case TOX_ERR_FRIEND_SEND_MESSAGE_FRIEND_NOT_CONNECTED:
-      self = .friendNotConnected
-    case TOX_ERR_FRIEND_SEND_MESSAGE_SENDQ:
-      self = .sendQueueFull
-    case TOX_ERR_FRIEND_SEND_MESSAGE_TOO_LONG:
-      self = .messageTooLong
-    default:
-      self = .unknown
-    }
-  }
-  
   /// Инициализатор для ошибок удаления друга.
   /// - Parameter friendDeleteError: Значение ошибки C-перечисления TOX_ERR_FRIEND_DELETE.
   public init(friendDeleteError: TOX_ERR_FRIEND_DELETE) {
@@ -282,6 +296,60 @@ extension ToxError {
       self = .fileChunkSendQueueFull
     case TOX_ERR_FILE_SEND_CHUNK_WRONG_POSITION:
       self = .fileChunkWrongPosition
+    default:
+      self = .unknown
+    }
+  }
+  
+  // Инициализация ToxError из значения C-перечисления TOX_ERR_FRIEND_SEND_MESSAGE.
+  /// - Parameter messageSendError: Значение C-перечисления TOX_ERR_FRIEND_SEND_MESSAGE.
+  init(cError: TOX_ERR_FRIEND_SEND_MESSAGE) {
+    switch cError {
+    case TOX_ERR_FRIEND_SEND_MESSAGE_FRIEND_NOT_FOUND:
+      self = .invalidFriendNumber
+    case TOX_ERR_FRIEND_SEND_MESSAGE_FRIEND_NOT_CONNECTED:
+      self = .friendNotConnected
+    case TOX_ERR_FRIEND_SEND_MESSAGE_SENDQ:
+      self = .sendQueueFull
+    case TOX_ERR_FRIEND_SEND_MESSAGE_TOO_LONG:
+      self = .messageTooLong
+    case TOX_ERR_FRIEND_SEND_MESSAGE_EMPTY:
+      self = .messageEmpty
+    default:
+      self = .unknown
+    }
+  }
+  
+  init(conferenceError: TOX_ERR_CONFERENCE_SEND_MESSAGE) {
+    switch conferenceError {
+    case TOX_ERR_CONFERENCE_SEND_MESSAGE_CONFERENCE_NOT_FOUND:
+      self = .invalidConferenceNumber
+    case TOX_ERR_CONFERENCE_SEND_MESSAGE_NO_CONNECTION:
+      self = .conferenceNotConnected
+    case TOX_ERR_CONFERENCE_SEND_MESSAGE_TOO_LONG:
+      self = .messageTooLong
+    case TOX_ERR_CONFERENCE_SEND_MESSAGE_FAIL_SEND:
+      self = .failSend
+    default:
+      self = .unknown
+    }
+  }
+  
+  init(setInfoError: TOX_ERR_SET_INFO) {
+    switch setInfoError {
+    case TOX_ERR_SET_INFO_NULL:
+      self = .null
+    case TOX_ERR_SET_INFO_TOO_LONG:
+      self = .nicknameTooLong
+    default:
+      self = .unknown
+    }
+  }
+  
+  init(setTypingError: TOX_ERR_SET_TYPING) {
+    switch setTypingError {
+    case TOX_ERR_SET_TYPING_FRIEND_NOT_FOUND:
+      self = .friendNotFound
     default:
       self = .unknown
     }
