@@ -72,7 +72,7 @@ final class SettingsScreenInteractor {
 
 extension SettingsScreenInteractor: SettingsScreenInteractorInput {
   func getOnionAddress(completion: ((Result<String, TorServiceError>) -> Void)?) {
-    p2pChatManager.getOnionAddress(completion: completion)
+//    p2pChatManager.getOnionAddress(completion: completion)
   }
   
   func copyToClipboard(text: String) {

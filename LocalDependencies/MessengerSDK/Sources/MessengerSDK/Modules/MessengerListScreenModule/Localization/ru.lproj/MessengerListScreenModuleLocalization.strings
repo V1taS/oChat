@@ -8,3 +8,4 @@
 // MARK: - State
 
 "State.Header.Title" = "oChat!";
+"State.Notification.PasscodeNotSet.Title" = "Пароль на устройстве не установлен. Шифрование данных невозможно!";

@@ -13,64 +13,21 @@ public struct WidgetCryptoView: View {
   
   // MARK: - Private properties
   
-  private var models: [WidgetCryptoView.Model]
-  @Binding private var searchText: String
+  private var model: WidgetCryptoView.Model
   
   // MARK: - Initialization
   
   /// Инициализатор для создания виджета с криптовалютой
   /// - Parameters:
-  ///   - models: Модели данных
-  ///   - searchText: Текст для филтрации массива по полю ``model.leftSide?.titleModel?.text``
-  public init(
-    _ models: [WidgetCryptoView.Model],
-    searchText: Binding<String> = .constant("")
-  ) {
-    self.models = models
-    self._searchText = searchText
-  }
-  
-  /// Инициализатор для создания виджета с криптовалютой
-  /// - Parameters:
   ///   - model: Модель данных
-  ///   - searchText: Текст для филтрации массива по полю ``model.leftSide?.titleModel?.text``
-  public init(
-    _ model: WidgetCryptoView.Model,
-    searchText: Binding<String> = .constant("")
-  ) {
-    self.init([model], searchText: searchText)
+  public init(_ model: WidgetCryptoView.Model) {
+    self.model = model
   }
   
   // MARK: - Body
   
   public var body: some View {
-    LazyVStack(alignment: .center, spacing: .zero) {
-      
-      ForEach(Array(models.enumerated()).filter { index, model in
-        // Проверяем, является ли searchText пустым и разворачиваем его
-        guard !searchText.isEmpty else {
-          // Если searchText равен nil, возвращаем true для всех моделей, чтобы отобразить все.
-          return true
-        }
-        // Проверяем, есть ли текст у модели
-        if let text = model.leftSide?.titleModel?.text {
-          // Возвращаем true, если searchText пуст или содержится в тексте модели (игнорируем регистр)
-          return searchText.isEmpty || text.lowercased().contains(searchText.lowercased())
-        } else {
-          // Если у модели нет текста, возвращаем true, чтобы включить ее в отображаемые модели.
-          return true
-        }
-      }, id: \.element.id) { index, model in
-        createWidgetCrypto(model: model)
-        
-        // Разделяем виджеты линией, если это не последний элемент
-        if models.count > 1 && models.count - 1 != index {
-          SKStyleAsset.slate.swiftUIColor.opacity(0.3)
-            .frame(width: .infinity, height: 1)
-        }
-      }
-    }
-    .clipShape(RoundedRectangle(cornerRadius: .s3))
+    createWidgetCrypto(model: model)
   }
 }
 
@@ -419,27 +376,25 @@ struct WidgetCryptoView_Previews: PreviewProvider {
     VStack {
       Spacer()
       WidgetCryptoView(
-        [
-          .init(
-            leftSide: .init(
-              titleModel: .init(
-                text: "ETH",
-                textStyle: .standart
-              )
-            ),
-            rightSide: .init(
-              itemModel: .radioButtons(
-                initNewValue: true,
-                action: {_ in}
-              )
-            ),
-            additionCenterTextModel: nil,
-            additionCenterContent: nil,
-            isSelectable: false,
-            backgroundColor: nil,
-            action: {}
-          )
-        ]
+        .init(
+          leftSide: .init(
+            titleModel: .init(
+              text: "ETH",
+              textStyle: .standart
+            )
+          ),
+          rightSide: .init(
+            itemModel: .radioButtons(
+              initNewValue: true,
+              action: {_ in}
+            )
+          ),
+          additionCenterTextModel: nil,
+          additionCenterContent: nil,
+          isSelectable: false,
+          backgroundColor: nil,
+          action: {}
+        )
       )
       Spacer()
     }

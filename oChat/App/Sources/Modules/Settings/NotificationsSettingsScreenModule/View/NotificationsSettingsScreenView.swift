@@ -20,15 +20,32 @@ struct NotificationsSettingsScreenView: View {
   // MARK: - Body
   
   var body: some View {
-    VStack(spacing: .zero) {
-      ScrollView(.vertical, showsIndicators: false) {
-        VStack(spacing: .s6) {
-          WidgetCryptoView(presenter.stateWidgetCryptoModels)
+    List {
+      ForEach(presenter.stateWidgetCryptoModels.indices, id: \.self) { index in
+        VStack(spacing: .zero) {
+          WidgetCryptoView(presenter.stateWidgetCryptoModels[index])
+            .if(index == 0) { view in
+              view
+                .clipShape(RoundedCornerShape(corners: [.topLeft, .topRight], radius: .s4))
+            }
+            .if(index == presenter.stateWidgetCryptoModels.count - 1) { view in
+              view
+                .clipShape(RoundedCornerShape(corners: [.bottomLeft, .bottomRight], radius: .s4))
+            }
+          
+          if index < presenter.stateWidgetCryptoModels.count - 1 {
+            Divider()
+              .background(SKStyleAsset.slate.swiftUIColor.opacity(0.3))
+          }
         }
-        .padding(.horizontal, .s4)
-        .padding(.top, .s3)
+        .listRowBackground(Color.clear)
+        .listRowInsets(.init(top: .zero, leading: .s4, bottom: .zero, trailing: .s4))
+        .listRowSeparator(.hidden)
       }
     }
+    .background(Color.clear)
+    .listStyle(PlainListStyle())
+    .padding(.vertical, .s4)
   }
 }
 

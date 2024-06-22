@@ -7,13 +7,4 @@
 
 import Foundation
 
-public enum Secrets {
-  /// Базовый URL для скачивания изображений
-  public static var tokenBaseUrlString = ""
-  
-  /// Ключ для API Infura
-  public static var infuraKeys = ""
-  
-  /// Ключ для API OneInch
-  public static var oneInchKeys = ""
-}
+public enum Secrets {}

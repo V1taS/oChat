@@ -18,6 +18,8 @@ public enum SecureDataManagerServiceKey: String {
   case messengerModelHandler = "MessengerModelHandlerService"
   /// Контейнер с диплинками
   case deepLinkService = "DeepLinkService"
+  /// Контейнер для сервиса ТОР
+  case torService = "TorService"
 }
 
 // MARK: - Extension
@@ -25,6 +27,6 @@ public enum SecureDataManagerServiceKey: String {
 extension SecureDataManagerServiceKey {
   /// Элементы которые надо очищать при удалении программы с устройства
   static public var itemsToClear: [SecureDataManagerServiceKey] {
-    [.modelHandler, .session, .messengerModelHandler, deepLinkService]
+    [.modelHandler, .session, .messengerModelHandler, deepLinkService, torService]
   }
 }

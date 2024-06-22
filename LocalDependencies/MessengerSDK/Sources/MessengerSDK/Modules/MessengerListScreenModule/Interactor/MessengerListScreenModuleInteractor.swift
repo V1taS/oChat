@@ -16,10 +16,9 @@ protocol MessengerListScreenModuleInteractorInput {
   /// Расшифровывает данные, используя приватный ключ.
   /// - Parameters:
   ///   - encryptedData: Зашифрованные данные.
-  ///   - privateKey: Приватный ключ.
   /// - Returns: Расшифрованные данные.
   /// - Throws: Ошибка расшифровки данных.
-  func decrypt(_ encryptedData: String?, privateKey: String) -> String?
+  func decrypt(_ encryptedData: String?, completion: ((String?) -> Void)?)
   
   /// Шифрует данные, используя публичный ключ.
   /// - Parameters:
@@ -34,6 +33,11 @@ protocol MessengerListScreenModuleInteractorInput {
   /// - Returns: Публичный ключ в виде строки.
   /// - Throws: Ошибка генерации публичного ключа.
   func publicKey(from privateKey: String) -> String?
+  
+  /// Извлекает публичный ключ из адреса Tox.
+  /// - Параметр address: Адрес Tox в виде строки (76 символов).
+  /// - Возвращаемое значение: Строка с публичным ключом (64 символа) или `nil` при ошибке.
+  func getToxPublicKey(from address: String) -> String?
   
   /// Возвращает уникальный идентификатор устройства.
   /// - Returns: Строка, содержащая UUID устройства или "Unknown", если идентификатор не доступен.
@@ -73,29 +77,55 @@ protocol MessengerListScreenModuleInteractorInput {
   
   /// Отправляет сообщение на сервер.
   /// - Parameters:
-  ///   - onionAddress: Адрес сервера в сети Onion.
+  ///   - toxPublicKey: Публичный ключ контакта, который находится в контактах
   ///   - messengerRequest: Данные запроса в виде `MessengerNetworkRequest`, содержащие информацию для отправки.
   ///   - completion: Блок завершения, который возвращает `Result<Void, Error>` указывающий успешность операции.
   func sendMessage(
-    onionAddress: String,
+    toxPublicKey: String,
     messengerRequest: MessengerNetworkRequestModel?,
-    completion: @escaping (Result<Void, Error>) -> Void
+    completion: @escaping (Result<Int32, Error>) -> Void
   )
   
-  /// Инициирует переписку по указанному адресу.
+  /// Запрос на переписку по указанному адресу.
   /// - Parameters:
-  ///   - onionAddress: Адрес сервера в сети Onion.
+  ///   - senderAddress: Адрес контакта
   ///   - messengerRequest: Данные запроса в виде `MessengerNetworkRequest`, содержащие информацию для начала переписки.
   ///   - completion: Блок завершения, который возвращает `Result<Void, Error>` указывающий успешность операции.
-  func initiateChat(
-    onionAddress: String,
+  func initialChat(
+    senderAddress: String,
     messengerRequest: MessengerNetworkRequestModel?,
-    completion: @escaping (Result<Void, Error>) -> Void
+    completion: @escaping (Result<Int32?, Error>) -> Void
   )
   
   /// Получает адрес onion-сервиса.
   /// - Returns: Адрес сервиса или ошибка.
-  func getOnionAddress(completion: ((Result<String, TorServiceError>) -> Void)?)
+  func getToxAddress(completion: ((Result<String, TorServiceError>) -> Void)?)
+  
+  /// Метод для получения публичного ключа.
+  /// - Returns: Публичный ключ в виде строки в шестнадцатеричном формате.
+  func getToxPublicKey(completion: @escaping (String?) -> Void)
+  
+  /// Получить контакт по адресу onion
+  func getContactModelsFrom(
+    onionAddress: String,
+    completion: ((ContactModel?) -> Void)?
+  )
+  
+  /// Получить контакт по публичному ключу
+  func getContactModelsFrom(
+    toxPublicKey: String,
+    completion: ((ContactModel?) -> Void)?
+  )
+  
+  /// Используя метод confirmFriendRequest, вы подтверждаете запрос на добавление в друзья, зная публичный ключ отправителя.
+  /// Этот метод принимает публичный ключ друга и добавляет его в список друзей без отправки дополнительного сообщения.
+  /// - Parameters:
+  ///   - publicKey: Строка, представляющая публичный ключ друга. Этот ключ используется для идентификации пользователя в сети Tox.
+  ///   - completion: Замыкание, вызываемое после завершения операции. Возвращает результат выполнения в виде:
+  func confirmFriendRequest(
+    with publicToxKey: String,
+    completion: @escaping (Result<String, Error>) -> Void
+  )
   
   /// Устанавливает, является ли контакт онлайн
   /// - Parameters:
@@ -108,11 +138,15 @@ protocol MessengerListScreenModuleInteractorInput {
     completion: (() -> Void)?
   )
   
-  /// Получить контакт по адресу onion
-  func getContactModelsFrom(
-    onionAddress: String,
-    completion: ((ContactModel?) -> Void)?
-  )
+  /// Переводит всех контактов в состояние оффлайн.
+  /// - Parameter completion: Опциональный блок завершения, вызываемый после того, как все контакты будут переведены в оффлайн.
+  func setAllContactsIsOffline(completion: (() -> Void)?)
+  
+  /// Проверяем установлен ли пароль на телефоне, это необходимо для шифрования данных
+  func passcodeNotSetInSystemIOSheck()
+  
+  /// Запуск TOR + TOX сервисы
+  func stratTORxService()
 }
 
 /// Интерактор
@@ -150,68 +184,229 @@ final class MessengerListScreenModuleInteractor {
 // MARK: - MessengerListScreenModuleInteractorInput
 
 extension MessengerListScreenModuleInteractor: MessengerListScreenModuleInteractorInput {
-  func getContactModelsFrom(onionAddress: String, completion: ((ContactModel?) -> Void)?) {
-    modelHandlerService.getContactModels { contactModels in
-      if let contactIndex = contactModels.firstIndex(where: { $0.onionAddress == onionAddress }) {
-        completion?(contactModels[contactIndex])
-      } else {
-        completion?(nil)
+  func stratTORxService() {
+    DispatchQueue.global().async { [weak self] in
+      guard let self else { return }
+      modelHandlerService.getMessengerModel { [weak self] messengerModel in
+        guard let self else { return }
+        let toxStateAsString = messengerModel.toxStateAsString
+        
+        p2pChatManager.start(
+          saveDataString: toxStateAsString) { [weak self] result in
+            guard let self else { return }
+            switch result {
+            case .success:
+              if toxStateAsString == nil {
+                p2pChatManager.toxStateAsString { [weak self] stateAsString in
+                  guard let self else { return }
+                  modelSettingsManager
+                    .setToxStateAsString(stateAsString, completion: {})
+                }
+              }
+            case .failure:
+              break
+            }
+          }
       }
     }
   }
   
-  func initiateChat(
-    onionAddress: String,
-    messengerRequest: MessengerNetworkRequestModel?,
-    completion: @escaping (Result<Void, any Error>
-    ) -> Void) {
-    p2pChatManager.initiateChat(
-      onionAddress: onionAddress,
-      messengerRequest: messengerRequest,
-      completion: completion
-    )
+  func passcodeNotSetInSystemIOSheck() {
+    DispatchQueue.global().async { [weak self] in
+      self?.systemService.checkIfPasscodeIsSet { [weak self] result in
+        guard let self else { return }
+        if case let .failure(error) = result, error == .passcodeNotSet {
+          DispatchQueue.main.async { [weak self] in
+            self?.notificationService.showNotification(
+              .negative(
+                title: MessengerSDKStrings.MessengerListScreenModuleLocalization
+                  .stateNotificationPasscodeNotSetTitle
+              )
+            )
+          }
+        }
+      }
+    }
   }
   
-  func sendMessage(
-    onionAddress: String,
-    messengerRequest: MessengerNetworkRequestModel?,
-    completion: @escaping (Result<Void, any Error>
-    ) -> Void) {
-    p2pChatManager.sendMessage(
-      onionAddress: onionAddress,
-      messengerRequest: messengerRequest,
-      completion: completion
-    )
+  func setAllContactsIsOffline(completion: (() -> Void)?) {
+    DispatchQueue.global().async { [weak self] in
+      self?.modelSettingsManager.setAllContactsIsOffline {
+        DispatchQueue.main.async {
+          completion?()
+        }
+      }
+    }
   }
+  
+  func setStatus(_ model: ContactModel, _ status: ContactModel.Status, completion: (() -> Void)?) {
+    DispatchQueue.global().async { [weak self] in
+      self?.modelSettingsManager.setStatus(model, status, completion: {
+        DispatchQueue.main.async {
+          completion?()
+        }
+      })
+    }
+  }
+  
+  func confirmFriendRequest(
+    with publicToxKey: String,
+    completion: @escaping (Result<String, Error>) -> Void
+  ) {
+    DispatchQueue.global().async { [weak self] in
+      self?.p2pChatManager.confirmFriendRequest(with: publicToxKey) { [weak self] result in
+        DispatchQueue.main.async {
+          completion(result)
+        }
+      }
+    }
+  }
+  
+  func getContactModelsFrom(
+    toxPublicKey: String,
+    completion: ((ContactModel?) -> Void)?
+  ) {
+    DispatchQueue.global().async { [weak self] in
+      self?.modelHandlerService.getContactModels { contactModels in
+        DispatchQueue.main.async { [weak self] in
+          if let contactIndex = contactModels.firstIndex(where: { $0.toxPublicKey == toxPublicKey }) {
+            completion?(contactModels[contactIndex])
+          } else {
+            completion?(nil)
+          }
+        }
+      }
+    }
+  }
+  
+  func getContactModelsFrom(onionAddress: String, completion: ((ContactModel?) -> Void)?) {
+    DispatchQueue.global().async { [weak self] in
+      self?.modelHandlerService.getContactModels { contactModels in
+        DispatchQueue.main.async { [weak self] in
+          if let contactIndex = contactModels.firstIndex(where: { $0.toxAddress == onionAddress }) {
+            completion?(contactModels[contactIndex])
+          } else {
+            completion?(nil)
+          }
+        }
+      }
+    }
+  }
+  
+  func initialChat(
+    senderAddress: String,
+    messengerRequest: MessengerNetworkRequestModel?,
+    completion: @escaping (Result<Int32?, Error>) -> Void) {
+      guard let messengerRequest else {
+        return
+      }
+      
+      DispatchQueue.global().async { [weak self] in
+        let dto = messengerRequest.mapToDTO()
+        guard let json = self?.createJSONString(from: dto) else {
+          return
+        }
+        
+        self?.p2pChatManager.addFriend(address: senderAddress, message: json, completion: { contactID in
+          DispatchQueue.main.async { [weak self] in
+            print("✅ Запрос отправлен")
+            completion(.success(contactID))
+            self?.saveToxState()
+          }
+        })
+      }
+    }
+  
+  func sendMessage(
+    toxPublicKey: String,
+    messengerRequest: MessengerNetworkRequestModel?,
+    completion: @escaping (Result<Int32, Error>) -> Void) {
+      guard let messengerRequest else {
+        return
+      }
+      
+      DispatchQueue.global().async { [weak self] in
+        let dto = messengerRequest.mapToDTO()
+        guard let json = self?.createJSONString(from: dto) else {
+          return
+        }
+        
+        self?.p2pChatManager.sendMessage(
+          to: toxPublicKey,
+          message: json,
+          messageType: .normal) { [weak self] result in
+            DispatchQueue.main.async {
+              switch result {
+              case let .success(messageId):
+                completion(.success(messageId))
+              case let .failure(error):
+                completion(.failure(error))
+              }
+              self?.saveToxState()
+            }
+          }
+      }
+    }
   
   func encrypt(_ data: String?, publicKey: String) -> String? {
     cryptoService.encrypt(data, publicKey: publicKey)
   }
   
-  func setStatus(_ model: ContactModel, _ status: SKAbstractions.ContactModel.Status, completion: (() -> Void)?) {
-    DispatchQueue.global().async { [weak self] in
-      self?.modelSettingsManager.setStatus(model, status, completion: completion)
-    }
-  }
-  
   func getContactModels(completion: @escaping ([ContactModel]) -> Void) {
     DispatchQueue.global().async { [weak self] in
-      self?.modelHandlerService.getContactModels(completion: completion)
+      self?.modelHandlerService.getContactModels(completion: { contactModel in
+        DispatchQueue.main.async {
+          completion(contactModel)
+        }
+      })
     }
   }
   
-  func decrypt(_ encryptedData: String?, privateKey: String) -> String? {
-    cryptoService.decrypt(encryptedData, privateKey: privateKey)
+  func decrypt(_ encryptedData: String?, completion: ((String?) -> Void)?) {
+    DispatchQueue.global(qos: .userInteractive).async { [weak self] in
+      guard let self else { return }
+      let messenge = cryptoService.decrypt(
+        encryptedData,
+        privateKey: systemService.getDeviceIdentifier()
+      )
+      
+      DispatchQueue.main.async {
+        completion?(messenge)
+      }
+    }
   }
   
-  func getOnionAddress(completion: ((Result<String, SKAbstractions.TorServiceError>) -> Void)?) {
+  func getToxAddress(completion: ((Result<String, TorServiceError>) -> Void)?) {
     DispatchQueue.global().async { [weak self] in
-      self?.p2pChatManager.getOnionAddress(completion: completion)
+      self?.p2pChatManager.getToxAddress(completion: { result in
+        DispatchQueue.main.async {
+          switch result {
+          case let .success(toxAddress):
+            completion?(.success(toxAddress))
+          case .failure(_):
+            completion?(.failure(.onionAddressForTorHiddenServiceCouldNotBeLoaded))
+          }
+        }
+      })
+    }
+  }
+  
+  func getToxPublicKey(completion: @escaping (String?) -> Void) {
+    DispatchQueue.global().async { [weak self] in
+      self?.p2pChatManager.getToxPublicKey(completion: { toxPublicKey in
+        DispatchQueue.main.async {
+          completion(toxPublicKey)
+        }
+      })
     }
   }
   
   func publicKey(from privateKey: String) -> String? {
     cryptoService.publicKey(from: privateKey)
+  }
+  
+  func getToxPublicKey(from address: String) -> String? {
+    p2pChatManager.getToxPublicKey(from: address)
   }
   
   func getDeviceIdentifier() -> String {
@@ -220,23 +415,42 @@ extension MessengerListScreenModuleInteractor: MessengerListScreenModuleInteract
   
   func removeContactModels(_ contactModel: ContactModel, completion: (() -> Void)?) {
     DispatchQueue.global().async { [weak self] in
-      self?.modelHandlerService.removeContactModels(contactModel, completion: completion)
+      if let toxPublicKey = contactModel.toxPublicKey {
+        self?.p2pChatManager.deleteFriend(toxPublicKey: toxPublicKey, completion: {_ in})
+      }
+      self?.modelHandlerService.removeContactModels(contactModel, completion: {
+        DispatchQueue.main.async {
+          completion?()
+        }
+      })
+      self?.saveToxState()
     }
   }
   
   func saveContactModel(_ model: ContactModel, completion: (() -> Void)?) {
     DispatchQueue.global().async { [weak self] in
-      self?.modelHandlerService.saveContactModel(model, completion: completion)
+      self?.modelHandlerService.saveContactModel(model, completion: { [weak self] in
+        DispatchQueue.main.async {
+          completion?()
+          self?.saveToxState()
+        }
+      })
     }
   }
   
   func showNotification(_ type: SKAbstractions.NotificationServiceType) {
-    notificationService.showNotification(type)
+    DispatchQueue.main.async { [weak self] in
+      self?.notificationService.showNotification(type)
+    }
   }
   
-  func getMessengerModel(completion: @escaping (SKAbstractions.MessengerModel) -> Void) {
+  func getMessengerModel(completion: @escaping (MessengerModel) -> Void) {
     DispatchQueue.global().async { [weak self] in
-      self?.modelHandlerService.getMessengerModel(completion: completion)
+      self?.modelHandlerService.getMessengerModel(completion: { messengerModel in
+        DispatchQueue.main.async {
+          completion(messengerModel)
+        }
+      })
     }
   }
   
@@ -247,13 +461,39 @@ extension MessengerListScreenModuleInteractor: MessengerListScreenModuleInteract
   }
   
   func getDeepLinkAdress(completion: ((String?) -> Void)?) {
-    deepLinkService.getMessengerAdress(completion: completion)
+    deepLinkService.getMessengerAdress { adress in
+      DispatchQueue.main.async {
+        completion?(adress)
+      }
+    }
   }
 }
 
 // MARK: - Private
 
-private extension MessengerListScreenModuleInteractor {}
+private extension MessengerListScreenModuleInteractor {
+  func createJSONString(from dto: MessengerNetworkRequestDTO) -> String? {
+    let encoder = JSONEncoder()
+    
+    do {
+      let jsonData = try encoder.encode(dto)
+      guard let jsonString = String(data: jsonData, encoding: .utf8) else {
+        print("Ошибка преобразования данных JSON в строку.")
+        return nil
+      }
+      return jsonString
+    } catch {
+      print("Ошибка кодирования модели в JSON: \(error)")
+      return nil
+    }
+  }
+  
+  func saveToxState() {
+    p2pChatManager.toxStateAsString { [weak self] stateAsString in
+      self?.modelSettingsManager.setToxStateAsString(stateAsString, completion: {})
+    }
+  }
+}
 
 // MARK: - Constants
 

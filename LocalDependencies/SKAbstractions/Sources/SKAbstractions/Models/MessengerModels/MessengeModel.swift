@@ -52,6 +52,8 @@ extension MessengeModel {
     case own
     /// Сообщение получено от другого пользователя.
     case received
+    /// Системное сообщение
+    case system
   }
 }
 

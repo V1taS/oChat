@@ -68,7 +68,7 @@ extension MessengerDialogScreenInteractor: MessengerDialogScreenInteractorInput 
   
   func getNewContactModels(_ contactModel: ContactModel, completion: ((ContactModel) -> Void)?) {
     modelHandlerService.getContactModels { contactModels in
-      if let contactIndex = contactModels.firstIndex(where: { $0.onionAddress == contactModel.onionAddress }) {
+      if let contactIndex = contactModels.firstIndex(where: { $0.toxAddress == contactModel.toxAddress }) {
         completion?(contactModels[contactIndex])
       } else {
         completion?(contactModel)

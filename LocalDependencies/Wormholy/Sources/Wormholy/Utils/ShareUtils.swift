@@ -33,7 +33,7 @@ final class ShareUtils {
     ) { (sharedItems) in
       guard let sharedStrings = sharedItems as? [String] else { return }
       
-      let appName = Bundle.main.infoDictionary![kCFBundleNameKey as String] as! String
+      let appName = Bundle.main.infoDictionary![kCFBundleNameKey as String] as? String
       
       let dateFormatterGet = DateFormatter()
       dateFormatterGet.dateFormat = "yyyyMMdd_HHmmss_SSS"
@@ -48,7 +48,7 @@ final class ShareUtils {
         suffix = "-postman_collection.json"
       }
       
-      let filename = "\(appName)_\(dateFormatterGet.string(from: Date()))\(suffix)"
+      let filename = "\(appName ?? "")_\(dateFormatterGet.string(from: Date()))\(suffix)"
       
       for string in sharedStrings {
         FileHandler.writeTxtFileOnDesktop(text: string, fileName: filename)
@@ -86,9 +86,9 @@ final class ShareUtils {
     let dateFormatterGet = DateFormatter()
     dateFormatterGet.dateFormat = "yyyyMMdd_HHmmss_SSS"
     
-    let appName = Bundle.main.infoDictionary![kCFBundleNameKey as String] as! String
+    let appName = Bundle.main.infoDictionary![kCFBundleNameKey as String] as? String
     
-    let collectionName = "\(appName) \(dateFormatterGet.string(from: Date()))"
+    let collectionName = "\(appName ?? "") \(dateFormatterGet.string(from: Date()))"
     
     let info = PMInfo(postmanID: collectionName, name: collectionName, schema: "https://schema.getpostman.com/json/collection/v2.1.0/collection.json")
     

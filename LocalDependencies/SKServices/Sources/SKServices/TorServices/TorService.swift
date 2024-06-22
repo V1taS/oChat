@@ -9,37 +9,24 @@ import Foundation
 import Tor
 import SKAbstractions
 
-public class TorService: NSObject, URLSessionDelegate, ITorService {
+public final class TorService: NSObject, ITorService {
   
   // MARK: - Public properties
   
-  /// Singleton instance
   public static let shared = TorService()
   public var stateAction: ((_ state: TorSessionState) -> Void)?
   
   // MARK: - Private properties
+  
+  private let secureDataManagerService: ISecureDataManagerService = SecureDataManagerService(.messengerModelHandler)
+  private let cryptoService: ICryptoService = CryptoService()
   
   private var config: TorConfiguration = TorConfiguration()
   private var thread: TorThread?
   private var controller: TorController?
   private var authDirPath = ""
   private var onionAddress: String?
-  
-  private var sessionConfiguration: URLSessionConfiguration {
-    let session = URLSessionConfiguration.default
-    session.connectionProxyDictionary = [
-      kCFProxyTypeKey: kCFProxyTypeSOCKS,
-      kCFStreamPropertySOCKSProxyHost: "localhost",
-      kCFStreamPropertySOCKSProxyPort: Constants.proxyPort
-    ]
-    return session
-  }
-  
-  private lazy var session = URLSession(
-    configuration: sessionConfiguration,
-    delegate: self,
-    delegateQueue: OperationQueue()
-  )
+  private lazy var session = sessionConfiguration()
   
   // MARK: - Init
   
@@ -209,11 +196,6 @@ private extension TorService {
       case ("GUARD", "DOWN"):
         self.stateAction?(.stopped)
         return true
-      case ("CIRC", "LAUNCHED"), ("CIRC", "BUILT"), ("CIRC", "FAILED"), ("CIRC", "CLOSED"):
-        if let id = arguments?["ID"], let status = arguments?["STATUS"] {
-          stateAction?(.circuitsUpdated(status))
-        }
-        return true
       default:
         print("Необработанное событие: \(type) с действием \(action)")
         return true
@@ -291,19 +273,59 @@ private extension TorService {
     stateAction?(.started)
     
     self.config.options = [
+      // Порт DNS: Указывает порт, на котором Tor будет слушать запросы DNS и отвечать псевдо-ответами,
+      // если запрошенные хосты могут быть разрешены через сеть Tor.
       "DNSPort": "\(Constants.dnsPort)",
+      
+      // Автоматическая карта хостов при разрешении: При разрешении имен в DNS-запросах автоматически
+      // создает виртуальные адреса для хостов в .onion доменах.
       "AutomapHostsOnResolve": "1",
-      "SocksPort": "\(Constants.proxyPort)", // Только Onion трафик
+      
+      // Порт SOCKS: Указывает порт, на котором Tor принимает соединения от клиентских приложений 
+      // через SOCKS5 прокси.
+      "SocksPort": "\(Constants.proxyPort)",
+      
+      // Избегать записи на диск: Указывает Tor не записывать информацию на диск для увеличения
+      // конфиденциальности и снижения износа носителей.
       "AvoidDiskWrites": "1",
+      
+      // Директория аутентификации клиента для Onion: Указывает директорию, в которой хранятся ключи
+      // аутентификации для доступа к защищенным Onion-сервисам.
       "ClientOnionAuthDir": "\(self.authDirPath)",
+      
+      // Изучить таймаут создания цепи: Если включено, Tor будет пытаться изучить, сколько времени 
+      // обычно требуется для построения цепи, и настроить тайм-ауты соответственно.
       "LearnCircuitBuildTimeout": "1",
-      "NumEntryGuards": "1", // Увеличить количество узлов
-      "SafeSocks": "1",
+      
+      // Количество стражей входа: Определяет, сколько входных узлов (стражей) должно использовать
+      // Tor для создания своих цепочек.
+      "NumEntryGuards": "3",
+      
+      // Безопасные SOCKS: Предотвращает утечку информации путем блокирования потенциально 
+      // опасных SOCKS-запросов, например, запросов по DNS.
+//      "SafeSocks": "1",
+      
+      // Долгоживущие порты: Список портов, для которых Tor будет пытаться использовать более стабильные 
+      // и долговечные цепи, чтобы улучшить производительность и надежность.
       "LongLivedPorts": "80,443",
+      
+      // Количество CPU: Определяет, сколько процессорных ядер должно использоваться 
+      // Tor для обработки криптографических задач.
       "NumCPUs": "2",
+      
+      // Отключить присоединение отладчика: Предотвращает попытки присоединения отладчиков к процессу Tor,
+      // что может быть использовано для увеличения безопасности.
       "DisableDebuggerAttachment": "1",
-      "SafeLogging": "1",
-      "UseEntryGuardsAsDirGuards": "1"
+      
+      // Безопасное логирование: Конфигурирует Tor для записи в логи минимального количества информации,
+      // чтобы уменьшить риск утечки чувствительных данных.
+      "SafeLogging": "0",
+      
+      // Контрольная сумма: Включает или отключает проверку контрольной суммы для пакетов данных.
+//      "Checksums": "1",
+      
+      // BridgeRelay: Определяет, будет ли этот Tor узел действовать как мост.
+      "BridgeRelay": "0"
     ]
     
     config.cookieAuthentication = true
@@ -498,6 +520,41 @@ private extension TorService {
     }
     controller?.disconnect()
     controller = nil
+  }
+}
+
+// MARK: - SessionConfiguration
+
+extension TorService: URLSessionDelegate {
+  /// Создает конфигурацию сессии URLSession с использованием прокси SOCKS для подключения через сеть Tor.
+  /// - Returns: Экземпляр URLSession, настроенный для работы через локальный прокси-сервер Tor.
+  func sessionConfiguration() -> URLSession {
+    let urlSessionConfiguration = URLSessionConfiguration.default
+    urlSessionConfiguration.connectionProxyDictionary = [
+      kCFProxyTypeKey: kCFProxyTypeSOCKS,
+      kCFStreamPropertySOCKSProxyHost: "localhost",
+      kCFStreamPropertySOCKSProxyPort: Constants.proxyPort
+    ]
+    let session = URLSession(
+      configuration: urlSessionConfiguration,
+      delegate: self,
+      delegateQueue: OperationQueue()
+    )
+    return session
+  }
+  
+  /// Вызывается, когда сессия URLSession становится недействительной из-за ошибки.
+  /// - Parameters:
+  ///   - session: Сессия URLSession, которая стала недействительной.
+  ///   - error: Ошибка, приведшая к недействительности сессии. Может быть nil, если сессия была отменена.
+  public func urlSession(_ session: URLSession, didBecomeInvalidWithError error: (any Error)?) {
+    // TODO: - ✅
+  }
+  
+  /// Вызывается, когда URLSession завершила обработку всех событий для фоновой сессии.
+  /// - Parameter session: Фоновая сессия URLSession, для которой завершились все события.
+  public func urlSessionDidFinishEvents(forBackgroundURLSession session: URLSession) {
+    // TODO: - ✅
   }
 }
 

@@ -7,18 +7,15 @@
 
 import Foundation
 
-public enum NotificationConstants {
-  /// Имя для получения уведомлений о входящих сообщений
-  public static var didReceiveMessageName = "didReceiveMessage"
+public enum NotificationConstants: String {
+  /// Отправка уведомления о получении нового сообщения
+  case didReceiveMessage
   /// Имя для получения уведомлений о начале переписки
-  public static var didInitiateChatName = "didInitiateMessage"
+  case didInitiateChat
   /// Онлайн мой статус
-  public static var didUpdateOnlineStatusName = "didUpdateOnlineStatusName"
-  /// Обновить список контактов на главном экране
-  public static var updateListContacts = "updateListContacts"
+  case didUpdateMyOnlineStatus
   /// Состояние ТОР
-  public static var sessionState = "sessionState"
-  /// Состояние сервера
-  public static var serverState = "serverState"
+  case sessionState
+  /// Онлайн статус друзей
+  case didUpdateFriendOnlineStatus
 }
-

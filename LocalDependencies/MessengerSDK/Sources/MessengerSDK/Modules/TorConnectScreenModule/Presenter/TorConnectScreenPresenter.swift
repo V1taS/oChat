@@ -87,14 +87,8 @@ private extension TorConnectScreenPresenter {
   func initialSetup() {
     NotificationCenter.default.addObserver(
       self,
-      selector: #selector(handleServerState(_:)),
-      name: Notification.Name(NotificationConstants.serverState),
-      object: nil
-    )
-    NotificationCenter.default.addObserver(
-      self,
       selector: #selector(handleSessionState(_:)),
-      name: Notification.Name(NotificationConstants.sessionState),
+      name: Notification.Name(NotificationConstants.sessionState.rawValue),
       object: nil
     )
   }
@@ -137,8 +131,6 @@ private extension TorConnectScreenPresenter {
         stateSystemMessage = "Stopped"
       case .refreshing:
         stateSystemMessage = "Refreshing"
-      case let .circuitsUpdated(status):
-        stateSystemMessage = "\(status)"
       }
     }
   }

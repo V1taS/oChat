@@ -17,11 +17,10 @@ public final class MessengerScreenFlowCoordinator: Coordinator<Void, MessengerSc
   
   // MARK: - Private variables
   
-  private var attemptGetContactModel = 1
   private let services: IApplicationServices
   private var messengerListScreenModuleModule: MessengerListScreenModuleModule?
   private var messengerDialogModule: MessengerDialogScreenModule?
-  private var messengerNewMessengeScreenModule: MessengerNewMessengeScreenModule?
+  private var torConnectScreenModule: TorConnectScreenModule?
   
   // MARK: - Initialization
   
@@ -46,12 +45,20 @@ public final class MessengerScreenFlowCoordinator: Coordinator<Void, MessengerSc
 // MARK: - MessengerListScreenModuleModuleOutput
 
 extension MessengerScreenFlowCoordinator: MessengerListScreenModuleOutput {
-  public func dataModelHasBeenUpdated() {
-    messengerDialogModule?.input.updateDialog()
+  public func userDidScreenshot() {
+    // TODO: - 🟡
+  }
+  
+  public func openPanelConnection() {
+    openTorConnectScreenModule()
   }
   
   public func openNewMessengeScreen(contactAdress: String?) {
-    openMessengerNewMessengeScreenModule(contactAdress: contactAdress)
+    openMessengerDialogModule(dialogModel: nil, contactAdress: contactAdress)
+  }
+  
+  public func dataModelHasBeenUpdated() {
+    messengerDialogModule?.input.updateDialog()
   }
   
   public func openMessengerDialogScreen(dialogModel: ContactModel) {
@@ -62,65 +69,58 @@ extension MessengerScreenFlowCoordinator: MessengerListScreenModuleOutput {
 // MARK: - MessengerDialogScreenModuleOutput
 
 extension MessengerScreenFlowCoordinator: MessengerDialogScreenModuleOutput {
-  public func removeDialogMessage(_ message: String?, contact: ContactModel, completion: (() -> Void)?) {
-    messengerListScreenModuleModule?.input.removeMessage(message, contact: contact, completion: completion)
+  public func removeMessage(id: String, contact: ContactModel) {
+    messengerListScreenModuleModule?.input.removeMessage(id: id, contact: contact)
   }
   
-  public func sendInitiateChatFromDialog(onionAddress: String) {
-    messengerListScreenModuleModule?.input.sendInitiateChat(onionAddress: onionAddress)
+  public func confirmRequestForDialog(contactModel: ContactModel) {
+    messengerListScreenModuleModule?.input.confirmRequestForDialog(contactModel: contactModel)
+  }
+  
+  public func cancelRequestForDialog(contactModel: ContactModel) {
+    messengerListScreenModuleModule?.input.cancelRequestForDialog(contactModel: contactModel)
+  }
+  
+  public func sendInitiateChatFromDialog(contactModel: ContactModel) {
+    messengerListScreenModuleModule?.input.sendInitiateChat(contactModel: contactModel)
   }
   
   public func sendMessage(_ message: String, contact: ContactModel) {
     messengerListScreenModuleModule?.input.sendMessage(message, contact: contact)
   }
   
-  public func contactHasBeenDeleted(_ contactModel: ContactModel) {
-    messengerListScreenModuleModule?.input.removeContactModels(contactModel, completion: { [weak self] in
-      guard let self else { return }
-      navigationController?.popViewController(animated: true)
-    })
-  }
-  
   public func messengerDialogWillDisappear() {
     messengerListScreenModuleModule?.input.updateListContacts(completion: {})
   }
-  
-  public func deleteContactButtonTapped() {
-    showAlertDeleteContact()
-  }
 }
 
-// MARK: - MessengerNewMessengeScreenModuleOutput
+// MARK: - TorConnectScreenModuleOutput
 
-extension MessengerScreenFlowCoordinator: MessengerNewMessengeScreenModuleOutput {
-  public func sendInitiateChatFromNewMessenge(onionAddress: String) {
-    messengerListScreenModuleModule?.input.sendInitiateChat(onionAddress: onionAddress)
-    messengerNewMessengeScreenModule?.viewController.dismiss(
-      animated: true,
-      completion: { [weak self] in
-        guard let self else { return }
-        getContactModel(onionAddress: onionAddress) { [weak self] contactModel in
-          guard let self, let contactModel else { return }
-          openMessengerDialogModule(dialogModel: contactModel)
-        }
-        messengerNewMessengeScreenModule = nil
-      }
-    )
+extension MessengerScreenFlowCoordinator: TorConnectScreenModuleOutput {
+  public func refreshTorConnectService() {
+//    updateOnlineStatus(status: .offline)
+//    p2pChatManager.stop { [weak self] _ in
+//      self?.p2pChatManager.start(completion: { _ in })
+//    }
   }
   
-  public func closeNewMessengeScreenButtonTapped() {
-    messengerListScreenModuleModule?.input.updateListContacts(completion: nil)
-    messengerNewMessengeScreenModule?.viewController.dismiss(animated: true)
-    messengerNewMessengeScreenModule = nil
+  public func torServiceConnected() {
+    torConnectScreenModule?.viewController.dismiss(animated: true)
+    torConnectScreenModule = nil
+  }
+  
+  public func stratTorConnectService() {
+    
   }
 }
 
 // MARK: - Open modules
 
 private extension MessengerScreenFlowCoordinator {
-  func openMessengerDialogModule(dialogModel: ContactModel) {
+  func openMessengerDialogModule(dialogModel: ContactModel?, contactAdress: String? = nil) {
     var messengerDialogModule = MessengerDialogScreenAssembly().createModule(
       dialogModel: dialogModel,
+      contactAdress: contactAdress,
       services: services
     )
     self.messengerDialogModule = messengerDialogModule
@@ -130,16 +130,11 @@ private extension MessengerScreenFlowCoordinator {
     navigationController?.pushViewController(messengerDialogModule.viewController, animated: true)
   }
   
-  func openMessengerNewMessengeScreenModule(contactAdress: String?) {
-    var messengerNewMessengeScreenModule = MessengerNewMessengeScreenAssembly()
-      .createModule(services: services, contactAdress: contactAdress)
-    self.messengerNewMessengeScreenModule = messengerNewMessengeScreenModule
-    messengerNewMessengeScreenModule.input.moduleOutput = self
-    
-    navigationController?.present(
-      messengerNewMessengeScreenModule.viewController.wrapToNavigationController(),
-      animated: true
-    )
+  func openTorConnectScreenModule() {
+    var torConnectScreenModule = TorConnectScreenAssembly().createModule(services: services)
+    self.torConnectScreenModule = torConnectScreenModule
+    torConnectScreenModule.input.moduleOutput = self
+    UIViewController.topController?.present(torConnectScreenModule.viewController, animated: true)
   }
 }
 
@@ -149,38 +144,6 @@ private extension MessengerScreenFlowCoordinator {
   func finishMessengerFlow(_ flowType: MessengerScreenFinishFlowType) {
     messengerListScreenModuleModule = nil
     messengerDialogModule = nil
-    messengerNewMessengeScreenModule = nil
     finishFlow?(flowType)
   }
-  
-  func showAlertDeleteContact() {
-    UIViewController.topController?.showAlertWithTwoButtons(
-      title: "Вы хотите удалить контакт?",
-      cancelButtonText: "Отмена",
-      customButtonText: "Удалить",
-      customButtonAction: { [weak self] in
-        self?.messengerDialogModule?.input.userChoseToDeleteContact()
-      }
-    )
-  }
-  
-  func getContactModel(onionAddress: String, completion: ((ContactModel?) -> Void)?) {
-    guard attemptGetContactModel <= 10 else {
-      completion?(nil)
-      return
-    }
-    
-    messengerListScreenModuleModule?.input.getContactModelsFrom(
-      onionAddress: onionAddress,
-      completion: { [weak self] contactModel in
-        guard let self else { return }
-        if let contactModel {
-          completion?(contactModel)
-        } else {
-          attemptGetContactModel += 1
-          getContactModel(onionAddress: onionAddress, completion: completion)
-        }
-      })
-  }
-  
 }

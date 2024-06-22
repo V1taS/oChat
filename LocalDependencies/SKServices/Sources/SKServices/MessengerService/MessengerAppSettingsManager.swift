@@ -20,10 +20,7 @@ extension MessengerModelHandlerService: IAppSettingsManager {
       }
       var updatedModel = model
       updatedModel.appSettingsModel.isFaceIDEnabled = value
-      
-      DispatchQueue.main.async {
-        self.saveMessengerModel(updatedModel, completion: completion)
-      }
+      saveMessengerModel(updatedModel, completion: completion)
     }
   }
   
@@ -34,10 +31,7 @@ extension MessengerModelHandlerService: IAppSettingsManager {
       }
       var updatedModel = model
       updatedModel.appSettingsModel.appPassword = value
-      
-      DispatchQueue.main.async {
-        self.saveMessengerModel(updatedModel, completion: completion)
-      }
+      saveMessengerModel(updatedModel, completion: completion)
     }
   }
   
@@ -48,10 +42,7 @@ extension MessengerModelHandlerService: IAppSettingsManager {
       }
       var updatedModel = model
       updatedModel.appSettingsModel.isNotificationsEnabled = value
-      
-      DispatchQueue.main.async {
-        self.saveMessengerModel(updatedModel, completion: completion)
-      }
+      saveMessengerModel(updatedModel, completion: completion)
     }
   }
 }

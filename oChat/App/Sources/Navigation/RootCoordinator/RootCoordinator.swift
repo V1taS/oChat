@@ -22,7 +22,6 @@ final class RootCoordinator: Coordinator<Void, Void> {
   private var mainFlowCoordinator: MainFlowCoordinator?
   private var initialFlowCoordinator: InitialFlowCoordinator?
   private var authenticationFlowCoordinator: AuthenticationFlowCoordinator?
-  private var torConnectScreenModule: TorConnectScreenModule?
   
   private lazy var p2pChatManager: IP2PChatManager = services.messengerService.p2pChatManager
   private var notificationService: INotificationService {
@@ -45,36 +44,7 @@ final class RootCoordinator: Coordinator<Void, Void> {
   
   override func start(parameter: Void) {
     setupLaunchScreen()
-  }
-  
-  @objc func appDidBecomeActive() {
-    sessionCheck()
-    passcodeNotSetInSystemIOSheck()
-  }
-  
-  @objc func userDidScreenshot() {
-    // TODO: - 🟡 Был сделан скриншот
-  }
-}
-
-// MARK: - TorConnectScreenModuleOutput
-
-extension RootCoordinator: TorConnectScreenModuleOutput {
-  func refreshTorConnectService() {
-    updateOnlineStatus(status: .offline)
-    p2pChatManager.stop { [weak self] _ in
-      self?.p2pChatManager.start(completion: { _ in })
-    }
-  }
-  
-  func torServiceConnected() {
-    torConnectScreenModule?.viewController.dismiss(animated: true)
-    torConnectScreenModule = nil
-  }
-  
-  func stratTorConnectService() {
     setupSessionService()
-    stratTORService()
   }
 }
 
@@ -103,7 +73,6 @@ private extension RootCoordinator {
       switch state {
       case .success:
         self?.openMainFlowCoordinator(isPresentScreenAnimated: true)
-        self?.openTorConnectScreenModule()
       case .failure:
         break
       }
@@ -119,23 +88,12 @@ private extension RootCoordinator {
       switch state {
       case .success:
         self?.openMainFlowCoordinator(isPresentScreenAnimated: true)
-        self?.openTorConnectScreenModule()
       case .failure:
         break
       }
       self?.authenticationFlowCoordinator = nil
     }
     authenticationFlowCoordinator.start(parameter: state)
-  }
-  
-  func openTorConnectScreenModule() {
-    Timer.scheduledTimer(withTimeInterval: 0.2, repeats: false) { [weak self] _ in
-      guard let self else { return }
-      var torConnectScreenModule = TorConnectScreenAssembly().createModule(services: services)
-      self.torConnectScreenModule = torConnectScreenModule
-      torConnectScreenModule.input.moduleOutput = self
-      UIViewController.topController?.presentFullScreen(torConnectScreenModule.viewController)
-    }
   }
 }
 
@@ -144,14 +102,6 @@ private extension RootCoordinator {
 private extension RootCoordinator {
   func setupSessionService() {
     let notificationCenter = NotificationCenter.default
-    
-    notificationCenter.addObserver(
-      self,
-      selector: #selector(userDidScreenshot),
-      name: UIApplication.userDidTakeScreenshotNotification,
-      object: nil
-    )
-    
     notificationCenter.addObserver(
       self,
       selector: #selector(appDidBecomeActive),
@@ -166,11 +116,11 @@ private extension RootCoordinator {
       }
       
       services.messengerService.modelHandlerService.getAppSettingsModel { [weak self] model in
-        guard let self, model.appPassword != nil else {
-          return
+        DispatchQueue.main.async { [weak self] in
+          guard let self, model.appPassword != nil else { return }
+          openAuthenticationFlowCoordinator(.loginPasscode(.loginFaceID))
+          mainFlowCoordinator = nil
         }
-        openAuthenticationFlowCoordinator(.loginPasscode(.loginFaceID))
-        mainFlowCoordinator = nil
       }
     }
   }
@@ -181,168 +131,27 @@ private extension RootCoordinator {
     }
     
     services.messengerService.modelHandlerService.getMessengerModel { [weak self] model in
-      guard let self else {
-        return
-      }
-      
-      if model.appSettingsModel.appPassword != nil {
-        openAuthenticationFlowCoordinator(.loginPasscode(.loginFaceID))
-      } else {
-        openMainFlowCoordinator(isPresentScreenAnimated: true)
-        openTorConnectScreenModule()
+      DispatchQueue.main.async { [weak self] in
+        guard let self else { return }
+        
+        if model.appSettingsModel.appPassword != nil {
+          openAuthenticationFlowCoordinator(.loginPasscode(.loginFaceID))
+        } else {
+          openMainFlowCoordinator(isPresentScreenAnimated: true)
+        }
       }
     }
   }
   
   func sessionCheck() {
     services.messengerService.modelHandlerService.getAppSettingsModel { [weak self] model in
-      guard let self, model.appPassword != nil else {
-        return
-      }
-      if !services.accessAndSecurityManagementService.sessionService.isSessionActive() {
-        openAuthenticationFlowCoordinator(.loginPasscode(.loginFaceID))
-      }
-    }
-  }
-  
-  func passcodeNotSetInSystemIOSheck() {
-    services.userInterfaceAndExperienceService.systemService.checkIfPasscodeIsSet { [weak self] result in
-      guard let self else {
-        return
-      }
-      if case let .failure(error) = result, error == .passcodeNotSet {
-        services.userInterfaceAndExperienceService.notificationService.showNotification(
-          .negative(
-            title: OChatStrings.RootCoordinatorLocalization
-              .State.Notification.PasscodeNotSet.title
-          )
-        )
-      }
-    }
-  }
-  
-  func stratTORService() {
-    startSessionlistener()
-    startServerlistener()
-    
-    p2pChatManager.start { [weak self] result in
-      guard let self else {
-        return
-      }
-      
-      switch result {
-      case .success:
-        //        notificationService.showNotification(.positive(title: "Сервер ТОР запустился"))
-        updateOnlineStatus(status: .online)
-      case let .failure(error):
-        switch error {
-        case .onionAddressForTorHiddenServiceCouldNotBeLoaded:
-          notificationService.showNotification(.negative(title: "Не удалось загрузить адрес onion-сервиса"))
-        case .errorLoadingPrivateKey:
-          notificationService.showNotification(.negative(title: "Ошибка при загрузке приватного ключа"))
-        case .errorWhenDeletingKeys:
-          notificationService.showNotification(.negative(title: "Ошибка при удалении ключей"))
-        case let .somethingWentWrong(text):
-          notificationService.showNotification(.negative(title: "Произошла непредвиденная ошибка \(text ?? "")"))
-        case .failedToSetPermissions:
-          notificationService.showNotification(.negative(title: "Не удалось установить права доступа"))
-        case .failedToWriteTorrc:
-          notificationService.showNotification(.negative(title: "Ошибка при записи файла конфигурации torrc"))
-        case .failedToCreateDirectory:
-          notificationService.showNotification(.negative(title: "Ошибка при создании директории"))
-        case .authDirectoryPreviouslyCreated:
-          notificationService.showNotification(.negative(title: "Директория авторизации уже была создана ранее"))
-        case .torrcFileIsEmpty:
-          notificationService.showNotification(.negative(title: "Файл конфигурации torrc пуст"))
-        case .unableToAccessTheCachesDirectory:
-          notificationService.showNotification(.negative(title: "Невозможно получить доступ к кэш-директории"))
+      DispatchQueue.main.async { [weak self] in
+        guard let self, model.appPassword != nil else { return }
+        if !services.accessAndSecurityManagementService.sessionService.isSessionActive() {
+          openAuthenticationFlowCoordinator(.loginPasscode(.loginFaceID))
         }
-        updateOnlineStatus(status: .offline)
-        p2pChatManager.start(completion: { _ in })
-        openTorConnectScreenModule()
       }
-      checkServerAvailability()
     }
-  }
-  
-  func startSessionlistener() {
-    p2pChatManager.sessionStateAction = { [weak self] result in
-      guard let self else {
-        return
-      }
-      
-      switch result {
-      case .none: break
-      case .started:
-        updateOnlineStatus(status: .inProgress)
-      case .connectingProgress:
-        updateOnlineStatus(status: .inProgress)
-      case .connected:
-        updateOnlineStatus(status: .online)
-      case .stopped:
-        updateOnlineStatus(status: .offline)
-        openTorConnectScreenModule()
-        p2pChatManager.start(completion: { _ in })
-      case .refreshing:
-        updateOnlineStatus(status: .inProgress)
-      case .circuitsUpdated:
-        break
-      }
-      postSessionState(state: result)
-    }
-  }
-  
-  func startServerlistener() {
-    p2pChatManager.serverStateAction = { [weak self] result in
-      guard let self else {
-        return
-      }
-      
-      switch result {
-      case .errorStartingServer:
-        updateOnlineStatus(status: .offline)
-        openTorConnectScreenModule()
-        p2pChatManager.stop { [weak self] _ in
-          self?.p2pChatManager.start(completion: { _ in })
-        }
-      default: break
-      }
-      postServerState(state: result)
-    }
-  }
-  
-  func postSessionState(state: TorSessionState) {
-    NotificationCenter.default.post(
-      name: Notification.Name(NotificationConstants.sessionState),
-      object: nil,
-      userInfo: ["sessionState": state]
-    )
-  }
-  
-  func postServerState(state: TorServerState) {
-    NotificationCenter.default.post(
-      name: Notification.Name(NotificationConstants.serverState),
-      object: nil,
-      userInfo: ["serverState": state]
-    )
-  }
-  
-  func updateOnlineStatus(status: ContactModel.Status) {
-    // Отправка уведомления о начале нового чата
-    NotificationCenter.default.post(
-      name: Notification.Name(NotificationConstants.didUpdateOnlineStatusName),
-      object: nil,
-      userInfo: ["onlineStatus": status]
-    )
-  }
-  
-  func updateListContacts() {
-    // Обновляем список контактов на главном экране
-    NotificationCenter.default.post(
-      name: Notification.Name(NotificationConstants.updateListContacts),
-      object: nil,
-      userInfo: [:]
-    )
   }
   
   func isFirstLaunchScreen() -> Bool {
@@ -359,50 +168,8 @@ private extension RootCoordinator {
     return false
   }
   
-  func checkServerAvailability() {
-    DispatchQueue.global().async { [weak self] in
-      self?.services.messengerService.modelHandlerService.getContactModels { [weak self] contactModels in
-        guard let self else { return }
-        contactModels.forEach { contact in
-          self.checkContactOnline(contact, attempts: .zero)
-        }
-      }
-    }
-  }
-  
-  func checkContactOnline(_ contact: ContactModel, attempts: Int, maxAttempts: Int = 20) {
-    guard attempts < maxAttempts else {
-      // Если достигли максимального количества попыток и все были неудачными, ставим статус offline и начинаем заново
-      updateContactStatus(contact, isOnline: false)
-      return
-    }
-    
-    services.messengerService.p2pChatManager.checkServerAvailability(
-      onionAddress: contact.onionAddress ?? ""
-    ) { [weak self] isAvailable in
-      guard let self = self else { return }
-      
-      if isAvailable {
-        // Если контакт онлайн, обновляем статус и начинаем заново
-        self.updateContactStatus(contact, isOnline: true)
-      } else {
-        // Продолжаем делать запросы
-        self.checkContactOnline(contact, attempts: attempts + 1)
-      }
-    }
-  }
-  
-  func updateContactStatus(_ contact: ContactModel, isOnline: Bool) {
-    DispatchQueue.main.async { [weak self] in
-      guard let self else { return }
-      
-      if contact.status != .requested {
-        services.messengerService.modelSettingsManager.setStatus(contact, isOnline ? .online : .offline) {}
-        updateListContacts()
-      }
-    }
-    
-    // Рестарт проверки статуса
-    checkServerAvailability()
+  @objc
+  func appDidBecomeActive() {
+    sessionCheck()
   }
 }

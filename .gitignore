@@ -100,3 +100,5 @@ LocalDependencies/lottie-ios/Lottie.xcodeproj
 Tuist/Dependencies/graph.json
 LocalDependencies/AuthenticationSDK/AuthenticationSDK.xcodeproj
 LocalDependencies/CocoaAsyncSocket/CocoaAsyncSocket.xcodeproj
+LocalDependencies/CocoaAsyncSocket/Source/GCD/CocoaAsyncSocket.modulemap
+LocalDependencies/ToxCore/ToxCore.xcodeproj
