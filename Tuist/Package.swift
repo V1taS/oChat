@@ -15,7 +15,6 @@ let package = Package(
     .package(path: "../../../LocalDependencies/AuthenticationSDK"),
     .package(path: "../../../LocalDependencies/SKStoriesWidget"),
     .package(path: "../../../LocalDependencies/SKUIKit"),
-    .package(path: "../../../LocalDependencies/Wormholy"),
     .package(path: "../../../LocalDependencies/SKServices")
   ]
 )

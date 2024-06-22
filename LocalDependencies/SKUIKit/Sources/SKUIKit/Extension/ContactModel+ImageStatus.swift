@@ -2,7 +2,7 @@
 //  ContactModel+ImageStatus.swift
 //  SKUIKit
 //
-//  Created by Vitalii Sosin on 08.06.2024.
+//  Created by Vitalii Sosin on 19.06.2024.
 //
 
 import UIKit
@@ -16,19 +16,19 @@ extension ContactModel.Status {
   public var imageStatus: UIImage? {
     switch self {
     case .online:
-      UIImage(
+      return UIImage(
         named: SKStyleAsset.oChatOnline.name,
         in: SKStyleResources.bundle,
         with: nil
       )
     case .offline:
-      UIImage(
+      return UIImage(
         named: SKStyleAsset.oChatOffline.name,
         in: SKStyleResources.bundle,
         with: nil
       )
-    case .inProgress, .requested:
-      UIImage(
+    case .requestChat, .initialChat:
+      return UIImage(
         named: SKStyleAsset.oChatInProgress.name,
         in: SKStyleResources.bundle,
         with: nil

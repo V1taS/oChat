@@ -12,20 +12,24 @@ import SKAbstractions
 public protocol MessengerListScreenModuleOutput: AnyObject {
   /// Открыть экран создание нового сообщения
   func openNewMessengeScreen(contactAdress: String?)
+  
   /// Открыть экран с диалогом
   func openMessengerDialogScreen(dialogModel: ContactModel)
   
   /// Модель данных была обновлена
   func dataModelHasBeenUpdated()
+  
+  /// Открыть панель подключения
+  func openPanelConnection()
+  
+  /// Был сделан скриншот
+  func userDidScreenshot()
 }
 
 /// События которые отправляем из `Coordinator` в `MessengerListScreenModuleModule`
 public protocol MessengerListScreenModuleModuleInput {
-  /// Удалить сообщение у контакта
-  func removeMessage(_ message: String?, contact: ContactModel, completion: (() -> Void)?)
-  
-  /// Обновить список контактов
-  func updateListContacts(completion: (() -> Void)?)
+  /// Удалить сообщение
+  func removeMessage(id: String, contact: ContactModel)
   
   /// Удаляет модель контакта `ContactModel` асинхронно.
   /// - Parameters:
@@ -33,20 +37,23 @@ public protocol MessengerListScreenModuleModuleInput {
   ///   - completion: Опциональный блок завершения, который вызывается после завершения операции удаления. Может быть `nil`.
   func removeContactModels(_ contactModel: ContactModel, completion: (() -> Void)?)
   
+  /// Обновить список контактов
+  func updateListContacts(completion: (() -> Void)?)
+  
   /// Отправить запрос на переписку
-  func sendInitiateChat(onionAddress: String)
+  func sendInitiateChat(contactModel: ContactModel)
   
   /// Отправить сообщение контакту
   func sendMessage(_ message: String, contact: ContactModel)
   
+  /// Подтвердить запрос на переписку
+  func confirmRequestForDialog(contactModel: ContactModel)
+  
+  /// Отклонить запрос на переписку
+  func cancelRequestForDialog(contactModel: ContactModel)
+  
   /// События которые отправляем из `MessengerListScreenModuleModule` в `Coordinator`
   var moduleOutput: MessengerListScreenModuleOutput? { get set }
-  
-  /// Получить контакт по адресу onion
-  func getContactModelsFrom(
-    onionAddress: String,
-    completion: ((ContactModel?) -> Void)?
-  )
 }
 
 /// Готовый модуль `MessengerListScreenModuleModule`

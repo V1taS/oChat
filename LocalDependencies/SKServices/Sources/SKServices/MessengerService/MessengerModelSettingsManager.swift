@@ -12,39 +12,49 @@ import SKStyle
 // MARK: - MessengerModelSettingsManager
 
 extension MessengerModelHandlerService: IMessengerModelSettingsManager {
+  public func setToxStateAsString(
+    _ toxStateAsString: String?,
+    completion: (() -> Void)?
+  ) {
+    getMessengerModel { [weak self] model in
+      guard let self else { return }
+      var updatedModel = model
+      updatedModel.toxStateAsString = toxStateAsString
+      saveMessengerModel(updatedModel, completion: completion)
+    }
+  }
+  
   public func setStatus(
     _ contactModel: ContactModel,
     _ status: ContactModel.Status,
     completion: (() -> Void)?
   ) {
-      getMessengerModel { [weak self] model in
-        guard let self else {
-          return
-        }
-        var updatedModel = model
-        if let contactIndex = updatedModel.contacts.firstIndex(of: contactModel) {
-          updatedModel.contacts[contactIndex].status = status
-        }
-        
-        self.saveMessengerModel(updatedModel, completion: completion)
+    getMessengerModel { [weak self] model in
+      guard let self else { return }
+      var updatedModel = model
+      if let contactIndex = updatedModel.contacts.firstIndex(of: contactModel) {
+        updatedModel.contacts[contactIndex].status = status
       }
+      
+      saveMessengerModel(updatedModel, completion: completion)
     }
+  }
   
-  public func setIsPasswordDialogProtected(
-    _ contactModel: ContactModel,
-   _ value: Bool,
-   completion: (() -> Void)?
-  ) {
+  public func setAllContactsIsOffline(completion: (() -> Void)?) {
     getMessengerModel { [weak self] model in
       guard let self else {
         return
       }
       var updatedModel = model
-      if let contactIndex = updatedModel.contacts.firstIndex(of: contactModel) {
-        updatedModel.contacts[contactIndex].isPasswordDialogProtected = value
+      var updatedContacts = model.contacts.compactMap { model in
+        var updatedModel = model
+        if model.status == .online {
+          updatedModel.status = .offline
+        }
+        return updatedModel
       }
-      
-      self.saveMessengerModel(updatedModel, completion: completion)
+      updatedModel.contacts = updatedContacts
+      saveMessengerModel(updatedModel, completion: completion)
     }
   }
   
@@ -54,9 +64,7 @@ extension MessengerModelHandlerService: IMessengerModelSettingsManager {
     completion: ((ContactModel?) -> Void)?
   ) {
     getMessengerModel { [weak self] model in
-      guard let self else {
-        return
-      }
+      guard let self else { return }
       var updatedModel = model
       var updatedContactModel = contactModel
       updatedContactModel.name = name
@@ -65,7 +73,7 @@ extension MessengerModelHandlerService: IMessengerModelSettingsManager {
         updatedModel.contacts[contactIndex].name = name
       }
       
-      self.saveMessengerModel(
+      saveMessengerModel(
         updatedModel,
         completion: {
           completion?(updatedContactModel)
@@ -79,25 +87,23 @@ extension MessengerModelHandlerService: IMessengerModelSettingsManager {
     _ address: String,
     completion: ((ContactModel?) -> Void)?
   ) {
-      getMessengerModel { [weak self] model in
-        guard let self else {
-          return
-        }
-        var updatedModel = model
-        var updatedContactModel = contactModel
-        updatedContactModel.onionAddress = address
-        
-        if let contactIndex = updatedModel.contacts.firstIndex(of: contactModel) {
-          updatedModel.contacts[contactIndex].onionAddress = address
-        }
-        
-        self.saveMessengerModel(
-          updatedModel,
-          completion: {
-            completion?(updatedContactModel)
-          }
-        )
+    getMessengerModel { [weak self] model in
+      guard let self else { return }
+      var updatedModel = model
+      var updatedContactModel = contactModel
+      updatedContactModel.toxAddress = address
+      
+      if let contactIndex = updatedModel.contacts.firstIndex(of: contactModel) {
+        updatedModel.contacts[contactIndex].toxAddress = address
       }
+      
+      saveMessengerModel(
+        updatedModel,
+        completion: {
+          completion?(updatedContactModel)
+        }
+      )
+    }
   }
   
   public func setMeshAddress(
@@ -106,9 +112,7 @@ extension MessengerModelHandlerService: IMessengerModelSettingsManager {
     completion: ((ContactModel?) -> Void)?
   ) {
     getMessengerModel { [weak self] model in
-      guard let self else {
-        return
-      }
+      guard let self else { return }
       var updatedModel = model
       var updatedContactModel = contactModel
       updatedContactModel.meshAddress = meshAddress
@@ -117,7 +121,7 @@ extension MessengerModelHandlerService: IMessengerModelSettingsManager {
         updatedModel.contacts[contactIndex].meshAddress = meshAddress
       }
       
-      self.saveMessengerModel(
+      saveMessengerModel(
         updatedModel,
         completion: {
           completion?(updatedContactModel)
@@ -132,9 +136,7 @@ extension MessengerModelHandlerService: IMessengerModelSettingsManager {
     completion: ((ContactModel?) -> Void)?
   ) {
     getMessengerModel { [weak self] model in
-      guard let self else {
-        return
-      }
+      guard let self else { return }
       var updatedModel = model
       var updatedContactModel: ContactModel?
       
@@ -145,7 +147,7 @@ extension MessengerModelHandlerService: IMessengerModelSettingsManager {
         updatedModel.contacts[contactIndex].messenges.append(messengeModel)
       }
       
-      self.saveMessengerModel(
+      saveMessengerModel(
         updatedModel,
         completion: {
           completion?(updatedContactModel)
@@ -160,9 +162,7 @@ extension MessengerModelHandlerService: IMessengerModelSettingsManager {
     completion: ((ContactModel?) -> Void)?
   ) {
     getMessengerModel { [weak self] model in
-      guard let self else {
-        return
-      }
+      guard let self else { return }
       var updatedModel = model
       var updatedContactModel = contactModel
       updatedContactModel.encryptionPublicKey = publicKey
@@ -171,7 +171,7 @@ extension MessengerModelHandlerService: IMessengerModelSettingsManager {
         updatedModel.contacts[contactIndex].encryptionPublicKey = publicKey
       }
       
-      self.saveMessengerModel(
+      saveMessengerModel(
         updatedModel,
         completion: {
           completion?(updatedContactModel)
@@ -185,19 +185,14 @@ extension MessengerModelHandlerService: IMessengerModelSettingsManager {
     completion: (() -> Void)?
   ) {
     getMessengerModel { [weak self] model in
-      guard let self else {
-        return
-      }
+      guard let self else { return }
       var updatedModel = model
       
       if let contactIndex = updatedModel.contacts.firstIndex(of: contactModel) {
         updatedModel.contacts.remove(at: contactIndex)
       }
       
-      self.saveMessengerModel(
-        updatedModel,
-        completion: completion
-      )
+      saveMessengerModel(updatedModel, completion: completion)
     }
   }
 }

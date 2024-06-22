@@ -32,8 +32,7 @@ protocol SettingsScreenFactoryInput {
   func createSecuritySectionsModels(
     passcodeAndFaceIDValue: Bool,
     messengerIsEnabled: Bool,
-    languageValue: String,
-    myOnionAddress: String
+    languageValue: String
   ) -> [WidgetCryptoView.Model]
   /// Создаем заголовок, какой язык выбран в приложении Русский или Английский
   func createLanguageValue(from languageType: AppLanguageType) -> String
@@ -69,8 +68,7 @@ extension SettingsScreenFactory: SettingsScreenFactoryInput {
   func createSecuritySectionsModels(
     passcodeAndFaceIDValue: Bool,
     messengerIsEnabled: Bool,
-    languageValue: String,
-    myOnionAddress: String
+    languageValue: String
   ) -> [WidgetCryptoView.Model] {
     var models: [WidgetCryptoView.Model] = []
     let isOnTitle = OChatStrings.SettingsScreenLocalization

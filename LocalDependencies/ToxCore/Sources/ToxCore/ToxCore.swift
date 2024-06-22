@@ -43,11 +43,19 @@ public extension ToxCore {
     completion: @escaping (Result<Void, ToxError>) -> Void
   ) {
     self.toxNodesJsonString = toxNodesJsonString
-    toxQueue.async {
+    toxQueue.async { [weak self] in
+      guard let self else { return }
       var error: Tox_Err_New = TOX_ERR_NEW_OK
       
       // Преобразуем Swift опции в C-структуру
       var toxOptions = ToxOptions.convertToToxOptions(from: options)
+      
+      // Передаем указатель на `toxOptions` в функцию
+      withUnsafeMutablePointer(to: &toxOptions) { toxOptionsPointer in
+        tox_options_set_log_callback(toxOptionsPointer, logCallback)
+        tox_options_set_ipv6_enabled(toxOptionsPointer, true)
+      }
+      self.registerEventHandlers()
       
       if let savedDataString = savedDataString,
          let data = Data(base64Encoded: savedDataString) {
@@ -61,6 +69,7 @@ public extension ToxCore {
       }
       
       self.tox = tox_new(&toxOptions, &error)
+      
       if error != TOX_ERR_NEW_OK {
         let swiftError = ToxError(cError: error)
         completion(.failure(swiftError))
@@ -68,7 +77,6 @@ public extension ToxCore {
         self.bootstrap { result in
           completion(result)
           if case .success = result {
-            self.registerEventHandlers()
             self.startEventLoop()
           }
         }
@@ -128,9 +136,6 @@ public extension ToxCore {
       // Создаем и сохраняем контекст с переданным замыканием
       let context = ConnectionStatusContext(callback: callback)
       globalConnectionStatusContext = context
-      
-      // Устанавливаем глобальный коллбек для обработки статуса соединения
-      tox_callback_self_connection_status(tox, connectionStatusCallback)
     }
   }
   
@@ -149,9 +154,6 @@ public extension ToxCore {
       // Создаем и сохраняем контекст с переданным замыканием.
       let context = FriendRequestContext(callback: callback)
       globalConnectioFriendRequestContext = context
-      
-      // Устанавливаем глобальный коллбек для обработки запросов на добавление в друзья.
-      tox_callback_friend_request(tox, friendRequestCallback)
     }
   }
   
@@ -170,10 +172,21 @@ public extension ToxCore {
         // Сохраняем контекст
         let context = MessageContext(callback: callback)
         globalConnectionMessageContext = context
-        
-        // Устанавливаем глобальный коллбек
-        tox_callback_friend_message(tox, messageCallback)
       }
+    }
+  
+  // Метод для регистрации обратного вызова на изменение состояния подключения друзей
+  /// - Parameter callback: Замыкание, вызываемое при изменении состояния подключения друга.
+  ///     - friendId: Уникальный идентификатор друга, состояние которого изменилось.
+  ///     - connectionStatus: Новое состояние подключения друга.
+  func setFriendStatusCallback(
+    callback: @escaping (
+      _ friendId: Int32,
+      _ connectionStatus: ConnectionStatus
+    ) -> Void) {
+      // Сохраняем контекст
+      let context = FriendStatusContext(callback: callback)
+      globalFriendStatusContext = context
     }
   
   /// Метод для регистрации обратного вызова на получение данных файла.
@@ -189,9 +202,6 @@ public extension ToxCore {
       // Сохраняем контекст
       let context = FileChunkReceiveContext(callback: callback)
       globalConnectionFileChunkReceiveContext = context
-      
-      // Устанавливаем глобальный коллбек
-      tox_callback_file_recv_chunk(tox, fileChunkReceiveCallback)
     }
   }
   
@@ -208,11 +218,107 @@ public extension ToxCore {
       // Сохраняем контекст
       let context = FileReceiveContext(callback: callback)
       globalConnectionFileReceiveContext = context
-      
-      // Устанавливаем глобальный коллбек
-      tox_callback_file_recv(tox, fileReceiveCallback)
     }
   }
+  
+  // Метод для регистрации обратного вызова на логирование
+  /// - Parameter callback: Замыкание, вызываемое при получении сообщения лога.
+  ///     - file: Имя файла, откуда был вызван лог.
+  ///     - level: Уровень логирования.
+  ///     - funcName: Имя функции, откуда был вызван лог.
+  ///     - message: Текст сообщения.
+  ///     - line: Номер строки, где был вызван лог.
+  public func setLogCallback(
+    callback: @escaping (
+      _ file: String,
+      _ level: LogLevel,
+      _ funcName: String,
+      _ line: UInt32,
+      _ message: String,
+      _ arg: String,
+      _ userData: UnsafeMutableRawPointer?
+    ) -> Void) {
+      let context = LogContext(callback: { (file, toxLogLevel, funcName, line, message, arg, userData) in
+        let logLevel = LogLevel.from(toxLogLevel)
+        callback(file, logLevel, funcName, line, message, arg, userData)
+      })
+      globalLogContext = context
+    }
+  
+  /// Устанавливает обратный вызов для получения сообщений статуса друзей.
+  /// Этот метод регистрирует коллбэк, который будет вызываться при получении
+  /// нового сообщения статуса от друга. Сообщения статуса — это сообщения,
+  /// которые друзья могут установить для отображения своего текущего состояния.
+  /// - Parameter callback: Замыкание, вызываемое при получении нового сообщения статуса.
+  ///   - friendId: Уникальный идентификатор друга, от которого было получено сообщение.
+  ///   - message: Текст сообщения статуса.
+  func setFriendStatusMessageCallback(
+    callback: @escaping (_ friendId: Int32, _ message: String) -> Void) {
+      toxQueue.async {
+        guard let tox = self.tox else { return }
+        
+        // Сохраняем контекст
+        let context = StatusMessageContext(callback: callback)
+        globalStatusMessageContext = context
+      }
+    }
+  
+  /// Устанавливает обратный вызов для изменения статуса друзей.
+  /// Этот метод регистрирует коллбэк, который будет вызываться при изменении
+  /// статуса друга.
+  /// - Parameter callback: Замыкание, вызываемое при изменении статуса.
+  ///   - friendId: Уникальный идентификатор друга, чей статус изменился.
+  ///   - status: Новый статус пользователя.
+  func setFriendStatusOnlineCallback(
+    callback: @escaping (_ friendId: Int32, _ status: UserStatus) -> Void) {
+      toxQueue.async {
+        // Проверяем, что объект Tox инициализирован
+        guard let tox = self.tox else { return }
+        
+        // Создаем и сохраняем контекст с переданным замыканием
+        let context = FriendStatusOnlineContext(callback: callback)
+        globalFriendStatusOnlineContext = context
+      }
+    }
+  
+  /// Устанавливает обратный вызов для изменения статуса набора текста друзей.
+  /// Этот метод регистрирует коллбэк, который будет вызываться при изменении
+  /// статуса набора текста друга.
+  /// - Parameter callback: Замыкание, вызываемое при изменении статуса набора текста.
+  ///   - friendId: Уникальный идентификатор друга, чей статус набора текста изменился.
+  ///   - isTyping: Логическое значение, указывающее, набирает ли текст друг.
+  func setFriendTypingCallback(
+    callback: @escaping (_ friendId: Int32, _ isTyping: Bool) -> Void) {
+      toxQueue.async {
+        // Проверяем, что объект Tox инициализирован
+        guard let tox = self.tox else { return }
+        
+        // Создаем и сохраняем контекст с переданным замыканием
+        let context = TypingContext(callback: callback)
+        globalTypingContext = context
+      }
+    }
+  
+  /// Устанавливает обратный вызов для получения уведомлений о прочтении сообщений.
+  /// Этот метод регистрирует коллбэк, который будет вызываться при получении
+  /// уведомления о прочтении сообщения другом.
+  /// - Parameter callback: Замыкание, вызываемое при получении уведомления о прочтении.
+  ///   - friendId: Уникальный идентификатор друга, который прочитал сообщение.
+  ///   - messageId: Идентификатор сообщения, которое было прочитано.
+  func setFriendReadReceiptCallback(
+    callback: @escaping (UInt32, UInt32) -> Void) {
+      toxQueue.async {
+        // Проверяем, что объект Tox инициализирован
+        guard let tox = self.tox else { return }
+        
+        // Создаем и сохраняем контекст с переданным замыканием
+        let context = ReadReceiptContext(callback: callback)
+        globalReadReceiptContext = context
+        
+        // Регистрируем коллбэк для получения уведомлений о прочтении
+        tox_callback_friend_read_receipt(tox, friendReadReceiptCallback)
+      }
+    }
 }
 
 // MARK: - Data Tox
@@ -308,43 +414,20 @@ public extension ToxCore {
     return nospam
   }
   
-  /// Генерирует новый адрес Tox и возвращает результат через завершение.
-  /// - Parameter completion: Блок завершения, который возвращает результат генерации адреса.
-  func generateToxAddress(completion: @escaping (Result<String, ToxError>) -> Void) {
-    let CRYPTO_PUBLIC_KEY_SIZE = 32
-    let TOX_NOSPAM_SIZE = 4
-    let TOX_CHECKSUM_SIZE = 2
-    let FRIEND_ADDRESS_SIZE = CRYPTO_PUBLIC_KEY_SIZE + TOX_NOSPAM_SIZE + TOX_CHECKSUM_SIZE
-    
-    toxQueue.async { [self] in
-      guard let tox = self.tox else {
-        completion(.failure(.null))
-        return
-      }
-      
-      // Получаем публичный ключ
-      var publicKey = [UInt8](repeating: 0, count: CRYPTO_PUBLIC_KEY_SIZE)
-      tox_self_get_public_key(tox, &publicKey)
-      
-      // Получаем nospam-код
-      let nospam = tox_self_get_nospam(tox)
-      var nospamBytes = withUnsafeBytes(of: nospam.littleEndian, Array.init)
-      
-      // Создаем адрес
-      var address = [UInt8](repeating: 0, count: FRIEND_ADDRESS_SIZE)
-      address[..<CRYPTO_PUBLIC_KEY_SIZE] = publicKey[...]
-      address[CRYPTO_PUBLIC_KEY_SIZE..<(CRYPTO_PUBLIC_KEY_SIZE + TOX_NOSPAM_SIZE)] = nospamBytes[...]
-      
-      // Вычисляем и добавляем контрольную сумму
-      let checksum = addressChecksum(address: address, length: CRYPTO_PUBLIC_KEY_SIZE + TOX_NOSPAM_SIZE)
-      var checksumBytes = withUnsafeBytes(of: checksum.littleEndian, Array.init)
-      address[(CRYPTO_PUBLIC_KEY_SIZE + TOX_NOSPAM_SIZE)...] = checksumBytes[...]
-      
-      // Преобразуем адрес в шестнадцатеричную строку
-      let addressHex = address.map { String(format: "%02x", $0) }.joined()
-      
-      completion(.success(addressHex.uppercased()))
+  func getToxAddress() -> String? {
+    guard let tox = self.tox else {
+      print("Tox is not initialized.")
+      return nil
     }
+    
+    let addressSize = 76
+    var address = [UInt8](repeating: 0, count: addressSize / 2)
+    
+    tox_self_get_address(tox, &address)
+    
+    // Преобразуем байты в строку в шестнадцатеричном формате
+    let addressHex = address.map { String(format: "%02x", $0) }.joined()
+    return addressHex
   }
 }
 
@@ -739,6 +822,47 @@ public extension ToxCore {
     return result
   }
   
+  /// Используя метод confirmFriendRequest, вы подтверждаете запрос на добавление в друзья, зная публичный ключ отправителя.
+  /// Этот метод принимает публичный ключ друга и добавляет его в список друзей без отправки дополнительного сообщения.
+  /// - Parameters:
+  ///   - publicKey: Строка, представляющая публичный ключ друга. Этот ключ используется для идентификации пользователя в сети Tox.
+  ///   - completion: Замыкание, вызываемое после завершения операции. Возвращает результат выполнения в виде:
+  ///       - `Int32`: Уникальный идентификатор друга в списке друзей. Этот идентификатор используется для управления другом (отправка сообщений, проверка статуса и т.д.).
+  ///       - `ToxError`: Ошибка, если запрос не удалось подтвердить.
+  public func confirmFriendRequest(
+    with publicKey: String,
+    completion: @escaping (Result<Int32, ToxError>) -> Void
+  ) {
+    toxQueue.async {
+      // Проверяем, инициализирован ли объект Tox.
+      guard let tox = self.tox else {
+        completion(.failure(.null))
+        return
+      }
+      
+      // Конвертируем строку публичного ключа в данные.
+      guard let publicKeyData = Data(hexString: publicKey) else {
+        completion(.failure(.unknown))
+        return
+      }
+      
+      // Переменная для хранения ошибки.
+      var error: TOX_ERR_FRIEND_ADD = TOX_ERR_FRIEND_ADD_OK
+      // Добавляем друга, используя публичный ключ.
+      let friendId = publicKeyData.withUnsafeBytes { pubKeyPtr in
+        tox_friend_add_norequest(tox, pubKeyPtr.baseAddress?.assumingMemoryBound(to: UInt8.self), &error)
+      }
+      
+      // Проверяем на наличие ошибки и возвращаем результат.
+      if error == TOX_ERR_FRIEND_ADD_OK {
+        completion(.success(Int32(friendId)))
+      } else {
+        let swiftError = ToxError(friendAddError: error)
+        completion(.failure(swiftError))
+      }
+    }
+  }
+  
   /// Метод для добавления нового друга по публичному ключу без приветственного сообщения. (Не требует подтверждения)
   /// - Parameters:
   ///   - publicKey: Публичный ключ друга в сети Tox.
@@ -1088,41 +1212,26 @@ public extension ToxCore {}
 // MARK: - Private
 
 public extension ToxCore {
-  func addressChecksum(address: [UInt8], length: Int) -> UInt16 {
-    var checksum: [UInt8] = [0, 0]
-    
-    for i in 0..<length {
-      checksum[i % 2] ^= address[i]
-    }
-    
-    var check: UInt16 = 0
-    memcpy(&check, checksum, MemoryLayout<UInt16>.size)
-    
-    return check
-  }
-  
-  // Функция для проверки валидности публичного ключа
-  func validatePublicKey(_ publicKey: Data) -> Bool {
-    // Реализуем проверку валидности публичного ключа
-    // Публичный ключ должен быть определенного формата и длины
-    return publicKey.count == CRYPTO_PUBLIC_KEY_SIZE
-  }
-  
   func registerEventHandlers() {
     toxQueue.async {
       guard let tox = self.tox else { return }
-      
       tox_callback_self_connection_status(tox, connectionStatusCallback)
-      tox_callback_friend_request(tox, friendRequestCallback)
       tox_callback_friend_message(tox, messageCallback)
+      tox_callback_friend_connection_status(tox, friendStatusCallback)
+      tox_callback_friend_request(tox, friendRequestCallback)
+      tox_callback_friend_status_message(tox, friendStatusMessageCallback)
+      tox_callback_friend_status(tox, friendStatusOnlineCallback)
       tox_callback_file_recv(tox, fileReceiveCallback)
       tox_callback_file_recv_chunk(tox, fileChunkReceiveCallback)
+      tox_callback_friend_typing(tox, friendTypingCallback)
+      tox_callback_friend_read_receipt(tox, friendReadReceiptCallback)
     }
   }
   
   func startEventLoop() {
+    guard let tox else { return }
     timer = DispatchSource.makeTimerSource(queue: toxQueue)
-    timer?.schedule(deadline: .now(), repeating: .milliseconds(Int(tox_iteration_interval(tox!))))
+    timer?.schedule(deadline: .now(), repeating: .milliseconds(Int(tox_iteration_interval(tox))))
     timer?.setEventHandler { [weak self] in
       guard let self = self, let tox = self.tox else { return }
       tox_iterate(tox, nil)
@@ -1156,27 +1265,43 @@ public extension ToxCore {
   
   func bootstrap(completion: @escaping (Result<Void, ToxError>) -> Void) {
     toxQueue.async { [weak self] in
-      guard let self, let tox = self.tox else {
+      guard let self = self, let tox = self.tox else {
         completion(.failure(.null))
         return
       }
       
-      let nodes = ToxNode.parseToxNodes(from: toxNodesJsonString)
+      let nodes = ToxNode.parseToxNodes(from: self.toxNodesJsonString)
       var successfullyConnected = false
       
       for node in nodes {
         guard let publicKeyData = Data(hexString: node.publicKey) else {
-          completion(.failure(.unknown))
-          return
+          print("❌ Ошибка: Некорректный публичный ключ для узла \(node.ipv4) или \(node.ipv6 ?? "No IPv6")")
+          continue
         }
         
         publicKeyData.withUnsafeBytes { pubKeyPtr in
-          let success = tox_bootstrap(tox, node.ipv4, node.port, pubKeyPtr.baseAddress?.assumingMemoryBound(to: UInt8.self), nil)
-          if success {
-            successfullyConnected = true
-            print("✅ Узел загружен: \(node.ipv4)")
-          } else {
-            print("❌ Ошибка загрузки от узла: \(node.ipv4)")
+          // Попытка загрузки узла по IPv4
+          if !node.ipv4.isEmpty {
+            let ipv4Success = tox_bootstrap(tox, node.ipv4, node.port, pubKeyPtr.baseAddress?.assumingMemoryBound(to: UInt8.self), nil)
+            if ipv4Success {
+              successfullyConnected = true
+              print("✅ Узел загружен по IPv4: \(node.ipv4)")
+              self.addTCPRelay(tox, address: node.ipv4, port: node.port, pubKeyPointer: pubKeyPtr)
+            } else {
+              print("❌ Ошибка загрузки узла по IPv4: \(node.ipv4)")
+            }
+          }
+          
+          // Попытка загрузки узла по IPv6, если адрес доступен
+          if let ipv6 = node.ipv6, !ipv6.isEmpty {
+            let ipv6Success = tox_bootstrap(tox, ipv6, node.port, pubKeyPtr.baseAddress?.assumingMemoryBound(to: UInt8.self), nil)
+            if ipv6Success {
+              successfullyConnected = true
+              print("✅ Узел загружен по IPv6: \(ipv6)")
+              self.addTCPRelay(tox, address: ipv6, port: node.port, pubKeyPointer: pubKeyPtr)
+            } else {
+              print("❌ Ошибка загрузки узла по IPv6: \(ipv6)")
+            }
           }
         }
       }
@@ -1186,6 +1311,27 @@ public extension ToxCore {
       } else {
         completion(.failure(.null))
       }
+    }
+  }
+  
+  func addTCPRelay(
+    _ tox: UnsafeMutablePointer<Tox>,
+    address: String,
+    port: UInt16,
+    pubKeyPointer: UnsafeRawBufferPointer
+  ) {
+    var error: TOX_ERR_BOOTSTRAP = TOX_ERR_BOOTSTRAP_OK
+    let result = tox_add_tcp_relay(
+      tox,
+      address,
+      port,
+      pubKeyPointer.baseAddress?.assumingMemoryBound(to: UInt8.self),
+      &error
+    )
+    if result {
+      print("✅ TCP реле добавлено для: \(address)")
+    } else {
+      print("❌ Ошибка добавления TCP реле для \(address): \(error)")
     }
   }
 }

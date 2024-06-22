@@ -13,8 +13,9 @@ final public class SKBarButtonItem: UIBarButtonItem {
   // MARK: - Private properties
   
   private var barButtonAction: (() -> Void)?
+  private var buttonItem: ((SKBarButtonItem?) -> Void)?
   private let impactFeedback = UIImpactFeedbackGenerator(style: .soft)
-
+  
   // MARK: - Init
   
   public init(_ buttonType: SKBarButtonItem.ButtonType,
@@ -27,8 +28,10 @@ final public class SKBarButtonItem: UIBarButtonItem {
     self.target = self
     self.action = #selector(barButtonSelector)
     self.barButtonAction = buttonType.action
+    self.buttonItem = buttonType.buttonItem
     self.tintColor = SKStyleAsset.azure.color
     self.isEnabled = isEnabled
+    buttonItem?(self)
   }
   
   required init?(coder: NSCoder) {
@@ -49,28 +52,47 @@ private extension SKBarButtonItem {
 
 extension SKBarButtonItem {
   public enum ButtonType {
+    var buttonItem: ((SKBarButtonItem?) -> Void)? {
+      switch self {
+      case let .close(_, button):
+        return button
+      case let .done(_, button):
+        return button
+      case let .refresh(_, button):
+        return button
+      case let .share(_, button):
+        return button
+      case let .delete(_, button):
+        return button
+      case let .write(_, button):
+        return button
+      case let .text(_, _, button):
+        return button
+      }
+    }
+    
     var action: (() -> Void)? {
       switch self {
-      case let .close(action):
+      case let .close(action, _):
         return action
-      case let .done(action):
+      case let .done(action, _):
         return action
-      case let .refresh(action):
+      case let .refresh(action, _):
         return action
-      case let .share(action):
+      case let .share(action, _):
         return action
-      case let .delete(action):
+      case let .delete(action, _):
         return action
-      case let .write(action):
+      case let .write(action, _):
         return action
-      case let .text(_, action):
+      case let .text(_, action, _):
         return action
       }
     }
     
     var title: String? {
       switch self {
-      case let .text(text, _):
+      case let .text(text, _, _):
         return text
       default:
         return nil
@@ -96,12 +118,12 @@ extension SKBarButtonItem {
       }
     }
     
-    case close(action: (() -> Void)?)
-    case done(action: (() -> Void)?)
-    case refresh(action: (() -> Void)?)
-    case share(action: (() -> Void)?)
-    case delete(action: (() -> Void)?)
-    case write(action: (() -> Void)?)
-    case text(_ text: String, action: (() -> Void)?)
+    case close(action: (() -> Void)?, buttonItem: ((SKBarButtonItem?) -> Void)? = nil)
+    case done(action: (() -> Void)?, buttonItem: ((SKBarButtonItem?) -> Void)? = nil)
+    case refresh(action: (() -> Void)?, buttonItem: ((SKBarButtonItem?) -> Void)? = nil)
+    case share(action: (() -> Void)?, buttonItem: ((SKBarButtonItem?) -> Void)? = nil)
+    case delete(action: (() -> Void)?, buttonItem: ((SKBarButtonItem?) -> Void)? = nil)
+    case write(action: (() -> Void)?, buttonItem: ((SKBarButtonItem?) -> Void)? = nil)
+    case text(_ text: String, action: (() -> Void)?, buttonItem: ((SKBarButtonItem?) -> Void)? = nil)
   }
 }

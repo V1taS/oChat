@@ -126,20 +126,11 @@ private extension SettingsScreenPresenter {
   
   func initialSetup() {
     let languageValue = factory.createLanguageValue(from: stateCurrentLanguage)
-    
-    interactor.getOnionAddress { [weak self] result in
-      guard let self else {
-        return
-      }
-      
-      let onionAddress = try? result.get()
-      stateSectionsModels = factory.createSecuritySectionsModels(
-        passcodeAndFaceIDValue: statePasscodeAndFaceIDValue,
-        messengerIsEnabled: stateMessengerIsEnabled,
-        languageValue: languageValue,
-        myOnionAddress: onionAddress ?? ""
-      )
-    }
+    stateSectionsModels = factory.createSecuritySectionsModels(
+      passcodeAndFaceIDValue: statePasscodeAndFaceIDValue,
+      messengerIsEnabled: stateMessengerIsEnabled,
+      languageValue: languageValue
+    )
   }
 }
 

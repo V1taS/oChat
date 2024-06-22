@@ -16,6 +16,8 @@ public final class ApplicationServicesStub: IApplicationServices, IDataManagerSe
                                             ICloudKitService, IAppSettingsManager, IDataManagementService,
                                             IAccessAndSecurityManagementService, IUserInterfaceAndExperienceService,
                                             IDeepLinkService {
+  public func setAllContactsIsOffline(completion: (() -> Void)?) {}
+  
   public func saveDeepLinkURL(_ url: URL, completion: (() -> Void)?) {}
   public func deleteDeepLinkURL() {}
   public func getMessengerAdress(completion: ((String?) -> Void)?) {}
@@ -165,6 +167,42 @@ public final class ApplicationServicesStub: IApplicationServices, IDataManagerSe
 
 public final class MessengerServiceStub: IMessengerModelSettingsManager, IMessengerModelHandlerService,
                                          IMessagesService, IMessengerService, IP2PChatManager, IAppSettingsManager {
+  public func setAllContactsIsOffline(completion: (() -> Void)?) { }
+  
+  public func getToxPublicKey(from address: String) -> String? { nil }
+  
+  public func confirmFriendRequest(with publicKey: String, completion: @escaping (Result<String, any Error>) -> Void) {}
+  public func deleteFriend(toxPublicKey: String, completion: ((Bool) -> Void)?) {}
+  public func friendConnectionStatus(toxPublicKey: String, completion: ((ConnectionToxStatus?) -> Void)?) {}
+  public func sendMessage(to toxPublicKey: String, message: String, messageType: ToxSendMessageType, completion: @escaping (Result<Int32, any Error>) -> Void) {}
+  
+  public func addFriendWithoutRequest(publicToxKey: String, completion: ((Int32?) -> Void)?) {}
+  
+  public func friendNumber(publicToxKey publicKey: String, completion: ((Int32?) -> Void)?) {}
+  public func friendConnectionStatus(friendNumber: Int32, completion: ((ConnectionToxStatus?) -> Void)?) {}
+  
+  public func deleteFriend(friendNumber: Int32, completion: ((Bool) -> Void)?) {}
+  
+  public func addFriend(publicToxKey address: String, completion: ((Int32?) -> Void)?) {}
+  
+  public func getToxPublicKey(completion: @escaping (String?) -> Void) {}
+  
+  public func toxStateAsString(completion: ((String?) -> Void)?) {}
+  
+  public func addFriend(address: String, message: String, completion: ((Int32?) -> Void)?) {}
+  
+  public func confirmFriendRequest(with publicKey: String, completion: @escaping (Result<Int32, any Error>) -> Void) {}
+  
+  public func sendMessage(to friendNumber: Int32, message: String, messageType: ToxSendMessageType, completion: @escaping (Result<Int32, any Error>) -> Void) {}
+  
+  public func setToxStateAsString(_ toxStateAsString: String?, completion: (() -> Void)?) {}
+  
+  public func toxStateAsString() -> String? { nil }
+  
+  public func getToxAddress(completion: @escaping (Result<String, any Error>) -> Void) {}
+  
+  public func start(saveDataString: String?, completion: ((Result<Void, any Error>) -> Void)?) {}
+  
   public func sendMessage(onionAddress: String, messengerRequest: MessengerNetworkRequestModel?, completion: @escaping (Result<Void, any Error>) -> Void) {}
   
   public func initiateChat(onionAddress: String, messengerRequest: MessengerNetworkRequestModel?, completion: @escaping (Result<Void, any Error>) -> Void) {}
@@ -198,7 +236,6 @@ public final class MessengerServiceStub: IMessengerModelSettingsManager, IMessen
   public func prepareMessage(_ message: String?) -> String? { nil }
   public func handleReceiveMessages(_ message: String?) -> (theirPublicKey: String?, message: String?) { (nil, nil)}
   public func setIsOnline(_ model: ContactModel, _ value: Bool, completion: (() -> Void)?) {}
-  public func setIsPasswordDialogProtected(_ model: ContactModel, _ value: Bool, completion: (() -> Void)?) {}
   public func setNameContact(_ model: ContactModel, _ name: String, completion: ((ContactModel?) -> Void)?) {}
   public func setOnionAddress(_ model: ContactModel, _ address: String, completion: ((ContactModel?) -> Void)?) {}
   public func setMeshAddress(_ model: ContactModel, _ meshAddress: String, completion: ((ContactModel?) -> Void)?) {}

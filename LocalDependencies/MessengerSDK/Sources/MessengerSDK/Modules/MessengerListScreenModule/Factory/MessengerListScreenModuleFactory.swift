@@ -32,7 +32,7 @@ protocol MessengerListScreenModuleFactoryInput {
   
   /// Удалить сообщение
   func removeMessageToContact(
-    message: String?,
+    id: String,
     contactModel: ContactModel
   ) -> ContactModel
   
@@ -55,7 +55,7 @@ final class MessengerListScreenModuleFactory {
 
 extension MessengerListScreenModuleFactory: MessengerListScreenModuleFactoryInput {
   func searchContact(contactModels: [ContactModel], torAddress: String) -> ContactModel? {
-    if let contactIndex = contactModels.firstIndex(where: { $0.onionAddress == torAddress }) {
+    if let contactIndex = contactModels.firstIndex(where: { $0.toxAddress == torAddress }) {
       return contactModels[contactIndex]
     }
     return nil
@@ -81,13 +81,13 @@ extension MessengerListScreenModuleFactory: MessengerListScreenModuleFactoryInpu
   }
   
   func removeMessageToContact(
-    message: String?,
+    id: String,
     contactModel: ContactModel
   ) -> ContactModel {
     var updatedModel = contactModel
     var updatedMessengesModel = updatedModel.messenges
     
-    if let messengeIndex = updatedMessengesModel.firstIndex(where: { $0.message == message}) {
+    if let messengeIndex = updatedMessengesModel.firstIndex(where: { $0.id == id}) {
       updatedMessengesModel.remove(at: messengeIndex)
     }
     updatedModel.messenges = updatedMessengesModel
@@ -102,8 +102,7 @@ extension MessengerListScreenModuleFactory: MessengerListScreenModuleFactoryInpu
     var models: [WidgetCryptoView.Model] = []
     
     messengerDialogModels.forEach { dialogModel in
-      let title = ((dialogModel.name ?? dialogModel.onionAddress) ?? "").formatString(minTextLength: 20)
-      var dateLastMessage = ""
+      let title = ((dialogModel.name ?? dialogModel.toxAddress) ?? "").formatString(minTextLength: 20)
       
       var contactStatusStyle: WidgetCryptoView.TextStyle = .netural
       switch dialogModel.status {
@@ -111,9 +110,9 @@ extension MessengerListScreenModuleFactory: MessengerListScreenModuleFactoryInpu
         contactStatusStyle = .positive
       case .offline:
         contactStatusStyle = .negative
-      case .inProgress:
+      case .requestChat:
         contactStatusStyle = .netural
-      case .requested:
+      case .initialChat:
         contactStatusStyle = .netural
       }
       
@@ -133,17 +132,14 @@ extension MessengerListScreenModuleFactory: MessengerListScreenModuleFactoryInpu
             ),
             descriptionModel: .init(
               text: dialogModel.messenges.last?.message ?? "",
-              lineLimit: 2,
+              lineLimit: 1,
               textStyle: .netural
             )
           ),
           rightSide: .init(
             imageModel: .chevron,
             itemModel: nil,
-            titleModel: .init(
-              text: dateLastMessage,
-              textStyle: .netural
-            )
+            titleModel: nil
           ),
           isSelectable: true,
           backgroundColor: nil,

@@ -14,20 +14,20 @@ final class MessengerDialogScreenPresenter: ObservableObject {
   
   // MARK: - View state
   
-  @Published var stateInputMessengeText = ""
-  @Published var stateIsEnabledRightButton = true
-  @Published var stateBottomHelper: String?
-  @Published var stateIsErrorInputText = false
-  @Published var stateIsEnabledInputText = true
-  @Published var stateMaxLengthInputText = 100
+  // MARK: - Initial chat state
   
-  @Published var stateMessengeModels: [MessengeModel] = []
+  @Published var stateContactAdress = ""
+  @Published var stateIsDeeplinkAdress = false
+  @Published var stateContactAdressMaxLength = 76
+  
+  // MARK: - Request chat state
+  
+  // MARK: - Chat state
+  
   @Published var stateContactModel: ContactModel
-  @Published var stateCostOfSendingMessage: String?
-  
-  @Published var stateKeyExchangeTitle: String = ""
-  @Published var stateKeyExchangeIsShow = false
-  @Published var stateChatingTitle: String = ""
+  @Published var stateMessengeModels: [MessengeModel] = []
+  @Published var stateInputMessengeText = ""
+  @Published var stateInputMessengeTextMaxLength = 1_000
   
   // MARK: - Internal properties
   
@@ -37,8 +37,8 @@ final class MessengerDialogScreenPresenter: ObservableObject {
   
   private let interactor: MessengerDialogScreenInteractorInput
   private let factory: MessengerDialogScreenFactoryInput
-  private var keyExchangeSecondsLeft = 100
-  private var chatingSecondsLeft = 100
+  private weak var deleteRightBarButton: SKBarButtonItem?
+  private var barButtonView: SKBarButtonView?
   
   // MARK: - Initialization
   
@@ -46,24 +46,27 @@ final class MessengerDialogScreenPresenter: ObservableObject {
   ///   - interactor: Интерактор
   ///   - factory: Фабрика
   ///   - dialogModel: Моделька с данными
+  ///   - contactAdress: Адрес контакта
   init(interactor: MessengerDialogScreenInteractorInput,
        factory: MessengerDialogScreenFactoryInput,
-       dialogModel: ContactModel) {
+       dialogModel: ContactModel?,
+       contactAdress: String?) {
     self.interactor = interactor
     self.factory = factory
-    self.stateContactModel = dialogModel
-    self.stateMessengeModels = configureMessengeModel(dialogModel.messenges)
+    stateContactAdress = contactAdress ?? ""
+    stateIsDeeplinkAdress = contactAdress != nil
+    let contact = dialogModel ?? factory.createInitialContact(address: contactAdress ?? "")
+    stateContactModel = contact
+    stateMessengeModels = contact.messenges
   }
   
   // MARK: - The lifecycle of a UIViewController
   
   lazy var viewDidLoad: (() -> Void)? = { [weak self] in
     guard let self else { return }
-    
-    timerForKeyExchangeTitle()
-    timerForChating()
+    initialSetup()
   }
-
+  
   lazy var viewWillDisappear: (() -> Void)? = { [weak self] in
     guard let self else { return }
     moduleOutput?.messengerDialogWillDisappear()
@@ -71,9 +74,14 @@ final class MessengerDialogScreenPresenter: ObservableObject {
   
   // MARK: - Internal func
   
+  func removeMessage(id: String) {
+    moduleOutput?.removeMessage(id: id, contact: stateContactModel)
+  }
+  
   func sendMessage() {
+    guard !stateInputMessengeText.isEmpty else { return }
     let messenge = stateInputMessengeText
-    let contactModel = stateContactModel
+    var updatedContactModel = stateContactModel
     let messengeModel = MessengeModel(
       messageType: .own,
       messageStatus: .inProgress,
@@ -81,29 +89,72 @@ final class MessengerDialogScreenPresenter: ObservableObject {
     )
     
     stateMessengeModels.append(messengeModel)
+    updatedContactModel.messenges.append(messengeModel)
+    stateContactModel = updatedContactModel
+    
     DispatchQueue.global().async { [weak self] in
       guard let self else { return }
-      moduleOutput?.sendMessage(messenge, contact: contactModel)
+      moduleOutput?.sendMessage(messenge, contact: updatedContactModel)
     }
+    stateInputMessengeText = ""
   }
   
   func sendInitiateChatFromDialog() {
-    keyExchangeSecondsLeft = 100
-    timerForKeyExchangeTitle()
+    var updatedModel = stateContactModel
+    var messenges: [MessengeModel] = [
+      .init(
+        messageType: .system,
+        messageStatus: .delivered,
+        message: "Запрос на переписку отправлен. Ожидаем подтверждения!"
+      )
+    ]
+    updatedModel.messenges.append(contentsOf: messenges)
+    stateMessengeModels.append(contentsOf: messenges)
+    updatedModel.toxAddress = stateContactAdress
+    stateContactModel = updatedModel
     
-    interactor.showNotification(.positive(title: "Запрос на переписку отправлен"))
-    let contactModel = stateContactModel
-    moduleOutput?.sendInitiateChatFromDialog(onionAddress: contactModel.onionAddress ?? "")
+    DispatchQueue.global().async { [weak self] in
+      self?.moduleOutput?.sendInitiateChatFromDialog(contactModel: updatedModel)
+    }
+    
+    updateCenterBarButtonView(isHidden: false)
+    stateContactAdress = ""
   }
   
-  func getPlaceholder() -> String {
-    factory.createPlaceholder()
+  func isInitialChatValidation() -> Bool {
+    !stateContactAdress.isEmpty && stateContactAdress.count == stateContactAdressMaxLength
   }
   
-  /// Прошел валидацию запроса
-  func isValidationRequested() -> Bool {
-    true
-//    return stateContactModel.encryptionPublicKey != nil
+  func isChatValidation() -> Bool {
+    !stateInputMessengeText.isEmpty && stateContactModel.status == .online
+  }
+  
+  func confirmRequestForDialog() {
+    moduleOutput?.confirmRequestForDialog(contactModel: stateContactModel)
+  }
+  
+  func cancelRequestForDialog() {
+    moduleOutput?.cancelRequestForDialog(contactModel: stateContactModel)
+  }
+  
+  func getInitialPlaceholder() -> String {
+    factory.createInitialPlaceholder()
+  }
+  
+  func getMainPlaceholder() -> String {
+    factory.createMainPlaceholder()
+  }
+  
+  func getInitialHintModel() -> MessengerDialogHintModel {
+    factory.createInitialHintModel()
+  }
+  
+  func getRequestHintModel() -> MessengerDialogHintModel {
+    factory.createRequestHintModel()
+  }
+  
+  func getRequestButtonCancelTitle() -> String {
+    factory.createRequestButtonCancelTitle()
   }
 }
 
@@ -113,13 +164,9 @@ extension MessengerDialogScreenPresenter: MessengerDialogScreenModuleInput {
   func updateDialog() {
     interactor.getNewContactModels(stateContactModel) { [weak self] contactModel in
       guard let self else { return }
-      self.stateMessengeModels = configureMessengeModel(contactModel.messenges)
       self.stateContactModel = contactModel
+      self.stateMessengeModels = contactModel.messenges
     }
-  }
-  
-  func userChoseToDeleteContact() {
-    moduleOutput?.contactHasBeenDeleted(stateContactModel)
   }
 }
 
@@ -134,74 +181,45 @@ extension MessengerDialogScreenPresenter: MessengerDialogScreenFactoryOutput {}
 // MARK: - SceneViewModel
 
 extension MessengerDialogScreenPresenter: SceneViewModel {
-  var sceneTitle: String? {
-    factory.createHeaderTitle(dialogModel: stateContactModel)
-  }
-  
   var isEndEditing: Bool {
     true
   }
   
-  var rightBarButtonItem: SKBarButtonItem? {
-    .init(.delete(action: { [weak self] in
-      self?.moduleOutput?.deleteContactButtonTapped()
-    }))
+  var centerBarButtonItem: SKBarButtonViewType? {
+    .widgetCryptoView(barButtonView)
   }
 }
 
 // MARK: - Private
 
 private extension MessengerDialogScreenPresenter {
-  func configureMessengeModel(_ encryptMessengeModels: [MessengeModel]) -> [MessengeModel] {
-    let decrypttMessengeModels = encryptMessengeModels.compactMap { messengeModel in
-      var updatedMessengeModel = messengeModel
-      updatedMessengeModel.message = interactor.decrypt(updatedMessengeModel.message) ?? ""
-      return updatedMessengeModel
-    }
-    return decrypttMessengeModels.filter { !$0.message.isEmpty }
+  func initialSetup() {
+    barButtonView = SKBarButtonView(
+      .init(
+        leftImage: nil,
+        centerText: nil,
+        rightImage: nil,
+        isEnabled: false,
+        action: {}
+      )
+    )
+    
+    let isHiddenCenterBarButton = stateContactModel.status == .initialChat ||
+    stateContactModel.status == .requestChat
+    updateCenterBarButtonView(isHidden: isHiddenCenterBarButton)
   }
   
-  func timerForKeyExchangeTitle() {
-    if self.stateContactModel.encryptionPublicKey == nil {
-      Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] timer in
-        guard let self = self else { return }
-        if keyExchangeSecondsLeft > .zero {
-          self.stateKeyExchangeTitle = "Повторно отправить запрос можно через \(keyExchangeSecondsLeft) сек."
-          self.stateKeyExchangeIsShow = false
-          keyExchangeSecondsLeft -= 1
-        } else {
-          self.stateKeyExchangeTitle = "Запрос можно отправить сейчас"
-          self.stateKeyExchangeIsShow = true
-          timer.invalidate()
-        }
-      }
+  func updateCenterBarButtonView(isHidden: Bool) {
+    var title = stateContactAdress
+    if let toxAddress = stateContactModel.toxAddress, !toxAddress.isEmpty {
+      title = toxAddress
     }
-  }
-  
-  func timerForChating() {
-    if stateMessengeModels.last?.messageStatus == .inProgress {
-      Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] timer in
-        guard let self = self else { return }
-        if chatingSecondsLeft > .zero {
-          self.stateChatingTitle = "Повторно отправить можно через \(chatingSecondsLeft) сек."
-          self.stateIsEnabledRightButton = false
-          chatingSecondsLeft -= 1
-        } else {
-          self.stateChatingTitle = ""
-          self.stateIsEnabledRightButton = true
-          chatingSecondsLeft = 100
-          timer.invalidate()
-          moduleOutput?.removeDialogMessage(
-            stateMessengeModels.last?.message,
-            contact: stateContactModel,
-            completion: { [weak self] in
-              guard let self = self else { return }
-              updateDialog()
-            }
-          )
-        }
-      }
-    }
+    
+    let toxAddress = stateContactModel.toxAddress
+    let stateContactAdress = stateContactAdress
+    barButtonView?.isHidden = isHidden
+    barButtonView?.iconLeftView.image = stateContactModel.status.imageStatus
+    barButtonView?.labelView.text = factory.createHeaderTitleFrom(title)
   }
 }
 

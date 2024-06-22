@@ -8,3 +8,24 @@
 // MARK: - State
 
 "State.Notification.MessageFailure" = "Something went wrong";
+
+"Messenger.Initial.Header.Title" = "Начните анонимный диалог";
+"Messenger.Initial.Header.Description" = "Используйте возможности Tox и TOR для максимальной безопасности и анонимности общения. Только вы и ваш собеседник видите сообщения.";
+"Messenger.Initial.Button.Title" = "Отправить запрос на переписку";
+"Messenger.Initial.One.Title" = "Простота и инновации";
+"Messenger.Initial.One.Description" = "Просто добавьте пользователя, и каждое сообщение будет многократно шифроваться и передаваться напрямую через безопасные каналы.";
+"Messenger.Initial.Two.Title" = "Безупречная безопасность";
+"Messenger.Initial.Two.Description" = "Уникальное сочетание Tox и TOR гарантирует, что ваши данные передаются напрямую и остаются анонимными, обеспечивая непревзойденную защиту от перехвата.";
+"Messenger.Initial.Three.Title" = "Абсолютная конфиденциальность";
+"Messenger.Initial.Three.Description" = "Сообщения не хранятся на серверах ни на секунду. Прямое p2p соединение через Tox и шифрование TOR гарантируют, что никто, кроме вас и вашего собеседника, не сможет прочитать ваши сообщения.";
+
+"Messenger.Request.Header.Title" = "Запрос на анонимный диалог";
+"Messenger.Request.Header.Description" = "Вы получили запрос на общение через Tox и TOR. Ваши сообщения будут видеть только вы и отправитель.";
+"Messenger.Request.Button.Title" = "Принять запрос";
+"Messenger.Request.Button.Cancel.Title" = "Отклонить запрос";
+"Messenger.Request.One.Title" = "Простота и защита";
+"Messenger.Request.One.Description" = "Приняв запрос, вы можете начать безопасное общение. Каждое сообщение шифруется и передается напрямую через защищенные каналы.";
+"Messenger.Request.Two.Title" = "Гарантированная безопасность";
+"Messenger.Request.Two.Description" = "Tox и TOR обеспечивают передачу данных напрямую и анонимно, защищая ваши сообщения от перехвата.";
+"Messenger.Request.Three.Title" = "Полная конфиденциальность";
+"Messenger.Request.Three.Description" = "Ваши сообщения не будут храниться на серверах. Прямое p2p соединение через Tox и шифрование TOR гарантируют, что никто, кроме вас и отправителя, не сможет прочитать ваши сообщения.";

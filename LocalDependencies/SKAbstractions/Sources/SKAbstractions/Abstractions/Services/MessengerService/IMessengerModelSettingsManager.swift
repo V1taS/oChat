@@ -11,6 +11,14 @@ import SwiftUI
 
 /// Протокол для управления настройками модели контакта.
 public protocol IMessengerModelSettingsManager {
+  /// Устанавливает состояние Tox в виде строки и вызывает блок завершения.
+  /// - Parameters:
+  ///   - toxStateAsString: Строка, представляющая состояние Tox. Если значение `nil`, состояние сбрасывается.
+  ///   - completion: Блок завершения, который будет вызван после установки состояния. Опциональный параметр.
+  func setToxStateAsString(
+    _ toxStateAsString: String?,
+    completion: (() -> Void)?
+  )
   
   /// Устанавливает, является ли контакт онлайн
   /// - Parameters:
@@ -20,17 +28,6 @@ public protocol IMessengerModelSettingsManager {
   func setStatus(
     _ model: ContactModel,
     _ status: ContactModel.Status,
-    completion: (() -> Void)?
-  )
-  
-  /// Устанавливает, защиту на конкретный диалог
-  /// - Parameters:
-  ///   - model: Модель контакта `ContactModel`.
-  ///   - value: Значение, указывающее,  защиту на конкретный диалог (`true`) или нет (`false`).
-  ///   - completion: Опциональный блок завершения, который вызывается после завершения операции. Может быть `nil`.
-  func setIsPasswordDialogProtected(
-    _ model: ContactModel,
-    _ value: Bool,
     completion: (() -> Void)?
   )
   
@@ -97,4 +94,8 @@ public protocol IMessengerModelSettingsManager {
     _ model: ContactModel,
     completion: (() -> Void)?
   )
+  
+  /// Переводит всех контактов в состояние оффлайн.
+  /// - Parameter completion: Опциональный блок завершения, вызываемый после того, как все контакты будут переведены в оффлайн.
+  func setAllContactsIsOffline(completion: (() -> Void)?)
 }

@@ -10,6 +10,7 @@ import SKUIKit
 import SwiftUI
 import SKAbstractions
 import Lottie
+import SKFoundation
 
 struct MessengerListScreenModuleView: View {
   
@@ -35,16 +36,27 @@ struct MessengerListScreenModuleView: View {
 
 private extension MessengerListScreenModuleView {
   func createContent() -> some View {
-    ScrollView(.vertical, showsIndicators: false) {
-      VStack(spacing: .zero) {
-        ForEach(presenter.stateWidgetModels, id: \.id) { widgetsModel in
-          WidgetCryptoView(widgetsModel)
-            .padding(.top, .s4)
+    List {
+      ForEach(presenter.stateWidgetModels.indices, id: \.self) { index in
+        VStack(spacing: .zero) {
+          WidgetCryptoView(presenter.stateWidgetModels[index])
+            .clipShape(RoundedRectangle(cornerRadius: .s3))
         }
+        .listRowBackground(Color.clear)
+        .listRowInsets(.init(top: .zero, leading: .s4, bottom: .zero, trailing: .s4))
+        .listRowSeparator(.hidden)
       }
-      .padding(.horizontal, .s4)
-      .padding(.bottom, .s4)
+      .onDelete { indexSet in
+        guard let index = indexSet.first else {
+          return
+        }
+        presenter.removeContact(index: index)
+      }
     }
+    .background(Color.clear)
+    .listStyle(PlainListStyle())
+    .listRowSpacing(.s4)
+    .padding(.vertical, .s4)
   }
   
   func createEmptyState() -> some View {

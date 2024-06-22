@@ -31,17 +31,7 @@ struct ConfigurationValueConfigurator: Configurator {
   
   // MARK: - Internal func
   
-  func configure() {
-    getConfigurationValue(forKey: Constants.oneInchKeys) { value in
-      Secrets.oneInchKeys = value
-    }
-    getConfigurationValue(forKey: Constants.infuraKey) { value in
-      Secrets.infuraKeys = value
-    }
-    getConfigurationValue(forKey: Constants.tokenBaseUrlKey) { value in
-      Secrets.tokenBaseUrlString = value
-    }
-  }
+  func configure() {}
 }
 
 // MARK: - Private

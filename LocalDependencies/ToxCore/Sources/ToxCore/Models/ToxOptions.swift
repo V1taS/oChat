@@ -50,9 +50,9 @@ public struct ToxOptions {
     self.startPort = 0
     self.endPort = 0
     self.tcpPort = 0
-    self.holePunchingEnabled = false
-    self.localDiscoveryEnabled = false
-    self.dhtAnnouncementsEnabled = false
+    self.holePunchingEnabled = true
+    self.localDiscoveryEnabled = true
+    self.dhtAnnouncementsEnabled = true
     self.experimentalGroupsPersistence = false
     self.useTorProxy = false
   }

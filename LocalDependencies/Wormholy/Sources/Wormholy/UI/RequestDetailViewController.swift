@@ -41,9 +41,9 @@ class RequestDetailViewController: WHBaseViewController {
     
     tableView.estimatedRowHeight = 100.0
     tableView.rowHeight = UITableView.automaticDimension
-    tableView.register(UINib(nibName: "TextTableViewCell", bundle: .module), forCellReuseIdentifier: "TextTableViewCell")
-    tableView.register(UINib(nibName: "ActionableTableViewCell", bundle: .module), forCellReuseIdentifier: "ActionableTableViewCell")
-    tableView.register(UINib(nibName: "RequestTitleSectionView", bundle: .module), forHeaderFooterViewReuseIdentifier: "RequestTitleSectionView")
+    tableView.register(UINib(nibName: "TextTableViewCell", bundle: WormholyResources.bundle), forCellReuseIdentifier: "TextTableViewCell")
+    tableView.register(UINib(nibName: "ActionableTableViewCell", bundle: WormholyResources.bundle), forCellReuseIdentifier: "ActionableTableViewCell")
+    tableView.register(UINib(nibName: "RequestTitleSectionView", bundle: WormholyResources.bundle), forHeaderFooterViewReuseIdentifier: "RequestTitleSectionView")
   }
   
   override func didReceiveMemoryWarning() {
@@ -79,7 +79,7 @@ class RequestDetailViewController: WHBaseViewController {
   
   // MARK: - Navigation
   func openBodyDetailVC(title: String?, body: Data?){
-    let storyboard = UIStoryboard(name: "Flow", bundle: .module)
+    let storyboard = UIStoryboard(name: "Flow", bundle: WormholyResources.bundle)
     if let requestDetailVC = storyboard.instantiateViewController(withIdentifier: "BodyDetailViewController") as? BodyDetailViewController{
       requestDetailVC.title = title
       requestDetailVC.data = body

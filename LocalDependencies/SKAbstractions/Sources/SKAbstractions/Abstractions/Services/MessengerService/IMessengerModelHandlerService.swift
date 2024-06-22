@@ -19,12 +19,6 @@ public protocol IMessengerModelHandlerService {
   @discardableResult
   func deleteAllData() -> Bool
   
-  /// Сохраняет модель `MessengerModel` асинхронно.
-  /// - Parameters:
-  ///   - model: Модель `MessengerModel`, которая будет сохранена.
-  ///   - completion: Опциональный блок завершения, который вызывается после завершения операции сохранения.
-  func saveMessengerModel(_ model: MessengerModel, completion: (() -> Void)?)
-  
   /// Получает модель настроек приложения `AppSettingsModel` асинхронно.
   /// - Parameter completion: Блок завершения, который вызывается с `AppSettingsModel` после завершения операции.
   func getAppSettingsModel(completion: @escaping (AppSettingsModel) -> Void)

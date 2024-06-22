@@ -17,7 +17,7 @@ public struct ContactModel {
   public var name: String?
   
   /// Адрес контакта в сети Tor.
-  public var onionAddress: String?
+  public var toxAddress: String?
   
   /// Локальный адрес в mesh-сети.
   public var meshAddress: String?
@@ -31,35 +31,35 @@ public struct ContactModel {
   /// Публичный ключ для шифрования сообщений.
   public var encryptionPublicKey: String?
   
-  /// Индикатор защиты диалога с этим контактом паролем.
-  public var isPasswordDialogProtected: Bool
+  /// Публичный ключ для шифрования сообщений.
+  public var toxPublicKey: String?
   
   /// Инициализатор для создания нового контакта.
   /// - Parameters:
   ///   - name: Имя контакта.
-  ///   - onionAddress: Адрес контакта в сети Tor.
+  ///   - toxAddress: Адрес контакта в сети Tox.
   ///   - meshAddress: Локальный адрес в mesh-сети.
   ///   - messenges: Список сообщений с этим контактом.
   ///   - status: Статус онлайн контакта.
   ///   - encryptionPublicKey: Публичный ключ для шифрования сообщений.
-  ///   - isPasswordDialogProtected: Индикатор защиты диалога паролем.
+  ///   - toxPublicKey: Публичный ключ для шифрования сообщений.
   public init(
     name: String?,
-    onionAddress: String?,
+    toxAddress: String?,
     meshAddress: String?,
     messenges: [MessengeModel],
     status: ContactModel.Status,
     encryptionPublicKey: String?,
-    isPasswordDialogProtected: Bool
+    toxPublicKey: String?
   ) {
     self.id = UUID().uuidString
     self.name = name
-    self.onionAddress = onionAddress
+    self.toxAddress = toxAddress
     self.meshAddress = meshAddress
     self.messenges = messenges
     self.status = status
     self.encryptionPublicKey = encryptionPublicKey
-    self.isPasswordDialogProtected = isPasswordDialogProtected
+    self.toxPublicKey = toxPublicKey
   }
 }
 
@@ -69,12 +69,12 @@ extension ContactModel {
   public static func mock() -> Self {
     Self(
       name: nil,
-      onionAddress: nil,
+      toxAddress: nil,
       meshAddress: nil,
       messenges: [],
-      status: .inProgress,
-      encryptionPublicKey: nil,
-      isPasswordDialogProtected: false
+      status: .offline,
+      encryptionPublicKey: nil, 
+      toxPublicKey: nil
     )
   }
 }
@@ -90,11 +90,11 @@ extension ContactModel {
     /// Пользователь не в сети.
     case offline
     
-    /// Переписка в процессе.
-    case inProgress
+    /// Неизвестный контакт запросил переписку с тобой
+    case requestChat
     
-    /// Запрос на начало переписки.
-    case requested
+    /// Ты запросил переписку с контактом
+    case initialChat
     
     /// Заголовок
     public var title: String {
@@ -103,10 +103,10 @@ extension ContactModel {
         "В сети"
       case .offline:
         "Не в сети"
-      case .inProgress:
-        "Подключение..."
-      case .requested:
-        "Инвайт"
+      case .requestChat:
+        "Запрос на переписку"
+      case .initialChat:
+        "Отправили запрос"
       }
     }
   }

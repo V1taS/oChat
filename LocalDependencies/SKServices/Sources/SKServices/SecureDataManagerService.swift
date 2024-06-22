@@ -79,7 +79,7 @@ public struct SecureDataManagerService: ISecureDataManagerService {
     let status: OSStatus = SecItemAdd(attributes, nil)
     
     switch status {
-    case noErr:
+    case errSecSuccess:
       return true
     case errSecDuplicateItem:
       guard deleteData(for: key) else {

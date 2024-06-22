@@ -14,36 +14,36 @@ public struct MessengerNetworkRequestModel {
   public var messageText: String?
   
   /// Адрес получателя в сети Tor для доставки сообщения.
-  public let recipientTorAddress: String
+  public let senderAddress: String
   
   /// Адрес получателя в локальной mesh-сети, используемый для отправки сообщений при отсутствии интернета.
-  public let recipientLocalMeshAddress: String
+  public let senderLocalMeshAddress: String?
   
   /// Публичный ключ отправителя для верификации его подлинности получателем.
-  public let senderPublicKey: String
+  public let senderPublicKey: String?
   
-  /// Текущий статус контакта отправителя.
-  public var senderContactStatus: ContactModel.Status
+  /// Публичный ключ для шифрования сообщений.
+  public var senderToxPublicKey: String?
   
   /// Инициализирует новый экземпляр сетевого запроса для мессенджера с заданными параметрами.
   /// - Parameters:
   ///   - messageText: Текст сообщения.
-  ///   - recipientTorAddress: Адрес в сети Tor для отправки.
-  ///   - recipientLocalMeshAddress: Адрес в локальной сети для отправки.
+  ///   - senderAddress: Адрес в сети для отправки.
+  ///   - senderLocalMeshAddress: Адрес в локальной сети для отправки.
   ///   - senderPublicKey: Публичный ключ отправителя.
-  ///   - senderContactStatus: Статус контакта отправителя.
+  ///   - senderToxPublicKey: Публичный ключ для шифрования сообщений.
   public init(
     messageText: String?,
-    recipientTorAddress: String,
-    recipientLocalMeshAddress: String,
-    senderPublicKey: String,
-    senderContactStatus: ContactModel.Status
+    senderAddress: String,
+    senderLocalMeshAddress: String?,
+    senderPublicKey: String?,
+    senderToxPublicKey: String?
   ) {
     self.messageText = messageText
-    self.recipientTorAddress = recipientTorAddress
-    self.recipientLocalMeshAddress = recipientLocalMeshAddress
+    self.senderAddress = senderAddress
+    self.senderLocalMeshAddress = senderLocalMeshAddress
     self.senderPublicKey = senderPublicKey
-    self.senderContactStatus = senderContactStatus
+    self.senderToxPublicKey = senderToxPublicKey
   }
 }
 
@@ -54,10 +54,10 @@ extension MessengerNetworkRequestModel {
   public func mapToDTO() -> MessengerNetworkRequestDTO {
     MessengerNetworkRequestDTO(
       messageText: messageText,
-      recipientTorAddress: recipientTorAddress,
-      recipientLocalMeshAddress: recipientLocalMeshAddress,
+      senderAddress: senderAddress,
+      senderLocalMeshAddress: senderLocalMeshAddress,
       senderPublicKey: senderPublicKey,
-      senderContactStatus: senderContactStatus.rawValue
+      senderToxPublicKey: senderToxPublicKey
     )
   }
 }

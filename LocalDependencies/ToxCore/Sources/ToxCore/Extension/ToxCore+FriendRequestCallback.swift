@@ -42,25 +42,35 @@ let friendRequestCallback: @convention(c) (
   Int,
   UnsafeMutableRawPointer?
 ) -> Void = { tox, publicKey, message, length, userData in
-  // Проверяем, что публичный ключ и сообщение не равны nil, а длина сообщения больше нуля.
-  guard let publicKey = publicKey, let message = message, length > 0 else { return }
+  // Проверяем, что публичный ключ не равен nil и длина сообщения допустима (неотрицательная)
+  guard let publicKey = publicKey, length >= 0 else {
+    print("🔴 Ошибка: Публичный ключ не установлен или длина сообщения некорректна.")
+    return
+  }
   
-  // Получаем указатель на пользовательские данные и проверяем его на nil.
-  guard let userData = userData else { return }
-  
+  // Получаем контекст из глобальной переменной
   guard let context = globalConnectioFriendRequestContext else {
     print("🔴 Ошибка: контекст не установлен")
     return
   }
   
-  // Преобразуем публичный ключ и сообщение в формат Data.
+  // Преобразуем публичный ключ в Data
   let publicKeyData = Data(bytes: publicKey, count: Int(TOX_PUBLIC_KEY_SIZE))
-  let messageData = Data(bytes: message, count: length)
   
-  // Конвертируем публичный ключ в шестнадцатеричную строку и сообщение в строку UTF-8.
-  if let publicKeyHex = publicKeyData.toHexString(),
-     let messageStr = String(data: messageData, encoding: .utf8) {
-    // Вызываем сохраненное замыкание с публичным ключом и сообщением.
-    context.callback(publicKeyHex, messageStr)
+  // Инициализируем Data для сообщения, даже если оно пустое
+  let messageData: Data
+  if length > 0, let message = message {
+    messageData = Data(bytes: message, count: length)
+  } else {
+    messageData = Data()
   }
+  
+  // Преобразуем публичный ключ в шестнадцатеричную строку
+  let publicKeyHex = publicKeyData.map { String(format: "%02x", $0) }.joined()
+  
+  // Преобразуем сообщение в строку UTF-8, если оно не пустое
+  let messageStr = String(data: messageData, encoding: .utf8) ?? ""
+  
+  // Вызываем сохраненное замыкание с публичным ключом и сообщением
+  context.callback(publicKeyHex, messageStr)
 }

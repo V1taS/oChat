@@ -22,6 +22,4 @@ public enum TorSessionState {
   case stopped
   /// Подключение обновляется.
   case refreshing
-  /// Состояние `circuitsUpdated` активируется при изменении статуса одной или нескольких цепочек Tor.
-  case circuitsUpdated(String)
 }

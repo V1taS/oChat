@@ -20,7 +20,10 @@ public struct MessengerModel {
   public var contacts: [ContactModel]
   
   /// Мой статус онлайн.
-  public var myStatus: ContactModel.Status
+  public var myStatus: MessengerModel.Status
+  
+  /// Строка, содержащая сохранённое состояние Tox в формате Base64
+  public var toxStateAsString: String?
   
   // MARK: - Initializer
   
@@ -29,14 +32,45 @@ public struct MessengerModel {
   ///   - appSettingsModel: Модель настроек приложения.
   ///   - contacts: Массив моделей контактов, каждый из которых представляет отдельный контакт.
   ///   - myStatus: Мой статус онлайн.
+  ///   - toxStateAsString: Строка, содержащая сохранённое состояние Tox в формате Base64
   public init(
     appSettingsModel: AppSettingsModel,
     contacts: [ContactModel],
-    myStatus: ContactModel.Status
+    myStatus: MessengerModel.Status,
+    toxStateAsString: String?
   ) {
     self.appSettingsModel = appSettingsModel
     self.contacts = contacts
     self.myStatus = myStatus
+    self.toxStateAsString = toxStateAsString
+  }
+}
+
+// MARK: - Status
+
+extension MessengerModel {
+  /// Перечисление, представляющее статусы.
+  public enum Status: String {
+    /// Пользователь в сети.
+    case online
+    
+    /// Пользователь не в сети.
+    case offline
+    
+    /// Пользователь подключается к сети
+    case inProgress
+    
+    /// Заголовок
+    public var title: String {
+      switch self {
+      case .online:
+        "В сети"
+      case .offline:
+        "Не в сети"
+      case .inProgress:
+        "Подключение"
+      }
+    }
   }
 }
 
@@ -47,7 +81,8 @@ extension MessengerModel {
     Self(
       appSettingsModel: .setDefaultValues(),
       contacts: [], 
-      myStatus: .inProgress
+      myStatus: .inProgress, 
+      toxStateAsString: nil
     )
   }
 }
@@ -55,3 +90,4 @@ extension MessengerModel {
 // MARK: - IdentifiableAndCodable
 
 extension MessengerModel: IdentifiableAndCodable {}
+extension MessengerModel.Status: IdentifiableAndCodable {}

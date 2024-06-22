@@ -26,10 +26,7 @@ public final class MessengerModelHandlerService: IMessengerModelHandlerService {
   
   public func getMessengerModel(completion: @escaping (MessengerModel) -> Void) {
     queue.async { [weak self] in
-      guard let self else {
-        return
-      }
-      
+      guard let self else { return }
       let messengerModel: MessengerModel
       if let model: MessengerModel? = self.secureDataManagerService.getModel(for: Constants.messengerModelKey),
          let unwrappedModel = model {
@@ -37,39 +34,19 @@ public final class MessengerModelHandlerService: IMessengerModelHandlerService {
       } else {
         messengerModel = MessengerModel.setDefaultValues()
       }
-      DispatchQueue.main.async {
-        completion(messengerModel)
-      }
-    }
-  }
-  
-  public func saveMessengerModel(_ model: MessengerModel, completion: (() -> Void)?) {
-    queue.async(flags: .barrier) { [weak self] in
-      guard let self else {
-        return
-      }
-      
-      self.secureDataManagerService.saveModel(model, for: Constants.messengerModelKey)
-      DispatchQueue.main.async {
-        completion?()
-      }
+      completion(messengerModel)
     }
   }
   
   public func getContactModels(completion: @escaping ([ContactModel]) -> Void) {
     getMessengerModel { model in
-      DispatchQueue.main.async {
-        completion(model.contacts)
-      }
+      completion(model.contacts)
     }
   }
   
   public func removeContactModels(_ contactModel: ContactModel, completion: (() -> Void)?) {
     getMessengerModel { [weak self] model in
-      guard let self else {
-        return
-      }
-      
+      guard let self else { return }
       var updatedModel = model
       var updatedContactModel: [ContactModel] = model.contacts
       
@@ -77,42 +54,33 @@ public final class MessengerModelHandlerService: IMessengerModelHandlerService {
         updatedContactModel.remove(at: contactIndex)
       }
       updatedModel.contacts = updatedContactModel
-      self.saveMessengerModel(updatedModel, completion: completion)
-      
-      DispatchQueue.main.async {
-        completion?()
-      }
+      saveMessengerModel(updatedModel, completion: completion)
     }
   }
   
   public func saveContactModel(_ contactModel: ContactModel, completion: (() -> Void)?) {
     getMessengerModel { [weak self] model in
-      guard let self else {
-        return
-      }
+      guard let self else { return }
       var updatedModel = model
       var updatedContactModel: [ContactModel] = model.contacts
       
-      if let contactIndex = updatedContactModel.firstIndex(where: { $0.onionAddress == contactModel.onionAddress }) {
+      if let contactIndex = updatedContactModel.firstIndex(where: { $0.toxAddress == contactModel.toxAddress }) {
         updatedContactModel[contactIndex] = contactModel
       } else {
         updatedContactModel.append(contactModel)
       }
       
       updatedModel.contacts = updatedContactModel
-      self.saveMessengerModel(updatedModel, completion: completion)
+      saveMessengerModel(updatedModel, completion: completion)
     }
   }
   
   public func saveContactModels(_ contactModels: [ContactModel], completion: (() -> Void)?) {
     getMessengerModel { [weak self] model in
-      guard let self else {
-        return
-      }
-      
+      guard let self else { return }
       var updatedModel = model
       updatedModel.contacts = contactModels
-      self.saveMessengerModel(updatedModel, completion: completion)
+      saveMessengerModel(updatedModel, completion: completion)
     }
   }
   
@@ -123,23 +91,26 @@ public final class MessengerModelHandlerService: IMessengerModelHandlerService {
   
   public func getAppSettingsModel(completion: @escaping (AppSettingsModel) -> Void) {
     getMessengerModel { safeKeeperModel in
-      DispatchQueue.main.async {
-        completion(safeKeeperModel.appSettingsModel)
-      }
+      completion(safeKeeperModel.appSettingsModel)
     }
   }
   
   public func saveAppSettingsModel(_ appSettingsModel: AppSettingsModel, completion: (() -> Void)? = nil) {
     getMessengerModel { [weak self] model in
-      guard let self else {
-        return
-      }
-      
+      guard let self else { return }
       var updatedModel = model
       updatedModel.appSettingsModel = appSettingsModel
-      
       self.saveMessengerModel(updatedModel, completion: completion)
     }
+  }
+}
+
+// MARK: - Funcs
+
+extension MessengerModelHandlerService {
+  public func saveMessengerModel(_ model: MessengerModel, completion: (() -> Void)?) {
+    secureDataManagerService.saveModel(model, for: Constants.messengerModelKey)
+    completion?()
   }
 }
 

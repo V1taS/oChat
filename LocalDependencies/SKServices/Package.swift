@@ -22,7 +22,9 @@ let package = Package(
     .package(path: "../../LocalDependencies/SKNotifications"),
     .package(path: "../../LocalDependencies/SwiftTor"),
     .package(path: "../../LocalDependencies/CocoaAsyncSocket"),
-    .package(path: "../../LocalDependencies/Ecies")
+    .package(path: "../../LocalDependencies/Ecies"),
+    .package(path: "../../LocalDependencies/ToxCore"),
+    .package(path: "../../LocalDependencies/Wormholy")
   ],
   targets: [
     .target(
@@ -38,7 +40,9 @@ let package = Package(
         "SKFoundation",
         "SKNotifications",
         "SwiftTor",
-        "CocoaAsyncSocket"
+        "CocoaAsyncSocket",
+        "ToxCore",
+        "Wormholy"
       ]
     ),
     .binaryTarget(name: "WalletCore", path: "Sources/XCFrameworks/WalletCore.xcframework"),

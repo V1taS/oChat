@@ -67,7 +67,7 @@ final class MessengerProfileModuleInteractor {
 
 extension MessengerProfileModuleInteractor: MessengerProfileModuleInteractorInput {
   func getOnionAdress() {
-    p2pChatManager.getOnionAddress { [weak self] result in
+    p2pChatManager.getToxAddress { [weak self] result in
       let onionAdress = try? result.get()
       self?.output?.didReceiveMyOnionAddress(onionAdress ?? "")
     }
