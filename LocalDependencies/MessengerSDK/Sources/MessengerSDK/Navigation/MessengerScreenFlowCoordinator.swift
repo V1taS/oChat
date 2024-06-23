@@ -69,6 +69,18 @@ extension MessengerScreenFlowCoordinator: MessengerListScreenModuleOutput {
 // MARK: - MessengerDialogScreenModuleOutput
 
 extension MessengerScreenFlowCoordinator: MessengerDialogScreenModuleOutput {
+  public func setUserIsTyping(
+    _ isTyping: Bool,
+    to toxPublicKey: String,
+    completion: @escaping (Result<Void, any Error>) -> Void
+  ) {
+    messengerListScreenModuleModule?.input.setUserIsTyping(
+      isTyping,
+      to: toxPublicKey,
+      completion: completion
+    )
+  }
+  
   public func closeMessengerDialog() {
     navigationController?.popViewController(animated: true)
     messengerDialogModule = nil

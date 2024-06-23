@@ -167,6 +167,10 @@ public final class ApplicationServicesStub: IApplicationServices, IDataManagerSe
 
 public final class MessengerServiceStub: IMessengerModelSettingsManager, IMessengerModelHandlerService,
                                          IMessagesService, IMessengerService, IP2PChatManager, IAppSettingsManager {
+  public func setSelfStatus(isOnline: Bool) {}
+  
+  public func setUserIsTyping(_ isTyping: Bool, to toxPublicKey: String, completion: @escaping (Result<Void, any Error>) -> Void) {}
+  
   public func setAllContactsIsOffline(completion: (() -> Void)?) { }
   
   public func getToxPublicKey(from address: String) -> String? { nil }

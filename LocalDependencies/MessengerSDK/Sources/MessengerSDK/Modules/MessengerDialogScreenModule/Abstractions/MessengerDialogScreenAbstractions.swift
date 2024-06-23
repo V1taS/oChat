@@ -35,6 +35,17 @@ public protocol MessengerDialogScreenModuleOutput: AnyObject {
   
   /// Закрыть экран диалогов
   func closeMessengerDialog()
+  
+  /// Метод для установки статуса "печатает" для друга.
+  /// - Parameters:
+  ///   - isTyping: Статус "печатает" (true, если пользователь печатает).
+  ///   - toxPublicKey: Публичный ключ друга
+  ///   - completion: Замыкание, вызываемое по завершении операции, с результатом успешного выполнения или ошибкой.
+  func setUserIsTyping(
+    _ isTyping: Bool,
+    to toxPublicKey: String,
+    completion: @escaping (Result<Void, Error>) -> Void
+  )
 }
 
 /// События которые отправляем из `Coordinator` в `MessengerDialogScreenModule`

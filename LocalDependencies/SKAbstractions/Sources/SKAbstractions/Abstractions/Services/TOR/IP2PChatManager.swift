@@ -79,4 +79,18 @@ public protocol IP2PChatManager {
     messageType: ToxSendMessageType,
     completion: @escaping (Result<Int32, Error>) -> Void
   )
+  
+  /// Метод для установки статуса "печатает" для друга.
+  /// - Parameters:
+  ///   - isTyping: Статус "печатает" (true, если пользователь печатает).
+  ///   - toxPublicKey: Публичный ключ друга
+  ///   - completion: Замыкание, вызываемое по завершении операции, с результатом успешного выполнения или ошибкой.
+  func setUserIsTyping(
+    _ isTyping: Bool,
+    to toxPublicKey: String,
+    completion: @escaping (Result<Void, Error>) -> Void
+  )
+  
+  /// Метод для установки статуса пользователя.
+  func setSelfStatus(isOnline: Bool)
 }

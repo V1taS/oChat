@@ -90,7 +90,7 @@ private extension MessengerDialogScreenView {
         message: isInitialState ? $presenter.stateContactAdress : $presenter.stateInputMessengeText,
         maxLength: isInitialState ? presenter.stateContactAdressMaxLength : presenter.stateInputMessengeTextMaxLength,
         onChange: { newvalue in
-          // TODO: -
+          presenter.setUserIsTyping(text: newvalue)
         },
         header: {
           EmptyView()
@@ -221,6 +221,15 @@ private extension MessengerDialogScreenView {
           }
         }
         .padding(.bottom, .s4)
+        
+        if presenter.stateContactModel.isTyping {
+          HStack {
+            TypingIndicatorView()
+              .padding(.leading, .s4)
+              .padding(.vertical, .s4)
+            Spacer()
+          }
+        }
         
         if presenter.isInitialWaitConfirmState() {
           MainButtonView(

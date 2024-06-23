@@ -117,14 +117,24 @@ extension MessengerListScreenModuleFactory: MessengerListScreenModuleFactoryInpu
         contactStatusStyle = .netural
       }
       
-      var newMessagePointView: WidgetCryptoView.ItemModel?
+      var rightItemModel: WidgetCryptoView.ItemModel?
       if dialogModel.isNewMessagesAvailable {
-        newMessagePointView = .custom(
+        rightItemModel = .custom(
           item: AnyView(
           Circle()
             .foregroundColor(SKStyleAsset.constantRuby.swiftUIColor)
           ),
           size: .custom(width: .s2, height: .s2),
+          isHitTesting: false
+        )
+      }
+      
+      if dialogModel.isTyping {
+        rightItemModel = .custom(
+          item: AnyView(
+            TypingIndicatorView()
+          ),
+          size: .custom(width: .s8, height: .s4),
           isHitTesting: false
         )
       }
@@ -151,7 +161,7 @@ extension MessengerListScreenModuleFactory: MessengerListScreenModuleFactoryInpu
           ),
           rightSide: .init(
             imageModel: .chevron,
-            itemModel: newMessagePointView,
+            itemModel: rightItemModel,
             titleModel: nil
           ),
           isSelectable: true,

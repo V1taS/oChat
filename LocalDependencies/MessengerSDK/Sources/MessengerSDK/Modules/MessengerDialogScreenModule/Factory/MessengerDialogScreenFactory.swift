@@ -124,7 +124,8 @@ extension MessengerDialogScreenFactory: MessengerDialogScreenFactoryInput {
       status: .initialChat,
       encryptionPublicKey: nil,
       toxPublicKey: nil, 
-      isNewMessagesAvailable: false
+      isNewMessagesAvailable: false, 
+      isTyping: false
     )
   }
   

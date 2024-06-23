@@ -20,7 +20,6 @@ extension P2PChatManager {
     setSessionTORCallback()
     setFriendStatusCallback()
     setLogCallback()
-    setFriendStatusMessageCallback()
     setFriendStatusOnlineCallback()
     setFriendTypingCallback()
     setFriendReadReceiptCallback()
@@ -38,8 +37,8 @@ private extension P2PChatManager {
   }
   
   func setFriendTypingCallback() {
-    toxCore.setFriendTypingCallback { friendId, isTyping in
-      print("friendId: \(friendId), isTyping: \(isTyping)")
+    toxCore.setFriendTypingCallback { [weak self] friendId, isTyping in
+      self?.updateFriendTyping(friendId, isTyping)
     }
   }
   
@@ -49,9 +48,18 @@ private extension P2PChatManager {
     }
   }
   
-  func setFriendStatusMessageCallback() {
-    toxCore.setFriendStatusCallback { friendId, statusMessage in
-      print("friendId: \(friendId), statusMessage: \(statusMessage)")
+  func setFriendStatusCallback() {
+    toxCore.setFriendStatusCallback { [weak self] friendId, connectionStatus in
+      let status: UserStatus
+      switch connectionStatus {
+      case .none:
+        status = .away
+      case .tcp:
+        status = .online
+      case .udp:
+        status = .online
+      }
+      self?.updateFriendStatusOnline(friendId: friendId, status: status)
     }
   }
   
@@ -74,19 +82,6 @@ private extension P2PChatManager {
     }
   }
   
-  func setFriendStatusCallback() {
-    toxCore.setFriendStatusCallback { [self] friendId, connectionStatus in
-      switch connectionStatus {
-      case .none:
-        print("friendId: \(friendId) - 🔴 НЕ в сети")
-      case .tcp:
-        print("friendId: \(friendId) - 🟢 в сети_tcp")
-      case .udp:
-        print("friendId: \(friendId) - 🟢 в сети_udp")
-      }
-    }
-  }
-  
   func setFriendRequestCallback() {
     toxCore.setFriendRequestCallback { [weak self] toxPublicKey, jsonString in
       guard let self else { return }
@@ -99,14 +94,10 @@ private extension P2PChatManager {
       guard let self else { return }
       switch connectionStatus {
       case .none:
-        print("✅ none")
         updateMyOnlineStatus(status: .offline)
       case .tcp:
-        print("✅ tcp")
         updateMyOnlineStatus(status: .online)
-        setFriendRequestCallback()
       case .udp:
-        print("✅ udp")
         updateMyOnlineStatus(status: .online)
       }
     }
@@ -143,6 +134,24 @@ private extension P2PChatManager {
 
 @available(iOS 16.0, *)
 private extension P2PChatManager {
+  func updateFriendTyping(_ friendId: Int32, _ isTyping: Bool) {
+    guard let publicKey = toxCore.publicKeyFromFriendNumber(friendNumber: friendId) else {
+      return
+    }
+    
+    DispatchQueue.main.async {
+      // Отправка уведомления о том печатает ли пользователь сейчас
+      NotificationCenter.default.post(
+        name: Notification.Name(NotificationConstants.isTyping.rawValue),
+        object: nil,
+        userInfo: [
+          "publicKey": publicKey,
+          "isTyping": isTyping
+        ]
+      )
+    }
+  }
+  
   func updateFriendStatusOnline(friendId: Int32, status: UserStatus) {
     guard let publicKey = toxCore.publicKeyFromFriendNumber(friendNumber: friendId) else {
       return

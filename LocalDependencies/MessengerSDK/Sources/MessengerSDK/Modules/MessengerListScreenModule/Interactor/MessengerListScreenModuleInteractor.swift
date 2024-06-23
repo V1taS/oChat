@@ -151,6 +151,20 @@ protocol MessengerListScreenModuleInteractorInput {
   
   /// Установить красную точку на таб баре 
   func setRedDotToTabBar(value: String?)
+  
+  /// Метод для установки статуса "печатает" для друга.
+  /// - Parameters:
+  ///   - isTyping: Статус "печатает" (true, если пользователь печатает).
+  ///   - toxPublicKey: Публичный ключ друга
+  ///   - completion: Замыкание, вызываемое по завершении операции, с результатом успешного выполнения или ошибкой.
+  func setUserIsTyping(
+    _ isTyping: Bool,
+    to toxPublicKey: String,
+    completion: @escaping (Result<Void, Error>) -> Void
+  )
+  
+  /// Метод для установки статуса пользователя.
+  func setSelfStatus(isOnline: Bool)
 }
 
 /// Интерактор
@@ -188,6 +202,31 @@ final class MessengerListScreenModuleInteractor {
 // MARK: - MessengerListScreenModuleInteractorInput
 
 extension MessengerListScreenModuleInteractor: MessengerListScreenModuleInteractorInput {
+  func setSelfStatus(isOnline: Bool) {
+    DispatchQueue.global().async { [weak self] in
+      self?.p2pChatManager.setSelfStatus(isOnline: isOnline)
+    }
+  }
+  
+  func setUserIsTyping(
+    _ isTyping: Bool,
+    to toxPublicKey: String,
+    completion: @escaping (Result<Void, any Error>) -> Void
+  ) {
+    DispatchQueue.global().async { [weak self] in
+      self?.p2pChatManager.setUserIsTyping(isTyping, to: toxPublicKey) { result in
+        DispatchQueue.main.async { [weak self] in
+          switch result {
+          case .success:
+            completion(.success(()))
+          case let .failure(error):
+            completion(.failure(error))
+          }
+        }
+      }
+    }
+  }
+  
   func setRedDotToTabBar(value: String?) {
     guard let tabBarController = UIApplication.currentWindow?.rootViewController as? UITabBarController,
           (tabBarController.tabBar.items?.count ?? .zero) > .zero else {

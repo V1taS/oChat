@@ -75,6 +75,7 @@ final class MessengerDialogScreenPresenter: ObservableObject {
   lazy var viewWillDisappear: (() -> Void)? = { [weak self] in
     guard let self else { return }
     moduleOutput?.messengerDialogWillDisappear()
+    setUserIsTyping(text: "")
   }
   
   // MARK: - Internal func
@@ -159,7 +160,7 @@ final class MessengerDialogScreenPresenter: ObservableObject {
   }
   
   func isInitialWaitConfirmState() -> Bool {
-    stateContactModel.status == .initialChat && !stateContactModel.toxAddress.isNilOrEmpty
+    stateContactModel.status == .initialChat && !stateContactModel.toxAddress.isNilOrEmpty || (stateContactModel.encryptionPublicKey ?? "").isEmpty
   }
   
   func isRequestChatState() -> Bool {
@@ -186,6 +187,16 @@ final class MessengerDialogScreenPresenter: ObservableObject {
         self.stateIsCanResendInitialRequest = true
         timer.invalidate()
       }
+    }
+  }
+  
+  func setUserIsTyping(text: String) {
+    guard let toxPublicKey = stateContactModel.toxPublicKey else {
+      return
+    }
+    
+    DispatchQueue.global().async { [weak self] in
+      self?.moduleOutput?.setUserIsTyping(!text.isEmpty, to: toxPublicKey, completion: { _ in })
     }
   }
 }
@@ -252,6 +263,9 @@ private extension MessengerDialogScreenPresenter {
   }
   
   func markMessageAsRead(contactModel: ContactModel) {
+    guard contactModel.status != .initialChat else {
+      return
+    }
     var contactUpdated = contactModel
     if contactUpdated.isNewMessagesAvailable {
       contactUpdated.isNewMessagesAvailable = false
@@ -277,11 +291,16 @@ private extension MessengerDialogScreenPresenter {
   
   func addWelcomeMessage(contactModel: ContactModel) {
     var contactUpdated = contactModel
+    let publicKeyIsEmpty = (stateContactModel.encryptionPublicKey ?? "").isEmpty
+    
+    let sender = "Поздравляем! Вас успешно добавили в контакты. Теперь дождитесь, когда ваш новый контакт вам напишет"
+    let receiver = "Поздравляем! Вы успешно добавили контакт. Пожалуйста, отправьте сообщение первым, чтобы начать общение"
+    
     contactUpdated.messenges.append(
       .init(
         messageType: .systemSuccess,
         messageStatus: .delivered,
-        message: "Поздравляем! Вы успешно добавлены в список контактов. Теперь вы можете начать переписку"
+        message: publicKeyIsEmpty ? sender : receiver
       )
     )
     
