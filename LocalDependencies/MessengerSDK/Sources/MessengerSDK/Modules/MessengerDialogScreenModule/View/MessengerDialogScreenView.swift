@@ -65,11 +65,11 @@ private extension MessengerDialogScreenView {
     
     switch messageType {
     case .own:
-      backgroundColor = SKStyleAsset.azure.swiftUIColor
+      backgroundColor = SKStyleAsset.constantAzure.swiftUIColor
     case .received:
-      backgroundColor = SKStyleAsset.navy.swiftUIColor
+      backgroundColor = SKStyleAsset.constantNavy.swiftUIColor
     case .system:
-      backgroundColor = SKStyleAsset.amberGlow.swiftUIColor
+      backgroundColor = SKStyleAsset.constantAmberGlow.swiftUIColor
     }
     
     return Text(message)
