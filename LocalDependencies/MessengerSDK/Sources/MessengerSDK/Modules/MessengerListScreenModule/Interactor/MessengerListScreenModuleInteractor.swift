@@ -7,6 +7,7 @@
 
 import SwiftUI
 import SKAbstractions
+import SKStyle
 
 /// События которые отправляем из Interactor в Presenter
 protocol MessengerListScreenModuleInteractorOutput: AnyObject {}
@@ -147,6 +148,23 @@ protocol MessengerListScreenModuleInteractorInput {
   
   /// Запуск TOR + TOX сервисы
   func stratTORxService()
+  
+  /// Установить красную точку на таб баре 
+  func setRedDotToTabBar(value: String?)
+  
+  /// Метод для установки статуса "печатает" для друга.
+  /// - Parameters:
+  ///   - isTyping: Статус "печатает" (true, если пользователь печатает).
+  ///   - toxPublicKey: Публичный ключ друга
+  ///   - completion: Замыкание, вызываемое по завершении операции, с результатом успешного выполнения или ошибкой.
+  func setUserIsTyping(
+    _ isTyping: Bool,
+    to toxPublicKey: String,
+    completion: @escaping (Result<Void, Error>) -> Void
+  )
+  
+  /// Метод для установки статуса пользователя.
+  func setSelfStatus(isOnline: Bool)
 }
 
 /// Интерактор
@@ -184,6 +202,41 @@ final class MessengerListScreenModuleInteractor {
 // MARK: - MessengerListScreenModuleInteractorInput
 
 extension MessengerListScreenModuleInteractor: MessengerListScreenModuleInteractorInput {
+  func setSelfStatus(isOnline: Bool) {
+    DispatchQueue.global().async { [weak self] in
+      self?.p2pChatManager.setSelfStatus(isOnline: isOnline)
+    }
+  }
+  
+  func setUserIsTyping(
+    _ isTyping: Bool,
+    to toxPublicKey: String,
+    completion: @escaping (Result<Void, any Error>) -> Void
+  ) {
+    DispatchQueue.global().async { [weak self] in
+      self?.p2pChatManager.setUserIsTyping(isTyping, to: toxPublicKey) { result in
+        DispatchQueue.main.async { [weak self] in
+          switch result {
+          case .success:
+            completion(.success(()))
+          case let .failure(error):
+            completion(.failure(error))
+          }
+        }
+      }
+    }
+  }
+  
+  func setRedDotToTabBar(value: String?) {
+    guard let tabBarController = UIApplication.currentWindow?.rootViewController as? UITabBarController,
+          (tabBarController.tabBar.items?.count ?? .zero) > .zero else {
+      return
+    }
+    
+    tabBarController.tabBar.items?[.zero].badgeValue = value
+    tabBarController.tabBar.items?[.zero].badgeColor = SKStyleAsset.constantRuby.color
+  }
+  
   func stratTORxService() {
     DispatchQueue.global().async { [weak self] in
       guard let self else { return }
@@ -415,15 +468,18 @@ extension MessengerListScreenModuleInteractor: MessengerListScreenModuleInteract
   
   func removeContactModels(_ contactModel: ContactModel, completion: (() -> Void)?) {
     DispatchQueue.global().async { [weak self] in
-      if let toxPublicKey = contactModel.toxPublicKey {
-        self?.p2pChatManager.deleteFriend(toxPublicKey: toxPublicKey, completion: {_ in})
-      }
-      self?.modelHandlerService.removeContactModels(contactModel, completion: {
-        DispatchQueue.main.async {
-          completion?()
+      self?.p2pChatManager.deleteFriend(
+        toxPublicKey: contactModel.toxPublicKey ?? "",
+        completion: { [weak self] _ in
+          guard let self else { return }
+          modelHandlerService.removeContactModels(contactModel, completion: {
+            DispatchQueue.main.async {
+              completion?()
+            }
+          })
+          saveToxState()
         }
-      })
-      self?.saveToxState()
+      )
     }
   }
   

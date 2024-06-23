@@ -9,6 +9,7 @@ import SKStyle
 import SKUIKit
 import SwiftUI
 import SKAbstractions
+import SKFoundation
 
 final class MessengerDialogScreenPresenter: ObservableObject {
   
@@ -19,6 +20,9 @@ final class MessengerDialogScreenPresenter: ObservableObject {
   @Published var stateContactAdress = ""
   @Published var stateIsDeeplinkAdress = false
   @Published var stateContactAdressMaxLength = 76
+  @Published var stateShowInitialTips = true
+  @Published var stateIsCanResendInitialRequest = false
+  @Published var stateSecondsUntilResendInitialRequestAllowed = 0
   
   // MARK: - Request chat state
   
@@ -39,6 +43,7 @@ final class MessengerDialogScreenPresenter: ObservableObject {
   private let factory: MessengerDialogScreenFactoryInput
   private weak var deleteRightBarButton: SKBarButtonItem?
   private var barButtonView: SKBarButtonView?
+  private var timer: Timer?
   
   // MARK: - Initialization
   
@@ -53,7 +58,7 @@ final class MessengerDialogScreenPresenter: ObservableObject {
        contactAdress: String?) {
     self.interactor = interactor
     self.factory = factory
-    stateContactAdress = contactAdress ?? ""
+    stateContactAdress = contactAdress ?? (dialogModel?.toxAddress ?? "")
     stateIsDeeplinkAdress = contactAdress != nil
     let contact = dialogModel ?? factory.createInitialContact(address: contactAdress ?? "")
     stateContactModel = contact
@@ -70,6 +75,7 @@ final class MessengerDialogScreenPresenter: ObservableObject {
   lazy var viewWillDisappear: (() -> Void)? = { [weak self] in
     guard let self else { return }
     moduleOutput?.messengerDialogWillDisappear()
+    setUserIsTyping(text: "")
   }
   
   // MARK: - Internal func
@@ -101,15 +107,6 @@ final class MessengerDialogScreenPresenter: ObservableObject {
   
   func sendInitiateChatFromDialog() {
     var updatedModel = stateContactModel
-    var messenges: [MessengeModel] = [
-      .init(
-        messageType: .system,
-        messageStatus: .delivered,
-        message: "Запрос на переписку отправлен. Ожидаем подтверждения!"
-      )
-    ]
-    updatedModel.messenges.append(contentsOf: messenges)
-    stateMessengeModels.append(contentsOf: messenges)
     updatedModel.toxAddress = stateContactAdress
     stateContactModel = updatedModel
     
@@ -118,15 +115,6 @@ final class MessengerDialogScreenPresenter: ObservableObject {
     }
     
     updateCenterBarButtonView(isHidden: false)
-    stateContactAdress = ""
-  }
-  
-  func isInitialChatValidation() -> Bool {
-    !stateContactAdress.isEmpty && stateContactAdress.count == stateContactAdressMaxLength
-  }
-  
-  func isChatValidation() -> Bool {
-    !stateInputMessengeText.isEmpty && stateContactModel.status == .online
   }
   
   func confirmRequestForDialog() {
@@ -135,6 +123,15 @@ final class MessengerDialogScreenPresenter: ObservableObject {
   
   func cancelRequestForDialog() {
     moduleOutput?.cancelRequestForDialog(contactModel: stateContactModel)
+    moduleOutput?.closeMessengerDialog()
+  }
+  
+  func isInitialChatValidation() -> Bool {
+    !stateContactAdress.isEmpty && stateContactAdress.count == stateContactAdressMaxLength
+  }
+  
+  func isChatValidation() -> Bool {
+    !stateInputMessengeText.isEmpty && stateContactModel.status == .online
   }
   
   func getInitialPlaceholder() -> String {
@@ -156,6 +153,52 @@ final class MessengerDialogScreenPresenter: ObservableObject {
   func getRequestButtonCancelTitle() -> String {
     factory.createRequestButtonCancelTitle()
   }
+  
+  func isInitialAddressEntryState() -> Bool {
+    stateContactModel.status == .initialChat &&
+    (stateContactModel.toxAddress.isNilOrEmpty || stateIsDeeplinkAdress)
+  }
+  
+  func isInitialWaitConfirmState() -> Bool {
+    stateContactModel.status == .initialChat && !stateContactModel.toxAddress.isNilOrEmpty || (stateContactModel.encryptionPublicKey ?? "").isEmpty
+  }
+  
+  func isRequestChatState() -> Bool {
+    stateContactModel.status == .requestChat
+  }
+  
+  func startScheduleResendInitialRequest() {
+    // Устанавливаем начальное состояние
+    stateIsCanResendInitialRequest = false
+    stateSecondsUntilResendInitialRequestAllowed = 30
+    
+    // Инвалидируем предыдущий таймер, если он существует
+    timer?.invalidate()
+    
+    // Запускаем новый таймер, который обновляется каждую секунду
+    timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] timer in
+      guard let self = self else { return }
+      
+      // Уменьшаем количество оставшихся секунд
+      self.stateSecondsUntilResendInitialRequestAllowed -= 1
+      
+      // Если отсчёт завершён, обновляем состояние и останавливаем таймер
+      if self.stateSecondsUntilResendInitialRequestAllowed <= 0 {
+        self.stateIsCanResendInitialRequest = true
+        timer.invalidate()
+      }
+    }
+  }
+  
+  func setUserIsTyping(text: String) {
+    guard let toxPublicKey = stateContactModel.toxPublicKey else {
+      return
+    }
+    
+    DispatchQueue.global().async { [weak self] in
+      self?.moduleOutput?.setUserIsTyping(!text.isEmpty, to: toxPublicKey, completion: { _ in })
+    }
+  }
 }
 
 // MARK: - MessengerDialogScreenModuleInput
@@ -164,8 +207,15 @@ extension MessengerDialogScreenPresenter: MessengerDialogScreenModuleInput {
   func updateDialog() {
     interactor.getNewContactModels(stateContactModel) { [weak self] contactModel in
       guard let self else { return }
+      
+      if isWelcomeMessageAllowed(contactModel: contactModel) {
+        addWelcomeMessage(contactModel: contactModel)
+        return
+      }
+      
       self.stateContactModel = contactModel
       self.stateMessengeModels = contactModel.messenges
+      updateCenterBarButtonView(isHidden: false)
     }
   }
 }
@@ -194,6 +244,8 @@ extension MessengerDialogScreenPresenter: SceneViewModel {
 
 private extension MessengerDialogScreenPresenter {
   func initialSetup() {
+    markMessageAsRead(contactModel: stateContactModel)
+    
     barButtonView = SKBarButtonView(
       .init(
         leftImage: nil,
@@ -204,9 +256,24 @@ private extension MessengerDialogScreenPresenter {
       )
     )
     
-    let isHiddenCenterBarButton = stateContactModel.status == .initialChat ||
-    stateContactModel.status == .requestChat
-    updateCenterBarButtonView(isHidden: isHiddenCenterBarButton)
+    updateCenterBarButtonView(isHidden: isInitialAddressEntryState() || isRequestChatState())
+    if isInitialWaitConfirmState() {
+      startScheduleResendInitialRequest()
+    }
+  }
+  
+  func markMessageAsRead(contactModel: ContactModel) {
+    guard contactModel.status != .initialChat else {
+      return
+    }
+    var contactUpdated = contactModel
+    if contactUpdated.isNewMessagesAvailable {
+      contactUpdated.isNewMessagesAvailable = false
+    }
+    
+    DispatchQueue.global().async { [weak self] in
+      self?.moduleOutput?.saveContactModel(contactUpdated)
+    }
   }
   
   func updateCenterBarButtonView(isHidden: Bool) {
@@ -220,6 +287,34 @@ private extension MessengerDialogScreenPresenter {
     barButtonView?.isHidden = isHidden
     barButtonView?.iconLeftView.image = stateContactModel.status.imageStatus
     barButtonView?.labelView.text = factory.createHeaderTitleFrom(title)
+  }
+  
+  func addWelcomeMessage(contactModel: ContactModel) {
+    var contactUpdated = contactModel
+    let publicKeyIsEmpty = (stateContactModel.encryptionPublicKey ?? "").isEmpty
+    
+    let sender = "Поздравляем! Вас успешно добавили в контакты. Теперь дождитесь, когда ваш новый контакт вам напишет"
+    let receiver = "Поздравляем! Вы успешно добавили контакт. Пожалуйста, отправьте сообщение первым, чтобы начать общение"
+    
+    contactUpdated.messenges.append(
+      .init(
+        messageType: .systemSuccess,
+        messageStatus: .delivered,
+        message: publicKeyIsEmpty ? sender : receiver
+      )
+    )
+    
+    DispatchQueue.global().async { [weak self] in
+      self?.moduleOutput?.saveContactModel(contactUpdated)
+    }
+  }
+  
+  func isWelcomeMessageAllowed(contactModel: ContactModel) -> Bool {
+    let isMessengesIsEmpty = contactModel.messenges.filter({ !$0.messageType.isSystem }).isEmpty
+    let isContainsSystemMessengeSuccess = contactModel.messenges.contains(where: ({
+      $0.messageType == .systemSuccess
+    }))
+    return isMessengesIsEmpty && !isContainsSystemMessengeSuccess && contactModel.status == .online
   }
 }
 

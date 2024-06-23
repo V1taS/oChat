@@ -41,7 +41,7 @@ public struct TipsView: View {
       HStack(alignment: .firstTextBaseline, spacing: .zero) {
         Text(model.text)
           .font(.fancy.text.regular)
-          .foregroundColor(SKStyleAsset.onyx.swiftUIColor)
+          .foregroundColor(SKStyleAsset.constantOnyx.swiftUIColor)
           .lineLimit(.max)
           .allowsHitTesting(false)
           .padding(.leading, .s3)
@@ -64,7 +64,7 @@ public struct TipsView: View {
               Image(systemName: "xmark")
                 .resizable()
                 .aspectRatio(contentMode: .fit)
-                .foregroundColor(SKStyleAsset.onyx.swiftUIColor)
+                .foregroundColor(SKStyleAsset.constantOnyx.swiftUIColor)
                 .frame(width: .s3, height: .s3)
                 .padding(.trailing, .s3)
                 .padding(.leading, .s2)

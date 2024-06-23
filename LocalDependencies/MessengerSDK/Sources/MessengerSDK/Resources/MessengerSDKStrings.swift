@@ -54,6 +54,10 @@ public enum MessengerSDKStrings {
       "MessengerDialogScreenLocalization",
       "Messenger.Initial.Three.Description"
     )
+    public static let stateInitialMessengerNote = MessengerSDKStrings.tr(
+      "MessengerDialogScreenLocalization",
+      "Messenger.Initial.Note"
+    )
     
     public static let stateRequestMessengerHeaderTitle = MessengerSDKStrings.tr(
       "MessengerDialogScreenLocalization",

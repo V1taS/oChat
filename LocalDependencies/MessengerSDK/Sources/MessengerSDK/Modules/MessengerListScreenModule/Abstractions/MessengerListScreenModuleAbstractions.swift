@@ -52,6 +52,22 @@ public protocol MessengerListScreenModuleModuleInput {
   /// Отклонить запрос на переписку
   func cancelRequestForDialog(contactModel: ContactModel)
   
+  /// Сохраняет `ContactModel` асинхронно.
+  /// - Parameters:
+  ///   - model: Модель `ContactModel`, которая будутет сохранена.
+  func saveContactModel(_ model: ContactModel)
+  
+  /// Метод для установки статуса "печатает" для друга.
+  /// - Parameters:
+  ///   - isTyping: Статус "печатает" (true, если пользователь печатает).
+  ///   - toxPublicKey: Публичный ключ друга
+  ///   - completion: Замыкание, вызываемое по завершении операции, с результатом успешного выполнения или ошибкой.
+  func setUserIsTyping(
+    _ isTyping: Bool,
+    to toxPublicKey: String,
+    completion: @escaping (Result<Void, Error>) -> Void
+  )
+  
   /// События которые отправляем из `MessengerListScreenModuleModule` в `Coordinator`
   var moduleOutput: MessengerListScreenModuleOutput? { get set }
 }

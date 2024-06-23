@@ -109,6 +109,29 @@ public extension P2PChatManager {
     }
   }
   
+  func setUserIsTyping(
+    _ isTyping: Bool,
+    to toxPublicKey: String,
+    completion: @escaping (Result<Void, Error>) -> Void
+  ) {
+    guard let friendNumber = toxCore.friendNumber(publicKey: toxPublicKey) else {
+      DispatchQueue.main.async {
+        completion(.failure(ToxError.friendNotFound))
+      }
+      return
+    }
+    toxCore.setUserIsTyping(isTyping, forFriendNumber: friendNumber) { result in
+      DispatchQueue.main.async {
+        switch result {
+        case .success():
+          completion(.success(()))
+        case let .failure(error):
+          completion(.failure(error))
+        }
+      }
+    }
+  }
+  
   func confirmFriendRequest(
     with publicToxKey: String,
     completion: @escaping (Result<String, Error>) -> Void
@@ -201,6 +224,10 @@ public extension P2PChatManager {
     DispatchQueue.main.async { [weak self] in
       completion?(self?.toxCore.friendNumber(publicKey: publicToxKey))
     }
+  }
+  
+  func setSelfStatus(isOnline: Bool) {
+    toxCore.setSelfStatus(isOnline ? .online : .away)
   }
 }
 

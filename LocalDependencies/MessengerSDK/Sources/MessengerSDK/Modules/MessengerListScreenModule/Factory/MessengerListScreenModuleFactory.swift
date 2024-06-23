@@ -9,6 +9,7 @@ import SwiftUI
 import SKUIKit
 import SKAbstractions
 import SKFoundation
+import SKStyle
 
 /// Cобытия которые отправляем из Factory в Presenter
 protocol MessengerListScreenModuleFactoryOutput: AnyObject {
@@ -116,6 +117,28 @@ extension MessengerListScreenModuleFactory: MessengerListScreenModuleFactoryInpu
         contactStatusStyle = .netural
       }
       
+      var rightItemModel: WidgetCryptoView.ItemModel?
+      if dialogModel.isNewMessagesAvailable {
+        rightItemModel = .custom(
+          item: AnyView(
+          Circle()
+            .foregroundColor(SKStyleAsset.constantRuby.swiftUIColor)
+          ),
+          size: .custom(width: .s2, height: .s2),
+          isHitTesting: false
+        )
+      }
+      
+      if dialogModel.isTyping {
+        rightItemModel = .custom(
+          item: AnyView(
+            TypingIndicatorView()
+          ),
+          size: .custom(width: .s8, height: .s4),
+          isHitTesting: false
+        )
+      }
+      
       models.append(
         WidgetCryptoView.Model(
           leftSide: .init(
@@ -138,7 +161,7 @@ extension MessengerListScreenModuleFactory: MessengerListScreenModuleFactoryInpu
           ),
           rightSide: .init(
             imageModel: .chevron,
-            itemModel: nil,
+            itemModel: rightItemModel,
             titleModel: nil
           ),
           isSelectable: true,

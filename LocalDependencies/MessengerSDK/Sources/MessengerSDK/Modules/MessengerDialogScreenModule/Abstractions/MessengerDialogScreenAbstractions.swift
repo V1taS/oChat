@@ -27,6 +27,25 @@ public protocol MessengerDialogScreenModuleOutput: AnyObject {
   
   /// Удалить сообщение
   func removeMessage(id: String, contact: ContactModel)
+  
+  /// Сохраняет `ContactModel` асинхронно.
+  /// - Parameters:
+  ///   - model: Модель `ContactModel`, которая будутет сохранена.
+  func saveContactModel(_ model: ContactModel)
+  
+  /// Закрыть экран диалогов
+  func closeMessengerDialog()
+  
+  /// Метод для установки статуса "печатает" для друга.
+  /// - Parameters:
+  ///   - isTyping: Статус "печатает" (true, если пользователь печатает).
+  ///   - toxPublicKey: Публичный ключ друга
+  ///   - completion: Замыкание, вызываемое по завершении операции, с результатом успешного выполнения или ошибкой.
+  func setUserIsTyping(
+    _ isTyping: Bool,
+    to toxPublicKey: String,
+    completion: @escaping (Result<Void, Error>) -> Void
+  )
 }
 
 /// События которые отправляем из `Coordinator` в `MessengerDialogScreenModule`
