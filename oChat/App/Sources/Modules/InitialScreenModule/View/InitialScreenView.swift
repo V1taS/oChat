@@ -30,7 +30,7 @@ struct InitialScreenView: View {
       Spacer()
       
       MainButtonView(
-        text: presenter.stateContinueButtonTitle
+        text: OChatStrings.InitialScreenLocalization.Stories.Button.title
       ) {
         presenter.moduleOutput?.continueButtonTapped()
       }

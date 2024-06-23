@@ -14,13 +14,6 @@ final class InitialScreenPresenter: ObservableObject {
   
   // MARK: - View state
   
-  /// Заголовок кнопки `Создать новый кошелек`
-  @Published
-  var stateContinueButtonTitle = "Продолжить"
-  
-  /// Заголовок кнопки `Добавить существующий кошелек`
-  @Published
-  var stateImportWalletButtonTitle = OChatStrings.InitialScreenLocalization.State.ImportWalletButton.title
   
   // MARK: - Internal properties
   
