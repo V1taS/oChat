@@ -100,7 +100,6 @@ struct SettingsScreenView_Previews: PreviewProvider {
   }
 }
 
-
 struct RoundedCornerShape: Shape {
   var corners: UIRectCorner
   var radius: CGFloat

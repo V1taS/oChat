@@ -14,7 +14,6 @@ final class InitialScreenPresenter: ObservableObject {
   
   // MARK: - View state
   
-  
   // MARK: - Internal properties
   
   weak var moduleOutput: InitialScreenModuleOutput?
