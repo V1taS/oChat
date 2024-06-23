@@ -7,6 +7,7 @@
 
 import SwiftUI
 import SKAbstractions
+import SKStyle
 
 /// События которые отправляем из Interactor в Presenter
 protocol MessengerListScreenModuleInteractorOutput: AnyObject {}
@@ -147,6 +148,9 @@ protocol MessengerListScreenModuleInteractorInput {
   
   /// Запуск TOR + TOX сервисы
   func stratTORxService()
+  
+  /// Установить красную точку на таб баре 
+  func setRedDotToTabBar(value: String?)
 }
 
 /// Интерактор
@@ -184,6 +188,16 @@ final class MessengerListScreenModuleInteractor {
 // MARK: - MessengerListScreenModuleInteractorInput
 
 extension MessengerListScreenModuleInteractor: MessengerListScreenModuleInteractorInput {
+  func setRedDotToTabBar(value: String?) {
+    guard let tabBarController = UIApplication.currentWindow?.rootViewController as? UITabBarController,
+          (tabBarController.tabBar.items?.count ?? .zero) > .zero else {
+      return
+    }
+    
+    tabBarController.tabBar.items?[.zero].badgeValue = value
+    tabBarController.tabBar.items?[.zero].badgeColor = SKStyleAsset.constantRuby.color
+  }
+  
   func stratTORxService() {
     DispatchQueue.global().async { [weak self] in
       guard let self else { return }
@@ -415,15 +429,18 @@ extension MessengerListScreenModuleInteractor: MessengerListScreenModuleInteract
   
   func removeContactModels(_ contactModel: ContactModel, completion: (() -> Void)?) {
     DispatchQueue.global().async { [weak self] in
-      if let toxPublicKey = contactModel.toxPublicKey {
-        self?.p2pChatManager.deleteFriend(toxPublicKey: toxPublicKey, completion: {_ in})
-      }
-      self?.modelHandlerService.removeContactModels(contactModel, completion: {
-        DispatchQueue.main.async {
-          completion?()
+      self?.p2pChatManager.deleteFriend(
+        toxPublicKey: contactModel.toxPublicKey ?? "",
+        completion: { [weak self] _ in
+          guard let self else { return }
+          modelHandlerService.removeContactModels(contactModel, completion: {
+            DispatchQueue.main.async {
+              completion?()
+            }
+          })
+          saveToxState()
         }
-      })
-      self?.saveToxState()
+      )
     }
   }
   

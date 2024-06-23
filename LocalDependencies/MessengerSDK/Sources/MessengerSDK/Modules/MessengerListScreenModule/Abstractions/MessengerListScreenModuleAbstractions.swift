@@ -52,6 +52,11 @@ public protocol MessengerListScreenModuleModuleInput {
   /// Отклонить запрос на переписку
   func cancelRequestForDialog(contactModel: ContactModel)
   
+  /// Сохраняет `ContactModel` асинхронно.
+  /// - Parameters:
+  ///   - model: Модель `ContactModel`, которая будутет сохранена.
+  func saveContactModel(_ model: ContactModel)
+  
   /// События которые отправляем из `MessengerListScreenModuleModule` в `Coordinator`
   var moduleOutput: MessengerListScreenModuleOutput? { get set }
 }

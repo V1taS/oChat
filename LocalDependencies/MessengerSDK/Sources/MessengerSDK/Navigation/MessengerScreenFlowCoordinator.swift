@@ -69,6 +69,15 @@ extension MessengerScreenFlowCoordinator: MessengerListScreenModuleOutput {
 // MARK: - MessengerDialogScreenModuleOutput
 
 extension MessengerScreenFlowCoordinator: MessengerDialogScreenModuleOutput {
+  public func closeMessengerDialog() {
+    navigationController?.popViewController(animated: true)
+    messengerDialogModule = nil
+  }
+  
+  public func saveContactModel(_ model: ContactModel) {
+    messengerListScreenModuleModule?.input.saveContactModel(model)
+  }
+  
   public func removeMessage(id: String, contact: ContactModel) {
     messengerListScreenModuleModule?.input.removeMessage(id: id, contact: contact)
   }

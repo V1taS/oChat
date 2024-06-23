@@ -27,6 +27,14 @@ public protocol MessengerDialogScreenModuleOutput: AnyObject {
   
   /// Удалить сообщение
   func removeMessage(id: String, contact: ContactModel)
+  
+  /// Сохраняет `ContactModel` асинхронно.
+  /// - Parameters:
+  ///   - model: Модель `ContactModel`, которая будутет сохранена.
+  func saveContactModel(_ model: ContactModel)
+  
+  /// Закрыть экран диалогов
+  func closeMessengerDialog()
 }
 
 /// События которые отправляем из `Coordinator` в `MessengerDialogScreenModule`

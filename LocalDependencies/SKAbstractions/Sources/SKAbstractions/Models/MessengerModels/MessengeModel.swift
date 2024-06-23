@@ -52,8 +52,22 @@ extension MessengeModel {
     case own
     /// Сообщение получено от другого пользователя.
     case received
+    /// Системное сообщение Успех
+    case systemSuccess
+    /// Системное сообщение Внимание
+    case systemAttention
+    /// Системное сообщение Опасность
+    case systemDanger
+    
     /// Системное сообщение
-    case system
+    public var isSystem: Bool {
+      switch self {
+      case .systemSuccess, .systemAttention, .systemDanger:
+        return true
+      default:
+        return false
+      }
+    }
   }
 }
 

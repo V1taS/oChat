@@ -75,7 +75,8 @@ extension MessengerDialogScreenFactory: MessengerDialogScreenFactoryInput {
         .stateRequestMessengerThreeTitle,
       threeDescription: MessengerSDKStrings.MessengerDialogScreenLocalization
         .stateRequestMessengerThreeDescription,
-      threeSystemImageName: "lock.circle.fill"
+      threeSystemImageName: "lock.circle.fill", 
+      note: nil
     )
   }
     
@@ -102,7 +103,8 @@ extension MessengerDialogScreenFactory: MessengerDialogScreenFactoryInput {
         .stateInitialMessengerThreeTitle,
       threeDescription: MessengerSDKStrings.MessengerDialogScreenLocalization
         .stateInitialMessengerThreeDescription,
-      threeSystemImageName: "eye.slash.fill"
+      threeSystemImageName: "eye.slash.fill",
+      note: nil
     )
   }
   
@@ -111,10 +113,18 @@ extension MessengerDialogScreenFactory: MessengerDialogScreenFactoryInput {
       name: nil,
       toxAddress: address,
       meshAddress: nil,
-      messenges: [],
+      messenges: [
+        .init(
+          messageType: .systemAttention,
+          messageStatus: .delivered,
+          message: MessengerSDKStrings.MessengerDialogScreenLocalization
+            .stateInitialMessengerNote
+        )
+      ],
       status: .initialChat,
       encryptionPublicKey: nil,
-      toxPublicKey: nil
+      toxPublicKey: nil, 
+      isNewMessagesAvailable: false
     )
   }
   

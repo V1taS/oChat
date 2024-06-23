@@ -57,18 +57,20 @@ final class MessengerListScreenModulePresenter: ObservableObject {
   // MARK: - Internal func
   
   func removeContact(index: Int) {
-    stateWidgetModels.remove(at: index)
-
-    DispatchQueue.global().async { [weak self] in
+    Timer.scheduledTimer(withTimeInterval: 0.3, repeats: false) { [weak self] _ in
       guard let self else { return }
-      interactor.getContactModels { [weak self] contactModels in
+      stateWidgetModels.remove(at: index)
+      DispatchQueue.global().async { [weak self] in
         guard let self else { return }
-        let contactModel = contactModels[index]
-        removeContactModels(contactModel, completion: { [weak self] in
+        interactor.getContactModels { [weak self] contactModels in
           guard let self else { return }
-          moduleOutput?.dataModelHasBeenUpdated()
-          updateListContacts()
-        })
+          let contactModel = contactModels[index]
+          removeContactModels(contactModel, completion: { [weak self] in
+            guard let self else { return }
+            moduleOutput?.dataModelHasBeenUpdated()
+            updateListContacts()
+          })
+        }
       }
     }
   }
@@ -77,7 +79,20 @@ final class MessengerListScreenModulePresenter: ObservableObject {
 // MARK: - MessengerListScreenModuleModuleInput
 
 extension MessengerListScreenModulePresenter: MessengerListScreenModuleModuleInput {
+  func saveContactModel(_ model: SKAbstractions.ContactModel) {
+    interactor.saveContactModel(model) { [weak self] in
+      guard let self else { return }
+      moduleOutput?.dataModelHasBeenUpdated()
+      updateListContacts()
+    }
+  }
+  
   func sendInitiateChat(contactModel: ContactModel) {
+    DispatchQueue.main.async { [weak self] in
+      guard let self else { return }
+      interactor.showNotification(.positive(title: "Запрос отправлен"))
+    }
+    
     checkingContactPublicKey(contact: contactModel) { [weak self] updatedContactModel in
       guard let self else { return }
       sendInitiateChatNetworkRequest(contact: updatedContactModel) { [weak self] _ in
@@ -162,6 +177,9 @@ extension MessengerListScreenModulePresenter: MessengerListScreenModuleModuleInp
       guard let self else {
         return
       }
+      
+      updateRedDotToTabBar(contactModels: contactModels)
+      
       stateWidgetModels = factory.createDialogWidgetModels(
         messengerDialogModels: contactModels
       )
@@ -216,6 +234,13 @@ private extension MessengerListScreenModulePresenter {
       stateWidgetModels = factory.createDialogWidgetModels(messengerDialogModels: contactModels)
     }
     interactor.stratTORxService()
+    interactor.passcodeNotSetInSystemIOSheck()
+    
+    interactor.setAllContactsIsOffline { [weak self] in
+      guard let self else { return }
+      updateListContacts()
+      moduleOutput?.dataModelHasBeenUpdated()
+    }
     
     NotificationCenter.default.addObserver(
       self,
@@ -253,6 +278,12 @@ private extension MessengerListScreenModulePresenter {
       name: UIApplication.userDidTakeScreenshotNotification,
       object: nil
     )
+  }
+  
+  func updateRedDotToTabBar(contactModels: [ContactModel]) {
+    let newMessages = contactModels.filter({ $0.isNewMessagesAvailable })
+    let redDotToTabBarText: String? = newMessages.isEmpty ? nil : "\(newMessages.count)"
+    interactor.setRedDotToTabBar(value: redDotToTabBarText)
   }
   
   func setupSKBarButtonView() {
@@ -313,7 +344,6 @@ private extension MessengerListScreenModulePresenter {
     if contact.toxPublicKey == nil {
       let toxPublicKey = interactor.getToxPublicKey(from: toxAddress)
       updatedContactModel.toxPublicKey = toxPublicKey
-      updatedContactModel.status = .offline
     }
     completion?(updatedContactModel)
   }
@@ -434,8 +464,10 @@ private extension MessengerListScreenModulePresenter {
       moduleOutput?.dataModelHasBeenUpdated()
     }
     
-    Timer.scheduledTimer(withTimeInterval: 1, repeats: false) { [weak self] _ in
-      self?.interactor.getDeepLinkAdress { [weak self] contactAdress in
+    Timer.scheduledTimer(withTimeInterval: 0.5, repeats: false) { [weak self] _ in
+      guard let self else { return }
+      
+      interactor.getDeepLinkAdress { [weak self] contactAdress in
         guard let self, let contactAdress else {
           return
         }
@@ -481,6 +513,8 @@ private extension MessengerListScreenModulePresenter {
           return
         }
         
+        updateRedDotToTabBar(contactModels: contactModels)
+        
         let newContact = ContactModel(
           name: nil,
           toxAddress: messageModel.senderAddress,
@@ -488,7 +522,8 @@ private extension MessengerListScreenModulePresenter {
           messenges: [],
           status: .requestChat,
           encryptionPublicKey: messageModel.senderPublicKey,
-          toxPublicKey: toxPublicKey
+          toxPublicKey: toxPublicKey,
+          isNewMessagesAvailable: true
         )
         interactor.saveContactModel(newContact, completion: { [weak self] in
           guard let self else { return }
@@ -506,6 +541,7 @@ private extension MessengerListScreenModulePresenter {
       interactor.getContactModels { [weak self] contactModels in
         guard let self else { return }
         
+        updateRedDotToTabBar(contactModels: contactModels)
         interactor.decrypt(messageModel.messageText) { [weak self] messageText in
           guard let self else { return }
           
@@ -521,6 +557,7 @@ private extension MessengerListScreenModulePresenter {
             )
             updatedContact.status = .online
             updatedContact.toxAddress = messageModel.senderAddress
+            updatedContact.isNewMessagesAvailable = true
             updatedContact.encryptionPublicKey = messageModel.senderPublicKey
             interactor.saveContactModel(updatedContact, completion: { [weak self] in
               guard let self else { return }
@@ -535,7 +572,8 @@ private extension MessengerListScreenModulePresenter {
               messenges: [],
               status: .online,
               encryptionPublicKey: messageModel.senderPublicKey,
-              toxPublicKey: nil
+              toxPublicKey: nil, 
+              isNewMessagesAvailable: true
             )
             interactor.saveContactModel(contact, completion: { [weak self] in
               guard let self else { return }

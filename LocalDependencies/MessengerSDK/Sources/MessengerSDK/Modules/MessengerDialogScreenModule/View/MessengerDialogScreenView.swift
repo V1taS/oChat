@@ -46,11 +46,10 @@ struct MessengerDialogScreenView: View {
 
 private extension MessengerDialogScreenView {
   func getContent() -> AnyView {
-    if presenter.stateContactModel.status == .initialChat && 
-        (presenter.stateContactModel.toxAddress.isNilOrEmpty || presenter.stateIsDeeplinkAdress) {
+    if presenter.isInitialAddressEntryState() {
       return AnyView(informationView(model: presenter.getInitialHintModel()))
     }
-    if presenter.stateContactModel.status == .requestChat {
+    if presenter.isRequestChatState() {
       return AnyView(informationView(model: presenter.getRequestHintModel()))
     }
     return AnyView(readyToChatView())
@@ -68,7 +67,7 @@ private extension MessengerDialogScreenView {
       backgroundColor = SKStyleAsset.constantAzure.swiftUIColor
     case .received:
       backgroundColor = SKStyleAsset.constantNavy.swiftUIColor
-    case .system:
+    default:
       backgroundColor = SKStyleAsset.constantAmberGlow.swiftUIColor
     }
     
@@ -107,6 +106,7 @@ private extension MessengerDialogScreenView {
         
         if isInitialState {
           presenter.sendInitiateChatFromDialog()
+          presenter.startScheduleResendInitialRequest()
         } else {
           presenter.sendMessage()
         }
@@ -141,6 +141,20 @@ private extension MessengerDialogScreenView {
   func unsubscribeFromKeyboardNotifications() {
     keyboardCancellable?.cancel()
     keyboardCancellable = nil
+  }
+  
+  func getStyleForTips(messengeModel: MessengeModel) -> TipsView.Style {
+    let style: TipsView.Style
+    switch messengeModel.messageType {
+    case .systemSuccess:
+      return .success
+    case .systemAttention:
+      return .attention
+    case .systemDanger:
+      return .danger
+    default:
+      return .success
+    }
   }
 }
 
@@ -177,11 +191,11 @@ private extension MessengerDialogScreenView {
                 .id(messengeModel.id)
               }
               
-              if messengeModel.messageType == .system {
+              if messengeModel.messageType.isSystem {
                 TipsView(
                   .init(
                     text: messengeModel.message,
-                    style: .success,
+                    style: getStyleForTips(messengeModel: messengeModel),
                     isSelectableTips: false,
                     actionTips: {},
                     isCloseButton: true,
@@ -208,7 +222,21 @@ private extension MessengerDialogScreenView {
         }
         .padding(.bottom, .s4)
         
-        createChatFieldView(isInitialState: false)
+        if presenter.isInitialWaitConfirmState() {
+          MainButtonView(
+            text: presenter.stateIsCanResendInitialRequest ?
+            "Отправить запрос" :
+              "Отправить запрос через \(presenter.stateSecondsUntilResendInitialRequestAllowed) сек.",
+            isEnabled: presenter.stateIsCanResendInitialRequest,
+            style: .primary,
+            action: {
+              presenter.sendInitiateChatFromDialog()
+              presenter.startScheduleResendInitialRequest()
+            }
+          )
+        } else {
+          createChatFieldView(isInitialState: false)
+        }
       }
       .onAppear {
         scrollViewProxy.scrollTo(presenter.stateMessengeModels.last?.id, anchor: .bottom)
@@ -224,6 +252,22 @@ private extension MessengerDialogScreenView {
     VStack {
       ScrollView(.vertical, showsIndicators: false) {
         VStack(spacing: .zero) {
+          if let note = model.note, presenter.stateShowInitialTips {
+            TipsView(
+              .init(
+                text: note,
+                style: .attention,
+                isSelectableTips: false,
+                actionTips: {},
+                isCloseButton: true,
+                closeButtonAction: {
+                  presenter.stateShowInitialTips.toggle()
+                }
+              )
+            )
+            .padding(.bottom, .s10)
+          }
+          
           createHeaderView(model: model)
           createInformationBloksView(model: model)
             .padding(.top, .s12)

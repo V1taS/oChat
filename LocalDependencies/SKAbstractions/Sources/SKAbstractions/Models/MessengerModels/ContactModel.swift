@@ -34,6 +34,9 @@ public struct ContactModel {
   /// Публичный ключ для шифрования сообщений.
   public var toxPublicKey: String?
   
+  /// Доступны новые сообщения
+  public var isNewMessagesAvailable: Bool
+  
   /// Инициализатор для создания нового контакта.
   /// - Parameters:
   ///   - name: Имя контакта.
@@ -43,6 +46,7 @@ public struct ContactModel {
   ///   - status: Статус онлайн контакта.
   ///   - encryptionPublicKey: Публичный ключ для шифрования сообщений.
   ///   - toxPublicKey: Публичный ключ для шифрования сообщений.
+  ///   - isNewMessagesAvailable: Доступны новые сообщения
   public init(
     name: String?,
     toxAddress: String?,
@@ -50,7 +54,8 @@ public struct ContactModel {
     messenges: [MessengeModel],
     status: ContactModel.Status,
     encryptionPublicKey: String?,
-    toxPublicKey: String?
+    toxPublicKey: String?,
+    isNewMessagesAvailable: Bool
   ) {
     self.id = UUID().uuidString
     self.name = name
@@ -60,6 +65,7 @@ public struct ContactModel {
     self.status = status
     self.encryptionPublicKey = encryptionPublicKey
     self.toxPublicKey = toxPublicKey
+    self.isNewMessagesAvailable = isNewMessagesAvailable
   }
 }
 
@@ -74,7 +80,8 @@ extension ContactModel {
       messenges: [],
       status: .offline,
       encryptionPublicKey: nil, 
-      toxPublicKey: nil
+      toxPublicKey: nil, 
+      isNewMessagesAvailable: false
     )
   }
 }
