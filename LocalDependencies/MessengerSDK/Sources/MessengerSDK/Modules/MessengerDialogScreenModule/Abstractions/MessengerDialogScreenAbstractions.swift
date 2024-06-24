@@ -14,7 +14,7 @@ public protocol MessengerDialogScreenModuleOutput: AnyObject {
   func messengerDialogWillDisappear()
   
   /// Пользователь отправил сообщение
-  func sendMessage(_ message: String, contact: ContactModel)
+  func sendMessage(contact: ContactModel)
   
   /// Запросить переписку повторно
   func sendInitiateChatFromDialog(contactModel: ContactModel)
@@ -46,6 +46,9 @@ public protocol MessengerDialogScreenModuleOutput: AnyObject {
     to toxPublicKey: String,
     completion: @escaping (Result<Void, Error>) -> Void
   )
+  
+  /// Повторить отправку сообщения
+  func retrySendMessage(messengeModel: MessengeModel, contactModel: ContactModel)
 }
 
 /// События которые отправляем из `Coordinator` в `MessengerDialogScreenModule`

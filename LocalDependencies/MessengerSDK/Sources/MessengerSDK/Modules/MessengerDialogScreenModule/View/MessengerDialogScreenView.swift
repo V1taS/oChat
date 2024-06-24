@@ -59,6 +59,7 @@ private extension MessengerDialogScreenView {
     messageType: MessengeModel.MessageType,
     message: String
   ) -> some View {
+    
     let backgroundColor: Color
     let foregroundColor: Color
     
@@ -168,25 +169,47 @@ private extension MessengerDialogScreenView {
           LazyVStack(spacing: .zero) {
             ForEach(presenter.stateMessengeModels, id: \.id) { messengeModel in
               if messengeModel.messageType == .own {
-                HStack(spacing: .zero) {
-                  Spacer()
-                  createMessageView(
-                    messageType: messengeModel.messageType,
-                    message: messengeModel.message
+                MessageView(
+                  .init(
+                    id: messengeModel.id,
+                    text: messengeModel.message,
+                    messageType: .outgoing,
+                    messageStatus: messengeModel.messageStatus.mapTo(),
+                    hasTail: true,
+                    deleteAction: {
+                      presenter.removeMessage(id: messengeModel.id)
+                    },
+                    copyAction: {
+                      presenter.copyToClipboard(text: messengeModel.message)
+                    },
+                    retrySendAction: {
+                      presenter.retrySendMessage(messengeModel: messengeModel)
+                    }
                   )
-                }
+                )
                 .padding(.top, .s4)
                 .id(messengeModel.id)
               }
               
               if messengeModel.messageType == .received {
-                HStack(spacing: .zero) {
-                  createMessageView(
-                    messageType: messengeModel.messageType,
-                    message: messengeModel.message
+                MessageView(
+                  .init(
+                    id: messengeModel.id,
+                    text: messengeModel.message,
+                    messageType: .incoming,
+                    messageStatus: messengeModel.messageStatus.mapTo(),
+                    hasTail: true,
+                    deleteAction: {
+                      presenter.removeMessage(id: messengeModel.id)
+                    },
+                    copyAction: {
+                      presenter.copyToClipboard(text: messengeModel.message)
+                    },
+                    retrySendAction: {
+                      presenter.retrySendMessage(messengeModel: messengeModel)
+                    }
                   )
-                  Spacer()
-                }
+                )
                 .padding(.top, .s4)
                 .id(messengeModel.id)
               }

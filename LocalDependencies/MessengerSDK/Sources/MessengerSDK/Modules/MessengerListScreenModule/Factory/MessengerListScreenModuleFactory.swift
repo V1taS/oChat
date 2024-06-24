@@ -72,7 +72,7 @@ extension MessengerListScreenModuleFactory: MessengerListScreenModuleFactoryInpu
       updatedModel.messenges.append(
         .init(
           messageType: messageType,
-          messageStatus: messageType == .own ? .inProgress : .delivered,
+          messageStatus: messageType == .own ? .sending : .sent,
           message: message,
           file: nil
         )

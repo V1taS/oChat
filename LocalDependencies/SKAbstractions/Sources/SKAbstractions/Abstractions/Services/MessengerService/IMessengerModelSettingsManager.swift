@@ -98,4 +98,7 @@ public protocol IMessengerModelSettingsManager {
   /// Переводит всех контактов в состояние оффлайн.
   /// - Parameter completion: Опциональный блок завершения, вызываемый после того, как все контакты будут переведены в оффлайн.
   func setAllContactsIsOffline(completion: (() -> Void)?)
+  
+  /// Переводит всех контактов в состояние Не Печатают
+  func setAllContactsNoTyping(completion: (() -> Void)?)
 }

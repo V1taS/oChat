@@ -25,26 +25,41 @@ struct TorConnectScreenView: View {
       VStack(spacing: .s4) {
         createTorConnectAnimation()
         
-        Text("Connecting TOR ...")
-          .font(.fancy.text.largeTitle)
-          .foregroundColor(SKStyleAsset.ghost.swiftUIColor)
-        
-        ProgressView(value: presenter.stateConnectionProgress, total: 1.0)
-          .progressViewStyle(LinearProgressViewStyle(tint: SKStyleAsset.constantAzure.swiftUIColor))
-          .background(Color.black.opacity(0.8))
-          .cornerRadius(10)
-        
-        Text("Connecting to the Tor network \(String(Int(round(presenter.stateConnectionProgress))))%")
-          .font(.fancy.text.regular)
-          .foregroundColor(SKStyleAsset.constantSlate.swiftUIColor)
-        
-        Text("\(presenter.stateSystemMessage)")
-          .font(.fancy.text.small)
-          .foregroundColor(SKStyleAsset.constantAzure.swiftUIColor)
-        
-        RoundButtonView(style: .custom(text: "Reset")) {
-          presenter.refreshTorConnectService()
+        HStack(spacing: .s4) {
+          VStack(spacing: .s4) {
+            ProgressGradientView(progress: $presenter.stateTestPrigressTor)
+              .frame(width: 140, height: 140)
+            
+            Text("TOR")
+              .font(.fancy.text.largeTitle)
+              .foregroundColor(SKStyleAsset.ghost.swiftUIColor)
+          }
+          
+          
+          Spacer()
+          
+          VStack(spacing: .s4) {
+            ProgressGradientView(progress: $presenter.stateTestPrigressTox)
+              .frame(width: 140, height: 140)
+            
+            Text("TOX")
+              .font(.fancy.text.largeTitle)
+              .foregroundColor(SKStyleAsset.ghost.swiftUIColor)
+          }
         }
+        .padding(.horizontal, .s4)
+        
+//        Text("Connecting to the Tor network \(String(Int(round(presenter.stateConnectionProgress))))%")
+//          .font(.fancy.text.regular)
+//          .foregroundColor(SKStyleAsset.constantSlate.swiftUIColor)
+//        
+//        Text("\(presenter.stateSystemMessage)")
+//          .font(.fancy.text.small)
+//          .foregroundColor(SKStyleAsset.constantAzure.swiftUIColor)
+//        
+//        RoundButtonView(style: .custom(text: "Reset")) {
+//          presenter.refreshTorConnectService()
+//        }
         
         Spacer()
       }

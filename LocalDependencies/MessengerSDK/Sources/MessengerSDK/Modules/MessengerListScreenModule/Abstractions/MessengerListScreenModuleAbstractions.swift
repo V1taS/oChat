@@ -44,7 +44,7 @@ public protocol MessengerListScreenModuleModuleInput {
   func sendInitiateChat(contactModel: ContactModel)
   
   /// Отправить сообщение контакту
-  func sendMessage(_ message: String, contact: ContactModel)
+  func sendMessage(contact: ContactModel, completion: (() -> Void)?)
   
   /// Подтвердить запрос на переписку
   func confirmRequestForDialog(contactModel: ContactModel)
@@ -67,6 +67,9 @@ public protocol MessengerListScreenModuleModuleInput {
     to toxPublicKey: String,
     completion: @escaping (Result<Void, Error>) -> Void
   )
+  
+  /// Повторить отправку сообщения
+  func retrySendMessage(messengeModel: MessengeModel, contactModel: ContactModel)
   
   /// События которые отправляем из `MessengerListScreenModuleModule` в `Coordinator`
   var moduleOutput: MessengerListScreenModuleOutput? { get set }

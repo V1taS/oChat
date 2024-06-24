@@ -69,6 +69,10 @@ extension MessengerScreenFlowCoordinator: MessengerListScreenModuleOutput {
 // MARK: - MessengerDialogScreenModuleOutput
 
 extension MessengerScreenFlowCoordinator: MessengerDialogScreenModuleOutput {
+  public func retrySendMessage(messengeModel: MessengeModel, contactModel: ContactModel) {
+    messengerListScreenModuleModule?.input.retrySendMessage(messengeModel: messengeModel, contactModel: contactModel)
+  }
+  
   public func setUserIsTyping(
     _ isTyping: Bool,
     to toxPublicKey: String,
@@ -106,8 +110,8 @@ extension MessengerScreenFlowCoordinator: MessengerDialogScreenModuleOutput {
     messengerListScreenModuleModule?.input.sendInitiateChat(contactModel: contactModel)
   }
   
-  public func sendMessage(_ message: String, contact: ContactModel) {
-    messengerListScreenModuleModule?.input.sendMessage(message, contact: contact)
+  public func sendMessage(contact: ContactModel) {
+    messengerListScreenModuleModule?.input.sendMessage(contact: contact, completion: nil)
   }
   
   public func messengerDialogWillDisappear() {
