@@ -17,6 +17,42 @@ final class TorConnectScreenPresenter: ObservableObject {
   @Published var stateConnectionProgress: Double = .zero
   @Published var stateSystemMessage = ""
   
+  @Published var stateTestPrigressTor: CGFloat = .zero
+  @Published var stateTestPrigressTox: CGFloat = .zero
+  private var torTimer: Timer?
+  private var toxTimer: Timer?
+  
+  func startProgress() {
+    // Начинаем с прогресса stateTestPrigressTor
+    var torProgress: CGFloat = .zero
+    let torInterval = 15.0 / 150.0 // 15 секунд, 150 шагов
+    
+    torTimer = Timer.scheduledTimer(withTimeInterval: torInterval, repeats: true) { timer in
+      if torProgress < 1.0 {
+        torProgress += 1 / 150.0
+        self.stateTestPrigressTor = torProgress
+      } else {
+        timer.invalidate()
+        self.startToxProgress()
+      }
+    }
+  }
+  
+  private func startToxProgress() {
+    // Переходим к прогрессу stateTestPrigressTox
+    var toxProgress: CGFloat = .zero
+    let toxInterval = 5.0 / 50.0 // 5 секунд, 50 шагов
+    
+    toxTimer = Timer.scheduledTimer(withTimeInterval: toxInterval, repeats: true) { timer in
+      if toxProgress < 1.0 {
+        toxProgress += 1 / 50.0
+        self.stateTestPrigressTox = toxProgress
+      } else {
+        timer.invalidate()
+      }
+    }
+  }
+  
   // MARK: - Internal properties
   
   weak var moduleOutput: TorConnectScreenModuleOutput?
@@ -56,6 +92,7 @@ final class TorConnectScreenPresenter: ObservableObject {
     }
     
     moduleOutput?.stratTorConnectService()
+    startProgress()
   }
   
   // MARK: - Internal func

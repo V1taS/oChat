@@ -165,6 +165,9 @@ protocol MessengerListScreenModuleInteractorInput {
   
   /// Метод для установки статуса пользователя.
   func setSelfStatus(isOnline: Bool)
+  
+  /// Переводит всех контактов в состояние Не Печатают
+  func setAllContactsNoTyping(completion: (() -> Void)?)
 }
 
 /// Интерактор
@@ -202,6 +205,16 @@ final class MessengerListScreenModuleInteractor {
 // MARK: - MessengerListScreenModuleInteractorInput
 
 extension MessengerListScreenModuleInteractor: MessengerListScreenModuleInteractorInput {
+  func setAllContactsNoTyping(completion: (() -> Void)?) {
+    DispatchQueue.global().async { [weak self] in
+      self?.modelSettingsManager.setAllContactsNoTyping(completion: {
+        DispatchQueue.main.async {
+          completion?()
+        }
+      })
+    }
+  }
+  
   func setSelfStatus(isOnline: Bool) {
     DispatchQueue.global().async { [weak self] in
       self?.p2pChatManager.setSelfStatus(isOnline: isOnline)

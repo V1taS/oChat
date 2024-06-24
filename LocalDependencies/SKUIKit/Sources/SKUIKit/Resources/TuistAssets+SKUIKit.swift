@@ -23,7 +23,8 @@ public enum SKUIKitAsset {
   public static let loaderCircle = SKUIKitData(name: "loader_circle")
   public static let loaderFlipCoin = SKUIKitData(name: "loader_flip_coin")
   public static let loaderScaner = SKUIKitData(name: "loader_scaner")
-  public static let skWatermark = SKUIKitImages(name: "sk_watermark")
+  public static let incomingTail = SKUIKitData(name: "incomingTail")
+  public static let outgoingTail = SKUIKitData(name: "outgoingTail")
 }
 // swiftlint:enable identifier_name line_length nesting type_body_length type_name
 

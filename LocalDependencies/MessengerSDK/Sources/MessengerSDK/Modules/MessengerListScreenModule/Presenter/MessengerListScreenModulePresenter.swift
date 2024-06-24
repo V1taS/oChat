@@ -79,6 +79,21 @@ final class MessengerListScreenModulePresenter: ObservableObject {
 // MARK: - MessengerListScreenModuleModuleInput
 
 extension MessengerListScreenModulePresenter: MessengerListScreenModuleModuleInput {
+  func retrySendMessage(messengeModel: MessengeModel, contactModel: ContactModel) {
+    let newMessengeModel = MessengeModel(
+      messageType: messengeModel.messageType,
+      messageStatus: messengeModel.messageStatus,
+      message: messengeModel.message
+    )
+    var updatedContactModel = contactModel
+    updatedContactModel.messenges.append(newMessengeModel)
+    
+    sendMessage(contact: updatedContactModel) { [weak self] in
+      guard let self else { return }
+      removeMessage(id: messengeModel.id, contact: updatedContactModel)
+    }
+  }
+  
   func setUserIsTyping(
     _ isTyping: Bool,
     to toxPublicKey: String,
@@ -147,7 +162,7 @@ extension MessengerListScreenModulePresenter: MessengerListScreenModuleModuleInp
     }
   }
   
-  func sendMessage(_ message: String, contact: ContactModel) {
+  func sendMessage(contact: ContactModel, completion: (() -> Void)?) {
     guard contact.status == .online else {
       interactor.showNotification(.negative(title: "Контакт не в сети"))
       return
@@ -155,15 +170,23 @@ extension MessengerListScreenModulePresenter: MessengerListScreenModuleModuleInp
     
     checkingContactPublicKey(contact: contact) { [weak self] updatedContactModel in
       guard let self else { return }
-      sendMessageNetworkRequest(message, contact: updatedContactModel) { [weak self] result in
+      sendMessageNetworkRequest(contact: updatedContactModel) { [weak self] result in
         guard let self else { return }
         switch result {
         case .success:
-          moduleOutput?.dataModelHasBeenUpdated()
-          updateListContacts()
+          updateContactStatus(contact: contact, status: .sent) { [weak self] in
+            guard let self else { return }
+            moduleOutput?.dataModelHasBeenUpdated()
+            updateListContacts()
+            completion?()
+          }
         case let .failure(error):
-          moduleOutput?.dataModelHasBeenUpdated()
-          updateListContacts()
+          updateContactStatus(contact: contact, status: .failed) { [weak self] in
+            guard let self else { return }
+            moduleOutput?.dataModelHasBeenUpdated()
+            updateListContacts()
+            completion?()
+          }
         }
       }
     }
@@ -257,8 +280,12 @@ private extension MessengerListScreenModulePresenter {
     
     interactor.setAllContactsIsOffline { [weak self] in
       guard let self else { return }
-      updateListContacts()
-      moduleOutput?.dataModelHasBeenUpdated()
+      interactor.setAllContactsNoTyping { [weak self] in
+        guard let self else { return }
+        
+        updateListContacts()
+        moduleOutput?.dataModelHasBeenUpdated()
+      }
     }
     
     NotificationCenter.default.addObserver(
@@ -303,6 +330,24 @@ private extension MessengerListScreenModulePresenter {
       name: Notification.Name(NotificationConstants.isTyping.rawValue),
       object: nil
     )
+  }
+  
+  func updateContactStatus(
+    contact: ContactModel,
+    status: MessengeModel.MessageStatus,
+    completion: @escaping () -> Void
+  ) {
+    guard var updatedLastMessage = contact.messenges.last else { return }
+    updatedLastMessage.messageStatus = status
+    
+    var updatedContact = contact
+    updatedContact.status = .online
+    updatedContact.messenges[updatedContact.messenges.count - 1] = updatedLastMessage
+    
+    interactor.saveContactModel(updatedContact) { [weak self] in
+      guard let self else { return }
+      completion()
+    }
   }
   
   func updateRedDotToTabBar(contactModels: [ContactModel]) {
@@ -353,7 +398,7 @@ private extension MessengerListScreenModulePresenter {
       messageText: message,
       senderAddress: senderAddress,
       senderLocalMeshAddress: senderLocalMeshAddress ?? "",
-      senderPublicKey: senderPublicKey, 
+      senderPublicKey: senderPublicKey,
       senderToxPublicKey: senderToxPublicKey
     )
     completion?(senderAddress, requestModel)
@@ -374,7 +419,6 @@ private extension MessengerListScreenModulePresenter {
   }
   
   func prepareAndEncryptDataForNetworkRequest(
-    _ message: String?,
     contact: ContactModel,
     completion: ((_ recipientTorAddress: String,
                   _ requestModel: MessengerNetworkRequestModel) -> Void)?
@@ -382,6 +426,11 @@ private extension MessengerListScreenModulePresenter {
     guard let senderPublicKey = interactor.publicKey(from: interactor.getDeviceIdentifier()) else {
       interactor.showNotification(.negative(title: "Не получилось создать Публичный ключ для шифрования"))
       return
+    }
+    
+    var message = ""
+    if let messengeModel = contact.messenges.last, messengeModel.messageStatus == .sending {
+      message = messengeModel.message
     }
     
     interactor.saveContactModel(
@@ -417,7 +466,6 @@ private extension MessengerListScreenModulePresenter {
     completion: ((Result<Void, Error>) -> Void)?
   ) {
     prepareAndEncryptDataForNetworkRequest(
-      nil,
       contact: contact
     ) { [weak self] senderAddress, requestModel in
       guard let self, let toxAddress = contact.toxAddress else { return }
@@ -436,7 +484,6 @@ private extension MessengerListScreenModulePresenter {
   }
   
   func sendMessageNetworkRequest(
-    _ message: String,
     contact: ContactModel,
     completion: ((Result<Void, Error>) -> Void)?
   ) {
@@ -444,7 +491,6 @@ private extension MessengerListScreenModulePresenter {
       return
     }
     prepareAndEncryptDataForNetworkRequest(
-      message,
       contact: contact
     ) { [weak self] recipientTorAddress, requestModel in
       guard let self else { return }
@@ -479,7 +525,7 @@ private extension MessengerListScreenModulePresenter {
 // MARK: - Handle NotificationCenter
 
 private extension MessengerListScreenModulePresenter {
-  @objc 
+  @objc
   func appDidBecomeActive() {
     interactor.setSelfStatus(isOnline: true)
     interactor.passcodeNotSetInSystemIOSheck()
@@ -518,10 +564,19 @@ private extension MessengerListScreenModulePresenter {
        let status = notification.userInfo?["status"] as? ContactModel.Status {
       interactor.getContactModelsFrom(toxPublicKey: toxPublicKey) { [weak self] contactModel in
         guard let self, let contactModel else { return }
-        interactor.setStatus(contactModel, status) { [weak self] in
+        
+        var updatebleContactModel = contactModel
+        if status == .offline {
+          updatebleContactModel.isTyping = false
+        }
+        
+        interactor.saveContactModel(updatebleContactModel) { [weak self] in
           guard let self else { return }
-          updateListContacts()
-          moduleOutput?.dataModelHasBeenUpdated()
+          interactor.setStatus(updatebleContactModel, status) { [weak self] in
+            guard let self else { return }
+            updateListContacts()
+            moduleOutput?.dataModelHasBeenUpdated()
+          }
         }
       }
     }
@@ -535,6 +590,7 @@ private extension MessengerListScreenModulePresenter {
         guard let self, let contactModel else { return }
         var updatedContactModel = contactModel
         updatedContactModel.isTyping = isTyping
+        updatedContactModel.status = .online
         interactor.saveContactModel(updatedContactModel) { [weak self] in
           guard let self else { return }
           updateListContacts()
@@ -566,7 +622,7 @@ private extension MessengerListScreenModulePresenter {
           status: .requestChat,
           encryptionPublicKey: messageModel.senderPublicKey,
           toxPublicKey: toxPublicKey,
-          isNewMessagesAvailable: true, 
+          isNewMessagesAvailable: true,
           isTyping: false
         )
         interactor.saveContactModel(newContact, completion: { [weak self] in
@@ -616,8 +672,8 @@ private extension MessengerListScreenModulePresenter {
               messenges: [],
               status: .online,
               encryptionPublicKey: messageModel.senderPublicKey,
-              toxPublicKey: nil, 
-              isNewMessagesAvailable: true, 
+              toxPublicKey: nil,
+              isNewMessagesAvailable: true,
               isTyping: false
             )
             interactor.saveContactModel(contact, completion: { [weak self] in

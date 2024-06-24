@@ -76,12 +76,33 @@ final class MessengerDialogScreenPresenter: ObservableObject {
     guard let self else { return }
     moduleOutput?.messengerDialogWillDisappear()
     setUserIsTyping(text: "")
+    markMessageAsRead(contactModel: stateContactModel)
   }
   
   // MARK: - Internal func
   
   func removeMessage(id: String) {
-    moduleOutput?.removeMessage(id: id, contact: stateContactModel)
+    Timer.scheduledTimer(withTimeInterval: 0.4, repeats: false) { [weak self] _ in
+      guard let self else { return }
+      moduleOutput?.removeMessage(id: id, contact: stateContactModel)
+    }
+  }
+  
+  func retrySendMessage(messengeModel: MessengeModel) {
+    var updatedMessengeModel = messengeModel
+    updatedMessengeModel.messageStatus = .sending
+    var updatedContactModel = stateContactModel
+    var updatedMessengeModels = stateMessengeModels
+    
+    if let messengeIndex = updatedMessengeModels.firstIndex(where: { $0.id == messengeModel.id }) {
+      updatedMessengeModels[messengeIndex].messageStatus = .sending
+    }
+    updatedContactModel.messenges = updatedMessengeModels
+    stateMessengeModels = updatedMessengeModels
+    
+    DispatchQueue.global().async { [weak self] in
+      self?.moduleOutput?.retrySendMessage(messengeModel: updatedMessengeModel, contactModel: updatedContactModel)
+    }
   }
   
   func sendMessage() {
@@ -90,7 +111,7 @@ final class MessengerDialogScreenPresenter: ObservableObject {
     var updatedContactModel = stateContactModel
     let messengeModel = MessengeModel(
       messageType: .own,
-      messageStatus: .inProgress,
+      messageStatus: .sending,
       message: messenge
     )
     
@@ -100,7 +121,7 @@ final class MessengerDialogScreenPresenter: ObservableObject {
     
     DispatchQueue.global().async { [weak self] in
       guard let self else { return }
-      moduleOutput?.sendMessage(messenge, contact: updatedContactModel)
+      moduleOutput?.sendMessage(contact: updatedContactModel)
     }
     stateInputMessengeText = ""
   }
@@ -170,7 +191,7 @@ final class MessengerDialogScreenPresenter: ObservableObject {
   func startScheduleResendInitialRequest() {
     // Устанавливаем начальное состояние
     stateIsCanResendInitialRequest = false
-    stateSecondsUntilResendInitialRequestAllowed = 30
+    stateSecondsUntilResendInitialRequestAllowed = 60
     
     // Инвалидируем предыдущий таймер, если он существует
     timer?.invalidate()
@@ -197,6 +218,14 @@ final class MessengerDialogScreenPresenter: ObservableObject {
     
     DispatchQueue.global().async { [weak self] in
       self?.moduleOutput?.setUserIsTyping(!text.isEmpty, to: toxPublicKey, completion: { _ in })
+    }
+  }
+  
+  func copyToClipboard(text: String) {
+    Timer.scheduledTimer(withTimeInterval: 0.4, repeats: false) { [weak self] _ in
+      guard let self else { return }
+      interactor.copyToClipboard(text: text)
+      interactor.showNotification(.neutral(title: "Текст скопирован"))
     }
   }
 }
@@ -299,7 +328,7 @@ private extension MessengerDialogScreenPresenter {
     contactUpdated.messenges.append(
       .init(
         messageType: .systemSuccess,
-        messageStatus: .delivered,
+        messageStatus: .sent,
         message: publicKeyIsEmpty ? sender : receiver
       )
     )

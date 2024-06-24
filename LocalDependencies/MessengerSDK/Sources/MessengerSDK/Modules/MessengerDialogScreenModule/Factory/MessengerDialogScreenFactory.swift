@@ -116,7 +116,7 @@ extension MessengerDialogScreenFactory: MessengerDialogScreenFactoryInput {
       messenges: [
         .init(
           messageType: .systemAttention,
-          messageStatus: .delivered,
+          messageStatus: .sent,
           message: MessengerSDKStrings.MessengerDialogScreenLocalization
             .stateInitialMessengerNote
         )

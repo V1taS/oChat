@@ -58,6 +58,24 @@ extension MessengerModelHandlerService: IMessengerModelSettingsManager {
     }
   }
   
+  public func setAllContactsNoTyping(completion: (() -> Void)?) {
+    getMessengerModel { [weak self] model in
+      guard let self else {
+        return
+      }
+      var updatedModel = model
+      var updatedContacts = model.contacts.compactMap { model in
+        var updatedModel = model
+        if model.isTyping {
+          updatedModel.isTyping = false
+        }
+        return updatedModel
+      }
+      updatedModel.contacts = updatedContacts
+      saveMessengerModel(updatedModel, completion: completion)
+    }
+  }
+  
   public func setNameContact(
     _ contactModel: ContactModel,
     _ name: String,

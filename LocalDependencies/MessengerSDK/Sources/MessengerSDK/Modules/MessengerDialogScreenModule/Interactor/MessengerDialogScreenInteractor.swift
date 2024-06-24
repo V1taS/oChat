@@ -16,17 +16,15 @@ protocol MessengerDialogScreenInteractorInput {
   /// Получаем обновленный контакт
   func getNewContactModels(_ contactModel: ContactModel, completion: ((ContactModel) -> Void)?)
   
-  /// Расшифровывает данные, используя приватный ключ.
-  /// - Parameters:
-  ///   - encryptedData: Зашифрованные данные.
-  /// - Returns: Расшифрованные данные.
-  /// - Throws: Ошибка расшифровки данных.
-  func decrypt(_ encryptedData: String?) -> String?
-  
   /// Показать уведомление
   /// - Parameters:
   ///   - type: Тип уведомления
   func showNotification(_ type: NotificationServiceType)
+  
+  /// Копирует текст в буфер обмена.
+  /// - Parameters:
+  ///   - text: Текст для копирования.
+  func copyToClipboard(text: String)
 }
 
 /// Интерактор
@@ -58,12 +56,12 @@ final class MessengerDialogScreenInteractor {
 // MARK: - MessengerDialogScreenInteractorInput
 
 extension MessengerDialogScreenInteractor: MessengerDialogScreenInteractorInput {
-  func showNotification(_ type: SKAbstractions.NotificationServiceType) {
-    notificationService.showNotification(type)
+  func copyToClipboard(text: String) {
+    systemService.copyToClipboard(text: text)
   }
   
-  func decrypt(_ encryptedData: String?) -> String? {
-    cryptoService.decrypt(encryptedData, privateKey: systemService.getDeviceIdentifier())
+  func showNotification(_ type: SKAbstractions.NotificationServiceType) {
+    notificationService.showNotification(type)
   }
   
   func getNewContactModels(_ contactModel: ContactModel, completion: ((ContactModel) -> Void)?) {
@@ -76,10 +74,6 @@ extension MessengerDialogScreenInteractor: MessengerDialogScreenInteractorInput 
         }
       }
     }
-  }
-  
-  func getCostOfSendingMessage() -> Decimal? {
-    nil
   }
 }
 
