@@ -21,10 +21,14 @@ final class MessengerDialogScreenPresenter: ObservableObject {
   @Published var stateIsDeeplinkAdress = false
   @Published var stateContactAdressMaxLength = 76
   @Published var stateShowInitialTips = true
+  
   @Published var stateIsCanResendInitialRequest = false
   @Published var stateSecondsUntilResendInitialRequestAllowed = 0
   
-  // MARK: - Request chat state
+  // MARK: - Offline contact
+  
+  @Published var stateIsAskToComeContact = true
+  @Published var stateSecondsUntilAskToComeContactAllowed = 0
   
   // MARK: - Chat state
   
@@ -43,8 +47,9 @@ final class MessengerDialogScreenPresenter: ObservableObject {
   private let factory: MessengerDialogScreenFactoryInput
   private weak var deleteRightBarButton: SKBarButtonItem?
   private var barButtonView: SKBarButtonView?
+  private var resendInitialRequestTimer: Timer?
   private var timer: Timer?
-  
+    
   // MARK: - Initialization
   
   /// - Parameters:
@@ -194,10 +199,10 @@ final class MessengerDialogScreenPresenter: ObservableObject {
     stateSecondsUntilResendInitialRequestAllowed = 60
     
     // Инвалидируем предыдущий таймер, если он существует
-    timer?.invalidate()
+    resendInitialRequestTimer?.invalidate()
     
     // Запускаем новый таймер, который обновляется каждую секунду
-    timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] timer in
+    resendInitialRequestTimer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] timer in
       guard let self = self else { return }
       
       // Уменьшаем количество оставшихся секунд
@@ -226,6 +231,42 @@ final class MessengerDialogScreenPresenter: ObservableObject {
       guard let self else { return }
       interactor.copyToClipboard(text: text)
       interactor.showNotification(.neutral(title: "Текст скопирован"))
+    }
+  }
+  
+  func startAskToComeContactTimer() {
+    stateIsAskToComeContact = false
+    stateSecondsUntilAskToComeContactAllowed = 30
+    
+    timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] timer in
+      guard let self = self else { return }
+      self.updateAskToComeContactTimer()
+    }
+  }
+  
+  func sendPushNotification() {
+    guard stateContactModel.pushNotificationToken != nil else {
+      interactor.showNotification(.negative(title: "Контакт не включил уведомления на устройстве!"))
+      return
+    }
+    
+    var updatedContactModel = stateContactModel
+    if updatedContactModel.messenges.last?.messageType != .systemSuccess {
+      updatedContactModel.messenges.append(
+        .init(
+          messageType: .systemSuccess,
+          messageStatus: .sent,
+          message: "Вы уведомили вашего контакта, что вы хотите пообщаться. Ожидайте его появления в чате."
+        )
+      )
+    }
+    
+    stateContactModel = updatedContactModel
+    
+    DispatchQueue.global().async { [weak self] in
+      guard let self else { return }
+      moduleOutput?.saveContactModel(updatedContactModel)
+      moduleOutput?.sendPushNotification(contact: updatedContactModel)
     }
   }
 }
@@ -288,6 +329,18 @@ private extension MessengerDialogScreenPresenter {
     updateCenterBarButtonView(isHidden: isInitialAddressEntryState() || isRequestChatState())
     if isInitialWaitConfirmState() {
       startScheduleResendInitialRequest()
+    }
+  }
+  
+  func updateAskToComeContactTimer() {
+    stateSecondsUntilAskToComeContactAllowed -= 1
+    
+    if stateSecondsUntilAskToComeContactAllowed <= 0 {
+      // Останавливаем таймер
+      timer?.invalidate()
+      timer = nil
+      
+      stateIsAskToComeContact = true
     }
   }
   

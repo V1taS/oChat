@@ -69,6 +69,10 @@ extension MessengerScreenFlowCoordinator: MessengerListScreenModuleOutput {
 // MARK: - MessengerDialogScreenModuleOutput
 
 extension MessengerScreenFlowCoordinator: MessengerDialogScreenModuleOutput {
+  public func sendPushNotification(contact: ContactModel) {
+    messengerListScreenModuleModule?.input.sendPushNotification(contact: contact)
+  }
+  
   public func retrySendMessage(messengeModel: MessengeModel, contactModel: ContactModel) {
     messengerListScreenModuleModule?.input.retrySendMessage(messengeModel: messengeModel, contactModel: contactModel)
   }

@@ -49,6 +49,9 @@ public protocol MessengerDialogScreenModuleOutput: AnyObject {
   
   /// Повторить отправку сообщения
   func retrySendMessage(messengeModel: MessengeModel, contactModel: ContactModel)
+  
+  /// Метод для отправки push-уведомлений
+  func sendPushNotification(contact: ContactModel)
 }
 
 /// События которые отправляем из `Coordinator` в `MessengerDialogScreenModule`

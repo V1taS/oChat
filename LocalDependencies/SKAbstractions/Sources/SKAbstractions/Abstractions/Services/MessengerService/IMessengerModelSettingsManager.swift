@@ -86,6 +86,14 @@ public protocol IMessengerModelSettingsManager {
     completion: ((_ model: ContactModel?) -> Void)?
   )
   
+  /// Сохраняет токен для пуш сообщений
+  /// - Parameters:
+  ///   - token: Токен для пуш сообщений
+  func saveMyPushNotificationToken(
+    _ token: String,
+    completion: (() -> Void)?
+  )
+  
   /// Удаляет контакт.
   /// - Parameters:
   ///   - model: Модель контакта `ContactModel`, которую нужно удалить.

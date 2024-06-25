@@ -10,7 +10,10 @@ import SKAbstractions
 
 @available(iOS 16.0, *)
 public final class MessengerService: IMessengerService {
-  public init() {}
+  
+  public static let shared = MessengerService()
+  
+  private init() {}
   
   /// Возвращает сервис обмена сообщениями.
   public func messagesEncryptionService(privateKey: String) -> IMessagesService {

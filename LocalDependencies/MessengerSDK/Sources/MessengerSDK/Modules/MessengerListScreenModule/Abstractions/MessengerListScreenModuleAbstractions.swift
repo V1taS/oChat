@@ -73,6 +73,9 @@ public protocol MessengerListScreenModuleModuleInput {
   
   /// События которые отправляем из `MessengerListScreenModuleModule` в `Coordinator`
   var moduleOutput: MessengerListScreenModuleOutput? { get set }
+  
+  /// Метод для отправки push-уведомлений
+  func sendPushNotification(contact: ContactModel)
 }
 
 /// Готовый модуль `MessengerListScreenModuleModule`

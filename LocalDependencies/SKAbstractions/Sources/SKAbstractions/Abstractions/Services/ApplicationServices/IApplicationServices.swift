@@ -27,4 +27,7 @@ public protocol IApplicationServices {
   
   /// Возвращает сервис  для управления сервисами, связанными с мессенджером
   var messengerService: IMessengerService { get }
+  
+  /// Возвращает сервис  для отправки push-уведомлений
+  var pushNotificationService: IPushNotificationService { get }
 }

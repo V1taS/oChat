@@ -35,8 +35,38 @@ struct MessengerListScreenModuleView: View {
 // MARK: - Private
 
 private extension MessengerListScreenModuleView {
+  func notificationsView() -> AnyView {
+    if !presenter.stateIsNotificationsEnabled {
+      return AnyView(
+        ViewThatFits {
+          TipsView(
+            .init(
+              text: MessengerSDKStrings.MessengerListScreenModuleLocalization
+                .stateBannerPushNotificationTitle,
+              style: .attention,
+              isSelectableTips: true,
+              actionTips: {
+                presenter.requestNotification()
+              },
+              isCloseButton: false,
+              closeButtonAction: {}
+            )
+          )
+        }
+          .padding(.vertical, .s4)
+      )
+      
+    }
+    return AnyView(EmptyView())
+  }
+  
   func createContent() -> some View {
     List {
+      notificationsView()
+        .listRowBackground(Color.clear)
+        .listRowInsets(.init(top: .zero, leading: .s4, bottom: .zero, trailing: .s4))
+        .listRowSeparator(.hidden)
+      
       ForEach(presenter.stateWidgetModels.indices, id: \.self) { index in
         VStack(spacing: .zero) {
           WidgetCryptoView(presenter.stateWidgetModels[index])
@@ -62,6 +92,9 @@ private extension MessengerListScreenModuleView {
   func createEmptyState() -> some View {
     ScrollView(.vertical, showsIndicators: false) {
       VStack {
+        notificationsView()
+          .padding(.horizontal, .s4)
+        
         Spacer()
         
         LottieView(
