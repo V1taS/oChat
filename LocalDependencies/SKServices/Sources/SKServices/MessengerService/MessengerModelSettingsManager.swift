@@ -12,6 +12,15 @@ import SKStyle
 // MARK: - MessengerModelSettingsManager
 
 extension MessengerModelHandlerService: IMessengerModelSettingsManager {
+  public func saveMyPushNotificationToken(_ token: String, completion: (() -> Void)?) {
+    getMessengerModel { [weak self] model in
+      guard let self else { return }
+      var updatedModel = model
+      updatedModel.pushNotificationToken = token
+      saveMessengerModel(updatedModel, completion: completion)
+    }
+  }
+  
   public func setToxStateAsString(
     _ toxStateAsString: String?,
     completion: (() -> Void)?

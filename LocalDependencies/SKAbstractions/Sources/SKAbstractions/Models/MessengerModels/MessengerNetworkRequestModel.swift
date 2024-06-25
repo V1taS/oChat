@@ -25,6 +25,9 @@ public struct MessengerNetworkRequestModel {
   /// Публичный ключ для шифрования сообщений.
   public var senderToxPublicKey: String?
   
+  /// Токен для отправки пушей
+  public var senderPushNotificationToken: String?
+  
   /// Инициализирует новый экземпляр сетевого запроса для мессенджера с заданными параметрами.
   /// - Parameters:
   ///   - messageText: Текст сообщения.
@@ -32,18 +35,21 @@ public struct MessengerNetworkRequestModel {
   ///   - senderLocalMeshAddress: Адрес в локальной сети для отправки.
   ///   - senderPublicKey: Публичный ключ отправителя.
   ///   - senderToxPublicKey: Публичный ключ для шифрования сообщений.
+  ///   - senderPushNotificationToken: Токен для отправки пушей
   public init(
     messageText: String?,
     senderAddress: String,
     senderLocalMeshAddress: String?,
     senderPublicKey: String?,
-    senderToxPublicKey: String?
+    senderToxPublicKey: String?,
+    senderPushNotificationToken: String?
   ) {
     self.messageText = messageText
     self.senderAddress = senderAddress
     self.senderLocalMeshAddress = senderLocalMeshAddress
     self.senderPublicKey = senderPublicKey
     self.senderToxPublicKey = senderToxPublicKey
+    self.senderPushNotificationToken = senderPushNotificationToken
   }
 }
 
@@ -57,7 +63,8 @@ extension MessengerNetworkRequestModel {
       senderAddress: senderAddress,
       senderLocalMeshAddress: senderLocalMeshAddress,
       senderPublicKey: senderPublicKey,
-      senderToxPublicKey: senderToxPublicKey
+      senderToxPublicKey: senderToxPublicKey, 
+      senderPushNotificationToken: senderPushNotificationToken
     )
   }
 }

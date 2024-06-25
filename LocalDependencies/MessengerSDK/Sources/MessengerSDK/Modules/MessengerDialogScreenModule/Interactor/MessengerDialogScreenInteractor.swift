@@ -61,7 +61,9 @@ extension MessengerDialogScreenInteractor: MessengerDialogScreenInteractorInput 
   }
   
   func showNotification(_ type: SKAbstractions.NotificationServiceType) {
-    notificationService.showNotification(type)
+    DispatchQueue.main.async { [weak self] in
+      self?.notificationService.showNotification(type)
+    }
   }
   
   func getNewContactModels(_ contactModel: ContactModel, completion: ((ContactModel) -> Void)?) {

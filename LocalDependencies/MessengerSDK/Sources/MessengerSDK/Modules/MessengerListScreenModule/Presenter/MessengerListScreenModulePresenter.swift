@@ -15,6 +15,7 @@ final class MessengerListScreenModulePresenter: ObservableObject {
   // MARK: - View state
   
   @Published var stateWidgetModels: [WidgetCryptoView.Model] = []
+  @Published var stateIsNotificationsEnabled = false
   
   // MARK: - Internal properties
   
@@ -74,11 +75,21 @@ final class MessengerListScreenModulePresenter: ObservableObject {
       }
     }
   }
+  
+  func requestNotification() {
+    interactor.requestNotification { [weak self] granted in
+      self?.stateIsNotificationsEnabled = granted
+    }
+  }
 }
 
 // MARK: - MessengerListScreenModuleModuleInput
 
 extension MessengerListScreenModulePresenter: MessengerListScreenModuleModuleInput {
+  func sendPushNotification(contact: ContactModel) {
+    interactor.sendPushNotification(contact: contact)
+  }
+  
   func retrySendMessage(messengeModel: MessengeModel, contactModel: ContactModel) {
     let newMessengeModel = MessengeModel(
       messageType: messengeModel.messageType,
@@ -111,11 +122,6 @@ extension MessengerListScreenModulePresenter: MessengerListScreenModuleModuleInp
   }
   
   func sendInitiateChat(contactModel: ContactModel) {
-    DispatchQueue.main.async { [weak self] in
-      guard let self else { return }
-      interactor.showNotification(.positive(title: "Запрос отправлен"))
-    }
-    
     checkingContactPublicKey(contact: contactModel) { [weak self] updatedContactModel in
       guard let self else { return }
       sendInitiateChatNetworkRequest(contact: updatedContactModel) { [weak self] _ in
@@ -136,7 +142,6 @@ extension MessengerListScreenModulePresenter: MessengerListScreenModuleModuleInp
       guard let self else { return }
       switch result {
       case let .success(toxPublicKey):
-        interactor.showNotification(.positive(title: "Контакт успешно добавлен"))
         var updatedContactModel = contactModel
         updatedContactModel.status = .online
         interactor.saveContactModel(updatedContactModel) { [weak self] in
@@ -214,6 +219,7 @@ extension MessengerListScreenModulePresenter: MessengerListScreenModuleModuleInp
   }
   
   func updateListContacts(completion: (() -> Void)? = nil) {
+    updateIsNotificationsEnabled()
     interactor.getContactModels { [weak self] contactModels in
       guard let self else {
         return
@@ -266,7 +272,15 @@ extension MessengerListScreenModulePresenter: SceneViewModel {
 // MARK: - Private
 
 private extension MessengerListScreenModulePresenter {
+  func updateIsNotificationsEnabled() {
+    interactor.isNotificationsEnabled { [weak self] enabled in
+      self?.stateIsNotificationsEnabled = enabled
+    }
+  }
+  
   func initialSetup() {
+    updateIsNotificationsEnabled()
+    
     interactor.setSelfStatus(isOnline: true)
     interactor.getContactModels { [weak self] contactModels in
       guard let self else {
@@ -386,6 +400,7 @@ private extension MessengerListScreenModulePresenter {
     senderLocalMeshAddress: String?,
     senderPublicKey: String?,
     senderToxPublicKey: String?,
+    senderPushNotificationToken: String?,
     completion: ((_ recipientTorAddress: String,
                   _ requestModel: MessengerNetworkRequestModel) -> Void)?
   ) {
@@ -399,7 +414,8 @@ private extension MessengerListScreenModulePresenter {
       senderAddress: senderAddress,
       senderLocalMeshAddress: senderLocalMeshAddress ?? "",
       senderPublicKey: senderPublicKey,
-      senderToxPublicKey: senderToxPublicKey
+      senderToxPublicKey: senderToxPublicKey, 
+      senderPushNotificationToken: senderPushNotificationToken
     )
     completion?(senderAddress, requestModel)
   }
@@ -433,32 +449,43 @@ private extension MessengerListScreenModulePresenter {
       message = messengeModel.message
     }
     
-    interactor.saveContactModel(
-      contact,
-      completion: { [weak self] in
-        guard let self else { return }
-        var messageForSend = ""
-        if let encryptionPublicKey = contact.encryptionPublicKey {
-          let messageEncrypt = interactor.encrypt(message, publicKey: encryptionPublicKey)
-          messageForSend = messageEncrypt ?? ""
-        }
-        
-        interactor.getToxAddress { [weak self] result in
-          guard let self, let toxAddress = try? result.get() else { return }
-          interactor.getToxPublicKey { [weak self] toxPublicKey in
-            guard let self, let toxPublicKey else { return }
-            createRequestModel(
-              message: messageForSend,
-              senderAddress: toxAddress,
-              senderLocalMeshAddress: nil,
-              senderPublicKey: senderPublicKey,
-              senderToxPublicKey: toxPublicKey,
-              completion: completion
-            )
+    interactor.getPushNotificationToken { [weak self] pushNotificationToken in
+      guard let self else { return }
+      interactor.saveContactModel(
+        contact,
+        completion: { [weak self] in
+          guard let self else { return }
+          var messageForSend = ""
+          var senderPushNotificationTokenForSend: String?
+          
+          if let encryptionPublicKey = contact.encryptionPublicKey {
+            let messageEncrypt = interactor.encrypt(message, publicKey: encryptionPublicKey)
+            messageForSend = messageEncrypt ?? ""
+          }
+          
+          if let pushNotificationToken, let encryptionPublicKey = contact.encryptionPublicKey {
+            let pushNotificationTokenEncrypt = interactor.encrypt(pushNotificationToken, publicKey: encryptionPublicKey)
+            senderPushNotificationTokenForSend = pushNotificationTokenEncrypt
+          }
+          
+          interactor.getToxAddress { [weak self] result in
+            guard let self, let toxAddress = try? result.get() else { return }
+            interactor.getToxPublicKey { [weak self] toxPublicKey in
+              guard let self, let toxPublicKey else { return }
+              createRequestModel(
+                message: messageForSend,
+                senderAddress: toxAddress,
+                senderLocalMeshAddress: nil,
+                senderPublicKey: senderPublicKey,
+                senderToxPublicKey: toxPublicKey,
+                senderPushNotificationToken: senderPushNotificationTokenForSend,
+                completion: completion
+              )
+            }
           }
         }
-      }
-    )
+      )
+    }
   }
   
   func sendInitiateChatNetworkRequest(
@@ -612,24 +639,29 @@ private extension MessengerListScreenModulePresenter {
           return
         }
         
-        updateRedDotToTabBar(contactModels: contactModels)
-        
-        let newContact = ContactModel(
-          name: nil,
-          toxAddress: messageModel.senderAddress,
-          meshAddress: messageModel.senderLocalMeshAddress,
-          messenges: [],
-          status: .requestChat,
-          encryptionPublicKey: messageModel.senderPublicKey,
-          toxPublicKey: toxPublicKey,
-          isNewMessagesAvailable: true,
-          isTyping: false
-        )
-        interactor.saveContactModel(newContact, completion: { [weak self] in
+        interactor.decrypt(messageModel.senderPushNotificationToken) { [weak self] pushNotificationToken in
           guard let self else { return }
-          updateListContacts()
-          moduleOutput?.dataModelHasBeenUpdated()
-        })
+          
+          updateRedDotToTabBar(contactModels: contactModels)
+          
+          let newContact = ContactModel(
+            name: nil,
+            toxAddress: messageModel.senderAddress,
+            meshAddress: messageModel.senderLocalMeshAddress,
+            messenges: [],
+            status: .requestChat,
+            encryptionPublicKey: messageModel.senderPublicKey,
+            toxPublicKey: toxPublicKey,
+            pushNotificationToken: pushNotificationToken,
+            isNewMessagesAvailable: true,
+            isTyping: false
+          )
+          interactor.saveContactModel(newContact, completion: { [weak self] in
+            guard let self else { return }
+            updateListContacts()
+            moduleOutput?.dataModelHasBeenUpdated()
+          })
+        }
       }
     }
   }
@@ -644,43 +676,50 @@ private extension MessengerListScreenModulePresenter {
         updateRedDotToTabBar(contactModels: contactModels)
         interactor.decrypt(messageModel.messageText) { [weak self] messageText in
           guard let self else { return }
-          
-          if let contact = factory.searchContact(
-            contactModels: contactModels,
-            torAddress: messageModel.senderAddress
-          ) {
-            var updatedContact = contact
-            updatedContact = factory.addMessageToContact(
-              message: messageText,
-              contactModel: updatedContact,
-              messageType: .received
-            )
-            updatedContact.status = .online
-            updatedContact.toxAddress = messageModel.senderAddress
-            updatedContact.isNewMessagesAvailable = true
-            updatedContact.encryptionPublicKey = messageModel.senderPublicKey
-            interactor.saveContactModel(updatedContact, completion: { [weak self] in
-              guard let self else { return }
-              updateListContacts()
-              moduleOutput?.dataModelHasBeenUpdated()
-            })
-          } else {
-            let contact = ContactModel(
-              name: nil,
-              toxAddress: messageModel.senderAddress,
-              meshAddress: messageModel.senderLocalMeshAddress,
-              messenges: [],
-              status: .online,
-              encryptionPublicKey: messageModel.senderPublicKey,
-              toxPublicKey: nil,
-              isNewMessagesAvailable: true,
-              isTyping: false
-            )
-            interactor.saveContactModel(contact, completion: { [weak self] in
-              guard let self else { return }
-              updateListContacts()
-              moduleOutput?.dataModelHasBeenUpdated()
-            })
+          interactor.decrypt(messageModel.senderPushNotificationToken) { [weak self] pushNotificationToken in
+            guard let self else { return }
+            
+            if let contact = factory.searchContact(
+              contactModels: contactModels,
+              torAddress: messageModel.senderAddress
+            ) {
+              var updatedContact = contact
+              updatedContact = factory.addMessageToContact(
+                message: messageText,
+                contactModel: updatedContact,
+                messageType: .received
+              )
+              updatedContact.status = .online
+              if let senderPushNotificationToken = pushNotificationToken {
+                updatedContact.pushNotificationToken = senderPushNotificationToken
+              }
+              updatedContact.toxAddress = messageModel.senderAddress
+              updatedContact.isNewMessagesAvailable = true
+              updatedContact.encryptionPublicKey = messageModel.senderPublicKey
+              interactor.saveContactModel(updatedContact, completion: { [weak self] in
+                guard let self else { return }
+                updateListContacts()
+                moduleOutput?.dataModelHasBeenUpdated()
+              })
+            } else {
+              let contact = ContactModel(
+                name: nil,
+                toxAddress: messageModel.senderAddress,
+                meshAddress: messageModel.senderLocalMeshAddress,
+                messenges: [],
+                status: .online,
+                encryptionPublicKey: messageModel.senderPublicKey,
+                toxPublicKey: nil,
+                pushNotificationToken: pushNotificationToken,
+                isNewMessagesAvailable: true,
+                isTyping: false
+              )
+              interactor.saveContactModel(contact, completion: { [weak self] in
+                guard let self else { return }
+                updateListContacts()
+                moduleOutput?.dataModelHasBeenUpdated()
+              })
+            }
           }
         }
       }

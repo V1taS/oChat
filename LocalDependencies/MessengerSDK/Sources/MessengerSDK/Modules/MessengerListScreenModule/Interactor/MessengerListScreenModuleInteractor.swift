@@ -168,6 +168,28 @@ protocol MessengerListScreenModuleInteractorInput {
   
   /// Переводит всех контактов в состояние Не Печатают
   func setAllContactsNoTyping(completion: (() -> Void)?)
+  
+  /// Получить токен для пушей
+  func getPushNotificationToken(completion: ((String?) -> Void)?)
+  
+  /// Сохраняет токен для пуш сообщений
+  /// - Parameters:
+  ///   - token: Токен для пуш сообщений
+  func saveMyPushNotificationToken(
+    _ token: String,
+    completion: (() -> Void)?
+  )
+  
+  /// Запрос доступа к Уведомлениям
+  /// - Parameter granted: Булево значение, указывающее, было ли предоставлено разрешение
+  func requestNotification(completion: @escaping (_ granted: Bool) -> Void)
+
+  /// Метод для проверки, включены ли уведомления
+  /// - Parameter enabled: Булево значение, указывающее, было ли включено уведомление
+  func isNotificationsEnabled(completion: @escaping (_ enabled: Bool) -> Void)
+  
+  /// Метод для отправки push-уведомлений
+  func sendPushNotification(contact: ContactModel)
 }
 
 /// Интерактор
@@ -186,6 +208,8 @@ final class MessengerListScreenModuleInteractor {
   private let cryptoService: ICryptoService
   private let systemService: ISystemService
   private let modelSettingsManager: IMessengerModelSettingsManager
+  private let permissionService: IPermissionService
+  private let pushNotificationService: IPushNotificationService
   
   // MARK: - Initialization
   
@@ -199,12 +223,60 @@ final class MessengerListScreenModuleInteractor {
     cryptoService = services.accessAndSecurityManagementService.cryptoService
     systemService = services.userInterfaceAndExperienceService.systemService
     modelSettingsManager = services.messengerService.modelSettingsManager
+    permissionService = services.accessAndSecurityManagementService.permissionService
+    pushNotificationService = services.pushNotificationService
   }
 }
 
 // MARK: - MessengerListScreenModuleInteractorInput
 
 extension MessengerListScreenModuleInteractor: MessengerListScreenModuleInteractorInput {
+  func sendPushNotification(contact: ContactModel) {
+    guard let pushNotificationToken = contact.pushNotificationToken else {
+      DispatchQueue.main.async { [weak self] in
+        self?.notificationService.showNotification(.negative(title: "Нет токена для отправки уведомления"))
+      }
+      return
+    }
+    
+    DispatchQueue.global().async { [weak self] in
+      self?.pushNotificationService.sendPushNotification(
+        title: "Вас зовут в чат!",
+        body: "Ваши контакты хотят с вами пообщаться. Пожалуйста, зайдите в чат.",
+        customData: [:],
+        deviceToken: pushNotificationToken
+      )
+    }
+  }
+  
+  func requestNotification(completion: @escaping (Bool) -> Void) {
+    permissionService.requestNotification(completion: completion)
+  }
+  
+  func isNotificationsEnabled(completion: @escaping (Bool) -> Void) {
+    permissionService.isNotificationsEnabled(completion: completion)
+  }
+  
+  func saveMyPushNotificationToken(_ token: String, completion: (() -> Void)?) {
+    DispatchQueue.global().async { [weak self] in
+      self?.modelSettingsManager.saveMyPushNotificationToken(token) {
+        DispatchQueue.main.async {
+          completion?()
+        }
+      }
+    }
+  }
+  
+  func getPushNotificationToken(completion: ((String?) -> Void)?) {
+    DispatchQueue.global().async { [weak self] in
+      self?.modelHandlerService.getMessengerModel { messengerModel in
+        DispatchQueue.main.async {
+          completion?(messengerModel.pushNotificationToken)
+        }
+      }
+    }
+  }
+  
   func setAllContactsNoTyping(completion: (() -> Void)?) {
     DispatchQueue.global().async { [weak self] in
       self?.modelSettingsManager.setAllContactsNoTyping(completion: {

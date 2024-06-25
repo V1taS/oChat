@@ -266,6 +266,18 @@ private extension MessengerDialogScreenView {
               presenter.startScheduleResendInitialRequest()
             }
           )
+        } else if presenter.stateContactModel.status == .offline {
+          MainButtonView(
+            text: presenter.stateIsAskToComeContact ?
+            "Позвать контакт" :
+              "Позвать контакт через \(presenter.stateSecondsUntilAskToComeContactAllowed) сек.",
+            isEnabled: presenter.stateIsAskToComeContact,
+            style: .primary,
+            action: {
+              presenter.sendPushNotification()
+              presenter.startAskToComeContactTimer()
+            }
+          )
         } else {
           createChatFieldView(isInitialState: false)
         }

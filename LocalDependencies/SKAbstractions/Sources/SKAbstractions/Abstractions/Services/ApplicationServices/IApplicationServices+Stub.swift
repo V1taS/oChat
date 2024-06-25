@@ -15,16 +15,16 @@ public final class ApplicationServicesStub: IApplicationServices, IDataManagerSe
                                             IAnalyticsService, ISecureDataManagerService, ICryptoService,
                                             ICloudKitService, IAppSettingsManager, IDataManagementService,
                                             IAccessAndSecurityManagementService, IUserInterfaceAndExperienceService,
-                                            IDeepLinkService {
+                                            IDeepLinkService, IPushNotificationService {
+  public func sendPushNotification(title: String, body: String, customData: [String : Any], deviceToken: String) {}
+  public var pushNotificationService: any IPushNotificationService { self }
   public func setAllContactsIsOffline(completion: (() -> Void)?) {}
-  
   public func saveDeepLinkURL(_ url: URL, completion: (() -> Void)?) {}
   public func deleteDeepLinkURL() {}
   public func getMessengerAdress(completion: ((String?) -> Void)?) {}
   public var deepLinkService: any IDeepLinkService { self }
   public func generateQRCode(from string: String, backgroundColor: Color, foregroundColor: Color, iconIntoQR: UIImage?, iconSize: CGSize, iconBackgroundColor: Color?, completion: ((UIImage?) -> Void)?) {}
   public var messengerService: any IMessengerService { MessengerServiceStub() }
-  
   public func deleteAllData() -> Bool { false }
   public init() {}
   public func getDataManagerService() -> any IDataManagerService { self }
@@ -167,6 +167,8 @@ public final class ApplicationServicesStub: IApplicationServices, IDataManagerSe
 
 public final class MessengerServiceStub: IMessengerModelSettingsManager, IMessengerModelHandlerService,
                                          IMessagesService, IMessengerService, IP2PChatManager, IAppSettingsManager {
+  public func saveMyPushNotificationToken(_ token: String, completion: (() -> Void)?) {}
+  
   public func setAllContactsNoTyping(completion: (() -> Void)?) {}
   
   public func setSelfStatus(isOnline: Bool) {}

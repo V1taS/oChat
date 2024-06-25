@@ -25,6 +25,9 @@ public struct MessengerModel {
   /// Строка, содержащая сохранённое состояние Tox в формате Base64
   public var toxStateAsString: String?
   
+  /// Токен для отправки пушей
+  public var pushNotificationToken: String?
+  
   // MARK: - Initializer
   
   /// Инициализирует новый экземпляр `SafeKeeperModel` с указанными настройками приложения и кошельками.
@@ -33,16 +36,19 @@ public struct MessengerModel {
   ///   - contacts: Массив моделей контактов, каждый из которых представляет отдельный контакт.
   ///   - myStatus: Мой статус онлайн.
   ///   - toxStateAsString: Строка, содержащая сохранённое состояние Tox в формате Base64
+  ///   - pushNotificationToken: Токен для отправки пушей
   public init(
     appSettingsModel: AppSettingsModel,
     contacts: [ContactModel],
     myStatus: MessengerModel.Status,
-    toxStateAsString: String?
+    toxStateAsString: String?,
+    pushNotificationToken: String?
   ) {
     self.appSettingsModel = appSettingsModel
     self.contacts = contacts
     self.myStatus = myStatus
     self.toxStateAsString = toxStateAsString
+    self.pushNotificationToken = pushNotificationToken
   }
 }
 
@@ -80,9 +86,10 @@ extension MessengerModel {
   public static func setDefaultValues() -> Self {
     Self(
       appSettingsModel: .setDefaultValues(),
-      contacts: [], 
-      myStatus: .inProgress, 
-      toxStateAsString: nil
+      contacts: [],
+      myStatus: .inProgress,
+      toxStateAsString: nil, 
+      pushNotificationToken: nil
     )
   }
 }
