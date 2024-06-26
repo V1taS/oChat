@@ -245,15 +245,6 @@ private extension MessengerDialogScreenView {
         }
         .padding(.bottom, .s4)
         
-        if presenter.stateContactModel.isTyping {
-          HStack {
-            TypingIndicatorView()
-              .padding(.leading, .s4)
-              .padding(.vertical, .s4)
-            Spacer()
-          }
-        }
-        
         if presenter.isInitialWaitConfirmState() {
           MainButtonView(
             text: presenter.stateIsCanResendInitialRequest ?

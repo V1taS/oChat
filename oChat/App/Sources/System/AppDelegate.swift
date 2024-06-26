@@ -104,8 +104,32 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
   /// Обработка данных уведомления
   /// - Parameter userInfo: Данные, полученные из уведомления
   func handleNotification(_ userInfo: [AnyHashable: Any]) {
-    if let customKey1 = userInfo["customKey1"] as? String {
-      // TODO: - Прокидываем и получаем какие то данные
+    if let toxAddress = userInfo["toxAddress"] as? String {
+      MessengerService.shared.appSettingsManager.setIsNewMessagesAvailable(
+        true,
+        toxAddress: toxAddress,
+        completion: {}
+      )
+      
+      DispatchQueue.global().async {
+        MessengerService.shared.modelHandlerService.getContactModels { contactModels in
+          DispatchQueue.main.async {
+            if let contactIndex = contactModels.firstIndex(where: { $0.toxAddress == toxAddress }) {
+              var updatedContact = contactModels[contactIndex]
+              if updatedContact.messenges.last?.messageType != .systemSuccess {
+                updatedContact.messenges.append(
+                  .init(
+                    messageType: .systemSuccess,
+                    messageStatus: .sent,
+                    message: "Вы получили приглашение на общение. Присоединитесь и начните общение."
+                  )
+                )
+                MessengerService.shared.modelHandlerService.saveContactModel(updatedContact, completion: {})
+              }
+            }
+          }
+        }
+      }
     }
   }
 }

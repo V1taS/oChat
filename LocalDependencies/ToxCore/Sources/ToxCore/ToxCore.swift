@@ -356,10 +356,6 @@ public extension ToxCore {
     
     // Преобразуем Data в строку в формате Base64
     let base64String = data.base64EncodedString()
-    
-    // Логируем успешное сохранение
-    print("Saved data with length \(data.count).")
-    
     return base64String
   }
   
@@ -941,8 +937,6 @@ public extension ToxCore {
       return nil
     }
     
-    print("Get friend number with publicKey length \(publicKey.count)")
-    
     guard let cPublicKey = publicKey.hexStringToBytes() else {
       print("Invalid public key format.")
       return nil
@@ -973,8 +967,6 @@ public extension ToxCore {
       print("Tox is not initialized.")
       return nil
     }
-    
-    print("Get public key from friend number \(friendNumber)")
     
     // Выделение памяти для публичного ключа
     let publicKeySize = Constants.publicKeySize
@@ -1034,27 +1026,6 @@ public extension ToxCore {
     // Преобразуем временную метку в дату
     let lastOnlineDate = Date(timeIntervalSince1970: TimeInterval(timestamp))
     return lastOnlineDate
-  }
-  
-  /// Метод для получения статуса друга по его номеру.
-  /// - Parameters:
-  ///   - friendNumber: Номер друга в сети Tox.
-  /// - Returns: Статус друга в виде значения перечисления `UserStatus`, если он доступен, иначе nil.
-  func friendStatus(friendNumber: Int32) -> UserStatus? {
-    guard let tox = self.tox else {
-      print("Tox is not initialized.")
-      return nil
-    }
-    
-    var cError: TOX_ERR_FRIEND_QUERY = TOX_ERR_FRIEND_QUERY_OK
-    let cStatus: TOX_USER_STATUS = tox_friend_get_status(tox, UInt32(friendNumber), &cError)
-    
-    if cError != TOX_ERR_FRIEND_QUERY_OK {
-      print("Failed to get friend status with error code \(cError).")
-      return nil
-    }
-    
-    return UserStatus.userStatusFromCUserStatus(cStatus)
   }
   
   /// Метод для получения статуса подключения друга по его номеру.

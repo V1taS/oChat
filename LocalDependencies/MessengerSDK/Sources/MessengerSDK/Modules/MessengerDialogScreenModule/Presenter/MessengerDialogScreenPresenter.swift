@@ -46,7 +46,7 @@ final class MessengerDialogScreenPresenter: ObservableObject {
   private let interactor: MessengerDialogScreenInteractorInput
   private let factory: MessengerDialogScreenFactoryInput
   private weak var deleteRightBarButton: SKBarButtonItem?
-  private var barButtonView: SKBarButtonView?
+  private var barButtonView: SKChatBarButtonView?
   private var resendInitialRequestTimer: Timer?
   private var timer: Timer?
     
@@ -87,6 +87,10 @@ final class MessengerDialogScreenPresenter: ObservableObject {
   // MARK: - Internal func
   
   func removeMessage(id: String) {
+    if let messageIndex = stateMessengeModels.firstIndex(where: { $0.id == id }) {
+      stateMessengeModels.remove(at: messageIndex)
+    }
+    
     Timer.scheduledTimer(withTimeInterval: 0.4, repeats: false) { [weak self] _ in
       guard let self else { return }
       moduleOutput?.removeMessage(id: id, contact: stateContactModel)
@@ -306,7 +310,7 @@ extension MessengerDialogScreenPresenter: SceneViewModel {
   }
   
   var centerBarButtonItem: SKBarButtonViewType? {
-    .widgetCryptoView(barButtonView)
+    .customView(view: barButtonView)
   }
 }
 
@@ -316,7 +320,7 @@ private extension MessengerDialogScreenPresenter {
   func initialSetup() {
     markMessageAsRead(contactModel: stateContactModel)
     
-    barButtonView = SKBarButtonView(
+    barButtonView = SKChatBarButtonView(
       .init(
         leftImage: nil,
         centerText: nil,
@@ -358,17 +362,21 @@ private extension MessengerDialogScreenPresenter {
     }
   }
   
-  func updateCenterBarButtonView(isHidden: Bool) {
+  func updateCenterBarButtonView(
+    isHidden: Bool = false
+  ) {
     var title = stateContactAdress
     if let toxAddress = stateContactModel.toxAddress, !toxAddress.isEmpty {
       title = toxAddress
     }
     
-    let toxAddress = stateContactModel.toxAddress
-    let stateContactAdress = stateContactAdress
+    barButtonView?.titleView.text = factory.createHeaderTitleFrom(title)
+    barButtonView?.descriptionView.text = stateContactModel.isTyping ? "Печатает..." : stateContactModel.status.title
+    
+    barButtonView?.iconLeftView.isHidden = stateContactModel.isTyping
+    barButtonView?.typingIndicator.isHidden = !stateContactModel.isTyping
     barButtonView?.isHidden = isHidden
     barButtonView?.iconLeftView.image = stateContactModel.status.imageStatus
-    barButtonView?.labelView.text = factory.createHeaderTitleFrom(title)
   }
   
   func addWelcomeMessage(contactModel: ContactModel) {

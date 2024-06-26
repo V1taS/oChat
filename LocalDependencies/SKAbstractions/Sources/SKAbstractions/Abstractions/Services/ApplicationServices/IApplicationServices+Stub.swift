@@ -16,6 +16,7 @@ public final class ApplicationServicesStub: IApplicationServices, IDataManagerSe
                                             ICloudKitService, IAppSettingsManager, IDataManagementService,
                                             IAccessAndSecurityManagementService, IUserInterfaceAndExperienceService,
                                             IDeepLinkService, IPushNotificationService {
+  public func setIsNewMessagesAvailable(_ value: Bool, toxAddress: String, completion: (() -> Void)?) {}
   public func sendPushNotification(title: String, body: String, customData: [String : Any], deviceToken: String) {}
   public var pushNotificationService: any IPushNotificationService { self }
   public func setAllContactsIsOffline(completion: (() -> Void)?) {}
@@ -167,6 +168,12 @@ public final class ApplicationServicesStub: IApplicationServices, IDataManagerSe
 
 public final class MessengerServiceStub: IMessengerModelSettingsManager, IMessengerModelHandlerService,
                                          IMessagesService, IMessengerService, IP2PChatManager, IAppSettingsManager {
+  public func startPeriodicFriendStatusCheck(completion: (([String : Bool]) -> Void)?) {}
+  
+  public func friendStatus(completion: @escaping (Bool) -> Void) {}
+  
+  public func setIsNewMessagesAvailable(_ value: Bool, toxAddress: String, completion: (() -> Void)?) {}
+  
   public func saveMyPushNotificationToken(_ token: String, completion: (() -> Void)?) {}
   
   public func setAllContactsNoTyping(completion: (() -> Void)?) {}

@@ -1,21 +1,25 @@
 //
-//  SKBarButtonView.swift
+//  SKChatBarButtonView.swift
 //  SKUIKit
 //
-//  Created by Vitalii Sosin on 24.04.2024.
+//  Created by Vitalii Sosin on 26.06.2024.
 //
 
 import UIKit
 import SKStyle
 
-public final class SKBarButtonView: UIControl {
+public final class SKChatBarButtonView: UIControl {
   
   // MARK: - Private properties
   
   public let iconLeftView = UIImageView()
-  public let labelView = UILabel()
+  public var typingIndicator = TypingIndicatorUIView()
+  public let titleView = UILabel()
+  public let descriptionView = UILabel()
   public let iconRightView = UIImageView()
-  private let stackView = UIStackView()
+  
+  private let verticalStackView = UIStackView()
+  private let horizontalStackView = UIStackView()
   private var action: (() -> Void)?
   private let impactFeedback = UIImpactFeedbackGenerator(style: .soft)
   
@@ -40,7 +44,7 @@ public final class SKBarButtonView: UIControl {
   
   // MARK: - Initialization
   
-  public init(_ model: SKBarButtonView.Model) {
+  public init(_ model: SKChatBarButtonView.Model) {
     super.init(frame: .zero)
     configureLayout()
     applyDefaultBehavior(model)
@@ -53,14 +57,19 @@ public final class SKBarButtonView: UIControl {
 
 // MARK: - Private
 
-private extension SKBarButtonView {
+private extension SKChatBarButtonView {
   func configureLayout() {
-    [iconLeftView, labelView, iconRightView].forEach {
+    [typingIndicator, iconLeftView, descriptionView, iconRightView].forEach {
       $0.translatesAutoresizingMaskIntoConstraints = false
-      stackView.addArrangedSubview($0)
+      horizontalStackView.addArrangedSubview($0)
     }
     
-    [stackView].forEach {
+    [titleView, horizontalStackView].forEach {
+      $0.translatesAutoresizingMaskIntoConstraints = false
+      verticalStackView.addArrangedSubview($0)
+    }
+    
+    [verticalStackView].forEach {
       $0.translatesAutoresizingMaskIntoConstraints = false
       addSubview($0)
     }
@@ -68,36 +77,46 @@ private extension SKBarButtonView {
     NSLayoutConstraint.activate([
       iconLeftView.widthAnchor.constraint(equalToConstant: .s4),
       iconLeftView.heightAnchor.constraint(equalToConstant: .s4),
+      typingIndicator.widthAnchor.constraint(equalToConstant: .s8),
+      typingIndicator.heightAnchor.constraint(equalToConstant: .s4),
       
       iconRightView.widthAnchor.constraint(equalToConstant: .s4),
       iconRightView.heightAnchor.constraint(equalToConstant: .s4),
       
-      stackView.leadingAnchor.constraint(equalTo: leadingAnchor),
-      stackView.topAnchor.constraint(equalTo: topAnchor),
-      stackView.trailingAnchor.constraint(equalTo: trailingAnchor),
-      stackView.bottomAnchor.constraint(equalTo: bottomAnchor)
+      verticalStackView.leadingAnchor.constraint(equalTo: leadingAnchor),
+      verticalStackView.topAnchor.constraint(equalTo: topAnchor),
+      verticalStackView.trailingAnchor.constraint(equalTo: trailingAnchor),
+      verticalStackView.bottomAnchor.constraint(equalTo: bottomAnchor)
     ])
   }
   
-  func applyDefaultBehavior(_ model: SKBarButtonView.Model) {
+  func applyDefaultBehavior(_ model: SKChatBarButtonView.Model) {
     iconLeftView.contentMode = .scaleAspectFit
     iconLeftView.layer.cornerRadius = .s2
     iconLeftView.clipsToBounds = true
+    typingIndicator.isHidden = true
     
-    labelView.font = .fancy.text.regularMedium
-    labelView.textColor = SKStyleAsset.ghost.color
+    titleView.font = .fancy.text.regularMedium
+    titleView.textColor = SKStyleAsset.ghost.color
+    
+    descriptionView.font = .fancy.text.regular
+    descriptionView.textColor = SKStyleAsset.constantSlate.color
     
     iconRightView.contentMode = .scaleAspectFit
     iconRightView.layer.cornerRadius = .s2
     iconRightView.clipsToBounds = true
     iconRightView.tintColor = SKStyleAsset.ghost.color
     
-    stackView.axis = .horizontal
-    stackView.alignment = .center
-    stackView.spacing = .s2
+    horizontalStackView.axis = .horizontal
+    horizontalStackView.alignment = .center
+    horizontalStackView.spacing = .s2
+    
+    verticalStackView.axis = .vertical
+    verticalStackView.alignment = .center
+    verticalStackView.spacing = .s1
     
     iconLeftView.image = model.leftImage
-    labelView.text = model.centerText
+    titleView.text = model.centerText
     iconRightView.image = model.rightImage
     action = model.action
     isEnabled = model.isEnabled
@@ -118,7 +137,7 @@ private extension SKBarButtonView {
 
 // MARK: - Model
 
-extension SKBarButtonView {
+extension SKChatBarButtonView {
   public struct Model {
     let leftImage: UIImage?
     let centerText: String?
@@ -149,3 +168,4 @@ extension SKBarButtonView {
     }
   }
 }
+

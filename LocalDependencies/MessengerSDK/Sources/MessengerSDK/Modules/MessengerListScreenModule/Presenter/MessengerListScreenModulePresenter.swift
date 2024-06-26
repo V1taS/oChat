@@ -197,8 +197,8 @@ extension MessengerListScreenModulePresenter: MessengerListScreenModuleModuleInp
     }
   }
   
-  func getContactModelsFrom(onionAddress: String, completion: ((ContactModel?) -> Void)?) {
-    interactor.getContactModelsFrom(onionAddress: onionAddress, completion: completion)
+  func getContactModelsFrom(toxAddress: String, completion: ((ContactModel?) -> Void)?) {
+    interactor.getContactModelsFrom(toxAddress: toxAddress, completion: completion)
   }
   
   func removeMessage(id: String, contact: ContactModel) {
@@ -279,6 +279,12 @@ private extension MessengerListScreenModulePresenter {
   }
   
   func initialSetup() {
+    interactor.startPeriodicFriendStatusCheck { [weak self] in
+      guard let self else { return }
+      updateListContacts()
+      moduleOutput?.dataModelHasBeenUpdated()
+    }
+    
     updateIsNotificationsEnabled()
     
     interactor.setSelfStatus(isOnline: true)

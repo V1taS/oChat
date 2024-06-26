@@ -143,7 +143,7 @@ extension MessengerDialogScreenFactory: MessengerDialogScreenFactoryInput {
   }
   
   func createHeaderTitleFrom(_ adress: String) -> String {
-    return adress.formatString(minTextLength: 20)
+    return adress.formatString(minTextLength: 10)
   }
 }
 
