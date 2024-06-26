@@ -12,5 +12,5 @@ public enum SKBarButtonViewType {
   case widgetCryptoView(SKBarButtonView?)
   
   /// Любая вьюшка которую поместим в центр навигейшен бара
-  case customView(view: UIView)
+  case customView(view: UIView?)
 }

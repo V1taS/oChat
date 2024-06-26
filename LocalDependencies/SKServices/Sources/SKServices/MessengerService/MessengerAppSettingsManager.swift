@@ -45,4 +45,24 @@ extension MessengerModelHandlerService: IAppSettingsManager {
       saveMessengerModel(updatedModel, completion: completion)
     }
   }
+  
+  public func setIsNewMessagesAvailable(
+    _ value: Bool,
+    toxAddress: String,
+    completion: (() -> Void)? = nil
+  ) {
+    getMessengerModel { [weak self] model in
+      guard let self else {
+        return
+      }
+      var updatedModel = model
+      var updatedContacts = updatedModel.contacts
+      
+      if let contactIndex = updatedContacts.firstIndex(where: { $0.toxAddress == toxAddress }) {
+        updatedContacts[contactIndex].isNewMessagesAvailable = value
+      }
+      updatedModel.contacts = updatedContacts
+      saveMessengerModel(updatedModel, completion: completion)
+    }
+  }
 }

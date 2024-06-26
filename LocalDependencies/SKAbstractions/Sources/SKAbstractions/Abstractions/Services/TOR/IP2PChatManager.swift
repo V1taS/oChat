@@ -93,4 +93,7 @@ public protocol IP2PChatManager {
   
   /// Метод для установки статуса пользователя.
   func setSelfStatus(isOnline: Bool)
+  
+  /// Запускает таймер для периодического вызова getFriendsStatus каждые 2 секунды.
+  func startPeriodicFriendStatusCheck(completion: (([String: Bool]) -> Void)?)
 }

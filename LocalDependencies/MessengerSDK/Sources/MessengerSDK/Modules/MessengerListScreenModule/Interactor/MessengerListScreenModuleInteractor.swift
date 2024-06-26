@@ -106,9 +106,9 @@ protocol MessengerListScreenModuleInteractorInput {
   /// - Returns: Публичный ключ в виде строки в шестнадцатеричном формате.
   func getToxPublicKey(completion: @escaping (String?) -> Void)
   
-  /// Получить контакт по адресу onion
+  /// Получить контакт по адресу
   func getContactModelsFrom(
-    onionAddress: String,
+    toxAddress: String,
     completion: ((ContactModel?) -> Void)?
   )
   
@@ -190,6 +190,9 @@ protocol MessengerListScreenModuleInteractorInput {
   
   /// Метод для отправки push-уведомлений
   func sendPushNotification(contact: ContactModel)
+  
+  /// Запускает таймер для периодического вызова getFriendsStatus каждые 2 секунды.
+  func startPeriodicFriendStatusCheck(completion: (() -> Void)?)
 }
 
 /// Интерактор
@@ -210,6 +213,7 @@ final class MessengerListScreenModuleInteractor {
   private let modelSettingsManager: IMessengerModelSettingsManager
   private let permissionService: IPermissionService
   private let pushNotificationService: IPushNotificationService
+  private var cacheFriendStatus: [String : Bool] = [:]
   
   // MARK: - Initialization
   
@@ -231,6 +235,32 @@ final class MessengerListScreenModuleInteractor {
 // MARK: - MessengerListScreenModuleInteractorInput
 
 extension MessengerListScreenModuleInteractor: MessengerListScreenModuleInteractorInput {
+  func startPeriodicFriendStatusCheck(completion: (() -> Void)?) {
+    p2pChatManager.startPeriodicFriendStatusCheck { [weak self] friendStatus in
+      guard let self else { return }
+      if cacheFriendStatus != friendStatus {
+        cacheFriendStatus = friendStatus
+        for (publicKey, isOnline) in friendStatus {
+          getContactModelsFrom(toxPublicKey: publicKey) { [weak self] contactModel in
+            guard let self else { return }
+            var updateContact = contactModel
+            if updateContact?.status != .initialChat || updateContact?.status != .requestChat {
+              updateContact?.status = isOnline ? .online : .offline
+            }
+            if let updateContact {
+              modelHandlerService.saveContactModel(updateContact, completion: { [weak self] in
+                DispatchQueue.main.async {
+                  completion?()
+                  print("Friend \(publicKey) is \(isOnline ? "🟢🟢🟢 online" : "🔴🔴🔴 offline")")
+                }
+              })
+            }
+          }
+        }
+      }
+    }
+  }
+  
   func sendPushNotification(contact: ContactModel) {
     guard let pushNotificationToken = contact.pushNotificationToken else {
       DispatchQueue.main.async { [weak self] in
@@ -240,10 +270,11 @@ extension MessengerListScreenModuleInteractor: MessengerListScreenModuleInteract
     }
     
     DispatchQueue.global().async { [weak self] in
+      let mame = contact.toxAddress?.formatString(minTextLength: 10)
       self?.pushNotificationService.sendPushNotification(
         title: "Вас зовут в чат!",
-        body: "Ваши контакты хотят с вами пообщаться. Пожалуйста, зайдите в чат.",
-        customData: [:],
+        body: "Ваш контакт \(mame) хочет с вами пообщаться. Пожалуйста, зайдите в чат.",
+        customData: ["toxAddress": contact.toxAddress],
         deviceToken: pushNotificationToken
       )
     }
@@ -417,11 +448,11 @@ extension MessengerListScreenModuleInteractor: MessengerListScreenModuleInteract
     }
   }
   
-  func getContactModelsFrom(onionAddress: String, completion: ((ContactModel?) -> Void)?) {
+  func getContactModelsFrom(toxAddress: String, completion: ((ContactModel?) -> Void)?) {
     DispatchQueue.global().async { [weak self] in
       self?.modelHandlerService.getContactModels { contactModels in
         DispatchQueue.main.async { [weak self] in
-          if let contactIndex = contactModels.firstIndex(where: { $0.toxAddress == onionAddress }) {
+          if let contactIndex = contactModels.firstIndex(where: { $0.toxAddress == toxAddress }) {
             completion?(contactModels[contactIndex])
           } else {
             completion?(nil)

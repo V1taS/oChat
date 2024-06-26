@@ -103,7 +103,7 @@ extension MessengerListScreenModuleFactory: MessengerListScreenModuleFactoryInpu
     var models: [WidgetCryptoView.Model] = []
     
     messengerDialogModels.forEach { dialogModel in
-      let title = ((dialogModel.name ?? dialogModel.toxAddress) ?? "").formatString(minTextLength: 20)
+      let title = ((dialogModel.name ?? dialogModel.toxAddress) ?? "").formatString(minTextLength: 10)
       
       var contactStatusStyle: WidgetCryptoView.TextStyle = .netural
       switch dialogModel.status {
@@ -117,9 +117,9 @@ extension MessengerListScreenModuleFactory: MessengerListScreenModuleFactoryInpu
         contactStatusStyle = .netural
       }
       
-      var rightItemModel: WidgetCryptoView.ItemModel?
+      var itemModel: WidgetCryptoView.ItemModel?
       if dialogModel.isNewMessagesAvailable {
-        rightItemModel = .custom(
+        itemModel = .custom(
           item: AnyView(
           Circle()
             .foregroundColor(SKStyleAsset.constantRuby.swiftUIColor)
@@ -130,7 +130,7 @@ extension MessengerListScreenModuleFactory: MessengerListScreenModuleFactoryInpu
       }
       
       if dialogModel.isTyping {
-        rightItemModel = .custom(
+        itemModel = .custom(
           item: AnyView(
             TypingIndicatorView()
           ),
@@ -143,7 +143,7 @@ extension MessengerListScreenModuleFactory: MessengerListScreenModuleFactoryInpu
         WidgetCryptoView.Model(
           leftSide: .init(
             imageModel: nil,
-            itemModel: nil,
+            itemModel: itemModel,
             titleModel: .init(
               text: title,
               textStyle: .standart,
@@ -161,7 +161,7 @@ extension MessengerListScreenModuleFactory: MessengerListScreenModuleFactoryInpu
           ),
           rightSide: .init(
             imageModel: .chevron,
-            itemModel: rightItemModel,
+            itemModel: nil,
             titleModel: nil
           ),
           isSelectable: true,
