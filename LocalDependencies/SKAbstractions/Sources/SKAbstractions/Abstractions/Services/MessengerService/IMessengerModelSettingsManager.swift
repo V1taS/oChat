@@ -47,11 +47,14 @@ public protocol IMessengerModelSettingsManager {
   ///   - model: Модель контакта `ContactModel`.
   ///   - address: Новый адрес для контакта.
   ///   - completion: Опциональный блок завершения, который вызывается после завершения операции. Может быть `nil`.
-  func setOnionAddress(
+  func setToxAddress(
     _ model: ContactModel,
     _ address: String,
     completion: ((_ model: ContactModel?) -> Void)?
   )
+  
+  /// Очищает временные ИД у всех сообщений
+  func clearAllMessengeTempID(completion: (() -> Void)?)
   
   /// Устанавливает локальный адрес контакта.
   /// - Parameters:

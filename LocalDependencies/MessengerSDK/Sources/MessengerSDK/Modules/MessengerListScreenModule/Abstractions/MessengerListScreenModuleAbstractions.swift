@@ -68,9 +68,6 @@ public protocol MessengerListScreenModuleModuleInput {
     completion: @escaping (Result<Void, Error>) -> Void
   )
   
-  /// Повторить отправку сообщения
-  func retrySendMessage(messengeModel: MessengeModel, contactModel: ContactModel)
-  
   /// События которые отправляем из `MessengerListScreenModuleModule` в `Coordinator`
   var moduleOutput: MessengerListScreenModuleOutput? { get set }
   

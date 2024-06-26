@@ -98,25 +98,38 @@ final class MessengerDialogScreenPresenter: ObservableObject {
   }
   
   func retrySendMessage(messengeModel: MessengeModel) {
-    var updatedMessengeModel = messengeModel
-    updatedMessengeModel.messageStatus = .sending
     var updatedContactModel = stateContactModel
     var updatedMessengeModels = stateMessengeModels
     
+    // Удаление старого сообщения
     if let messengeIndex = updatedMessengeModels.firstIndex(where: { $0.id == messengeModel.id }) {
-      updatedMessengeModels[messengeIndex].messageStatus = .sending
+      updatedMessengeModels.remove(at: messengeIndex)
     }
+    
+    // Создание нового сообщения
+    let newMessengeModel = MessengeModel(
+      messageType: .own,
+      messageStatus: .sending,
+      message: messengeModel.message
+    )
+    
+    // Обновление моделей сообщений и контакта
+    updatedMessengeModels.append(newMessengeModel)
     updatedContactModel.messenges = updatedMessengeModels
     stateMessengeModels = updatedMessengeModels
+    stateContactModel = updatedContactModel
+    
+    // Удаление старого сообщения и отправка нового через moduleOutput
+    moduleOutput?.removeMessage(id: messengeModel.id, contact: stateContactModel)
     
     DispatchQueue.global().async { [weak self] in
-      self?.moduleOutput?.retrySendMessage(messengeModel: updatedMessengeModel, contactModel: updatedContactModel)
+      guard let self = self else { return }
+      self.moduleOutput?.sendMessage(contact: updatedContactModel)
     }
   }
   
-  func sendMessage() {
-    guard !stateInputMessengeText.isEmpty else { return }
-    let messenge = stateInputMessengeText
+  func sendMessage(messenge: String) {
+    guard !messenge.isEmpty else { return }
     var updatedContactModel = stateContactModel
     let messengeModel = MessengeModel(
       messageType: .own,
@@ -132,7 +145,6 @@ final class MessengerDialogScreenPresenter: ObservableObject {
       guard let self else { return }
       moduleOutput?.sendMessage(contact: updatedContactModel)
     }
-    stateInputMessengeText = ""
   }
   
   func sendInitiateChatFromDialog() {

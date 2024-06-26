@@ -193,6 +193,9 @@ protocol MessengerListScreenModuleInteractorInput {
   
   /// Запускает таймер для периодического вызова getFriendsStatus каждые 2 секунды.
   func startPeriodicFriendStatusCheck(completion: (() -> Void)?)
+  
+  /// Очищает все временные ИДишники
+  func clearAllMessengeTempID(completion: (() -> Void)?)
 }
 
 /// Интерактор
@@ -247,6 +250,10 @@ extension MessengerListScreenModuleInteractor: MessengerListScreenModuleInteract
             if updateContact?.status != .initialChat || updateContact?.status != .requestChat {
               updateContact?.status = isOnline ? .online : .offline
             }
+            if !isOnline {
+              updateContact?.isTyping = false
+            }
+            
             if let updateContact {
               modelHandlerService.saveContactModel(updateContact, completion: { [weak self] in
                 DispatchQueue.main.async {
@@ -270,13 +277,21 @@ extension MessengerListScreenModuleInteractor: MessengerListScreenModuleInteract
     }
     
     DispatchQueue.global().async { [weak self] in
-      let mame = contact.toxAddress?.formatString(minTextLength: 10)
-      self?.pushNotificationService.sendPushNotification(
-        title: "Вас зовут в чат!",
-        body: "Ваш контакт \(mame) хочет с вами пообщаться. Пожалуйста, зайдите в чат.",
-        customData: ["toxAddress": contact.toxAddress],
-        deviceToken: pushNotificationToken
-      )
+      guard let self else { return }
+      p2pChatManager.getToxAddress { [weak self] result in
+        guard let self,
+              let myToxAddress = try? result.get() else {
+          return
+        }
+        
+        let mame: String = myToxAddress.formatString(minTextLength: 10)
+        pushNotificationService.sendPushNotification(
+          title: "Вас зовут в чат!",
+          body: "Ваш контакт \(mame) хочет с вами пообщаться. Пожалуйста, зайдите в чат.",
+          customData: ["toxAddress": contact.toxAddress],
+          deviceToken: pushNotificationToken
+        )
+      }
     }
   }
   
@@ -305,6 +320,16 @@ extension MessengerListScreenModuleInteractor: MessengerListScreenModuleInteract
           completion?(messengerModel.pushNotificationToken)
         }
       }
+    }
+  }
+  
+  func clearAllMessengeTempID(completion: (() -> Void)?) {
+    DispatchQueue.global().async { [weak self] in
+      self?.modelSettingsManager.clearAllMessengeTempID(completion: {
+        DispatchQueue.main.async {
+          completion?()
+        }
+      })
     }
   }
   

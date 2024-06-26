@@ -168,24 +168,17 @@ public final class ApplicationServicesStub: IApplicationServices, IDataManagerSe
 
 public final class MessengerServiceStub: IMessengerModelSettingsManager, IMessengerModelHandlerService,
                                          IMessagesService, IMessengerService, IP2PChatManager, IAppSettingsManager {
+  public func setToxAddress(_ model: ContactModel, _ address: String, completion: ((ContactModel?) -> Void)?) {}
+  public func clearAllMessengeTempID(completion: (() -> Void)?) {}
   public func startPeriodicFriendStatusCheck(completion: (([String : Bool]) -> Void)?) {}
-  
   public func friendStatus(completion: @escaping (Bool) -> Void) {}
-  
   public func setIsNewMessagesAvailable(_ value: Bool, toxAddress: String, completion: (() -> Void)?) {}
-  
   public func saveMyPushNotificationToken(_ token: String, completion: (() -> Void)?) {}
-  
   public func setAllContactsNoTyping(completion: (() -> Void)?) {}
-  
   public func setSelfStatus(isOnline: Bool) {}
-  
   public func setUserIsTyping(_ isTyping: Bool, to toxPublicKey: String, completion: @escaping (Result<Void, any Error>) -> Void) {}
-  
   public func setAllContactsIsOffline(completion: (() -> Void)?) { }
-  
   public func getToxPublicKey(from address: String) -> String? { nil }
-  
   public func confirmFriendRequest(with publicKey: String, completion: @escaping (Result<String, any Error>) -> Void) {}
   public func deleteFriend(toxPublicKey: String, completion: ((Bool) -> Void)?) {}
   public func friendConnectionStatus(toxPublicKey: String, completion: ((ConnectionToxStatus?) -> Void)?) {}

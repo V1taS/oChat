@@ -109,7 +109,8 @@ private extension MessengerDialogScreenView {
           presenter.sendInitiateChatFromDialog()
           presenter.startScheduleResendInitialRequest()
         } else {
-          presenter.sendMessage()
+          presenter.sendMessage(messenge: presenter.stateInputMessengeText)
+          presenter.stateInputMessengeText = ""
         }
       }) {
         Image(systemName: "arrow.up.circle.fill")

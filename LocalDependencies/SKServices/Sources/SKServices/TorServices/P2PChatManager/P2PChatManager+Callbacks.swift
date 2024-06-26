@@ -31,8 +31,8 @@ extension P2PChatManager {
 @available(iOS 16.0, *)
 private extension P2PChatManager {
   func setFriendReadReceiptCallback() {
-    toxCore.setFriendReadReceiptCallback { friendId, messageId in
-      print("friendId: \(friendId), messageId: \(messageId)")
+    toxCore.setFriendReadReceiptCallback { [weak self] friendId, messageId in
+      self?.updateFriendReadReceiptCallback(friendId, messageId)
     }
   }
   
@@ -134,6 +134,24 @@ private extension P2PChatManager {
 
 @available(iOS 16.0, *)
 private extension P2PChatManager {
+  func updateFriendReadReceiptCallback(_ friendId: UInt32, _ messageId: UInt32) {
+    guard let publicKey = toxCore.publicKeyFromFriendNumber(friendNumber: Int32(friendId)) else {
+      return
+    }
+    
+    DispatchQueue.main.async {
+      // Отправка уведомления о том что сообщение доставлено
+      NotificationCenter.default.post(
+        name: Notification.Name(NotificationConstants.didUpdateFriendReadReceipt.rawValue),
+        object: nil,
+        userInfo: [
+          "publicKey": publicKey,
+          "messageId": messageId
+        ]
+      )
+    }
+  }
+  
   func updateFriendTyping(_ friendId: Int32, _ isTyping: Bool) {
     guard let publicKey = toxCore.publicKeyFromFriendNumber(friendNumber: friendId) else {
       return

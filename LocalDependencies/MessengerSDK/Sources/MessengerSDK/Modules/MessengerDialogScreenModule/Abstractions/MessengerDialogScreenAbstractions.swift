@@ -47,9 +47,6 @@ public protocol MessengerDialogScreenModuleOutput: AnyObject {
     completion: @escaping (Result<Void, Error>) -> Void
   )
   
-  /// Повторить отправку сообщения
-  func retrySendMessage(messengeModel: MessengeModel, contactModel: ContactModel)
-  
   /// Метод для отправки push-уведомлений
   func sendPushNotification(contact: ContactModel)
 }
