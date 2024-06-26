@@ -11,6 +11,8 @@ import Foundation
 public struct MessengeModel {
   /// Уникальный идентификатор сообщения.
   public let id: String
+  /// Временный ID Сообщения
+  public var tempMessageID: UInt32?
   /// Тип сообщения (отправленное или полученное).
   public let messageType: MessageType
   /// Статус доставки и чтения сообщения.

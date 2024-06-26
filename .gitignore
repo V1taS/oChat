@@ -102,3 +102,5 @@ LocalDependencies/AuthenticationSDK/AuthenticationSDK.xcodeproj
 LocalDependencies/CocoaAsyncSocket/CocoaAsyncSocket.xcodeproj
 LocalDependencies/CocoaAsyncSocket/Source/GCD/CocoaAsyncSocket.modulemap
 LocalDependencies/ToxCore/ToxCore.xcodeproj
+LocalDependencies/SKServices/Package.resolved
+LocalDependencies/SKUIKit/Package.resolved

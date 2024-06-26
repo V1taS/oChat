@@ -1256,7 +1256,6 @@ public extension ToxCore {
             let ipv4Success = tox_bootstrap(tox, node.ipv4, node.port, pubKeyPtr.baseAddress?.assumingMemoryBound(to: UInt8.self), nil)
             if ipv4Success {
               successfullyConnected = true
-              print("✅ Узел загружен по IPv4: \(node.ipv4)")
               self.addTCPRelay(tox, address: node.ipv4, port: node.port, pubKeyPointer: pubKeyPtr)
             } else {
               print("❌ Ошибка загрузки узла по IPv4: \(node.ipv4)")
@@ -1268,7 +1267,6 @@ public extension ToxCore {
             let ipv6Success = tox_bootstrap(tox, ipv6, node.port, pubKeyPtr.baseAddress?.assumingMemoryBound(to: UInt8.self), nil)
             if ipv6Success {
               successfullyConnected = true
-              print("✅ Узел загружен по IPv6: \(ipv6)")
               self.addTCPRelay(tox, address: ipv6, port: node.port, pubKeyPointer: pubKeyPtr)
             } else {
               print("❌ Ошибка загрузки узла по IPv6: \(ipv6)")
@@ -1299,11 +1297,6 @@ public extension ToxCore {
       pubKeyPointer.baseAddress?.assumingMemoryBound(to: UInt8.self),
       &error
     )
-    if result {
-      print("✅ TCP реле добавлено для: \(address)")
-    } else {
-      print("❌ Ошибка добавления TCP реле для \(address): \(error)")
-    }
   }
 }
 

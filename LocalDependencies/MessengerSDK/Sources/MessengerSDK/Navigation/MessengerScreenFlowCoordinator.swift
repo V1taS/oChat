@@ -73,10 +73,6 @@ extension MessengerScreenFlowCoordinator: MessengerDialogScreenModuleOutput {
     messengerListScreenModuleModule?.input.sendPushNotification(contact: contact)
   }
   
-  public func retrySendMessage(messengeModel: MessengeModel, contactModel: ContactModel) {
-    messengerListScreenModuleModule?.input.retrySendMessage(messengeModel: messengeModel, contactModel: contactModel)
-  }
-  
   public func setUserIsTyping(
     _ isTyping: Bool,
     to toxPublicKey: String,
