@@ -50,9 +50,9 @@ public struct ChatFieldView<ContentView: View>: View {
         .foregroundStyle(.secondary)
         .accentColor(SKStyleAsset.azure.swiftUIColor)
         .lineLimit(5)
-        .introspect(.textField(axis: .vertical), on: .iOS(.v16, .v17, .v18)) { textField in
-          textField.delegate = textFieldBehavior
-        }
+//        .introspect(.textField(axis: .vertical), on: .iOS(.v16, .v17, .v18)) { textField in
+//          textField.delegate = textFieldBehavior
+//        }
       
       if let footer = footer?() {
         footer
