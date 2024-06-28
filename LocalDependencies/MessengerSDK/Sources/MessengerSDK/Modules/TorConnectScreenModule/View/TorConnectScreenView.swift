@@ -25,27 +25,34 @@ struct TorConnectScreenView: View {
       VStack(spacing: .s4) {
         createTorConnectAnimation()
         
+        Text("\(Int(round(presenter.stateConnectionTORProgress)) == 1 ? "Идет подключение к TOX..." : "Идет подключение к TOR...")")
+          .font(.fancy.text.title)
+          .foregroundColor(SKStyleAsset.ghost.swiftUIColor)
+        
         HStack(spacing: .s4) {
-          VStack(spacing: .s4) {
-            ProgressGradientView(progress: $presenter.stateTestPrigressTor)
-              .frame(width: 140, height: 140)
-            
-            Text("TOR")
-              .font(.fancy.text.largeTitle)
-              .foregroundColor(SKStyleAsset.ghost.swiftUIColor)
-          }
+          Spacer()
           
+          VStack(spacing: .s4) {
+            Text("TOR")
+              .font(.fancy.text.regularMedium)
+              .foregroundColor(SKStyleAsset.ghost.swiftUIColor)
+            
+            ProgressGradientView(progress: $presenter.stateConnectionTORProgress)
+              .frame(width: 140, height: 140)
+          }
           
           Spacer()
           
           VStack(spacing: .s4) {
-            ProgressGradientView(progress: $presenter.stateTestPrigressTox)
-              .frame(width: 140, height: 140)
-            
             Text("TOX")
-              .font(.fancy.text.largeTitle)
+              .font(.fancy.text.regularMedium)
               .foregroundColor(SKStyleAsset.ghost.swiftUIColor)
+            
+            ProgressGradientView(progress: $presenter.stateConnectionTOXProgress)
+              .frame(width: 140, height: 140)
           }
+          
+          Spacer()
         }
         .padding(.horizontal, .s4)
         

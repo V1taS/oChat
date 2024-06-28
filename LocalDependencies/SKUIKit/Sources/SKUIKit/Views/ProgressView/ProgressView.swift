@@ -63,6 +63,8 @@ public struct ProgressGradientView: View {
           // Метки для отображения прогресса
           ForEach(Array(stride(from: 0, through: 10, by: 1)), id: \.self) { i in
             Text("\(i * 10)")
+              .font(.fancy.text.small)
+              .foregroundColor(SKStyleAsset.ghost.swiftUIColor)
               .rotationEffect(.degrees(-120 - Double(i * 30)))
               .offset(x: outerCircleDiameter * 0.32)
               .rotationEffect(.degrees(Double(i * 30)))

@@ -81,8 +81,8 @@ extension ToxOptions {
       toxOptions.proxy_type = TOX_PROXY_TYPE_SOCKS5
       
       // Преобразуем строку в C строку и сохраняем в Data
-      guard let proxyHostCString = "127.0.0.1".cString(using: .utf8) else {
-        print("Ошибка: не удалось преобразовать строку '127.0.0.1' в C строку.")
+      guard let proxyHostCString = "localhost".cString(using: .utf8) else {
+        print("Ошибка: не удалось преобразовать строку 'localhost' в C строку.")
         return toxOptions
       }
       torProxyHostData = Data(cString: proxyHostCString)
@@ -91,7 +91,11 @@ extension ToxOptions {
       torProxyHostData?.withUnsafeBytes { bytes in
         toxOptions.proxy_host = bytes.baseAddress?.assumingMemoryBound(to: CChar.self)
       }
-      toxOptions.proxy_port = 9050
+
+      toxOptions.proxy_port = 19050
+  #if targetEnvironment(simulator)
+      toxOptions.proxy_port = 19052
+  #endif
     }
     return toxOptions
   }

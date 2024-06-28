@@ -20,25 +20,14 @@ public final class P2PChatManager: IP2PChatManager {
   
   // MARK: - Private properties
   
-  //  private var torService: ITorService = TorService.shared
+//  private var torService = SwiftTor(start: true)
   private let cloudKitService: ICloudKitService = CloudKitService()
   private var secureDataManagerService: ISecureDataManagerService = SecureDataManagerService(.configurationSecrets)
   private var periodicFriendStatusChecktimer: DispatchSourceTimer?
   
   // MARK: - Init
   
-  private init() {
-    //    Timer.scheduledTimer(withTimeInterval: 5, repeats: false) { [self] _ in
-    //      let server = TorServer()
-    //      self.torServer = server
-    //      print("✅ Сервер запустился")
-    //    }
-    //    torService.stateAction = { [weak self] result in
-    //      DispatchQueue.main.async { [weak self] in
-    //        self?.sessionStateAction?(result)
-    //      }
-    //    }
-  }
+  private init() {}
   
   deinit {
     NotificationCenter.default.removeObserver(self)
@@ -56,13 +45,60 @@ public final class P2PChatManager: IP2PChatManager {
       configurationCallback()
       createNewTox(saveDataString: saveDataString, nodesJSON: nodesJSON, completion: completion)
     }
+    
+//    startTorService { [weak self] result in
+//      guard let self else { return }
+//      switch result {
+//      case .success:
+//        getConfigurationValue(forKey: Constants.nodesKeys) { [weak self] nodesJSON in
+//          guard let self else { return }
+//          
+//          configurationCallback()
+//          createNewTox(saveDataString: saveDataString, nodesJSON: nodesJSON, completion: completion)
+//        }
+//      case .failure(_):
+//        print("failure❌ ")
+//      }
+//    }
   }
   
-  //    torService.start { [weak self] result in
-  //      DispatchQueue.main.async {
-  //        completion?(result)
-  //      }
-  //    }
+  func startTorService(completion: ((Result<Void, Error>) -> Void)?) {
+//    torService.stateAction = { [weak self] result in
+//      switch result {
+//      case .none:
+//        print("none")
+//      case .started:
+//        print("started")
+//      case let .connectingProgress(result):
+//        print("connectingProgress \(result)")
+//      case .connected:
+//        print("connected")
+//      case .stopped:
+//        print("stopped")
+//      case .refreshing:
+//        print("refreshing")
+//      }
+//      DispatchQueue.main.async { [weak self] in
+//        self?.sessionStateAction?(result)
+//      }
+//    }
+    
+//    torService.completion = { state in
+//      switch state {
+//      case .none:
+//        print("none")
+//      case .started:
+//        print("started")
+//      case .connected:
+//        print("connected")
+//        completion?(.success(()))
+//      case .stopped:
+//        print("stopped")
+//      case .refreshing:
+//        print("refreshing")
+//      }
+//    }
+  }
   
   public func stop(completion: ((Result<Void, TorServiceError>) -> Void)?) {}
 }
