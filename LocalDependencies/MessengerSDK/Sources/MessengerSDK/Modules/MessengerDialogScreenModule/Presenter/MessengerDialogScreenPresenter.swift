@@ -130,20 +130,24 @@ final class MessengerDialogScreenPresenter: ObservableObject {
   
   func sendMessage(messenge: String) {
     guard !messenge.isEmpty else { return }
-    var updatedContactModel = stateContactModel
-    let messengeModel = MessengeModel(
-      messageType: .own,
-      messageStatus: .sending,
-      message: messenge
-    )
     
-    stateMessengeModels.append(messengeModel)
-    updatedContactModel.messenges.append(messengeModel)
-    stateContactModel = updatedContactModel
-    
-    DispatchQueue.global().async { [weak self] in
+    DispatchQueue.main.async { [weak self] in
       guard let self else { return }
-      moduleOutput?.sendMessage(contact: updatedContactModel)
+      var updatedContactModel = stateContactModel
+      let messengeModel = MessengeModel(
+        messageType: .own,
+        messageStatus: .sending,
+        message: messenge
+      )
+      
+      stateMessengeModels.append(messengeModel)
+      updatedContactModel.messenges.append(messengeModel)
+      stateContactModel = updatedContactModel
+      
+      DispatchQueue.global().async { [weak self] in
+        guard let self else { return }
+        moduleOutput?.sendMessage(contact: updatedContactModel)
+      }
     }
   }
   
@@ -317,10 +321,6 @@ extension MessengerDialogScreenPresenter: MessengerDialogScreenFactoryOutput {}
 // MARK: - SceneViewModel
 
 extension MessengerDialogScreenPresenter: SceneViewModel {
-  var isEndEditing: Bool {
-    true
-  }
-  
   var centerBarButtonItem: SKBarButtonViewType? {
     .customView(view: barButtonView)
   }

@@ -7,7 +7,6 @@
 
 import SwiftUI
 import SKStyle
-import SwiftUIIntrospect
 
 /// A SwiftUI view that provides a multiline, editable chat interface.
 ///
@@ -20,7 +19,6 @@ public struct ChatFieldView<ContentView: View>: View {
   private var header: (() -> ContentView)?
   private var footer: (() -> ContentView)?
   private let maxLength: Int
-  private let textFieldBehavior = TextViewKeyboardBehavior()
   
   public init(
     _ titleKey: LocalizedStringKey,
@@ -50,9 +48,6 @@ public struct ChatFieldView<ContentView: View>: View {
         .foregroundStyle(.secondary)
         .accentColor(SKStyleAsset.azure.swiftUIColor)
         .lineLimit(5)
-//        .introspect(.textField(axis: .vertical), on: .iOS(.v16, .v17, .v18)) { textField in
-//          textField.delegate = textFieldBehavior
-//        }
       
       if let footer = footer?() {
         footer
@@ -82,15 +77,5 @@ struct ChatFieldView_Previews: PreviewProvider {
       .chatFieldStyle(.capsule)
     }
     .padding()
-  }
-}
-
-// TODO: - Подумать как сделать что бы клавиатура не скрывалась
-class TextViewKeyboardBehavior: NSObject, UITextViewDelegate {
-  func textView(_ textView: UITextView, shouldChangeTextIn range: NSRange, replacementText text: String) -> Bool {
-    if text == "\n" {
-      return false
-    }
-    return true
   }
 }

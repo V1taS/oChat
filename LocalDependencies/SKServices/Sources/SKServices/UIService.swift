@@ -35,7 +35,9 @@ public final class UIService: IUIService {
   }
   
   public func getColorScheme() -> UIUserInterfaceStyle? {
-    let isDarkMode = (UserDefaults.standard.object(forKey: Constants.colorSchemeKey) as? Bool) ?? true
+    guard let isDarkMode = (UserDefaults.standard.object(forKey: Constants.colorSchemeKey) as? Bool) else {
+      return nil
+    }
     return isDarkMode ? .dark : .light
   }
   

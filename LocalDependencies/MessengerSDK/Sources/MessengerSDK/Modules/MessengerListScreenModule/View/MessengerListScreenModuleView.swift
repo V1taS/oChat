@@ -67,20 +67,28 @@ private extension MessengerListScreenModuleView {
         .listRowInsets(.init(top: .zero, leading: .s4, bottom: .zero, trailing: .s4))
         .listRowSeparator(.hidden)
       
-      ForEach(presenter.stateWidgetModels.indices, id: \.self) { index in
+      ForEach(Array(presenter.stateWidgetModels.enumerated()), id: \.element.id) { index, model in
         VStack(spacing: .zero) {
-          WidgetCryptoView(presenter.stateWidgetModels[index])
+          WidgetCryptoView(model)
             .clipShape(RoundedRectangle(cornerRadius: .s3))
         }
         .listRowBackground(Color.clear)
         .listRowInsets(.init(top: .zero, leading: .s4, bottom: .zero, trailing: .s4))
         .listRowSeparator(.hidden)
-      }
-      .onDelete { indexSet in
-        guard let index = indexSet.first else {
-          return
+        .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+          Button(role: .destructive) {
+            presenter.removeContact(index: index)
+          } label: {
+            Text("Удалить")
+          }
+          
+          Button {
+            presenter.clearContact(index: index)
+          } label: {
+            Text("Очистить")
+          }
+          .tint(.orange)
         }
-        presenter.removeContact(index: index)
       }
     }
     .background(Color.clear)
