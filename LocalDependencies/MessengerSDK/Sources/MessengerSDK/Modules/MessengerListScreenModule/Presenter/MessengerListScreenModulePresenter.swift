@@ -57,6 +57,31 @@ final class MessengerListScreenModulePresenter: ObservableObject {
   
   // MARK: - Internal func
   
+  func clearContact(index: Int) {
+    Timer.scheduledTimer(withTimeInterval: 0.3, repeats: false) { [weak self] _ in
+      guard let self else { return }
+      DispatchQueue.global().async { [weak self] in
+        guard let self else { return }
+        interactor.getContactModels { [weak self] contactModels in
+          guard let self else { return }
+          var updatedContactModel = contactModels[index]
+          updatedContactModel.messenges = [
+            .init(
+              messageType: .systemSuccess,
+              messageStatus: .sent,
+              message: "Вы успешно очистили всю историю переписки"
+            )
+          ]
+          interactor.saveContactModel(updatedContactModel) { [weak self] in
+            guard let self else { return }
+            moduleOutput?.dataModelHasBeenUpdated()
+            updateListContacts()
+          }
+        }
+      }
+    }
+  }
+  
   func removeContact(index: Int) {
     Timer.scheduledTimer(withTimeInterval: 0.3, repeats: false) { [weak self] _ in
       guard let self else { return }

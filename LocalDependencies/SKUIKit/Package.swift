@@ -18,15 +18,13 @@ let package = Package(
     .package(path: "../../LocalDependencies/SKStyle"),
     .package(path: "../../LocalDependencies/SwiftUICharts"),
     .package(path: "../../LocalDependencies/SKAbstractions"),
-    .package(path: "../../LocalDependencies/SKFoundation"),
-    .package(url: "https://github.com/siteline/swiftui-introspect", exact: "1.2.0"),
+    .package(path: "../../LocalDependencies/SKFoundation")
   ],
   targets: [
     .target(
       name: "SKUIKit",
       dependencies: [
         .product(name: "Lottie", package: "lottie-ios"),
-        .product(name: "SwiftUIIntrospect", package: "swiftui-introspect"),
         "SKStyle",
         "SwiftUICharts",
         "SKAbstractions",

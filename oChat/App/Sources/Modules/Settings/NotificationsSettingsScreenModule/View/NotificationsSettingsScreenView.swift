@@ -21,9 +21,9 @@ struct NotificationsSettingsScreenView: View {
   
   var body: some View {
     List {
-      ForEach(presenter.stateWidgetCryptoModels.indices, id: \.self) { index in
+      ForEach(Array(presenter.stateWidgetCryptoModels.enumerated()), id: \.element.id) { index, model in
         VStack(spacing: .zero) {
-          WidgetCryptoView(presenter.stateWidgetCryptoModels[index])
+          WidgetCryptoView(model)
             .if(index == 0) { view in
               view
                 .clipShape(RoundedCornerShape(corners: [.topLeft, .topRight], radius: .s4))

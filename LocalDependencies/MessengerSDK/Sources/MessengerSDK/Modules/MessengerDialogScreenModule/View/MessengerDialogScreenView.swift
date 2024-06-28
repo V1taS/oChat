@@ -244,6 +244,10 @@ private extension MessengerDialogScreenView {
             }
           }
         }
+        .onTapGesture {
+          dismissKeyboard()
+        }
+        .scrollDismissesKeyboard(.never)
         .padding(.bottom, .s4)
         
         if presenter.isInitialWaitConfirmState() {
@@ -410,6 +414,15 @@ private extension MessengerDialogScreenView {
       Spacer()
     }
     .padding(.horizontal, .s4)
+  }
+  
+  func dismissKeyboard() {
+    UIApplication.shared.sendAction(
+      #selector(UIResponder.resignFirstResponder),
+      to: nil,
+      from: nil,
+      for: nil
+    )
   }
 }
 

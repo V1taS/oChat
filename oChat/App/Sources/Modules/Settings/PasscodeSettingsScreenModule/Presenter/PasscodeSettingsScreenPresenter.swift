@@ -37,7 +37,9 @@ final class PasscodeSettingsScreenPresenter: ObservableObject {
   
   // MARK: - The lifecycle of a UIViewController
   
-  lazy var viewDidLoad: (() -> Void)? = { [weak self] in
+  lazy var viewDidLoad: (() -> Void)? = {}
+  
+  lazy var viewWillAppear: (() -> Void)? = { [weak self] in
     guard let self else {
       return
     }
