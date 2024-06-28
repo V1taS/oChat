@@ -5,6 +5,7 @@ public class SwiftTor: ObservableObject {
   public var tor: TorHelper
   
   @Published public var state = TorState.none
+  var completion: ((TorState) -> Void)?
   
   public init(hiddenServicePort: Int? = nil, start: Bool = true) {
     self.tor = TorHelper()
@@ -12,7 +13,9 @@ public class SwiftTor: ObservableObject {
     if start {
       self.start()
     }
-    Timer.scheduledTimer(withTimeInterval: 0.3, repeats: true) { _ in
+    Timer.scheduledTimer(withTimeInterval: 0.3, repeats: true) { [weak self] _ in
+      guard let self else { return }
+      self.completion?(self.tor.state)
       self.state = self.tor.state
     }
     if hiddenServicePort != nil {
