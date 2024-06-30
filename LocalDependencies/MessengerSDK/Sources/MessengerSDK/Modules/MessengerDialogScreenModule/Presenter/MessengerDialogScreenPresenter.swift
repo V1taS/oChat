@@ -10,6 +10,7 @@ import SKUIKit
 import SwiftUI
 import SKAbstractions
 import SKFoundation
+import ExyteChat
 
 final class MessengerDialogScreenPresenter: ObservableObject {
   
@@ -33,9 +34,10 @@ final class MessengerDialogScreenPresenter: ObservableObject {
   // MARK: - Chat state
   
   @Published var stateContactModel: ContactModel
-  @Published var stateMessengeModels: [MessengeModel] = []
+  @Published var stateMessengeModels: [Message] = []
   @Published var stateInputMessengeText = ""
   @Published var stateInputMessengeTextMaxLength = 1_000
+  let stateShowMessengeMaxCount = 100
   
   // MARK: - Internal properties
   
@@ -67,7 +69,12 @@ final class MessengerDialogScreenPresenter: ObservableObject {
     stateIsDeeplinkAdress = contactAdress != nil
     let contact = dialogModel ?? factory.createInitialContact(address: contactAdress ?? "")
     stateContactModel = contact
-    stateMessengeModels = contact.messenges
+    
+    stateMessengeModels = factory.createMessageModels(
+      models: contact.messenges,
+      contactModel: contact,
+      replyMessageID: nil
+    )
   }
   
   // MARK: - The lifecycle of a UIViewController
@@ -86,6 +93,10 @@ final class MessengerDialogScreenPresenter: ObservableObject {
   
   // MARK: - Internal func
   
+  func loadMoreMessage(before: Message) {
+    // TODO: - Сделать пагинацию
+  }
+  
   func removeMessage(id: String) {
     if let messageIndex = stateMessengeModels.firstIndex(where: { $0.id == id }) {
       stateMessengeModels.remove(at: messageIndex)
@@ -99,11 +110,10 @@ final class MessengerDialogScreenPresenter: ObservableObject {
   
   func retrySendMessage(messengeModel: MessengeModel) {
     var updatedContactModel = stateContactModel
-    var updatedMessengeModels = stateMessengeModels
     
     // Удаление старого сообщения
-    if let messengeIndex = updatedMessengeModels.firstIndex(where: { $0.id == messengeModel.id }) {
-      updatedMessengeModels.remove(at: messengeIndex)
+    if let messengeIndex = stateMessengeModels.firstIndex(where: { $0.id == messengeModel.id }) {
+      stateMessengeModels.remove(at: messengeIndex)
     }
     
     // Создание нового сообщения
@@ -112,11 +122,13 @@ final class MessengerDialogScreenPresenter: ObservableObject {
       messageStatus: .sending,
       message: messengeModel.message
     )
+    updatedContactModel.messenges.append(newMessengeModel)
     
-    // Обновление моделей сообщений и контакта
-    updatedMessengeModels.append(newMessengeModel)
-    updatedContactModel.messenges = updatedMessengeModels
-    stateMessengeModels = updatedMessengeModels
+    stateMessengeModels = factory.createMessageModels(
+      models: updatedContactModel.messenges,
+      contactModel: stateContactModel,
+      replyMessageID: nil
+    )
     stateContactModel = updatedContactModel
     
     // Удаление старого сообщения и отправка нового через moduleOutput
@@ -140,9 +152,14 @@ final class MessengerDialogScreenPresenter: ObservableObject {
         message: messenge
       )
       
-      stateMessengeModels.append(messengeModel)
       updatedContactModel.messenges.append(messengeModel)
       stateContactModel = updatedContactModel
+      
+      stateMessengeModels = factory.createMessageModels(
+        models: updatedContactModel.messenges,
+        contactModel: stateContactModel,
+        replyMessageID: nil
+      )
       
       DispatchQueue.global().async { [weak self] in
         guard let self else { return }
@@ -151,9 +168,9 @@ final class MessengerDialogScreenPresenter: ObservableObject {
     }
   }
   
-  func sendInitiateChatFromDialog() {
+  func sendInitiateChatFromDialog(toxAddress: String?) {
     var updatedModel = stateContactModel
-    updatedModel.toxAddress = stateContactAdress
+    updatedModel.toxAddress = toxAddress ?? stateContactAdress
     stateContactModel = updatedModel
     
     DispatchQueue.global().async { [weak self] in
@@ -304,7 +321,12 @@ extension MessengerDialogScreenPresenter: MessengerDialogScreenModuleInput {
       }
       
       self.stateContactModel = contactModel
-      self.stateMessengeModels = contactModel.messenges
+      
+      stateMessengeModels = factory.createMessageModels(
+        models: contactModel.messenges,
+        contactModel: stateContactModel,
+        replyMessageID: nil
+      )
       updateCenterBarButtonView(isHidden: false)
     }
   }

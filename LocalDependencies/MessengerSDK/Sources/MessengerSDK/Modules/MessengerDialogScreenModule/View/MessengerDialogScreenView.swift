@@ -12,6 +12,7 @@ import SKAbstractions
 import Lottie
 import Combine
 import Foundation
+import ExyteChat
 
 struct MessengerDialogScreenView: View {
   
@@ -22,22 +23,11 @@ struct MessengerDialogScreenView: View {
   
   // MARK: - Private properties
   
-  @State private var keyboardHeight: CGFloat = .zero
-  @State private var keyboardCancellable: AnyCancellable?
-  
   // MARK: - Body
   
   var body: some View {
     VStack(spacing: .zero) {
       getContent()
-    }
-    .padding(.horizontal, .s4)
-    .padding(.bottom, .s4)
-    .onAppear {
-      subscribeToKeyboardNotifications()
-    }
-    .onDisappear {
-      unsubscribeFromKeyboardNotifications()
     }
   }
 }
@@ -106,7 +96,7 @@ private extension MessengerDialogScreenView {
         UIImpactFeedbackGenerator(style: .soft).impactOccurred()
         
         if isInitialState {
-          presenter.sendInitiateChatFromDialog()
+          presenter.sendInitiateChatFromDialog(toxAddress: nil)
           presenter.startScheduleResendInitialRequest()
         } else {
           presenter.sendMessage(messenge: presenter.stateInputMessengeText)
@@ -122,27 +112,7 @@ private extension MessengerDialogScreenView {
       }
       .disabled(!isValidate)
     }
-  }
-  
-  func subscribeToKeyboardNotifications() {
-    keyboardCancellable = Publishers.Merge(
-      NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification),
-      NotificationCenter.default.publisher(for: UIResponder.keyboardWillHideNotification)
-    )
-    .compactMap { notification in
-      if notification.name == UIResponder.keyboardWillShowNotification,
-         let keyboardFrame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect {
-        return keyboardFrame.height
-      } else {
-        return CGFloat(0)
-      }
-    }
-    .assign(to: \.keyboardHeight, on: self)
-  }
-  
-  func unsubscribeFromKeyboardNotifications() {
-    keyboardCancellable?.cancel()
-    keyboardCancellable = nil
+    .padding(.s4)
   }
   
   func getStyleForTips(messengeModel: MessengeModel) -> TipsView.Style {
@@ -163,94 +133,13 @@ private extension MessengerDialogScreenView {
 // MARK: - Private Ready To Chat
 
 private extension MessengerDialogScreenView {
+  @ViewBuilder
   func readyToChatView() -> some View {
-    ScrollViewReader { scrollViewProxy in
-      VStack {
-        ScrollView(.vertical, showsIndicators: false) {
-          LazyVStack(spacing: .zero) {
-            ForEach(presenter.stateMessengeModels, id: \.id) { messengeModel in
-              if messengeModel.messageType == .own {
-                MessageView(
-                  .init(
-                    id: messengeModel.id,
-                    text: messengeModel.message,
-                    messageType: .outgoing,
-                    messageStatus: messengeModel.messageStatus.mapTo(),
-                    hasTail: true,
-                    deleteAction: {
-                      presenter.removeMessage(id: messengeModel.id)
-                    },
-                    copyAction: {
-                      presenter.copyToClipboard(text: messengeModel.message)
-                    },
-                    retrySendAction: {
-                      presenter.retrySendMessage(messengeModel: messengeModel)
-                    }
-                  )
-                )
-                .padding(.top, .s4)
-                .id(messengeModel.id)
-              }
-              
-              if messengeModel.messageType == .received {
-                MessageView(
-                  .init(
-                    id: messengeModel.id,
-                    text: messengeModel.message,
-                    messageType: .incoming,
-                    messageStatus: messengeModel.messageStatus.mapTo(),
-                    hasTail: true,
-                    deleteAction: {
-                      presenter.removeMessage(id: messengeModel.id)
-                    },
-                    copyAction: {
-                      presenter.copyToClipboard(text: messengeModel.message)
-                    },
-                    retrySendAction: {
-                      presenter.retrySendMessage(messengeModel: messengeModel)
-                    }
-                  )
-                )
-                .padding(.top, .s4)
-                .id(messengeModel.id)
-              }
-              
-              if messengeModel.messageType.isSystem {
-                TipsView(
-                  .init(
-                    text: messengeModel.message,
-                    style: getStyleForTips(messengeModel: messengeModel),
-                    isSelectableTips: false,
-                    actionTips: {},
-                    isCloseButton: true,
-                    closeButtonAction: {
-                      presenter.removeMessage(id: messengeModel.id)
-                    }
-                  )
-                )
-                .padding(.top, .s4)
-                .id(messengeModel.id)
-              }
-            }
-          }
-          .onChange(of: presenter.stateMessengeModels) { _ in
-            scrollViewProxy.scrollTo(presenter.stateMessengeModels.last?.id, anchor: .bottom)
-          }
-          .onChange(of: keyboardHeight) { _ in
-            Timer.scheduledTimer(withTimeInterval: 0.3, repeats: false) { _ in
-              withAnimation {
-                scrollViewProxy.scrollTo(presenter.stateMessengeModels.last?.id, anchor: .bottom)
-              }
-            }
-          }
-        }
-        .onTapGesture {
-          dismissKeyboard()
-        }
-        .scrollDismissesKeyboard(.never)
-        .padding(.bottom, .s4)
-        
-        if presenter.isInitialWaitConfirmState() {
+    if presenter.isInitialWaitConfirmState() {
+      ChatView(
+        messages: presenter.stateMessengeModels,
+        didSendMessage: { _ in },
+        inputViewBuilder: { _, _, _, _, _, _ in
           MainButtonView(
             text: presenter.stateIsCanResendInitialRequest ?
             "Отправить запрос" :
@@ -258,11 +147,19 @@ private extension MessengerDialogScreenView {
             isEnabled: presenter.stateIsCanResendInitialRequest,
             style: .primary,
             action: {
-              presenter.sendInitiateChatFromDialog()
+              presenter.sendInitiateChatFromDialog(toxAddress: nil)
               presenter.startScheduleResendInitialRequest()
             }
           )
-        } else if presenter.stateContactModel.status == .offline {
+          .padding(.horizontal, .s4)
+          .padding(.top, .s4)
+        }
+      )
+    } else if presenter.stateContactModel.status == .offline {
+      ChatView(
+        messages: presenter.stateMessengeModels,
+        didSendMessage: { _ in },
+        inputViewBuilder: { _, _, _, _, _, _ in
           MainButtonView(
             text: presenter.stateIsAskToComeContact ?
             "Позвать контакт" :
@@ -274,13 +171,34 @@ private extension MessengerDialogScreenView {
               presenter.startAskToComeContactTimer()
             }
           )
-        } else {
-          createChatFieldView(isInitialState: false)
+          .padding(.horizontal, .s4)
+          .padding(.top, .s4)
         }
+      )
+    } else {
+      ChatView(messages: presenter.stateMessengeModels) { draft in
+        presenter.sendMessage(messenge: draft.text)
       }
-      .onAppear {
-        scrollViewProxy.scrollTo(presenter.stateMessengeModels.last?.id, anchor: .bottom)
+      .setAvailableInput(.textOnly)
+      .showMessageTimeView(true)
+      .showDateHeaders(showDateHeaders: true)
+      .setMediaPickerSelectionParameters(
+        .init(
+          mediaType: .photoAndVideo,
+          selectionStyle: .checkmark,
+          selectionLimit: 10,
+          showFullscreenPreview: false
+        )
+      )
+      .messageUseMarkdown(messageUseMarkdown: true)
+      .showMessageMenuOnLongPress(true)
+      .showNetworkConnectionProblem(true)
+      .assetsPickerLimit(assetsPickerLimit: 10)
+      .enableLoadMore(offset: presenter.stateShowMessengeMaxCount) { message in
+        presenter.loadMoreMessage(before: message)
       }
+      .messageUseMarkdown(messageUseMarkdown: true)
+      .mediaPickerTheme()
     }
   }
 }
@@ -334,7 +252,11 @@ private extension MessengerDialogScreenView {
               presenter.cancelRequestForDialog()
             }
         }
+        .padding(.horizontal, .s4)
       }
+    }
+    .onTapGesture {
+      dismissKeyboard()
     }
   }
   

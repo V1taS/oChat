@@ -37,6 +37,7 @@ public enum SKStyleAsset {
   public static let ruby = SKStyleColors(name: "ruby")
   public static let slate = SKStyleColors(name: "slate")
   public static let sheet = SKStyleColors(name: "Sheet")
+  public static let friendMessageBG = SKStyleColors(name: "FriendMessageBG")
   
   public static let oChatInProgress = SKStyleAssetData(name: "oChat_in_progress")
   public static let oChatOffline = SKStyleAssetData(name: "oChat_offline")

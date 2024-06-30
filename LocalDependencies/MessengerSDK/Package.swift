@@ -16,7 +16,8 @@ let package = Package(
   dependencies: [
     .package(path: "../../LocalDependencies/SKUIKit"),
     .package(path: "../../LocalDependencies/SKFoundation"),
-    .package(path: "../../LocalDependencies/SKAbstractions")
+    .package(path: "../../LocalDependencies/SKAbstractions"),
+    .package(path: "../../LocalDependencies/ExyteChat")
   ],
   targets: [
     .target(
@@ -24,7 +25,8 @@ let package = Package(
       dependencies: [
         "SKUIKit",
         "SKFoundation",
-        "SKAbstractions"
+        "SKAbstractions",
+        "ExyteChat"
       ]
     )
   ]

@@ -23,6 +23,8 @@ public struct MessengeModel {
   public let file: Data?
   /// Дата отправки сообщения
   public let date: Date
+  /// Цитируемое сообщение
+  public var quotedMessageID: String?
   
   /// Инициализирует новый экземпляр сообщения.
   /// - Parameters:

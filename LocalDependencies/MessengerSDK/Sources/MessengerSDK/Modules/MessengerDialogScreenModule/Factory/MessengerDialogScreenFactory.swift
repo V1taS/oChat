@@ -8,6 +8,7 @@
 import SwiftUI
 import SKUIKit
 import SKAbstractions
+import ExyteChat
 
 /// Cобытия которые отправляем из Factory в Presenter
 protocol MessengerDialogScreenFactoryOutput: AnyObject {}
@@ -34,6 +35,20 @@ protocol MessengerDialogScreenFactoryInput {
   
   /// Создать заголовок для кнопки отмена запроса на переписку
   func createRequestButtonCancelTitle() -> String
+  
+  /// Создаем модели для отображения
+  func createMessageModels(
+    models: [MessengeModel],
+    contactModel: ContactModel,
+    replyMessageID: String?
+  ) -> [Message]
+  
+  /// Получить количество сообщений исходя из максимального допустимого количества показа на экране
+  func loadMessage(
+    before: Message?,
+    messengeModels: [Message],
+    showMessengeMaxCount: Int
+  ) -> [Message]
 }
 
 /// Фабрика
@@ -47,6 +62,100 @@ final class MessengerDialogScreenFactory {
 // MARK: - MessengerDialogScreenFactoryInput
 
 extension MessengerDialogScreenFactory: MessengerDialogScreenFactoryInput {
+  func loadMessage(
+      before: Message?,
+      messengeModels: [Message],
+      showMessengeMaxCount: Int
+  ) -> [Message] {
+      // Если `before` равно nil, берем сообщения с самого начала
+      guard let before = before else {
+          // Проверка границ диапазона
+          let endIndex = min(showMessengeMaxCount, messengeModels.count)
+          return Array(messengeModels.prefix(endIndex))
+      }
+      
+      // Найти индекс сообщения `before`
+      guard let beforeIndex = messengeModels.firstIndex(where: { $0.id == before.id }) else {
+          // Если сообщение не найдено, возвращаем пустой массив или обрабатываем ошибку
+          return []
+      }
+      
+      // Проверка на валидность индекса
+      guard beforeIndex < messengeModels.count else {
+          return []
+      }
+      
+      // Получаем сообщения до и включая `before`
+      let previousMessages = Array(messengeModels[beforeIndex...])
+      
+      // Проверка границ диапазона
+      let endIndex = min(beforeIndex + showMessengeMaxCount, messengeModels.count)
+      let nextMessages = Array(messengeModels[beforeIndex..<endIndex])
+      
+      // Объединяем оба массива
+      return nextMessages + previousMessages
+  }
+  
+  func createMessageModels(
+    models: [MessengeModel],
+    contactModel: ContactModel,
+    replyMessageID: String?
+  ) -> [Message] {
+    var replyMessage: ReplyMessage?
+    
+    // Создаем объект User
+    let user = User(
+      id: contactModel.id,
+      name: contactModel.name ?? contactModel.toxAddress?.formatString(minTextLength: 10),
+      avatarURL: nil,
+      isCurrentUser: false
+    )
+    
+    // Находим сообщение для ответа, если оно есть
+    if let replyMessageID, let replyMessageIndex = models.firstIndex(where: { $0.id == replyMessageID }) {
+      let originMessage = models[replyMessageIndex]
+      replyMessage = ReplyMessage(
+        id: originMessage.id,
+        user: user.copy(isCurrentUser: originMessage.messageType == .own),
+        text: originMessage.message,
+        attachments: [],
+        recording: nil
+      )
+    }
+    
+    return models.map { model in
+      let status: Message.Status
+      switch model.messageStatus {
+      case .sending:
+        status = .sending
+      case .failed:
+        status = .error(
+          DraftMessage(
+            id: model.id,
+            text: model.message,
+            medias: [],
+            recording: nil,
+            replyMessage: replyMessage,
+            createdAt: Date()
+          )
+        )
+      case .sent:
+        status = .sent
+      }
+      
+      return Message(
+        id: model.id,
+        user: user.copy(isCurrentUser: model.messageType == .own),
+        status: status,
+        createdAt: model.date,
+        text: model.message,
+        attachments: [],
+        recording: nil,
+        replyMessage: replyMessage
+      )
+    }
+  }
+  
   func createRequestButtonCancelTitle() -> String {
     MessengerSDKStrings.MessengerDialogScreenLocalization
       .stateRequestButtonCancelTitle
@@ -75,11 +184,11 @@ extension MessengerDialogScreenFactory: MessengerDialogScreenFactoryInput {
         .stateRequestMessengerThreeTitle,
       threeDescription: MessengerSDKStrings.MessengerDialogScreenLocalization
         .stateRequestMessengerThreeDescription,
-      threeSystemImageName: "lock.circle.fill", 
+      threeSystemImageName: "lock.circle.fill",
       note: nil
     )
   }
-    
+  
   func createInitialHintModel() -> MessengerDialogHintModel {
     return MessengerDialogHintModel(
       lottieAnimationName: nil,
@@ -123,7 +232,7 @@ extension MessengerDialogScreenFactory: MessengerDialogScreenFactoryInput {
       ],
       status: .initialChat,
       encryptionPublicKey: nil,
-      toxPublicKey: nil, 
+      toxPublicKey: nil,
       pushNotificationToken: nil,
       isNewMessagesAvailable: false,
       isTyping: false
@@ -150,6 +259,14 @@ extension MessengerDialogScreenFactory: MessengerDialogScreenFactoryInput {
 // MARK: - Private
 
 private extension MessengerDialogScreenFactory {}
+
+// MARK: - User model
+
+private extension User {
+  func copy(isCurrentUser: Bool) -> User {
+    return User(id: self.id, name: self.name, avatarURL: self.avatarURL, isCurrentUser: isCurrentUser)
+  }
+}
 
 // MARK: - Constants
 
