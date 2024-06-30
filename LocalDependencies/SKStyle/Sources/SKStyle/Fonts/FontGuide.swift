@@ -22,12 +22,12 @@ public struct FontGuide {
     public let largeTitle = Font.get(font: .h1)
     /// Medium 22
     public let title = Font.get(font: .h3)
-    /// Medium 15
-    public let regularMedium = Font.get(font: .b2Medium)
+    /// Medium 17
+    public let regularMedium = Font.get(font: .b1Medium)
+    /// Regular 17
+    public let regular = Font.get(font: .b1)
     /// Regular 15
-    public let regular = Font.get(font: .b2)
-    /// Regular 13
-    public let small = Font.get(font: .b3)
+    public let small = Font.get(font: .b2)
   }
   
   /// Константные шрифты

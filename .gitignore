@@ -104,3 +104,5 @@ LocalDependencies/CocoaAsyncSocket/Source/GCD/CocoaAsyncSocket.modulemap
 LocalDependencies/ToxCore/ToxCore.xcodeproj
 LocalDependencies/SKServices/Package.resolved
 LocalDependencies/SKUIKit/Package.resolved
+LocalDependencies/MessengerSDK/Package.resolved
+LocalDependencies/ExyteChat/ExyteChat.xcodeproj
