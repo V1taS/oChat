@@ -69,7 +69,7 @@ private extension InputView {
             if case let .leftHelper(text) = model.style {
               Text(text)
                 .font(.fancy.text.regularMedium)
-                .foregroundColor(SKStyleAsset.slate.swiftUIColor)
+                .foregroundColor(SKStyleAsset.constantSlate.swiftUIColor)
                 .lineLimit(.max)
                 .truncationMode(.tail)
                 .padding(.trailing, .s2)
@@ -81,7 +81,7 @@ private extension InputView {
               if case let .topHelper(text) = model.style {
                 Text(text)
                   .font(.fancy.text.regularMedium)
-                  .foregroundColor(SKStyleAsset.slate.swiftUIColor)
+                  .foregroundColor(SKStyleAsset.constantSlate.swiftUIColor)
                   .lineLimit(.max)
                   .truncationMode(.tail)
                   .padding(.top, .s4)
@@ -131,7 +131,7 @@ private extension InputView {
               .resizable()
               .aspectRatio(contentMode: .fit)
               .frame(width: .s6)
-              .foregroundColor(SKStyleAsset.slate.swiftUIColor)
+              .foregroundColor(SKStyleAsset.constantSlate.swiftUIColor)
           }
         }
       }
@@ -153,7 +153,7 @@ private extension InputView {
               .resizable()
               .aspectRatio(contentMode: .fit)
               .frame(height: .s5)
-              .foregroundColor(SKStyleAsset.slate.swiftUIColor)
+              .foregroundColor(SKStyleAsset.constantSlate.swiftUIColor)
               .padding(.leading, .s3)
           }
         )
@@ -170,7 +170,7 @@ private extension InputView {
             .resizable()
             .aspectRatio(contentMode: .fit)
             .frame(height: .s7)
-            .foregroundColor(isEnabled ? SKStyleAsset.azure.swiftUIColor : SKStyleAsset.slate.swiftUIColor)
+            .foregroundColor(isEnabled ? SKStyleAsset.constantAzure.swiftUIColor : SKStyleAsset.constantSlate.swiftUIColor)
             .padding(.leading, .s7)
         }
           .disabled(!isEnabled)
@@ -194,7 +194,7 @@ private extension InputView {
         .lineLimit(.max)
         .font(model.textFont ?? .fancy.text.regular)
         .foregroundColor(SKStyleAsset.ghost.swiftUIColor)
-        .accentColor(model.isError ? SKStyleAsset.ruby.swiftUIColor : SKStyleAsset.azure.swiftUIColor)
+        .accentColor(model.isError ? SKStyleAsset.constantRuby.swiftUIColor : SKStyleAsset.constantAzure.swiftUIColor)
         .truncationMode(.tail)
         .padding(.bottom, .s4)
         .padding(.top, model.style.isTopHelper ? .zero : .s4)
@@ -226,7 +226,7 @@ private extension InputView {
         Text("\(bottomHelper)")
           .font(model.bottomHelperFont ?? .fancy.text.small)
           .foregroundColor(
-            model.isError ? SKStyleAsset.ruby.swiftUIColor : SKStyleAsset.slate.swiftUIColor
+            model.isError ? SKStyleAsset.constantRuby.swiftUIColor : SKStyleAsset.constantSlate.swiftUIColor
           )
           .lineLimit(.max)
           .truncationMode(.tail)
@@ -243,13 +243,13 @@ private extension InputView {
     guard model.isColorFocusBorder else {
       return .clear
     }
-    return model.isError ? SKStyleAsset.ruby.swiftUIColor :
-    isTextFieldFocused ? SKStyleAsset.azure.swiftUIColor : model.borderColor ?? Color.clear
+    return model.isError ? SKStyleAsset.constantRuby.swiftUIColor :
+    isTextFieldFocused ? SKStyleAsset.constantAzure.swiftUIColor : model.borderColor ?? Color.clear
   }
   
   func createPlaceholderView() -> Text {
     return Text(model.placeholder)
-      .foregroundColor(SKStyleAsset.slate.swiftUIColor.opacity(0.4))
+      .foregroundColor(SKStyleAsset.constantSlate.swiftUIColor.opacity(0.4))
   }
 }
 

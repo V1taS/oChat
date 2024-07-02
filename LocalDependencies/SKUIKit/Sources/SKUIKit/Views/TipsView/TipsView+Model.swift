@@ -18,11 +18,11 @@ extension TipsView {
       let opacity: CGFloat = 0.8
       switch self {
       case .danger:
-        return SKStyleAsset.ruby.swiftUIColor.opacity(opacity)
+        return SKStyleAsset.constantRuby.swiftUIColor.opacity(opacity)
       case .attention:
-        return SKStyleAsset.amberGlow.swiftUIColor.opacity(opacity)
+        return SKStyleAsset.constantAmberGlow.swiftUIColor.opacity(opacity)
       case .success:
-        return SKStyleAsset.lime.swiftUIColor.opacity(opacity)
+        return SKStyleAsset.constantLime.swiftUIColor.opacity(opacity)
       }
     }
     

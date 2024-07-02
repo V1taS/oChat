@@ -169,7 +169,7 @@ private extension NavigationCustomView {
           },
           content: {
             item.image
-              .foregroundColor(SKStyleAsset.azure.swiftUIColor)
+              .foregroundColor(SKStyleAsset.constantAzure.swiftUIColor)
           }
         )
       )

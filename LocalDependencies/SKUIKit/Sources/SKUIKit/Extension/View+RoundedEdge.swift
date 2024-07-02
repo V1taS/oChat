@@ -70,7 +70,7 @@ struct RoundedColorEdge_Previews: PreviewProvider {
       VStack {
         Text("Copy")
           .roundedEdge(
-            backgroundColor: SKStyleAsset.ruby.swiftUIColor,
+            backgroundColor: SKStyleAsset.constantRuby.swiftUIColor,
             boarderColor: .clear
           )
       }

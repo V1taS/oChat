@@ -38,7 +38,7 @@ public struct SwitcherView: View {
   public var body: some View {
     VStack {
       Toggle("", isOn: $isOn)
-        .toggleStyle(SwitchToggleStyle(tint: SKStyleAsset.azure.swiftUIColor))
+        .toggleStyle(SwitchToggleStyle(tint: SKStyleAsset.constantAzure.swiftUIColor))
         .disabled(!isEnabled)
     }
     .onChange(of: isOn) { newValue in

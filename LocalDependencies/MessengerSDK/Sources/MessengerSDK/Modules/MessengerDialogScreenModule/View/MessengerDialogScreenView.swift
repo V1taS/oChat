@@ -107,7 +107,7 @@ private extension MessengerDialogScreenView {
           .resizable()
           .aspectRatio(contentMode: .fit)
           .frame(height: .s7)
-          .foregroundColor(isValidate ? SKStyleAsset.azure.swiftUIColor : SKStyleAsset.slate.swiftUIColor)
+          .foregroundColor(isValidate ? SKStyleAsset.constantAzure.swiftUIColor : SKStyleAsset.constantSlate.swiftUIColor)
           .opacity(isValidate ? 1 : 0.5)
       }
       .disabled(!isValidate)
@@ -314,7 +314,7 @@ private extension MessengerDialogScreenView {
       Image(systemName: systemImageName)
         .resizable()
         .aspectRatio(contentMode: .fit)
-        .foregroundColor(SKStyleAsset.azure.swiftUIColor)
+        .foregroundColor(SKStyleAsset.constantAzure.swiftUIColor)
         .frame(width: 30, height: 30)
         .allowsHitTesting(false)
       
@@ -328,7 +328,7 @@ private extension MessengerDialogScreenView {
         
         Text(description)
           .font(.fancy.text.small)
-          .foregroundColor(SKStyleAsset.slate.swiftUIColor)
+          .foregroundColor(SKStyleAsset.constantSlate.swiftUIColor)
           .multilineTextAlignment(.leading)
           .allowsHitTesting(false)
           .padding(.horizontal, .s4)

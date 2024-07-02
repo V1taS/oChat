@@ -65,7 +65,7 @@ public struct TitleAndSubtitleView: View {
         ) {
           Text(description.isSecure ? Constants.secureText : description.text)
             .font(style.fontDescription)
-            .foregroundColor(SKStyleAsset.slate.swiftUIColor)
+            .foregroundColor(SKStyleAsset.constantSlate.swiftUIColor)
             .lineLimit(description.lineLimit)
             .truncationMode(.middle)
             .multilineTextAlignment(.center)

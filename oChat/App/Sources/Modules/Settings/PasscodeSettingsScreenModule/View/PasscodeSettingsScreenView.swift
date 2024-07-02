@@ -35,7 +35,7 @@ struct PasscodeSettingsScreenView: View {
           
           if index < presenter.stateWidgetCryptoModels.count - 1 {
             Divider()
-              .background(SKStyleAsset.slate.swiftUIColor.opacity(0.3))
+              .background(SKStyleAsset.constantSlate.swiftUIColor.opacity(0.3))
           }
         }
         .listRowBackground(Color.clear)

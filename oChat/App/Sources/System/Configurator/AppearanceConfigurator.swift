@@ -43,7 +43,7 @@ private extension AppearanceConfigurator {
   }
   
   func setupTabBarAppearance() {
-    UITabBar.appearance().tintColor = SKStyleAsset.azure.color
+    UITabBar.appearance().tintColor = SKStyleAsset.constantAzure.color
     UITabBar.appearance().unselectedItemTintColor = SKStyleAsset.constantSlate.color
     UITabBar.appearance().backgroundColor = SKStyleAsset.onyx.color.withAlphaComponent(0.99)
     UITabBar.appearance().backgroundImage = UIImage()
@@ -71,7 +71,7 @@ private extension AppearanceConfigurator {
     }
     UINavigationBar.appearance().isTranslucent = true
     UINavigationBar.appearance().titleTextAttributes = textAttributes
-    UINavigationBar.appearance().tintColor = SKStyleAsset.azure.color
+    UINavigationBar.appearance().tintColor = SKStyleAsset.constantAzure.color
     UINavigationBar.appearance().barTintColor = SKStyleAsset.onyx.color.withAlphaComponent(0.99)
   }
   

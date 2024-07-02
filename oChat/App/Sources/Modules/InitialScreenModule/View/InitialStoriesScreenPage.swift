@@ -133,7 +133,7 @@ private extension InitialStoriesScreenPage {
 
         Text(subtitle)
           .font(.fancy.text.title)
-          .foregroundColor(SKStyleAsset.slate.swiftUIColor)
+          .foregroundColor(SKStyleAsset.constantSlate.swiftUIColor)
           .multilineTextAlignment(.center)
           .offset(y: subtitleIsIsAnimating ? 0 : 50)
           .opacity(subtitleIsHidden ? .zero : 1)

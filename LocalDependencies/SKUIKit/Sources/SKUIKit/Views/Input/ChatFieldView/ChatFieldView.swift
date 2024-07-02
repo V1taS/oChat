@@ -46,7 +46,7 @@ public struct ChatFieldView<ContentView: View>: View {
         .foregroundColor(SKStyleAsset.ghost.swiftUIColor)
         .font(.fancy.text.regular)
         .foregroundStyle(.secondary)
-        .accentColor(SKStyleAsset.azure.swiftUIColor)
+        .accentColor(SKStyleAsset.constantAzure.swiftUIColor)
         .lineLimit(5)
       
       if let footer = footer?() {

@@ -53,7 +53,7 @@ public struct CircleButtonView: View {
       if let text = text {
         Text(text)
           .font(.fancy.text.regularMedium)
-          .foregroundColor(SKStyleAsset.slate.swiftUIColor)
+          .foregroundColor(SKStyleAsset.constantSlate.swiftUIColor)
           .lineLimit(Constants.lineLimit)
           .truncationMode(.tail)
           .padding(.top, .s1)
