@@ -15,7 +15,7 @@ final class MessengerListScreenModulePresenter: ObservableObject {
   // MARK: - View state
   
   @Published var stateWidgetModels: [WidgetCryptoView.Model] = []
-  @Published var stateIsNotificationsEnabled = false
+  @Published var stateIsNotificationsEnabled = true
   
   // MARK: - Internal properties
   

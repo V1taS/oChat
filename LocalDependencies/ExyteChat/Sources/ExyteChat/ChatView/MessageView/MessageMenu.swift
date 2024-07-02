@@ -44,16 +44,15 @@ struct MessageMenu<MainButton: View>: View {
             if alignment == .left {
                 Color.clear.viewSize(leadingPadding)
             }
-
+          
             ZStack {
-                theme.colors.friendMessage
+                theme.colors.menuButtonBackground
                     .background(.ultraThinMaterial)
-                    .environment(\.colorScheme, .light)
                     .opacity(0.5)
                     .cornerRadius(12)
                 HStack {
                     Text(title)
-                        .foregroundColor(theme.colors.textLightContext)
+                        .foregroundColor(theme.colors.menuButtonText)
                     Spacer()
                     icon
                 }

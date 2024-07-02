@@ -23,7 +23,7 @@ struct ActivityIndicator: View {
             }
 
             ActivityIndicatorView(isVisible: .constant(true), type: .flickeringDots())
-                .foregroundColor(theme.colors.sendButtonBackground)
+                .foregroundColor(theme.colors.activityIndicator)
                 .frame(width: size, height: size)
         }
     }

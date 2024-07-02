@@ -9,3 +9,4 @@
 "NSPhotoLibraryUsageDescription" = "Please grant access to your photo gallery so you can upload photos to create your Image ID.";
 "NSCameraUsageDescription" = "Please grant access to your camera so you can take photos to create your Image ID.";
 "NSFaceIDUsageDescription" = "oChat requires access to Face ID for quick and secure authentication.";
+"NSMicrophoneUsageDescription" = "oChat requires access to Face ID for quick and secure authentication.";

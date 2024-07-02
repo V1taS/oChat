@@ -34,7 +34,10 @@ public extension InfoPlist {
       ]),
       "UISupportedInterfaceOrientations": .array([
         .string("UIInterfaceOrientationPortrait")
-      ])
+      ]),
+      "NSPhotoLibraryUsageDescription": .string("Grant access to photo library to be able to select photos"),
+      "NSCameraUsageDescription": .string("Grant access to camera to be able to take photos and videos"),
+      "NSMicrophoneUsageDescription": .string("Grant access to microphone to be able to take videos")
     ]
   }
   

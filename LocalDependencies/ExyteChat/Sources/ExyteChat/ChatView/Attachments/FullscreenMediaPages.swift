@@ -70,7 +70,7 @@ struct FullscreenMediaPages: View {
                                     .overlay {
                                         if viewModel.index == index {
                                             RoundedRectangle(cornerRadius: 4)
-                                                .stroke(theme.colors.sendButtonBackground, lineWidth: 2)
+                                                .stroke(theme.colors.attachmentCellStroke, lineWidth: 2)
                                         }
                                     }
                                     .padding(.vertical, 1)

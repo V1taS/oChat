@@ -122,7 +122,7 @@ public struct ChatView<MessageContent: View, InputViewContent: View>: View {
                         } label: {
                             theme.images.scrollToBottom
                                 .frame(width: 40, height: 40)
-                                .circleBackground(theme.colors.friendMessage)
+                                .circleBackground(theme.colors.circleScrolledButtonBackground)
                         }
                         .padding(8)
                     }

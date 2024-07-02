@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import SKStyle
 
 struct ChatThemeKey: EnvironmentKey {
   static var defaultValue: ChatTheme = ChatTheme()
@@ -255,69 +256,211 @@ extension ChatTheme {
 
 extension ChatTheme {
   public struct Colors {
-    public var grayStatus: Color
-    public var errorStatus: Color
+    // Сообщения
+    public var messageStatus: Color
+    public var messageReadStatus: Color
+    public var messageErrorStatus: Color
+    public var myMessageBubbleBackground: Color
+    public var friendMessageBubbleBackground: Color
+    public var myMessageBubbleText: Color
+    public var friendMessageBubbleText: Color
+    public var myMessageTime: Color
+    public var friendMessageTime: Color
     
-    public var inputLightContextBackground: Color
-    public var inputDarkContextBackground: Color
+    // Ввод сообщений
+    public var inputMessageBackground: Color
+    public var inputSignatureBackground: Color
+    public var inputPlaceholder: Color
+    public var inputText: Color
     
-    public var mainBackground: Color
-    public var buttonBackground: Color
-    public var addButtonBackground: Color
-    public var sendButtonBackground: Color
+    // Ответы на сообщения
+    public var replyToUser: Color
+    public var replySeparator: Color
+    public var replyToText: Color
+    public var cancelText: Color
     
-    public var myMessage: Color
-    public var friendMessage: Color
+    // Запись сообщений
+    public var recordingMicrophone: Color
+    public var recordButtonBackground: Color
+    public var recordIndicator: Color
+    public var recordWaveFormOwn: Color
+    public var recordWaveFormReceived: Color
+    public var recordWaveFormColorButtonOwn: Color
+    public var recordWaveFormColorButtonReceived: Color
+    public var recordWaveFormColorButtonBgOwn: Color
+    public var recordWaveFormColorButtonBgReceived: Color
+    public var recordDot: Color
+    public var recordDurationText: Color
+    public var recordDurationLeftText: Color
+    public var recordWaveformPlayingText: Color
+    public var recordingText: Color
     
-    
-    public var textLightContext: Color
-    public var textDarkContext: Color
+    // Медиа и вложения
+    public var attachmentImage: Color
+    public var attachmentCellStroke: Color
     public var textMediaPicker: Color
     
-    public var recordDot: Color
+    // Основные элементы интерфейса
+    public var mainBackground: Color
+    public var addButtonBackground: Color
+    public var sendButtonBackground: Color
+    public var menuButtonBackground: Color
+    public var menuButtonText: Color
+    public var circleScrolledButtonBackground: Color
+    public var activityIndicator: Color
     
-    public var myMessageTime: Color
-    public var frientMessageTime: Color
+    // Вспомогательные элементы интерфейса
+    public var infoToolStatusItem: Color
+    public var infoToolTextItem: Color
+    public var infoToolItemBackground: Color
     
+    // Time Capsule
     public var timeCapsuleBackground: Color
     public var timeCapsuleForeground: Color
     
+    /**
+     Инициализатор структуры Colors
+     
+     - Параметры:
+     - messageStatus: Цвет статуса сообщения.
+     - messageReadStatus: Цвет статуса прочтения сообщения.
+     - messageErrorStatus: Цвет статуса ошибки сообщения.
+     - myMessageBubbleBackground: Цвет фона пузыря моего сообщения.
+     - friendMessageBubbleBackground: Цвет фона пузыря сообщения друга.
+     - myMessageBubbleText: Цвет текста в моем сообщении.
+     - friendMessageBubbleText: Цвет текста в сообщении друга.
+     - myMessageTime: Цвет времени моего сообщения.
+     - friendMessageTime: Цвет времени сообщения друга.
+     - inputMessageBackground: Цвет фона ввода сообщения.
+     - inputSignatureBackground: Цвет фона подписи ввода.
+     - inputPlaceholder: Цвет плейсхолдера ввода.
+     - inputText: Цвет текста ввода.
+     - replyToUser: Цвет текста при ответе пользователю.
+     - replySeparator: Цвет разделителя при ответе.
+     - replyToText: Цвет текста при ответе.
+     - cancelText: Цвет текста отмены.
+     - recordingMicrophone: Цвет иконки микрофона при записи.
+     - recordButtonBackground: Цвет фона кнопки записи.
+     - recordIndicator: Цвет индикатора записи.
+     - recordWaveFormOwn: Цвет формы волны записи (собственной).
+     - recordWaveFormReceived: Цвет формы волны записи (полученной).
+     - recordWaveFormColorButtonOwn: Цвет кнопки формы волны (собственной).
+     - recordWaveFormColorButtonReceived: Цвет кнопки формы волны (полученной).
+     - recordWaveFormColorButtonBgOwn: Цвет фона кнопки формы волны (собственной).
+     - recordWaveFormColorButtonBgReceived: Цвет фона кнопки формы волны (полученной).
+     - recordDot: Цвет точки записи.
+     - recordDurationText: Цвет текста длительности записи.
+     - recordDurationLeftText: Цвет текста оставшегося времени записи.
+     - recordWaveformPlayingText: Цвет текста воспроизведения формы волны.
+     - recordingText: Цвет текста записи.
+     - attachmentImage: Цвет изображения вложения.
+     - attachmentCellStroke: Цвет обводки ячейки вложения.
+     - textMediaPicker: Цвет текста медиапикера.
+     - mainBackground: Цвет основного фона.
+     - addButtonBackground: Цвет фона кнопки добавления.
+     - sendButtonBackground: Цвет фона кнопки отправки.
+     - menuButtonBackground: Цвет фона кнопки меню.
+     - menuButtonText: Цвет текста кнопки меню.
+     - circleScrolledButtonBackground: Цвет фона кнопки скролла.
+     - activityIndicator: Цвет индикатора активности.
+     - infoToolStatusItem: Цвет элемента статуса информационного инструмента.
+     - infoToolTextItem: Цвет текста элемента информационного инструмента.
+     - infoToolItemBackground: Цвет фона элемента информационного инструмента.
+     - timeCapsuleBackground: Цвет фона таймкапсулы.
+     - timeCapsuleForeground: Цвет переднего плана таймкапсулы.
+     */
     public init(
-      grayStatus: Color = Color(hex: "AFB3B8"),
-      errorStatus: Color = Color.red,
-      inputLightContextBackground: Color = Color(hex: "F2F3F5"),
-      inputDarkContextBackground: Color = Color(hex: "F2F3F5").opacity(0.12),
-      mainBackground: Color = .white,
-      buttonBackground: Color = Color(hex: "989EAC"),
-      addButtonBackground: Color = Color(hex: "#4F5055"),
-      sendButtonBackground: Color = Color(hex: "#4962FF"),
-      myMessage: Color = Color(hex: "4962FF"),
-      friendMessage: Color = Color(hex: "EBEDF0"),
-      textLightContext: Color = Color.black,
-      textDarkContext: Color = Color.white,
-      textMediaPicker: Color = Color(hex: "818C99"),
-      recordDot: Color = Color(hex: "F62121"),
-      myMessageTime: Color = .white.opacity(0.4),
-      frientMessageTime: Color = .black.opacity(0.4),
-      timeCapsuleBackground: Color = .black.opacity(0.4),
-      timeCapsuleForeground: Color = .white
+      messageStatus: Color = SKStyleAsset.constantSlate.swiftUIColor,
+      messageReadStatus: Color = SKStyleAsset.constantAzure.swiftUIColor,
+      messageErrorStatus: Color = SKStyleAsset.constantRuby.swiftUIColor,
+      myMessageBubbleBackground: Color = SKStyleAsset.constantAzure.swiftUIColor,
+      friendMessageBubbleBackground: Color = SKStyleAsset.componentSlateMessageBG.swiftUIColor,
+      myMessageBubbleText: Color = SKStyleAsset.constantGhost.swiftUIColor,
+      friendMessageBubbleText: Color = SKStyleAsset.constantNavy.swiftUIColor,
+      myMessageTime: Color = SKStyleAsset.constantGhost.swiftUIColor.opacity(0.4),
+      friendMessageTime: Color = SKStyleAsset.constantNavy.swiftUIColor.opacity(0.4),
+      inputMessageBackground: Color = SKStyleAsset.navy.swiftUIColor,
+      inputSignatureBackground: Color = SKStyleAsset.navy.swiftUIColor,
+      inputPlaceholder: Color = SKStyleAsset.constantSlate.swiftUIColor,
+      inputText: Color = SKStyleAsset.ghost.swiftUIColor,
+      replyToUser: Color = SKStyleAsset.constantSlate.swiftUIColor,
+      replySeparator: Color = SKStyleAsset.constantSlate.swiftUIColor,
+      replyToText: Color = SKStyleAsset.constantNavy.swiftUIColor,
+      cancelText: Color = SKStyleAsset.constantNavy.swiftUIColor,
+      recordingMicrophone: Color = SKStyleAsset.constantSlate.swiftUIColor,
+      recordButtonBackground: Color = SKStyleAsset.constantAzure.swiftUIColor,
+      recordIndicator: Color = SKStyleAsset.constantAzure.swiftUIColor,
+      recordWaveFormOwn: Color = SKStyleAsset.onyx.swiftUIColor,
+      recordWaveFormReceived: Color = SKStyleAsset.constantGhost.swiftUIColor,
+      recordWaveFormColorButtonOwn: Color = SKStyleAsset.constantAzure.swiftUIColor,
+      recordWaveFormColorButtonReceived: Color = SKStyleAsset.constantGhost.swiftUIColor,
+      recordWaveFormColorButtonBgOwn: Color = SKStyleAsset.constantGhost.swiftUIColor,
+      recordWaveFormColorButtonBgReceived: Color = SKStyleAsset.constantAzure.swiftUIColor,
+      recordDot: Color = SKStyleAsset.constantRuby.swiftUIColor,
+      recordDurationText: Color = SKStyleAsset.constantNavy.swiftUIColor,
+      recordDurationLeftText: Color = SKStyleAsset.constantNavy.swiftUIColor,
+      recordWaveformPlayingText: Color = SKStyleAsset.constantNavy.swiftUIColor,
+      recordingText: Color = SKStyleAsset.constantNavy.swiftUIColor,
+      attachmentImage: Color = SKStyleAsset.constantLightMistGray.swiftUIColor,
+      attachmentCellStroke: Color = SKStyleAsset.constantLightMistGray.swiftUIColor,
+      textMediaPicker: Color = SKStyleAsset.ghost.swiftUIColor,
+      mainBackground: Color = SKStyleAsset.onyx.swiftUIColor,
+      addButtonBackground: Color = SKStyleAsset.constantAzure.swiftUIColor,
+      sendButtonBackground: Color = SKStyleAsset.constantAzure.swiftUIColor,
+      menuButtonBackground: Color = SKStyleAsset.constantSlate.swiftUIColor,
+      menuButtonText: Color = SKStyleAsset.constantOnyx.swiftUIColor,
+      circleScrolledButtonBackground: Color = SKStyleAsset.componentSlateMessageBG.swiftUIColor,
+      activityIndicator: Color = SKStyleAsset.constantLightMistGray.swiftUIColor,
+      infoToolStatusItem: Color = SKStyleAsset.constantLightMistGray.swiftUIColor,
+      infoToolTextItem: Color = SKStyleAsset.constantLightMistGray.swiftUIColor,
+      infoToolItemBackground: Color = SKStyleAsset.constantAzure.swiftUIColor,
+      timeCapsuleBackground: Color = SKStyleAsset.constantLightMistGray.swiftUIColor.opacity(0.4),
+      timeCapsuleForeground: Color = SKStyleAsset.constantOnyx.swiftUIColor
     ) {
-      self.grayStatus = grayStatus
-      self.errorStatus = errorStatus
-      self.inputLightContextBackground = inputLightContextBackground
-      self.inputDarkContextBackground = inputDarkContextBackground
+      self.messageStatus = messageStatus
+      self.messageReadStatus = messageReadStatus
+      self.messageErrorStatus = messageErrorStatus
+      self.myMessageBubbleBackground = myMessageBubbleBackground
+      self.friendMessageBubbleBackground = friendMessageBubbleBackground
+      self.myMessageBubbleText = myMessageBubbleText
+      self.friendMessageBubbleText = friendMessageBubbleText
+      self.myMessageTime = myMessageTime
+      self.friendMessageTime = friendMessageTime
+      self.inputMessageBackground = inputMessageBackground
+      self.inputSignatureBackground = inputSignatureBackground
+      self.inputPlaceholder = inputPlaceholder
+      self.inputText = inputText
+      self.replyToUser = replyToUser
+      self.replySeparator = replySeparator
+      self.replyToText = replyToText
+      self.cancelText = cancelText
+      self.recordingMicrophone = recordingMicrophone
+      self.recordButtonBackground = recordButtonBackground
+      self.recordIndicator = recordIndicator
+      self.recordWaveFormOwn = recordWaveFormOwn
+      self.recordWaveFormReceived = recordWaveFormReceived
+      self.recordWaveFormColorButtonOwn = recordWaveFormColorButtonOwn
+      self.recordWaveFormColorButtonReceived = recordWaveFormColorButtonReceived
+      self.recordWaveFormColorButtonBgOwn = recordWaveFormColorButtonBgOwn
+      self.recordWaveFormColorButtonBgReceived = recordWaveFormColorButtonBgReceived
+      self.recordDot = recordDot
+      self.recordDurationText = recordDurationText
+      self.recordDurationLeftText = recordDurationLeftText
+      self.recordWaveformPlayingText = recordWaveformPlayingText
+      self.recordingText = recordingText
+      self.attachmentImage = attachmentImage
+      self.attachmentCellStroke = attachmentCellStroke
+      self.textMediaPicker = textMediaPicker
       self.mainBackground = mainBackground
-      self.buttonBackground = buttonBackground
       self.addButtonBackground = addButtonBackground
       self.sendButtonBackground = sendButtonBackground
-      self.myMessage = myMessage
-      self.friendMessage = friendMessage
-      self.textLightContext = textLightContext
-      self.textDarkContext = textDarkContext
-      self.textMediaPicker = textMediaPicker
-      self.recordDot = recordDot
-      self.myMessageTime = myMessageTime
-      self.frientMessageTime = frientMessageTime
+      self.menuButtonBackground = menuButtonBackground
+      self.menuButtonText = menuButtonText
+      self.circleScrolledButtonBackground = circleScrolledButtonBackground
+      self.activityIndicator = activityIndicator
+      self.infoToolStatusItem = infoToolStatusItem
+      self.infoToolTextItem = infoToolTextItem
+      self.infoToolItemBackground = infoToolItemBackground
       self.timeCapsuleBackground = timeCapsuleBackground
       self.timeCapsuleForeground = timeCapsuleForeground
     }

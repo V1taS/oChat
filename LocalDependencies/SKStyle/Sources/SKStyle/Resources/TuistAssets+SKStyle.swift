@@ -32,7 +32,7 @@ public enum SKStyleAsset {
   public static let ghost = SKStyleColors(name: "ghost")
   public static let navy = SKStyleColors(name: "navy")
   public static let onyx = SKStyleColors(name: "onyx")
-  
+  public static let componentSlateMessageBG = SKStyleColors(name: "componentSlateMessageBG")
   public static let oChatInProgress = SKStyleAssetData(name: "oChat_in_progress")
   public static let oChatOffline = SKStyleAssetData(name: "oChat_offline")
   public static let oChatOnline = SKStyleAssetData(name: "oChat_online")
