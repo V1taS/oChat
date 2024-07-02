@@ -15,7 +15,12 @@ public final class ApplicationServicesStub: IApplicationServices, IDataManagerSe
                                             IAnalyticsService, ISecureDataManagerService, ICryptoService,
                                             ICloudKitService, IAppSettingsManager, IDataManagementService,
                                             IAccessAndSecurityManagementService, IUserInterfaceAndExperienceService,
-                                            IDeepLinkService, IPushNotificationService {
+                                            IDeepLinkService, IPushNotificationService, IZipArchiveService {
+  public func zipFiles(atPaths paths: [URL], toDestination destinationPath: URL, password: String?, progress: ((Double) -> ())?) throws {}
+  public func unzipFile(atPath path: URL, toDestination destinationPath: URL, overwrite: Bool, password: String?, progress: ((Double) -> ())?, fileOutputHandler: ((URL) -> Void)?) throws {}
+  public var zipArchiveService: any IZipArchiveService { self }
+  public func decrypt(_ data: Data?, privateKey: String) -> Data? { nil }
+  public func encrypt(_ data: Data?, publicKey: String) -> Data? { nil }
   public func setIsNewMessagesAvailable(_ value: Bool, toxAddress: String, completion: (() -> Void)?) {}
   public func sendPushNotification(title: String, body: String, customData: [String : Any], deviceToken: String) {}
   public var pushNotificationService: any IPushNotificationService { self }
@@ -168,6 +173,7 @@ public final class ApplicationServicesStub: IApplicationServices, IDataManagerSe
 
 public final class MessengerServiceStub: IMessengerModelSettingsManager, IMessengerModelHandlerService,
                                          IMessagesService, IMessengerService, IP2PChatManager, IAppSettingsManager {
+  public func sendFile(toxPublicKey: String, model: MessengerNetworkRequestDTO, files: [URL]) {}
   public func setToxAddress(_ model: ContactModel, _ address: String, completion: ((ContactModel?) -> Void)?) {}
   public func clearAllMessengeTempID(completion: (() -> Void)?) {}
   public func startPeriodicFriendStatusCheck(completion: (([String : Bool]) -> Void)?) {}

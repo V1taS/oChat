@@ -96,4 +96,7 @@ public protocol IP2PChatManager {
   
   /// Запускает таймер для периодического вызова getFriendsStatus каждые 2 секунды.
   func startPeriodicFriendStatusCheck(completion: (([String: Bool]) -> Void)?)
+  
+  /// Отправить файл с сообщением
+  func sendFile(toxPublicKey: String, model: MessengerNetworkRequestDTO, files: [URL])
 }

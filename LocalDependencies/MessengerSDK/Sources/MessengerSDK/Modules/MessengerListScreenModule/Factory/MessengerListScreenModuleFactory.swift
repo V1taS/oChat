@@ -28,7 +28,11 @@ protocol MessengerListScreenModuleFactoryInput {
   func addMessageToContact(
     message: String?,
     contactModel: ContactModel,
-    messageType: MessengeModel.MessageType
+    messageType: MessengeModel.MessageType,
+    replyMessageID: String?,
+    images: [MessengeImageModel],
+    videos: [MessengeVideoModel],
+    recording: MessengeRecordingModel?
   ) -> ContactModel
   
   /// Удалить сообщение
@@ -65,7 +69,11 @@ extension MessengerListScreenModuleFactory: MessengerListScreenModuleFactoryInpu
   func addMessageToContact(
     message: String?,
     contactModel: ContactModel,
-    messageType: MessengeModel.MessageType
+    messageType: MessengeModel.MessageType,
+    replyMessageID: String?,
+    images: [MessengeImageModel],
+    videos: [MessengeVideoModel],
+    recording: MessengeRecordingModel?
   ) -> ContactModel {
     var updatedModel = contactModel
     if let message {
@@ -74,7 +82,10 @@ extension MessengerListScreenModuleFactory: MessengerListScreenModuleFactoryInpu
           messageType: messageType,
           messageStatus: messageType == .own ? .sending : .sent,
           message: message,
-          file: nil
+          replyMessageID: replyMessageID,
+          images: images,
+          videos: videos,
+          recording: recording
         )
       )
     }

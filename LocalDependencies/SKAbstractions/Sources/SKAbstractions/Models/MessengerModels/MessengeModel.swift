@@ -19,29 +19,42 @@ public struct MessengeModel {
   public var messageStatus: MessageStatus
   /// Текст сообщения.
   public var message: String
-  /// Прикреплённый файл в виде данных (опционально).
-  public let file: Data?
   /// Дата отправки сообщения
   public let date: Date
   /// Цитируемое сообщение
-  public var quotedMessageID: String?
+  public var replyMessageID: String?
+  /// Массив изображений сообщения
+  public var images: [MessengeImageModel]
+  /// Массив видео сообщения
+  public var videos: [MessengeVideoModel]
+  /// Запись сообщения (опционально)
+  public var recording: MessengeRecordingModel?
   
   /// Инициализирует новый экземпляр сообщения.
   /// - Parameters:
   ///   - messageType: Тип сообщения (отправленное или полученное).
   ///   - messageStatus: Статус доставки и чтения сообщения.
   ///   - message: Текст сообщения.
-  ///   - file: Прикреплённый файл в виде данных (опционально).
+  ///   - replyMessageID: Ответ на сообщение
+  ///   - images: Изображения
+  ///   - videos: Видео
+  ///   - recording: Аудиозапись
   public init(
     messageType: MessageType,
     messageStatus: MessageStatus,
     message: String,
-    file: Data? = nil
+    replyMessageID: String?,
+    images: [MessengeImageModel],
+    videos: [MessengeVideoModel],
+    recording: MessengeRecordingModel?
   ) {
     self.messageType = messageType
     self.messageStatus = messageStatus
     self.message = message
-    self.file = file
+    self.replyMessageID = replyMessageID
+    self.images = images
+    self.videos = videos
+    self.recording = recording
     self.id = UUID().uuidString
     self.date = Date()
   }

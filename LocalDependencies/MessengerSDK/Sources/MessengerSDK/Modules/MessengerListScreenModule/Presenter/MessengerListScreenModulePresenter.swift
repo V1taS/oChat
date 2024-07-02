@@ -9,6 +9,8 @@ import SKStyle
 import SKUIKit
 import SwiftUI
 import SKAbstractions
+import UniformTypeIdentifiers
+import UIKit
 
 final class MessengerListScreenModulePresenter: ObservableObject {
   
@@ -69,7 +71,11 @@ final class MessengerListScreenModulePresenter: ObservableObject {
             .init(
               messageType: .systemSuccess,
               messageStatus: .sent,
-              message: "Вы успешно очистили всю историю переписки"
+              message: "Вы успешно очистили всю историю переписки",
+              replyMessageID: nil,
+              images: [],
+              videos: [],
+              recording: nil
             )
           ]
           interactor.saveContactModel(updatedContactModel) { [weak self] in
@@ -394,6 +400,12 @@ private extension MessengerListScreenModulePresenter {
       name: Notification.Name(NotificationConstants.didUpdateFriendReadReceipt.rawValue),
       object: nil
     )
+    NotificationCenter.default.addObserver(
+      self,
+      selector: #selector(handleFileReceive(_:)),
+      name: Notification.Name(NotificationConstants.didUpdateFileReceive.rawValue),
+      object: nil
+    )
   }
   
   func updateContactStatus(
@@ -451,6 +463,7 @@ private extension MessengerListScreenModulePresenter {
   
   func createRequestModel(
     message: String?,
+    replyMessageID: String?,
     senderAddress: String?,
     senderLocalMeshAddress: String?,
     senderPublicKey: String?,
@@ -465,7 +478,8 @@ private extension MessengerListScreenModulePresenter {
     }
     
     let requestModel = MessengerNetworkRequestModel(
-      messageText: message,
+      messageText: message, 
+      replyMessageID: replyMessageID,
       senderAddress: senderAddress,
       senderLocalMeshAddress: senderLocalMeshAddress ?? "",
       senderPublicKey: senderPublicKey,
@@ -500,8 +514,10 @@ private extension MessengerListScreenModulePresenter {
     }
     
     var message = ""
+    var replyMessageID: String?
     if let messengeModel = contact.messenges.last, messengeModel.messageStatus == .sending {
       message = messengeModel.message
+      replyMessageID = messengeModel.replyMessageID
     }
     
     interactor.getPushNotificationToken { [weak self] pushNotificationToken in
@@ -528,7 +544,8 @@ private extension MessengerListScreenModulePresenter {
             interactor.getToxPublicKey { [weak self] toxPublicKey in
               guard let self, let toxPublicKey else { return }
               createRequestModel(
-                message: messageForSend,
+                message: messageForSend, 
+                replyMessageID: replyMessageID,
                 senderAddress: toxAddress,
                 senderLocalMeshAddress: nil,
                 senderPublicKey: senderPublicKey,
@@ -574,8 +591,28 @@ private extension MessengerListScreenModulePresenter {
     }
     prepareAndEncryptDataForNetworkRequest(
       contact: contact
-    ) { [weak self] recipientTorAddress, requestModel in
+    ) {
+      [weak self] recipientTorAddress, requestModel in
       guard let self else { return }
+      let messengeIndex = contact.messenges.firstIndex(where: {
+        $0.id == contact.messenges.last?.id
+      })
+      
+      if let messengeIndex,
+         !contact.messenges[messengeIndex].videos.isEmpty ||
+         !contact.messenges[messengeIndex].images.isEmpty {
+        var files: [URL] = []
+        contact.messenges[messengeIndex].videos.forEach { files.append($0.full) }
+        contact.messenges[messengeIndex].images.forEach { files.append($0.full) }
+        
+        interactor.sendFile(
+          toxPublicKey: toxPublicKey,
+          messengerRequest: requestModel,
+          files: files
+        )
+        
+        return
+      }
       
       interactor.sendMessage(
         toxPublicKey: toxPublicKey,
@@ -585,9 +622,7 @@ private extension MessengerListScreenModulePresenter {
         switch result {
         case let .success(messageId):
           var updatedContact = contact
-          if let messengeIndex = contact.messenges.firstIndex(where: {
-            $0.id == updatedContact.messenges.last?.id
-          }) {
+          if let messengeIndex {
             var updatedMessenge = updatedContact.messenges[messengeIndex]
             updatedMessenge.messageStatus = .sent
             updatedContact.messenges[messengeIndex] = updatedMessenge
@@ -684,6 +719,108 @@ private extension MessengerListScreenModulePresenter {
   }
   
   @objc
+  func handleFileReceive(_ notification: Notification) {
+    if let publicKey = notification.userInfo?["publicKey"] as? String,
+       let filePath = notification.userInfo?["filePath"] as? URL {
+      interactor.getContactModels { [weak self] contactModels in
+        guard let self else { return }
+        
+        interactor.receiveAndUnzipFile(zipFileURL: filePath) { [weak self] result in
+          guard let self, let result = try? result.get(),
+                let messengeDTO = try? JSONDecoder().decode(MessengerNetworkRequestDTO.self, from: result.model) else {
+            return
+          }
+          let messageModel = messengeDTO.mapToModel()
+          updateRedDotToTabBar(contactModels: contactModels)
+          interactor.decrypt(messageModel.messageText) { [weak self] messageText in
+            guard let self else { return }
+            interactor.decrypt(messageModel.senderPushNotificationToken) { [weak self] pushNotificationToken in
+              guard let self else { return }
+              var images: [MessengeImageModel] = []
+              var videos: [MessengeVideoModel] = []
+              var recording: MessengeRecordingModel?
+              
+              for fileUrl in result.files {
+                if fileUrl.isImageFile() {
+                  images.append(
+                    .init(
+                      id: UUID().uuidString,
+                      thumbnail: fileUrl,
+                      full: fileUrl
+                    )
+                  )
+                  continue
+                }
+                
+                if fileUrl.isVideoFile() {
+                  videos.append(
+                    .init(
+                      id: UUID().uuidString,
+                      thumbnail: fileUrl,
+                      full: fileUrl
+                    )
+                  )
+                  continue
+                }
+                
+                if fileUrl.isAudioFile() {
+                  // TODO: -
+                }
+              }
+              
+              if let contact = factory.searchContact(
+                contactModels: contactModels,
+                torAddress: messageModel.senderAddress
+              ) {
+                var updatedContact = contact
+                updatedContact = factory.addMessageToContact(
+                  message: messageText,
+                  contactModel: updatedContact,
+                  messageType: .received,
+                  replyMessageID: messageModel.replyMessageID,
+                  images: images,
+                  videos: videos,
+                  recording: recording
+                )
+                updatedContact.status = .online
+                if let senderPushNotificationToken = pushNotificationToken {
+                  updatedContact.pushNotificationToken = senderPushNotificationToken
+                }
+                updatedContact.toxAddress = messageModel.senderAddress
+                updatedContact.isNewMessagesAvailable = true
+                updatedContact.encryptionPublicKey = messageModel.senderPublicKey
+                interactor.saveContactModel(updatedContact, completion: { [weak self] in
+                  guard let self else { return }
+                  updateListContacts()
+                  moduleOutput?.dataModelHasBeenUpdated()
+                })
+              } else {
+                let contact = ContactModel(
+                  name: nil,
+                  toxAddress: messageModel.senderAddress,
+                  meshAddress: messageModel.senderLocalMeshAddress,
+                  messenges: [],
+                  status: .online,
+                  encryptionPublicKey: messageModel.senderPublicKey,
+                  toxPublicKey: nil,
+                  pushNotificationToken: pushNotificationToken,
+                  isNewMessagesAvailable: true,
+                  isTyping: false
+                )
+                interactor.saveContactModel(contact, completion: { [weak self] in
+                  guard let self else { return }
+                  updateListContacts()
+                  moduleOutput?.dataModelHasBeenUpdated()
+                })
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  
+  @objc
   func handleFriendReadReceipt(_ notification: Notification) {
     if let toxPublicKey = notification.userInfo?["publicKey"] as? String,
        let messageId = notification.userInfo?["messageId"] as? UInt32 {
@@ -768,8 +905,13 @@ private extension MessengerListScreenModulePresenter {
               updatedContact = factory.addMessageToContact(
                 message: messageText,
                 contactModel: updatedContact,
-                messageType: .received
+                messageType: .received,
+                replyMessageID: messageModel.replyMessageID,
+                images: [],
+                videos: [],
+                recording: nil
               )
+
               updatedContact.status = .online
               if let senderPushNotificationToken = pushNotificationToken {
                 updatedContact.pushNotificationToken = senderPushNotificationToken
@@ -815,3 +957,42 @@ private extension MessengerListScreenModulePresenter {
 // MARK: - Constants
 
 private enum Constants {}
+
+// TODO: - Вынести в Foundation
+// Расширение для определения типа содержимого файла по URL
+extension URL {
+  /// Определяет тип содержимого файла по его URL.
+  func getFileType() -> UTType? {
+    do {
+      let resourceValues = try self.resourceValues(forKeys: [.contentTypeKey])
+      return resourceValues.contentType
+    } catch {
+      print("Ошибка при получении типа файла: \(error)")
+      return nil
+    }
+  }
+  
+  /// Проверяет, является ли файл изображением.
+  func isImageFile() -> Bool {
+    guard let fileType = self.getFileType() else {
+      return false
+    }
+    return fileType.conforms(to: .image)
+  }
+  
+  /// Проверяет, является ли файл видео.
+  func isVideoFile() -> Bool {
+    guard let fileType = self.getFileType() else {
+      return false
+    }
+    return fileType.conforms(to: .movie)
+  }
+  
+  /// Проверяет, является ли файл аудио.
+  func isAudioFile() -> Bool {
+    guard let fileType = self.getFileType() else {
+      return false
+    }
+    return fileType.conforms(to: .audio)
+  }
+}

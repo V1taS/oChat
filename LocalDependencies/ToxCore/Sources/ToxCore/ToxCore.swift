@@ -425,6 +425,125 @@ public extension ToxCore {
     let addressHex = address.map { String(format: "%02x", $0) }.joined()
     return addressHex
   }
+  
+  /// Метод для инициализации отправки файла другу.
+  /// - Parameters:
+  ///   - friendNumber: Номер друга в сети Tox.
+  ///   - fileName: Имя файла.
+  ///   - fileSize: Размер файла в байтах.
+  ///   - completion: Замыкание, вызываемое по завершении операции, с результатом успешной отправки или ошибкой.
+  func sendFile(
+    to friendNumber: Int32,
+    fileName: String,
+    fileSize: UInt64,
+    completion: @escaping (Result<Int32, ToxError>) -> Void
+  ) {
+    toxQueue.async {
+      guard let tox = self.tox else {
+        completion(.failure(.null))
+        return
+      }
+      
+      let cFileName = [UInt8](fileName.utf8)
+      var cError: TOX_ERR_FILE_SEND = TOX_ERR_FILE_SEND_OK
+      
+      let fileId: Int32 = Int32(tox_file_send(
+        tox,
+        UInt32(friendNumber),
+        0, // Тип файла - данные
+        fileSize,
+        nil, // Нет дополнительных метаданных
+        cFileName,
+        cFileName.count,
+        &cError
+      ))
+      
+      if cError != TOX_ERR_FILE_SEND_OK {
+        let error = ToxError(fileSendError: cError)
+        completion(.failure(error))
+      } else {
+        completion(.success(fileId))
+      }
+    }
+  }
+  
+  /// Метод для отправки чанка данных файла.
+  /// - Parameters:
+  ///   - friendNumber: Номер друга в сети Tox.
+  ///   - fileId: Идентификатор файла.
+  ///   - position: Позиция начала данных.
+  ///   - data: Данные файла.
+  ///   - completion: Замыкание, вызываемое по завершении операции, с результатом успешной отправки или ошибкой.
+  func sendFileChunk(
+    to friendNumber: Int32,
+    fileId: Int32,
+    position: UInt64,
+    data: Data,
+    completion: @escaping (Result<Void, ToxError>) -> Void
+  ) {
+    toxQueue.async {
+      guard let tox = self.tox else {
+        completion(.failure(.null))
+        return
+      }
+      
+      var cError: TOX_ERR_FILE_SEND_CHUNK = TOX_ERR_FILE_SEND_CHUNK_OK
+      
+      data.withUnsafeBytes { (rawBufferPointer: UnsafeRawBufferPointer) in
+        let result = tox_file_send_chunk(
+          tox,
+          UInt32(friendNumber),
+          UInt32(fileId),
+          position,
+          rawBufferPointer.baseAddress?.assumingMemoryBound(to: UInt8.self),
+          data.count,
+          &cError
+        )
+        
+        if cError != TOX_ERR_FILE_SEND_CHUNK_OK {
+          let error = ToxError(fileSendChunkError: cError)
+          completion(.failure(error))
+        } else {
+          completion(.success(()))
+        }
+      }
+    }
+  }
+  
+  /// Метод для отмены отправки файла.
+  /// - Parameters:
+  ///   - friendNumber: Номер друга в сети Tox.
+  ///   - fileId: Идентификатор файла.
+  ///   - completion: Замыкание, вызываемое по завершении операции, с результатом успешной отправки или ошибкой.
+  func cancelFileSend(
+    to friendNumber: Int32,
+    fileId: Int32,
+    completion: @escaping (Result<Void, ToxError>) -> Void
+  ) {
+    toxQueue.async {
+      guard let tox = self.tox else {
+        completion(.failure(.null))
+        return
+      }
+      
+      var cError: TOX_ERR_FILE_CONTROL = TOX_ERR_FILE_CONTROL_OK
+      
+      let result = tox_file_control(
+        tox,
+        UInt32(friendNumber),
+        UInt32(fileId),
+        TOX_FILE_CONTROL_CANCEL,
+        &cError
+      )
+      
+      if result {
+        completion(.success(()))
+      } else {
+        let error = ToxError(fileControlError: cError)
+        completion(.failure(error))
+      }
+    }
+  }
 }
 
 // MARK: - User Tox

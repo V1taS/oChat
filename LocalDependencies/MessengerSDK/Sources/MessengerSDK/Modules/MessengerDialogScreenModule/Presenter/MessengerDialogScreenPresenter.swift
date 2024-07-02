@@ -51,7 +51,7 @@ final class MessengerDialogScreenPresenter: ObservableObject {
   private var barButtonView: SKChatBarButtonView?
   private var resendInitialRequestTimer: Timer?
   private var timer: Timer?
-    
+  
   // MARK: - Initialization
   
   /// - Parameters:
@@ -120,7 +120,11 @@ final class MessengerDialogScreenPresenter: ObservableObject {
     let newMessengeModel = MessengeModel(
       messageType: .own,
       messageStatus: .sending,
-      message: messengeModel.message
+      message: messengeModel.message,
+      replyMessageID: messengeModel.replyMessageID,
+      images: [],
+      videos: [],
+      recording: nil
     )
     updatedContactModel.messenges.append(newMessengeModel)
     
@@ -140,16 +144,18 @@ final class MessengerDialogScreenPresenter: ObservableObject {
     }
   }
   
-  func sendMessage(messenge: String) {
-    guard !messenge.isEmpty else { return }
-    
+  func sendMessage(messenge: String, images: [MessengeImageModel], videos: [MessengeVideoModel]) {
     DispatchQueue.main.async { [weak self] in
       guard let self else { return }
       var updatedContactModel = stateContactModel
       let messengeModel = MessengeModel(
         messageType: .own,
         messageStatus: .sending,
-        message: messenge
+        message: messenge,
+        replyMessageID: nil,
+        images: images,
+        videos: videos,
+        recording: nil
       )
       
       updatedContactModel.messenges.append(messengeModel)
@@ -293,7 +299,11 @@ final class MessengerDialogScreenPresenter: ObservableObject {
         .init(
           messageType: .systemSuccess,
           messageStatus: .sent,
-          message: "Вы уведомили вашего контакта, что вы хотите пообщаться. Ожидайте его появления в чате."
+          message: "Вы уведомили вашего контакта, что вы хотите пообщаться. Ожидайте его появления в чате.",
+          replyMessageID: nil,
+          images: [],
+          videos: [],
+          recording: nil
         )
       )
     }
@@ -424,7 +434,11 @@ private extension MessengerDialogScreenPresenter {
       .init(
         messageType: .systemSuccess,
         messageStatus: .sent,
-        message: publicKeyIsEmpty ? sender : receiver
+        message: publicKeyIsEmpty ? sender : receiver,
+        replyMessageID: nil,
+        images: [],
+        videos: [],
+        recording: nil
       )
     )
     

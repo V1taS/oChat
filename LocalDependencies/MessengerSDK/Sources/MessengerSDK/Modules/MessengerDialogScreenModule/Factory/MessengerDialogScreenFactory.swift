@@ -118,8 +118,8 @@ extension MessengerDialogScreenFactory: MessengerDialogScreenFactoryInput {
         id: originMessage.id,
         user: user.copy(isCurrentUser: originMessage.messageType == .own),
         text: originMessage.message,
-        attachments: [],
-        recording: nil
+        attachments: originMessage.images.map { $0.mapTo() } + originMessage.videos.map { $0.mapTo() },
+        recording: originMessage.recording?.mapTo()
       )
     }
     
@@ -134,7 +134,7 @@ extension MessengerDialogScreenFactory: MessengerDialogScreenFactoryInput {
             id: model.id,
             text: model.message,
             medias: [],
-            recording: nil,
+            recording: model.recording?.mapTo(),
             replyMessage: replyMessage,
             createdAt: Date()
           )
@@ -149,8 +149,8 @@ extension MessengerDialogScreenFactory: MessengerDialogScreenFactoryInput {
         status: status,
         createdAt: model.date,
         text: model.message,
-        attachments: [],
-        recording: nil,
+        attachments: model.images.map { $0.mapTo() } + model.videos.map { $0.mapTo() },
+        recording: model.recording?.mapTo(),
         replyMessage: replyMessage
       )
     }
@@ -227,7 +227,11 @@ extension MessengerDialogScreenFactory: MessengerDialogScreenFactoryInput {
           messageType: .systemAttention,
           messageStatus: .sent,
           message: MessengerSDKStrings.MessengerDialogScreenLocalization
-            .stateInitialMessengerNote
+            .stateInitialMessengerNote,
+          replyMessageID: nil,
+          images: [],
+          videos: [],
+          recording: nil
         )
       ],
       status: .initialChat,
@@ -271,3 +275,43 @@ private extension User {
 // MARK: - Constants
 
 private enum Constants {}
+
+// TODO: - Вынести маппинг
+
+// MARK: - Mapping MessengeRecordingModel
+
+extension MessengeRecordingModel {
+  func mapTo() -> Recording {
+    Recording(
+      duration: duration,
+      waveformSamples: waveformSamples,
+      url: url
+    )
+  }
+}
+
+// MARK: - Mapping MessengeVideoModel
+
+extension MessengeVideoModel {
+  func mapTo() -> Attachment {
+    Attachment(
+        id: id,
+        thumbnail: thumbnail,
+        full: full,
+        type: .image
+    )
+  }
+}
+
+// MARK: - Mapping MessengeImageModel
+
+extension MessengeImageModel {
+  func mapTo() -> Attachment {
+    Attachment(
+        id: id,
+        thumbnail: thumbnail,
+        full: full,
+        type: .image
+    )
+  }
+}

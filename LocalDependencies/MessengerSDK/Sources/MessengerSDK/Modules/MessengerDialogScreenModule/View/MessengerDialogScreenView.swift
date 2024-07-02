@@ -13,6 +13,7 @@ import Lottie
 import Combine
 import Foundation
 import ExyteChat
+import ExyteMediaPicker
 
 struct MessengerDialogScreenView: View {
   
@@ -98,9 +99,6 @@ private extension MessengerDialogScreenView {
         if isInitialState {
           presenter.sendInitiateChatFromDialog(toxAddress: nil)
           presenter.startScheduleResendInitialRequest()
-        } else {
-          presenter.sendMessage(messenge: presenter.stateInputMessengeText)
-          presenter.stateInputMessengeText = ""
         }
       }) {
         Image(systemName: "arrow.up.circle.fill")
@@ -177,9 +175,13 @@ private extension MessengerDialogScreenView {
       )
     } else {
       ChatView(messages: presenter.stateMessengeModels) { draft in
-        presenter.sendMessage(messenge: draft.text)
+        Task {
+          let images = await draft.makeImages()
+          let videos = await draft.makeVideos()
+          presenter.sendMessage(messenge: draft.text, images: images, videos: videos)
+        }
       }
-      .setAvailableInput(.textOnly)
+      .setAvailableInput(.full)
       .showMessageTimeView(true)
       .showDateHeaders(showDateHeaders: true)
       .setMediaPickerSelectionParameters(
@@ -360,5 +362,51 @@ struct MessengerDialogScreenView_Previews: PreviewProvider {
         services: ApplicationServicesStub()
       ).viewController
     }
+  }
+}
+
+// TODO: - Вынести этот код
+
+extension DraftMessage {
+  func makeImages() async -> [MessengeImageModel] {
+    await medias
+      .filter { $0.type == .image }
+      .asyncMap { (media : Media) -> (Media, URL?, URL?) in
+        (media, await media.getThumbnailURL(), await media.getURL())
+      }
+      .filter { (media: Media, thumb: URL?, full: URL?) -> Bool in
+        thumb != nil && full != nil
+      }
+      .map { media, thumb, full in
+        MessengeImageModel(id: media.id.uuidString, thumbnail: thumb!, full: full!)
+      }
+  }
+  
+  func makeVideos() async -> [MessengeVideoModel] {
+    await medias
+      .filter { $0.type == .video }
+      .asyncMap { (media : Media) -> (Media, URL?, URL?) in
+        (media, await media.getThumbnailURL(), await media.getURL())
+      }
+      .filter { (media: Media, thumb: URL?, full: URL?) -> Bool in
+        thumb != nil && full != nil
+      }
+      .map { media, thumb, full in
+        MessengeVideoModel(id: media.id.uuidString, thumbnail: thumb!, full: full!)
+      }
+  }
+}
+
+extension Sequence {
+  func asyncMap<T>(
+    _ transform: (Element) async throws -> T
+  ) async rethrows -> [T] {
+    var values = [T]()
+    
+    for element in self {
+      try await values.append(transform(element))
+    }
+    
+    return values
   }
 }

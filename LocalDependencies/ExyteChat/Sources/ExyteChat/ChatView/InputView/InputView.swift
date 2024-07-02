@@ -328,19 +328,16 @@ struct InputView: View {
       UIImpactFeedbackGenerator(style: .soft).impactOccurred()
       onAction(.send)
     }) {
-      Image(systemName: "arrow.up.circle.fill")
-        .resizable()
-        .aspectRatio(contentMode: .fit)
-        .frame(height: .s10)
-        .foregroundColor(state.canSend ? SKStyleAsset.constantAzure.swiftUIColor : SKStyleAsset.constantSlate.swiftUIColor)
-        .opacity(state.canSend ? 1 : 0.5)
+      theme.images.inputView.arrowSend
+        .viewSize(.s10)
+        .circleBackground(theme.colors.sendButtonBackground)
     }
     .disabled(!state.canSend)
   }
   
   var recordButton: some View {
     theme.images.inputView.microphone
-      .viewSize(48)
+      .viewSize(.s10)
       .circleBackground(theme.colors.recordButtonBackground)
       .frameGetter($recordButtonFrame)
   }

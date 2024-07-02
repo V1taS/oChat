@@ -121,7 +121,11 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
                   .init(
                     messageType: .systemSuccess,
                     messageStatus: .sent,
-                    message: "Вы получили приглашение на общение. Присоединитесь и начните общение."
+                    message: "Вы получили приглашение на общение. Присоединитесь и начните общение.",
+                    replyMessageID: nil,
+                    images: [],
+                    videos: [],
+                    recording: nil
                   )
                 )
                 MessengerService.shared.modelHandlerService.saveContactModel(updatedContact, completion: {})

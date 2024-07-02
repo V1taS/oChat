@@ -36,6 +36,15 @@ public final class CryptoService: ICryptoService {
     return encryptedData.base64EncodedString()
   }
   
+  public func encrypt(_ data: Data?, publicKey: String) -> Data? {
+    guard let data,
+          let publicKey = try? ECPublicKey(pem: publicKey) else {
+      return nil
+    }
+    
+    return publicKey.encrypt(msg: data, cipher: .AES256)
+  }
+  
   public func decrypt(_ message: String?, privateKey: String) -> String? {
     guard let message,
           let privateKey = getPrivateKey(from: privateKey),
@@ -47,6 +56,15 @@ public final class CryptoService: ICryptoService {
       return nil
     }
     return String(data: decryptedData, encoding: .utf8)
+  }
+  
+  public func decrypt(_ data: Data?, privateKey: String) -> Data? {
+    guard let data,
+          let privateKey = getPrivateKey(from: privateKey) else {
+      return nil
+    }
+    
+    return try? privateKey.decrypt(msg: data, cipher: .AES256)
   }
   
   public func sha512(from input: String) -> String {

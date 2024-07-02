@@ -22,4 +22,6 @@ public enum NotificationConstants: String {
   case isTyping
   /// Сообщение доставлено
   case didUpdateFriendReadReceipt
+  /// Файл доставлен
+  case didUpdateFileReceive
 }
