@@ -14,16 +14,16 @@ protocol MessengerProfileModuleFactoryOutput: AnyObject {}
 protocol MessengerProfileModuleFactoryInput {
   /// Создать Описание для экрана
   func createDescriptionTitle() -> String
-  
+
   /// Создать заголовок для кнопки копирования
   func createCopyButtonTitle() -> String
 }
 
 /// Фабрика
 final class MessengerProfileModuleFactory {
-  
+
   // MARK: - Internal properties
-  
+
   weak var output: MessengerProfileModuleFactoryOutput?
 }
 
@@ -31,11 +31,11 @@ final class MessengerProfileModuleFactory {
 
 extension MessengerProfileModuleFactory: MessengerProfileModuleFactoryInput {
   func createCopyButtonTitle() -> String {
-    "Копировать"
+    MessengerSDKStrings.MessengerProfile.copyButtonTitle
   }
-  
+
   func createDescriptionTitle() -> String {
-    "На этом экране отображается ваш уникальный адрес. Поделитесь им с другим пользователем, чтобы начать защищённую переписку и обмениваться сообщениями в полной конфиденциальности."
+    MessengerSDKStrings.MessengerProfile.description
   }
 }
 

@@ -10,6 +10,6 @@
 
 "State.Notification.ChangePassCode.Success" = "Код доступа успешно изменен";
 "State.Notification.NewAccessCode.Success" = "Код доступа успешно создан";
-"LanguageSection.Alert.Title" = "Чтобы изменить язык приложения, перейдите в настройки устройства";
-"LanguageSection.Alert.CancelButton.Title" = "Отмена";
-"LanguageSection.Alert.CustomButton.Title" = "Настройки";
+"LanguageSection.Alert.Title" = "To change the application language, go to your device settings";
+"LanguageSection.Alert.CancelButton.Title" = "Cancel";
+"LanguageSection.Alert.CustomButton.Title" = "App settings";

@@ -79,7 +79,7 @@ extension SettingsScreenFactory: SettingsScreenFactoryInput {
     let profileModel = createWidgetWithChevron(
       image: Image(systemName: "person.fill"),
       backgroundColor: #colorLiteral(red: 0.1844805479, green: 0.5407295227, blue: 0.9590529799, alpha: 1),
-      title: "My Profile",
+      title: OChatStrings.SettingsScreenLocalization.State.profile,
       additionRightTitle: "",
       action: { [weak self] in
         self?.output?.openMyProfileSection()

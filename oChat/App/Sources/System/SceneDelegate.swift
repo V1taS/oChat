@@ -47,10 +47,10 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     rootCoordinator = RootCoordinator(services)
     rootCoordinator?.start()
     
-    //#if DEBUG
+    // #if DEBUG
 #warning("Необходимо включить дебаг перед публикацией в стор")
     Wormholy.awake()
-    //#endif
+    // #endif
   }
   
   func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {

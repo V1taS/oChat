@@ -96,6 +96,16 @@ public enum MessengerSDKStrings {
       "Messenger.Request.Three.Description"
     )
   }
+  public enum MessengerProfile {
+    public static let copyButtonTitle = MessengerSDKStrings.tr(
+      "MessengerProfileModuleLocalization",
+      "Messenger.Profile.CopyButton.Title"
+    )
+    public static let description = MessengerSDKStrings.tr(
+      "MessengerProfileModuleLocalization",
+      "Messenger.Profile.Description"
+    )
+  }
 }
 
 // MARK: - Implementation Details
