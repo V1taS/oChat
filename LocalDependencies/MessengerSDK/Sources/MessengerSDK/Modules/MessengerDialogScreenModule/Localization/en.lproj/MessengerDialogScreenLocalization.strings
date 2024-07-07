@@ -9,24 +9,30 @@
 
 "State.Notification.MessageFailure" = "Something went wrong";
 
-"Messenger.Initial.Header.Title" = "Начните анонимный диалог";
-"Messenger.Initial.Header.Description" = "Используйте возможности Tox и TOR для максимальной безопасности и анонимности общения. Только вы и ваш собеседник видите сообщения.";
-"Messenger.Initial.Button.Title" = "Отправить запрос на переписку";
-"Messenger.Initial.One.Title" = "Простота и инновации";
-"Messenger.Initial.One.Description" = "Просто добавьте пользователя, и каждое сообщение будет многократно шифроваться и передаваться напрямую через безопасные каналы.";
-"Messenger.Initial.Two.Title" = "Безупречная безопасность";
-"Messenger.Initial.Two.Description" = "Уникальное сочетание Tox и TOR гарантирует, что ваши данные передаются напрямую и остаются анонимными, обеспечивая непревзойденную защиту от перехвата.";
-"Messenger.Initial.Three.Title" = "Абсолютная конфиденциальность";
-"Messenger.Initial.Three.Description" = "Сообщения не хранятся на серверах ни на секунду. Прямое p2p соединение через Tox и шифрование TOR гарантируют, что никто, кроме вас и вашего собеседника, не сможет прочитать ваши сообщения.";
-"Messenger.Initial.Note" = "Запрос отправлен успешно. Мы не можем узнать, в сети ли контакт, пока он не подтвердит запрос на переписку. Если контакт не в сети, он не получит приглашение. Вы сможете повторить отправку позже.";
+"Messenger.Initial.Header.Title" = "Start an anonymous dialogue";
+"Messenger.Initial.Header.Description" = "Use the capabilities of Tox and TOR for maximum security and anonymity of communication. Only you and your interlocutor see messages.";
+"Messenger.Initial.Button.Title" = "Send a correspondence request";
+"Messenger.Initial.One.Title" = "Simplicity and innovation";
+"Messenger.Initial.One.Description" = "Simply add a user and each message will be encrypted multiple times and transmitted directly through secure channels.";
+"Messenger.Initial.Two.Title" = "Impeccable security";
+"Messenger.Initial.Two.Description" = "The unique combination of Tox and TOR ensures that your data is transmitted directly and remains anonymous, providing unrivaled protection against interception.";
+"Messenger.Initial.Three.Title" = "Absolute confidentiality";
+"Messenger.Initial.Three.Description" = "Messages are not stored on servers for even a second. Direct p2p connection via Tox and TOR encryption ensure that no one except you and your interlocutor can read your messages.";
+"Messenger.Initial.Note" = "The request was sent successfully. We can't tell if a contact is online until they confirm a message request. If a contact is offline, they won't receive an invitation. You can resend later.";
+"Messenger.Initial.Request" = "Enter recipient's address";
+"Messenger.Initial.Message" = "Enter your message";
 
-"Messenger.Request.Header.Title" = "Запрос на анонимный диалог";
-"Messenger.Request.Header.Description" = "Вы получили запрос на общение через Tox и TOR. Ваши сообщения будут видеть только вы и отправитель.";
-"Messenger.Request.Button.Title" = "Принять запрос";
-"Messenger.Request.Button.Cancel.Title" = "Отклонить запрос";
-"Messenger.Request.One.Title" = "Простота и защита";
-"Messenger.Request.One.Description" = "Приняв запрос, вы можете начать безопасное общение. Каждое сообщение шифруется и передается напрямую через защищенные каналы.";
-"Messenger.Request.Two.Title" = "Гарантированная безопасность";
-"Messenger.Request.Two.Description" = "Tox и TOR обеспечивают передачу данных напрямую и анонимно, защищая ваши сообщения от перехвата.";
-"Messenger.Request.Three.Title" = "Полная конфиденциальность";
-"Messenger.Request.Three.Description" = "Ваши сообщения не будут храниться на серверах. Прямое p2p соединение через Tox и шифрование TOR гарантируют, что никто, кроме вас и отправителя, не сможет прочитать ваши сообщения.";
+"Messenger.Request.Header.Title" = "Request for anonymous dialogue";
+"Messenger.Request.Header.Description" = "You have received a request to communicate via Tox and TOR. Only you and the sender will see your messages.";
+"Messenger.Request.Button.Title" = "Accept request";
+"Messenger.Request.Button.Cancel.Title" = "Reject request";
+"Messenger.Request.One.Title" = "Simplicity and protection";
+"Messenger.Request.One.Description" = "Once you accept the request, you can begin secure communication. Every message is encrypted and transmitted directly through secure channels.";
+"Messenger.Request.Two.Title" = "Guaranteed safety";
+"Messenger.Request.Two.Description" = "Tox and TOR enable data transfer directly and anonymously, protecting your communications from interception.";
+"Messenger.Request.Three.Title" = "Complete confidentiality";
+"Messenger.Request.Three.Description" = "Your messages will not be stored on servers. Direct p2p connection via Tox and TOR encryption ensure that no one but you and the sender can read your messages.";
+
+"Messenger.Message.SendRequest" = "Send request";
+"Messenger.Message.SendRequestIn" = "Send request in";
+"Messenger.Message.seconds" = "sec.";

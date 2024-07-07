@@ -70,9 +70,9 @@ extension MessengerModel {
     public var title: String {
       switch self {
       case .online:
-        AbstractionsStrings.SKAbstractionsLocalization.messengerModelStatusTitleOnline
+        AbstractionsStrings.SKAbstractionsLocalization.commonStatusTitleOnline
       case .offline:
-        AbstractionsStrings.SKAbstractionsLocalization.messengerModelStatusTitleOffline
+        AbstractionsStrings.SKAbstractionsLocalization.commonStatusTitleOffline
       case .inProgress:
         AbstractionsStrings.SKAbstractionsLocalization.messengerModelStatusTitleConnecting
       }

@@ -121,13 +121,13 @@ extension ContactModel {
     public var title: String {
       switch self {
       case .online:
-        "В сети"
+        AbstractionsStrings.SKAbstractionsLocalization.commonStatusTitleOnline
       case .offline:
-        "Не в сети"
+        AbstractionsStrings.SKAbstractionsLocalization.commonStatusTitleOffline
       case .requestChat:
-        "Запрос на переписку"
+        AbstractionsStrings.SKAbstractionsLocalization.contactModelStatusTitleConversationRequest
       case .initialChat:
-        "Отправили запрос"
+        AbstractionsStrings.SKAbstractionsLocalization.contactModelStatusTitleSentRequest
       }
     }
   }

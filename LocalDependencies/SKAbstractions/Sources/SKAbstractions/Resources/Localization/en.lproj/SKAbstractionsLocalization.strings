@@ -5,8 +5,8 @@
 //  Created by Vladimir Stepanchikov on 6/23/24.
 //
 
-// MARK: - MessengerModel
-
-"MessengerModel.Status.Title.Online" = "Online";
-"MessengerModel.Status.Title.Offline" = "Offline";
+"Common.Status.Title.Online" = "Online";
+"Common.Status.Title.Offline" = "Offline";
 "MessengerModel.Status.Title.Connecting" = "Connecting";
+"ContactModel.Status.Title.ConversationRequest" = "Request for conversation";
+"ContactModel.Status.Title.SentRequest" = "Sent a request";

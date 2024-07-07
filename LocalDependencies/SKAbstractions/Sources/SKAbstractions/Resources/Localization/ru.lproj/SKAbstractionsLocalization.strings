@@ -5,8 +5,8 @@
 //  Created by Vladimir Stepanchikov on 6/23/24.
 //
 
-// MARK: - MessengerModel
-
-"MessengerModel.Status.Title.Online" = "В сети";
-"MessengerModel.Status.Title.Offline" = "Не в сети";
+"Common.Status.Title.Online" = "В сети";
+"Common.Status.Title.Offline" = "Не в сети";
 "MessengerModel.Status.Title.Connecting" = "Подключение";
+"ContactModel.Status.Title.ConversationRequest" = "Запрос на переписку";
+"ContactModel.Status.Title.SentRequest" = "Отправили запрос";

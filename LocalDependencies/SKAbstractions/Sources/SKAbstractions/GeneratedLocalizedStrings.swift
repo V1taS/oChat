@@ -4,17 +4,25 @@ import Foundation
 
 public enum AbstractionsStrings {
   public enum SKAbstractionsLocalization {
-    public static let messengerModelStatusTitleOnline = AbstractionsStrings.tr(
+    public static let commonStatusTitleOnline = AbstractionsStrings.tr(
       "SKAbstractionsLocalization",
-      "MessengerModel.Status.Title.Online"
+      "Common.Status.Title.Online"
     )
-    public static let messengerModelStatusTitleOffline = AbstractionsStrings.tr(
+    public static let commonStatusTitleOffline = AbstractionsStrings.tr(
       "SKAbstractionsLocalization",
-      "MessengerModel.Status.Title.Offline"
+      "Common.Status.Title.Offline"
     )
     public static let messengerModelStatusTitleConnecting = AbstractionsStrings.tr(
       "SKAbstractionsLocalization",
       "MessengerModel.Status.Title.Connecting"
+    )
+    public static let contactModelStatusTitleConversationRequest = AbstractionsStrings.tr(
+      "SKAbstractionsLocalization",
+      "ContactModel.Status.Title.ConversationRequest"
+    )
+    public static let contactModelStatusTitleSentRequest = AbstractionsStrings.tr(
+      "SKAbstractionsLocalization",
+      "ContactModel.Status.Title.SentRequest"
     )
   }
 }

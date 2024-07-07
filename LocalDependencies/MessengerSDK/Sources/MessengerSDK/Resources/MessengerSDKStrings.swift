@@ -103,6 +103,26 @@ public enum MessengerSDKStrings {
       "MessengerDialogScreenLocalization",
       "Messenger.Request.Three.Description"
     )
+    public static let messageRequest = MessengerSDKStrings.tr(
+      "MessengerDialogScreenLocalization",
+      "Messenger.Initial.Request"
+    )
+    public static let messageText = MessengerSDKStrings.tr(
+      "MessengerDialogScreenLocalization",
+      "Messenger.Initial.Message"
+    ) 
+    public static let seconds = MessengerSDKStrings.tr(
+      "MessengerDialogScreenLocalization",
+      "Messenger.Message.seconds"
+    )
+    public static let sendRequest = MessengerSDKStrings.tr(
+      "MessengerDialogScreenLocalization",
+      "Messenger.Message.SendRequest"
+    )
+    public static let sendRequestIn = MessengerSDKStrings.tr(
+      "MessengerDialogScreenLocalization",
+      "Messenger.Message.SendRequestIn"
+    )
   }
   public enum MessengerProfile {
     public static let copyButtonTitle = MessengerSDKStrings.tr(
@@ -112,6 +132,16 @@ public enum MessengerSDKStrings {
     public static let description = MessengerSDKStrings.tr(
       "MessengerProfileModuleLocalization",
       "Messenger.Profile.Description"
+    )
+  }
+  public enum TorConnectScreen {
+    public static let toxStatus = MessengerSDKStrings.tr(
+      "TorConnectScreenLocalization",
+      "TorConnectScreen.TOXStatus"
+    )
+    public static let torStatus = MessengerSDKStrings.tr(
+      "TorConnectScreenLocalization",
+      "TorConnectScreen.TORStatus"
     )
   }
 }
