@@ -30,6 +30,9 @@ protocol MessengerDialogScreenInteractorInput {
   /// - Parameter tempURL: Временный URL, по которому сохраняется объект.
   /// - Returns: Новый URL сохраненного объекта или nil в случае ошибки.
   func saveObjectWith(tempURL: URL) -> URL?
+  
+  /// Сохраняет изображение в галерее устройства.
+  func saveImageToGallery(_ imageURL: URL, completion: ((Bool) -> Void)?)
 }
 
 /// Интерактор
@@ -46,6 +49,8 @@ final class MessengerDialogScreenInteractor {
   private let cryptoService: ICryptoService
   private let notificationService: INotificationService
   private let dataManagementService: IDataManagerService
+  private let uiService: IUIService
+  private let permissionService: IPermissionService
   
   // MARK: - Initialization
   
@@ -57,12 +62,24 @@ final class MessengerDialogScreenInteractor {
     cryptoService = services.accessAndSecurityManagementService.cryptoService
     notificationService = services.userInterfaceAndExperienceService.notificationService
     dataManagementService = services.dataManagementService.dataManagerService
+    uiService = services.userInterfaceAndExperienceService.uiService
+    permissionService = services.accessAndSecurityManagementService.permissionService
   }
 }
 
 // MARK: - MessengerDialogScreenInteractorInput
 
 extension MessengerDialogScreenInteractor: MessengerDialogScreenInteractorInput {
+  func saveImageToGallery(_ imageURL: URL, completion: ((Bool) -> Void)?) {
+    let dataImage = dataManagementService.readObjectWith(fileURL: imageURL)
+    
+    permissionService.requestGallery { [weak self] granted in
+      guard let self else { return }
+      uiService.saveImageToGallery(dataImage, completion: { _ in })
+      completion?(granted)
+    }
+  }
+  
   func saveObjectWith(tempURL: URL) -> URL? {
     dataManagementService.saveObjectWith(tempURL: tempURL)
   }

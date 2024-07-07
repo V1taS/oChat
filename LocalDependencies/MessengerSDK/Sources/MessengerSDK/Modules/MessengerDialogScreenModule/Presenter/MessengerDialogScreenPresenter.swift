@@ -110,6 +110,17 @@ final class MessengerDialogScreenPresenter: ObservableObject {
   
   func retrySendMessage(messengeModel: MessengeModel) {}
   
+  func saveImageToGallery(_ imageURL: URL) {
+    interactor.saveImageToGallery(imageURL) { [weak self] isSuccess in
+      guard let self else { return }
+      if isSuccess {
+        interactor.showNotification(.positive(title: "Изображение сохранено в галерее"))
+      } else {
+        interactor.showNotification(.negative(title: "Ошибка сохранения"))
+      }
+    }
+  }
+  
   func sendMessage(
     messenge: String,
     replyMessageText: String?

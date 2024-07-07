@@ -93,16 +93,19 @@ public struct ChatView<MessageContent: View, InputViewContent: View>: View {
   @State private var menuBgOpacity: CGFloat = 0
   @State private var menuCellOpacity: CGFloat = 0
   @State private var menuScrollView: UIScrollView?
+  @State private var onSaveFile: ((URL) -> Void)?
   
   public init(messages: [Message],
               didSendMessage: @escaping (DraftMessage) -> Void,
               messageBuilder: @escaping MessageBuilderClosure,
-              inputViewBuilder: @escaping InputViewBuilderClosure) {
+              inputViewBuilder: @escaping InputViewBuilderClosure,
+              onSaveFile: ((URL) -> Void)? = nil) {
     self.didSendMessage = didSendMessage
     self.sections = ChatView.mapMessages(messages)
     self.ids = messages.map { $0.id }
     self.messageBuilder = messageBuilder
     self.inputViewBuilder = inputViewBuilder
+    self.onSaveFile = onSaveFile
   }
   
   public var body: some View {
@@ -150,13 +153,24 @@ public struct ChatView<MessageContent: View, InputViewContent: View>: View {
           safeAreaInsets: g.safeAreaInsets,
           onClose: { [weak viewModel] in
             viewModel?.dismissAttachmentFullScreen()
+          }, 
+          onSave: { url in
+            onSaveFile?(url)
           }
         )
         .ignoresSafeArea()
       }
     }
     .fullScreenCover(isPresented: $inputViewModel.showPicker) {
-      AttachmentsEditor(inputViewModel: inputViewModel, inputViewBuilder: inputViewBuilder, chatTitle: chatTitle, messageUseMarkdown: messageUseMarkdown, orientationHandler: orientationHandler, mediaPickerSelectionParameters: mediaPickerSelectionParameters, availableInput: availablelInput)
+      AttachmentsEditor(
+        inputViewModel: inputViewModel,
+        inputViewBuilder: inputViewBuilder,
+        chatTitle: chatTitle,
+        messageUseMarkdown: messageUseMarkdown,
+        orientationHandler: orientationHandler,
+        mediaPickerSelectionParameters: mediaPickerSelectionParameters,
+        availableInput: availablelInput
+      )
         .environmentObject(globalFocusState)
     }
     .onChange(of: inputViewModel.showPicker) {
@@ -521,8 +535,10 @@ public extension ChatView where MessageContent == EmptyView {
   
   init(messages: [Message],
        didSendMessage: @escaping (DraftMessage) -> Void,
+       onSaveFile: ((URL) -> Void)? = nil,
        inputViewBuilder: @escaping InputViewBuilderClosure) {
     self.didSendMessage = didSendMessage
+    self.onSaveFile = onSaveFile
     self.sections = ChatView.mapMessages(messages)
     self.ids = messages.map { $0.id }
     self.inputViewBuilder = inputViewBuilder
@@ -533,8 +549,10 @@ public extension ChatView where InputViewContent == EmptyView {
   
   init(messages: [Message],
        didSendMessage: @escaping (DraftMessage) -> Void,
+       onSaveFile: ((URL) -> Void)? = nil,
        messageBuilder: @escaping MessageBuilderClosure) {
     self.didSendMessage = didSendMessage
+    self.onSaveFile = onSaveFile
     self.sections = ChatView.mapMessages(messages)
     self.ids = messages.map { $0.id }
     self.messageBuilder = messageBuilder
@@ -542,12 +560,12 @@ public extension ChatView where InputViewContent == EmptyView {
 }
 
 public extension ChatView where MessageContent == EmptyView, InputViewContent == EmptyView {
-  
   init(messages: [Message],
-       didSendMessage: @escaping (DraftMessage) -> Void) {
+       didSendMessage: @escaping (DraftMessage) -> Void,
+       onSaveFile: ((URL) -> Void)? = nil) {
     self.didSendMessage = didSendMessage
+    self.onSaveFile = onSaveFile
     self.sections = ChatView.mapMessages(messages)
     self.ids = messages.map { $0.id }
   }
 }
-

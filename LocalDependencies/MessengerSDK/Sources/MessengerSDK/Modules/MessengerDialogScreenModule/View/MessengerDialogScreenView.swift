@@ -176,23 +176,29 @@ private extension MessengerDialogScreenView {
         }
       )
     } else {
-      ChatView(messages: presenter.stateMessengeModels) { draft in
-        Task {
-          if draft.medias.isEmpty && draft.recording == nil {
-            await presenter.sendMessage(
-              messenge: draft.text,
-              replyMessageText: draft.replyMessage?.text
-            )
-          } else {
-            await presenter.sendMessage(
-              messenge: draft.text,
-              medias: draft.medias,
-              recording: draft.recording,
-              replyMessageText: draft.replyMessage?.text
-            )
+      ChatView(
+        messages: presenter.stateMessengeModels,
+        didSendMessage: { draft in
+          Task {
+            if draft.medias.isEmpty && draft.recording == nil {
+              await presenter.sendMessage(
+                messenge: draft.text,
+                replyMessageText: draft.replyMessage?.text
+              )
+            } else {
+              await presenter.sendMessage(
+                messenge: draft.text,
+                medias: draft.medias,
+                recording: draft.recording,
+                replyMessageText: draft.replyMessage?.text
+              )
+            }
           }
+        },
+        onSaveFile: { url in
+          presenter.saveImageToGallery(url)
         }
-      }
+      )
       .setAvailableInput(.full)
       .showMessageTimeView(true)
       .showDateHeaders(showDateHeaders: true)

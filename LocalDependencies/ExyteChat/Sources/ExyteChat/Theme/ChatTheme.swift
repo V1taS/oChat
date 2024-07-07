@@ -77,6 +77,7 @@ extension ChatTheme {
       public var chevronDown: Image
       public var chevronRight: Image
       public var cross: Image
+      public var save: Image
     }
     
     public struct Message {
@@ -149,6 +150,7 @@ extension ChatTheme {
       chevronDown: Image? = nil,
       chevronRight: Image? = nil,
       cross: Image? = nil,
+      save: Image? = nil,
       attachedDocument: Image? = nil,
       checkmarks: Image? = nil,
       error: Image? = nil,
@@ -163,7 +165,6 @@ extension ChatTheme {
       forward: Image? = nil,
       reply: Image? = nil,
       retry: Image? = nil,
-      save: Image? = nil,
       select: Image? = nil,
       cancelRecord: Image? = nil,
       deleteRecord: Image? = nil,
@@ -209,7 +210,8 @@ extension ChatTheme {
       self.mediaPicker = MediaPicker(
         chevronDown: chevronDown ?? Image("chevronDown", bundle: .current),
         chevronRight: chevronRight ?? Image("chevronRight", bundle: .current),
-        cross: cross ?? Image("cross", bundle: .current)
+        cross: cross ?? Image("cross", bundle: .current), 
+        save: save ?? Image("save", bundle: .current)
       )
       
       self.message = Message(
