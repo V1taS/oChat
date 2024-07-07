@@ -180,7 +180,23 @@ private extension MessengerDialogScreenView {
         Task {
           let images = await draft.makeImages()
           let videos = await draft.makeVideos()
-          presenter.sendMessage(messenge: draft.text, images: images, videos: videos)
+          var recordingModel: MessengeRecordingModel?
+          
+          if let recording = draft.recording {
+            recordingModel = .init(
+              duration: recording.duration,
+              waveformSamples: recording.waveformSamples,
+              url: recording.url
+            )
+          }
+          
+          presenter.sendMessage(
+            messenge: draft.text,
+            images: images,
+            videos: videos,
+            recordingModel: recordingModel,
+            replyMessageText: draft.replyMessage?.text
+          )
         }
       }
       .setAvailableInput(.full)

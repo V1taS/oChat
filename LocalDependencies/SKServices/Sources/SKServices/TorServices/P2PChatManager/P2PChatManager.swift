@@ -11,7 +11,7 @@ import ToxCore
 
 @available(iOS 16.0, *)
 public final class P2PChatManager: IP2PChatManager {
-  
+
   // MARK: - Public properties
   
   public static let shared = P2PChatManager()
@@ -25,6 +25,8 @@ public final class P2PChatManager: IP2PChatManager {
   private var secureDataManagerService: ISecureDataManagerService = SecureDataManagerService(.configurationSecrets)
   private var periodicFriendStatusChecktimer: DispatchSourceTimer?
   private let zipArchiveService = ZipArchiveService()
+  private var fileData: Data?
+  var fileInfo: (friendNumber: Int32, fileId: Int32, fileName: String, fileSize: UInt64)?
   
   // MARK: - Init
   
@@ -253,25 +255,53 @@ public extension P2PChatManager {
     toxCore.setSelfStatus(isOnline ? .online : .away)
   }
   
-  func sendFile(toxPublicKey: String, model: MessengerNetworkRequestDTO, files: [URL]) {
+  func sendFile(
+    toxPublicKey: String,
+    model: MessengerNetworkRequestDTO,
+    recordModel: MessengeRecordingModel?,
+    files: [URL]
+  ) {
+    clearTemporaryDirectory()
+    
+    // MARK: - ШАГ 1 Инициализация отправки файла ❤️❤️❤️
     let encoder = JSONEncoder()
     
     let tempDirectory = FileManager.default.temporaryDirectory
     let modelURL = tempDirectory.appendingPathComponent(UUID().uuidString).appendingPathExtension("model")
+    let recordURL = tempDirectory.appendingPathComponent(UUID().uuidString).appendingPathExtension("record")
     let archiveURL = tempDirectory.appendingPathComponent(UUID().uuidString).appendingPathExtension("zip")
     
     do {
       let jsonData = try encoder.encode(model)
+      let recordData = try? encoder.encode(recordModel)
       // Сохранение model во временное хранилище
       try jsonData.write(to: modelURL)
       
-      // Архивирование model и files
-      var pathsToArchive = files
+      if let recordData {
+        try recordData.write(to: recordURL)
+      }
+      
+      
+      // Преобразование имен файлов в нижний регистр
+      var pathsToArchive = [URL]()
+      for fileURL in files {
+        let lowercasedFileName = fileURL.lastPathComponent.lowercased()
+        let lowercasedFileURL = tempDirectory.appendingPathComponent(lowercasedFileName)
+        try FileManager.default.copyItem(at: fileURL, to: lowercasedFileURL)
+        pathsToArchive.append(lowercasedFileURL)
+      }
       pathsToArchive.append(modelURL)
+      
+      if recordData != nil {
+        pathsToArchive.append(recordURL)
+      }
+      
+      // Архивирование model и files
       try zipArchiveService.zipFiles(atPaths: pathsToArchive, toDestination: archiveURL)
       
       // Чтение данных архива
       let fileData = try Data(contentsOf: archiveURL)
+      self.fileData = fileData
       
       // Получение номера друга по публичному ключу
       guard let friendNumber = toxCore.friendNumber(publicKey: toxPublicKey) else {
@@ -279,22 +309,28 @@ public extension P2PChatManager {
         return
       }
       
+      // Проверка существования друга
+      guard toxCore.friendExists(friendNumber: friendNumber) else {
+        print("Друг не найден для friendNumber: \(friendNumber)")
+        return
+      }
+      
       let fileName = archiveURL.lastPathComponent
       let fileSize = UInt64(fileData.count)
       
       // Инициализация отправки файла
-      toxCore.sendFile(to: friendNumber, fileName: fileName, fileSize: fileSize) { result in
+      toxCore.sendFile(to: friendNumber, fileName: fileName, fileSize: fileSize) { [weak self] result in
+        guard let self = self else { return }
         switch result {
         case let .success(fileId):
           print("✅ Файл инициализирован, fileId: \(fileId)")
-          // Отправка чанков данных файла
-          self.sendChunks(to: friendNumber, fileId: fileId, fileData: fileData)
+          
         case let .failure(error):
-          print("❌ Ошибка при инициализации отправки файла: \(error)")
+          print("❌ Ошибка при инициализации отправки файла: \(error.localizedDescription)")
         }
       }
     } catch {
-      print("❌ Ошибка при сохранении или архивировании файлов: \(error)")
+      print("❌ Ошибка при сохранении или архивировании файлов: \(error.localizedDescription)")
     }
   }
 }
@@ -302,36 +338,63 @@ public extension P2PChatManager {
 // MARK: - Private
 
 @available(iOS 16.0, *)
-private extension P2PChatManager {
-  func sendChunks(to friendNumber: Int32, fileId: Int32, fileData: Data) {
-    // Размер чанка 16 КБ
-    let chunkSize = 1024 * 16
-    var position: UInt64 = 0
-    let totalSize = UInt64(fileData.count)
+extension P2PChatManager {
+  func clearTemporaryDirectory() {
+    let tempDirectory = FileManager.default.temporaryDirectory
     
-    while position < totalSize {
-      let end = min(position + UInt64(chunkSize), totalSize)
-      let chunk = fileData[Int(position)..<Int(end)]
-      
-      ToxCore.shared.sendFileChunk(to: friendNumber, fileId: fileId, position: position, data: chunk) { result in
-        switch result {
-        case .success:
-          print("Чанк отправлен, позиция: \(position)")
-          
-          // Обновление прогресса
-          let progress = Double(position + UInt64(chunk.count)) / Double(totalSize) * 100
-          print(String(format: "🟡 Прогресс отправки: %.2f%%", progress))
-          
-          // Если отправка завершена
-          if position + UInt64(chunk.count) >= totalSize {
-            print("🟢 Отправка файла завершена.")
-          }
-          
-        case .failure(let error):
-          print("❌ Ошибка при отправке чанка: \(error)")
-        }
+    do {
+      let tempDirectoryContents = try FileManager.default.contentsOfDirectory(
+        at: tempDirectory,
+        includingPropertiesForKeys: nil,
+        options: []
+      )
+      for file in tempDirectoryContents {
+        try FileManager.default.removeItem(at: file)
       }
-      position += UInt64(chunk.count)
+      print("Temporary directory cleared successfully.")
+    } catch {
+      print("Error clearing temporary directory: \(error)")
+    }
+  }
+  
+  // Коллбек для отправки запрошенных чанков
+  func sendChunk(
+    to friendNumber: Int32,
+    fileId: Int32,
+    position: UInt64,
+    length: size_t,
+    completion: ((Result<Double, Error>) -> Void)?
+  ) {
+    guard let fileData else {
+      print("Ошибка: данные файла не найдены")
+      completion?(.failure(URLError(.unknown)))
+      return
+    }
+    
+    // Проверяем, запрашивается ли чанк с нулевой длиной
+    if length == .zero {
+      print("Запрос на чанк с нулевой длиной, завершение передачи")
+      completion?(.failure(URLError(.unknown)))
+      return
+    }
+    
+    let end = min(position + UInt64(length), UInt64(fileData.count))
+    let chunk = fileData.subdata(in: Int(position)..<Int(end))
+    let progress = Double(position + UInt64(length)) / Double(fileData.count) * 100
+    
+    toxCore.sendFileChunk(to: friendNumber, fileId: fileId, position: position, data: chunk) { result in
+      switch result {
+      case .success:
+        print("Чанк отправлен, позиция: \(position), длина: \(length) байт")
+        // Проверка завершения передачи файла
+        if position + UInt64(length) >= UInt64(fileData.count) {
+          print("Передача файла завершена")
+        }
+        completion?(.success(progress))
+      case let .failure(error):
+        completion?(.failure(error))
+        print("❌ Ошибка при отправке чанка: \(error.localizedDescription)")
+      }
     }
   }
   

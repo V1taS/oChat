@@ -98,5 +98,10 @@ public protocol IP2PChatManager {
   func startPeriodicFriendStatusCheck(completion: (([String: Bool]) -> Void)?)
   
   /// Отправить файл с сообщением
-  func sendFile(toxPublicKey: String, model: MessengerNetworkRequestDTO, files: [URL])
+  func sendFile(
+    toxPublicKey: String,
+    model: MessengerNetworkRequestDTO,
+    recordModel: MessengeRecordingModel?,
+    files: [URL]
+  )
 }

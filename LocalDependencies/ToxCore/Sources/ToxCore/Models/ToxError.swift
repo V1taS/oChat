@@ -159,6 +159,9 @@ public enum ToxError: Error {
   
   /// Статусное сообщение друга пустое.
   case emptyFriendStatusMessage
+  
+  case fileControlError(TOX_ERR_FILE_CONTROL)
+  case fileSeekError(TOX_ERR_FILE_SEEK)
 }
 
 extension ToxError {
@@ -375,6 +378,25 @@ extension ToxError {
       self = .fileSendError
     default:
       self = .unknown
+    }
+  }
+  
+  init(fileSeekError: TOX_ERR_FILE_SEEK) {
+    self = .fileSeekError(fileSeekError)
+  }
+  
+  var localizedDescription: String {
+    switch self {
+    case .null:
+      return "Tox instance is null."
+    case .fileSendError:
+      return "Error sending file."
+    case .fileControlError(let error):
+      return "File control error: \(error)"
+    case .fileSeekError(let error):
+      return "File seek error: \(error)"
+    default:
+      return ""
     }
   }
 }

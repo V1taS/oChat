@@ -14,7 +14,7 @@ public struct MessengerNetworkRequestModel {
   public var messageText: String?
   
   /// Цитируемое сообщение
-  public var replyMessageID: String?
+  public var replyMessageText: String?
   
   /// Адрес получателя в сети Tor для доставки сообщения.
   public let senderAddress: String
@@ -34,7 +34,7 @@ public struct MessengerNetworkRequestModel {
   /// Инициализирует новый экземпляр сетевого запроса для мессенджера с заданными параметрами.
   /// - Parameters:
   ///   - messageText: Текст сообщения.
-  ///   - replyMessageID: Цитируемое сообщение
+  ///   - replyMessageText: Цитируемое сообщение
   ///   - senderAddress: Адрес в сети для отправки.
   ///   - senderLocalMeshAddress: Адрес в локальной сети для отправки.
   ///   - senderPublicKey: Публичный ключ отправителя.
@@ -42,7 +42,7 @@ public struct MessengerNetworkRequestModel {
   ///   - senderPushNotificationToken: Токен для отправки пушей
   public init(
     messageText: String?,
-    replyMessageID: String?,
+    replyMessageText: String?,
     senderAddress: String,
     senderLocalMeshAddress: String?,
     senderPublicKey: String?,
@@ -50,7 +50,7 @@ public struct MessengerNetworkRequestModel {
     senderPushNotificationToken: String?
   ) {
     self.messageText = messageText
-    self.replyMessageID = replyMessageID
+    self.replyMessageText = replyMessageText
     self.senderAddress = senderAddress
     self.senderLocalMeshAddress = senderLocalMeshAddress
     self.senderPublicKey = senderPublicKey
@@ -65,8 +65,8 @@ extension MessengerNetworkRequestModel {
   /// Преобразует модель запроса в объект передачи данных (DTO).
   public func mapToDTO() -> MessengerNetworkRequestDTO {
     MessengerNetworkRequestDTO(
-      messageText: messageText, 
-      replyMessageID: replyMessageID,
+      messageText: messageText,
+      replyMessageText: replyMessageText,
       senderAddress: senderAddress,
       senderLocalMeshAddress: senderLocalMeshAddress,
       senderPublicKey: senderPublicKey,

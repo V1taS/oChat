@@ -173,6 +173,8 @@ public final class ApplicationServicesStub: IApplicationServices, IDataManagerSe
 
 public final class MessengerServiceStub: IMessengerModelSettingsManager, IMessengerModelHandlerService,
                                          IMessagesService, IMessengerService, IP2PChatManager, IAppSettingsManager {
+  public func sendFile(toxPublicKey: String, model: MessengerNetworkRequestDTO, recordModel: MessengeRecordingModel?, files: [URL]) {}
+  
   public func sendFile(toxPublicKey: String, model: MessengerNetworkRequestDTO, files: [URL]) {}
   public func setToxAddress(_ model: ContactModel, _ address: String, completion: ((ContactModel?) -> Void)?) {}
   public func clearAllMessengeTempID(completion: (() -> Void)?) {}

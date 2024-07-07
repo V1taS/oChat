@@ -22,7 +22,7 @@ public struct MessengeModel {
   /// Дата отправки сообщения
   public let date: Date
   /// Цитируемое сообщение
-  public var replyMessageID: String?
+  public var replyMessageText: String?
   /// Массив изображений сообщения
   public var images: [MessengeImageModel]
   /// Массив видео сообщения
@@ -43,7 +43,7 @@ public struct MessengeModel {
     messageType: MessageType,
     messageStatus: MessageStatus,
     message: String,
-    replyMessageID: String?,
+    replyMessageText: String?,
     images: [MessengeImageModel],
     videos: [MessengeVideoModel],
     recording: MessengeRecordingModel?
@@ -51,7 +51,7 @@ public struct MessengeModel {
     self.messageType = messageType
     self.messageStatus = messageStatus
     self.message = message
-    self.replyMessageID = replyMessageID
+    self.replyMessageText = replyMessageText
     self.images = images
     self.videos = videos
     self.recording = recording
