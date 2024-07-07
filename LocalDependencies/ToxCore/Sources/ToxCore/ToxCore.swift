@@ -189,38 +189,6 @@ public extension ToxCore {
       globalFriendStatusContext = context
     }
   
-  /// Метод для регистрации обратного вызова на получение данных файла.
-  /// - Parameter callback: Замыкание, вызываемое при получении части файла. Возвращает следующие параметры:
-  ///     - friendId: Уникальный идентификатор друга, отправившего файл.
-  ///     - fileId: Уникальный идентификатор файла.
-  ///     - position: Позиция начала данных.
-  ///     - data: Данные файла.
-  func setFileChunkReceiveCallback(callback: @escaping (Int32, Int32, UInt64, Data) -> Void) {
-    toxQueue.async {
-      guard let tox = self.tox else { return }
-      
-      // Сохраняем контекст
-      let context = FileChunkReceiveContext(callback: callback)
-      globalConnectionFileChunkReceiveContext = context
-    }
-  }
-  
-  /// Метод для регистрации обратного вызова на получение уведомлений о новом файле.
-  /// - Parameter callback: Замыкание, вызываемое при получении нового файла. Возвращает следующие параметры:
-  ///     - friendId: Уникальный идентификатор друга, отправившего файл.
-  ///     - fileId: Уникальный идентификатор файла.
-  ///     - fileName: Имя файла.
-  ///     - fileSize: Размер файла в байтах.
-  func setFileReceiveCallback(callback: @escaping (Int32, Int32, String, UInt64) -> Void) {
-    toxQueue.async {
-      guard let tox = self.tox else { return }
-      
-      // Сохраняем контекст
-      let context = FileReceiveContext(callback: callback)
-      globalConnectionFileReceiveContext = context
-    }
-  }
-  
   // Метод для регистрации обратного вызова на логирование
   /// - Parameter callback: Замыкание, вызываемое при получении сообщения лога.
   ///     - file: Имя файла, откуда был вызван лог.
@@ -319,6 +287,64 @@ public extension ToxCore {
         tox_callback_friend_read_receipt(tox, friendReadReceiptCallback)
       }
     }
+  
+  func acceptFile(friendNumber: Int32, fileId: Int32, completion: @escaping (Result<Void, ToxError>) -> Void) {
+    toxQueue.async {
+      guard let tox = self.tox else {
+        completion(.failure(.null))
+        return
+      }
+   
+      var cError: TOX_ERR_FILE_CONTROL = TOX_ERR_FILE_CONTROL_OK
+      let result = tox_file_control(
+        tox,
+        UInt32(friendNumber),
+        UInt32(fileId),
+        TOX_FILE_CONTROL_RESUME,
+        &cError
+      )
+      
+      if result {
+        completion(.success(()))
+      } else {
+        let error = ToxError(fileControlError: cError)
+        print("Ошибка при подтверждении приема файла: \(error.localizedDescription), cError: \(cError), friendNumber: \(friendNumber), fileId: \(fileId)")
+        completion(.failure(error))
+      }
+    }
+  }
+  
+  /// Метод для регистрации обратного вызова на получение данных файла.
+  /// - Parameter callback: Замыкание, вызываемое при получении части файла. Возвращает следующие параметры:
+  ///     - friendId: Уникальный идентификатор друга, отправившего файл.
+  ///     - fileId: Уникальный идентификатор файла.
+  ///     - position: Позиция начала данных.
+  ///     - data: Данные файла.
+  func setFileChunkReceiveCallback(callback: @escaping (Int32, Int32, UInt64, Data) -> Void) {
+    toxQueue.async {
+      guard let tox = self.tox else { return }
+      
+      // Сохраняем контекст
+      let context = FileChunkReceiveContext(callback: callback)
+      globalConnectionFileChunkReceiveContext = context
+    }
+  }
+  
+  /// Метод для регистрации обратного вызова на получение уведомлений о новом файле.
+  /// - Parameter callback: Замыкание, вызываемое при получении нового файла. Возвращает следующие параметры:
+  ///     - friendId: Уникальный идентификатор друга, отправившего файл.
+  ///     - fileId: Уникальный идентификатор файла.
+  ///     - fileName: Имя файла.
+  ///     - fileSize: Размер файла в байтах.
+  func setFileReceiveCallback(callback: @escaping (Int32, Int32, String, UInt64) -> Void) {
+    toxQueue.async {
+      guard let tox = self.tox else { return }
+      
+      // Сохраняем контекст
+      let context = FileReceiveContext(callback: callback)
+      globalConnectionFileReceiveContext = context
+    }
+  }
 }
 
 // MARK: - Data Tox
@@ -543,6 +569,81 @@ public extension ToxCore {
         completion(.failure(error))
       }
     }
+  }
+  
+  /// Метод для управления состоянием передачи файла.
+  /// - Parameters:
+  ///   - friendNumber: Номер друга в сети Tox.
+  ///   - fileId: Идентификатор файла.
+  ///   - control: Команда управления состоянием передачи файла.
+  ///   - completion: Замыкание, вызываемое по завершении операции, с результатом успешного выполнения или ошибкой.
+  func controlFileTransfer(
+    friendNumber: Int32,
+    fileId: Int32,
+    control: ToxFileControl,
+    completion: @escaping (Result<Void, ToxError>) -> Void
+  ) {
+    toxQueue.async {
+      guard let tox = self.tox else {
+        completion(.failure(.null))
+        return
+      }
+      
+      var cError: TOX_ERR_FILE_CONTROL = TOX_ERR_FILE_CONTROL_OK
+      let result = tox_file_control(
+        tox,
+        UInt32(friendNumber),
+        UInt32(fileId),
+        control.toCFileControl(),
+        &cError
+      )
+      
+      if result {
+        completion(.success(()))
+      } else {
+        let error = ToxError(fileControlError: cError)
+        print("Ошибка при управлении состоянием передачи файла: \(error)")
+        completion(.failure(error))
+      }
+    }
+  }
+  
+  func seekFile(
+    friendNumber: Int32,
+    fileId: Int32,
+    position: UInt64,
+    completion: @escaping (Result<Void, ToxError>) -> Void
+  ) {
+    toxQueue.async {
+      guard let tox = self.tox else {
+        completion(.failure(.null))
+        return
+      }
+      
+      var cError: TOX_ERR_FILE_SEEK = TOX_ERR_FILE_SEEK_OK
+      let result = tox_file_seek(
+        tox,
+        UInt32(friendNumber),
+        UInt32(fileId),
+        position,
+        &cError
+      )
+      
+      if result {
+        completion(.success(()))
+      } else {
+        let error = ToxError(fileSeekError: cError)
+        completion(.failure(error))
+      }
+    }
+  }
+  
+  func setFileControlCallback(callback: @escaping (Int32, Int32, TOX_FILE_CONTROL) -> Void) {
+    globalFileControlCallbackContext = FileControlCallbackContext(callback: callback)
+  }
+  
+  func setFileChunkRequestCallback(callback: @escaping (Int32, Int32, UInt64, Int) -> Void) {
+    globalFileChunkRequestCallbackContext = FileChunkRequestCallbackContext(callback: callback)
   }
 }
 
@@ -1311,10 +1412,12 @@ public extension ToxCore {
       tox_callback_friend_request(tox, friendRequestCallback)
       tox_callback_friend_status_message(tox, friendStatusMessageCallback)
       tox_callback_friend_status(tox, friendStatusOnlineCallback)
-      tox_callback_file_recv(tox, fileReceiveCallback)
-      tox_callback_file_recv_chunk(tox, fileChunkReceiveCallback)
       tox_callback_friend_typing(tox, friendTypingCallback)
       tox_callback_friend_read_receipt(tox, friendReadReceiptCallback)
+      tox_callback_file_recv(tox, fileReceiveCallback)
+      tox_callback_file_recv_chunk(tox, fileChunkReceiveCallback)
+      tox_callback_file_recv_control(tox, fileControlCallback)
+      tox_callback_file_chunk_request(tox, fileChunkRequestCallback)
     }
   }
   

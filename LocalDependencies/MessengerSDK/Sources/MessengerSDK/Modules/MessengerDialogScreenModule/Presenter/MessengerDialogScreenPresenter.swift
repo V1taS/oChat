@@ -72,8 +72,7 @@ final class MessengerDialogScreenPresenter: ObservableObject {
     
     stateMessengeModels = factory.createMessageModels(
       models: contact.messenges,
-      contactModel: contact,
-      replyMessageID: nil
+      contactModel: contact
     )
   }
   
@@ -121,7 +120,7 @@ final class MessengerDialogScreenPresenter: ObservableObject {
       messageType: .own,
       messageStatus: .sending,
       message: messengeModel.message,
-      replyMessageID: messengeModel.replyMessageID,
+      replyMessageText: messengeModel.replyMessageText,
       images: [],
       videos: [],
       recording: nil
@@ -130,8 +129,7 @@ final class MessengerDialogScreenPresenter: ObservableObject {
     
     stateMessengeModels = factory.createMessageModels(
       models: updatedContactModel.messenges,
-      contactModel: stateContactModel,
-      replyMessageID: nil
+      contactModel: stateContactModel
     )
     stateContactModel = updatedContactModel
     
@@ -144,18 +142,25 @@ final class MessengerDialogScreenPresenter: ObservableObject {
     }
   }
   
-  func sendMessage(messenge: String, images: [MessengeImageModel], videos: [MessengeVideoModel]) {
+  func sendMessage(
+    messenge: String,
+    images: [MessengeImageModel],
+    videos: [MessengeVideoModel],
+    recordingModel: MessengeRecordingModel?,
+    replyMessageText: String?
+  ) {
     DispatchQueue.main.async { [weak self] in
       guard let self else { return }
       var updatedContactModel = stateContactModel
+      
       let messengeModel = MessengeModel(
         messageType: .own,
         messageStatus: .sending,
         message: messenge,
-        replyMessageID: nil,
+        replyMessageText: replyMessageText,
         images: images,
         videos: videos,
-        recording: nil
+        recording: recordingModel
       )
       
       updatedContactModel.messenges.append(messengeModel)
@@ -163,8 +168,7 @@ final class MessengerDialogScreenPresenter: ObservableObject {
       
       stateMessengeModels = factory.createMessageModels(
         models: updatedContactModel.messenges,
-        contactModel: stateContactModel,
-        replyMessageID: nil
+        contactModel: stateContactModel
       )
       
       DispatchQueue.global().async { [weak self] in
@@ -300,7 +304,7 @@ final class MessengerDialogScreenPresenter: ObservableObject {
           messageType: .systemSuccess,
           messageStatus: .sent,
           message: "Вы уведомили вашего контакта, что вы хотите пообщаться. Ожидайте его появления в чате.",
-          replyMessageID: nil,
+          replyMessageText: nil,
           images: [],
           videos: [],
           recording: nil
@@ -334,8 +338,7 @@ extension MessengerDialogScreenPresenter: MessengerDialogScreenModuleInput {
       
       stateMessengeModels = factory.createMessageModels(
         models: contactModel.messenges,
-        contactModel: stateContactModel,
-        replyMessageID: nil
+        contactModel: stateContactModel
       )
       updateCenterBarButtonView(isHidden: false)
     }
@@ -435,7 +438,7 @@ private extension MessengerDialogScreenPresenter {
         messageType: .systemSuccess,
         messageStatus: .sent,
         message: publicKeyIsEmpty ? sender : receiver,
-        replyMessageID: nil,
+        replyMessageText: nil,
         images: [],
         videos: [],
         recording: nil

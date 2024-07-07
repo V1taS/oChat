@@ -42,21 +42,22 @@ struct AttachmentCell: View {
 }
 
 struct AsyncImageView: View {
-    @Environment(\.chatTheme) var theme
-    let url: URL
-
-    var body: some View {
-        CachedAsyncImage(url: url, urlCache: .imageCache) { imageView in
-            imageView
-                .resizable()
-                .scaledToFill()
-        } placeholder: {
-            ZStack {
-                Rectangle()
-                    .foregroundColor(theme.colors.attachmentImage)
-                    .frame(minWidth: 100, minHeight: 100)
-                ActivityIndicator(size: 30, showBackground: false)
-            }
-        }
+  @Environment(\.chatTheme) var theme
+  let url: URL
+  
+  var body: some View {
+    if let imageData = FileManager.default.contents(atPath: url.path()),
+       let image = UIImage(data: imageData) {
+      Image(uiImage: image)
+        .resizable()
+        .aspectRatio(contentMode: .fill)
+    } else {
+      ZStack {
+        Rectangle()
+          .foregroundColor(theme.colors.attachmentImage)
+          .frame(minWidth: 100, minHeight: 100)
+        ActivityIndicator(size: 30, showBackground: false)
+      }
     }
+  }
 }

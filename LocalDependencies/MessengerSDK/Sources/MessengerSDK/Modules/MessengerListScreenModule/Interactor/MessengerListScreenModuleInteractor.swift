@@ -216,12 +216,17 @@ protocol MessengerListScreenModuleInteractorInput {
   /// Метод для разархивирования файлов
   func receiveAndUnzipFile(
     zipFileURL: URL,
-    completion: @escaping (Result<(model: Data, files: [URL]), Error>) -> Void
+    completion: @escaping (Result<(
+      model: MessengerNetworkRequestModel,
+      recordingModel: MessengeRecordingModel?,
+      files: [URL]
+    ), Error>) -> Void
   )
   
   /// Отправить файл с сообщением
   func sendFile(
     toxPublicKey: String,
+    recordModel: MessengeRecordingModel?,
     messengerRequest: MessengerNetworkRequestModel,
     files: [URL]
   )
@@ -271,56 +276,75 @@ final class MessengerListScreenModuleInteractor {
 extension MessengerListScreenModuleInteractor: MessengerListScreenModuleInteractorInput {
   func receiveAndUnzipFile(
     zipFileURL: URL,
-    completion: @escaping (Result<(model: Data, files: [URL]), Error>) -> Void
+    completion: @escaping (Result<(
+      model: MessengerNetworkRequestModel,
+      recordingModel: MessengeRecordingModel?,
+      files: [URL]
+    ), Error>) -> Void
   ) {
     DispatchQueue.global().async { [weak self] in
       guard let self else { return }
-      let tempDirectory = FileManager.default.temporaryDirectory
-      let destinationURL = tempDirectory.appendingPathComponent(UUID().uuidString)
+      // Для получения директории Documents
+      guard let documentDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else {
+        print("Ошибка: не удалось получить путь к директории Documents")
+        return
+      }
+      let destinationURL = documentDirectory.appendingPathComponent(UUID().uuidString)
       
-      do {
-        try zipArchiveService.unzipFile(
-          atPath: zipFileURL,
-          toDestination: destinationURL,
-          overwrite: true,
-          password: nil,
-          progress: nil
-        ) { unzippedFile in
-          print("Unzipped file: \(unzippedFile)")
-        }
+      var model: MessengerNetworkRequestModel?
+      var recordingModel: MessengeRecordingModel?
+      var fileURLs: [URL] = []
+      
+      try? zipArchiveService.unzipFile(
+        atPath: zipFileURL,
+        toDestination: destinationURL,
+        overwrite: true,
+        password: nil,
+        progress: nil
+      ) { [weak self] unzippedFile in
+        guard let self else { return }
+        print("Unzipped file: \(unzippedFile)")
         
-        var modelData: Data?
-        var fileURLs: [URL] = []
-        
-        let fileManager = FileManager.default
-        let contents = try fileManager.contentsOfDirectory(
-          at: destinationURL,
-          includingPropertiesForKeys: nil,
-          options: []
-        )
-        
-        for file in contents {
-          if file.pathExtension == "model" {
-            modelData = try Data(contentsOf: file)
+        if unzippedFile.pathExtension == "model" {
+          if let modelData = FileManager.default.contents(atPath: unzippedFile.path()) {
+            let decoder = JSONDecoder()
+            guard let dto = try? decoder.decode(MessengerNetworkRequestDTO.self, from: modelData) else {
+              DispatchQueue.main.async {
+                completion(.failure(URLError(.unknown)))
+              }
+              return
+            }
+            model = dto.mapToModel()
           } else {
-            fileURLs.append(file)
+            print("Не удалось прочитать данные из файла")
           }
+        } else if unzippedFile.pathExtension == "record" {
+          if let modelData = FileManager.default.contents(atPath: unzippedFile.path()) {
+            let decoder = JSONDecoder()
+            guard let model = try? decoder.decode(MessengeRecordingModel.self, from: modelData) else {
+              DispatchQueue.main.async {
+                completion(.failure(URLError(.unknown)))
+              }
+              return
+            }
+            recordingModel = model
+          } else {
+            print("Не удалось прочитать данные из файла")
+          }
+        } else {
+          fileURLs.append(unzippedFile)
         }
-        
-        guard let model = modelData else {
-          throw URLError(.unknown)
-        }
-        
-        // Сохранение файлов в системное хранилище
-        let secureStorageURL = try saveFilesToSecureStorage(fileURLs)
-        
+      }
+      
+      guard let model else {
         DispatchQueue.main.async {
-          completion(.success((model, secureStorageURL)))
+          completion(.failure(URLError(.unknown)))
         }
-      } catch {
-        DispatchQueue.main.async {
-          completion(.failure(error))
-        }
+        return
+      }
+      
+      DispatchQueue.main.async {
+        completion(.success((model, recordingModel, fileURLs)))
       }
     }
   }
@@ -600,6 +624,7 @@ extension MessengerListScreenModuleInteractor: MessengerListScreenModuleInteract
   
   func sendFile(
     toxPublicKey: String,
+    recordModel: MessengeRecordingModel?,
     messengerRequest: MessengerNetworkRequestModel,
     files: [URL]
   ) {
@@ -607,7 +632,8 @@ extension MessengerListScreenModuleInteractor: MessengerListScreenModuleInteract
       guard let self else { return }
       p2pChatManager.sendFile(
         toxPublicKey: toxPublicKey,
-        model: messengerRequest.mapToDTO(),
+        model: messengerRequest.mapToDTO(), 
+        recordModel: recordModel,
         files: files
       )
     }
@@ -809,37 +835,6 @@ private extension MessengerListScreenModuleInteractor {
     p2pChatManager.toxStateAsString { [weak self] stateAsString in
       self?.modelSettingsManager.setToxStateAsString(stateAsString, completion: {})
     }
-  }
-  
-  func saveFilesToSecureStorage(_ files: [URL]) throws -> [URL] {
-    let fileManager = FileManager.default
-    var savedFiles: [URL] = []
-    
-    // Получаем URL для директории Application Support
-    guard let applicationSupportDirectory = fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask).first else {
-      throw NSError(
-        domain: "ToxFileReceiver",
-        code: 1,
-        userInfo: [NSLocalizedDescriptionKey: "Не удалось получить директорию Application Support"]
-      )
-    }
-    
-    for file in files {
-      let secureStorageURL = applicationSupportDirectory.appendingPathComponent(
-        UUID().uuidString
-      ).appendingPathExtension(file.pathExtension)
-      do {
-        try fileManager.moveItem(at: file, to: secureStorageURL)
-        savedFiles.append(secureStorageURL)
-      } catch {
-        throw NSError(
-          domain: "ToxFileReceiver",
-          code: 2,
-          userInfo: [NSLocalizedDescriptionKey: "Не удалось переместить файл: \(error.localizedDescription)"]
-        )
-      }
-    }
-    return savedFiles
   }
 }
 

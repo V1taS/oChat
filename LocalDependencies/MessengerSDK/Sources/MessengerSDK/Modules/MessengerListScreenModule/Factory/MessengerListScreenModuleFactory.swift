@@ -29,7 +29,7 @@ protocol MessengerListScreenModuleFactoryInput {
     message: String?,
     contactModel: ContactModel,
     messageType: MessengeModel.MessageType,
-    replyMessageID: String?,
+    replyMessageText: String?,
     images: [MessengeImageModel],
     videos: [MessengeVideoModel],
     recording: MessengeRecordingModel?
@@ -70,7 +70,7 @@ extension MessengerListScreenModuleFactory: MessengerListScreenModuleFactoryInpu
     message: String?,
     contactModel: ContactModel,
     messageType: MessengeModel.MessageType,
-    replyMessageID: String?,
+    replyMessageText: String?,
     images: [MessengeImageModel],
     videos: [MessengeVideoModel],
     recording: MessengeRecordingModel?
@@ -82,7 +82,7 @@ extension MessengerListScreenModuleFactory: MessengerListScreenModuleFactoryInpu
           messageType: messageType,
           messageStatus: messageType == .own ? .sending : .sent,
           message: message,
-          replyMessageID: replyMessageID,
+          replyMessageText: replyMessageText,
           images: images,
           videos: videos,
           recording: recording

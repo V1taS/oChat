@@ -8,13 +8,34 @@
 import Foundation
 import ToxCoreCpp
 
-enum ToxFileControl: UInt32 {
-  /// Принять запрос на отправку файла или продолжить отправку/прием после паузы.
-  case resume = 0
+// MARK: - ToxFileControl Enum
+
+public enum ToxFileControl {
+  case pause
+  case resume
+  case cancel
   
-  /// Пауза в передаче файла. Первоначальное состояние приема файла всегда находится на паузе, а отправка файла - в процессе. Если обе стороны ставят передачу на паузу, то обе стороны должны отправить `resume` для продолжения.
-  case pause = 1
+  public func toCFileControl() -> TOX_FILE_CONTROL {
+    switch self {
+    case .pause:
+      return TOX_FILE_CONTROL_PAUSE
+    case .resume:
+      return TOX_FILE_CONTROL_RESUME
+    case .cancel:
+      return TOX_FILE_CONTROL_CANCEL
+    }
+  }
   
-  /// Отклонить запрос на отправку файла или завершить передачу файла.
-  case cancel = 2
+  public static func fromCFileControl(_ cFileControl: TOX_FILE_CONTROL) -> ToxFileControl? {
+    switch cFileControl {
+    case TOX_FILE_CONTROL_PAUSE:
+      return .pause
+    case TOX_FILE_CONTROL_RESUME:
+      return .resume
+    case TOX_FILE_CONTROL_CANCEL:
+      return .cancel
+    default:
+      return nil
+    }
+  }
 }

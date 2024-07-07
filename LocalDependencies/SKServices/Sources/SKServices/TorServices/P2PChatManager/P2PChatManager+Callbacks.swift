@@ -23,6 +23,7 @@ extension P2PChatManager {
     setFriendStatusOnlineCallback()
     setFriendTypingCallback()
     setFriendReadReceiptCallback()
+    setupFileReceiveCallbacks()
   }
 }
 
@@ -31,19 +32,126 @@ extension P2PChatManager {
 @available(iOS 16.0, *)
 private extension P2PChatManager {
   func setupFileReceiveCallbacks() {
-    toxCore.setFileReceiveCallback { friendNumber, fileId, fileName, fileSize in
+    toxCore.setFileReceiveCallback { [weak self] friendNumber, fileId, fileName, fileSize in
+      guard let self else { return }
       print("Получен запрос на файл от друга \(friendNumber), fileId: \(fileId), fileName: \(fileName), fileSize: \(fileSize) байт")
-      // Инициализация получения файла
-      self.initFileReceive(friendNumber: friendNumber, fileId: fileId, fileName: fileName, fileSize: fileSize)
+      
+      // MARK: - ШАГ 2 Подтверждение запроса от юзера 1
+      
+      fileInfo = (friendNumber, fileId, fileName, fileSize)
+      self.toxCore.acceptFile(friendNumber: friendNumber, fileId: fileId) { _ in }
     }
     
-    toxCore.setFileChunkReceiveCallback { friendNumber, fileId, position, data in
-      print("Получен чанк данных от друга \(friendNumber), fileId: \(fileId), позиция: \(position), размер данных: \(data.count) байт")
-      // Обработка получения чанка
-      self.receiveChunk(friendNumber: friendNumber, fileId: fileId, position: position, data: data)
+    toxCore.setFileChunkReceiveCallback { [weak self] friendNumber, fileId, position, data in
+      guard let self, let fileInfo, fileInfo.friendNumber == friendNumber, fileInfo.fileId == fileId else {
+        print("Ошибка: информация о файле не найдена или не соответствует текущему запросу")
+        return
+      }
+      
+      // Для получения директории Documents
+      guard let documentDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else {
+        print("Ошибка: не удалось получить путь к директории Documents")
+        return
+      }
+      
+      let fileURL = documentDirectory.appendingPathComponent(fileInfo.fileName)
+      
+      writeFileChunk(
+        data: data,
+        position: position,
+        to: fileURL,
+        completion: { [weak self] result in
+          guard let self else { return }
+          switch result {
+          case let .success(progress):
+            if progress == 100 {
+              print("fileInfo: \(fileInfo.fileSize)")
+              if let fileData = try? Data(contentsOf: fileURL) {
+                print("file: \(fileData.count)")
+              } else {
+                print("Ошибка: не удалось прочитать данные из файла")
+              }
+            }
+            
+            updateFileReceiveCallback(
+              progress: progress,
+              friendId: friendNumber,
+              filePath: fileURL
+            )
+          case .failure:
+            print("❌ Что-то пошло не так")
+            break
+          }
+        }
+      )
+    }
+    
+    // MARK: - Получение подтверждения запроса на передачу файла (Просто уведомление)
+    toxCore.setFileControlCallback { friendNumber, fileId, control in }
+    
+    toxCore.setFileChunkRequestCallback { [weak self] friendNumber, fileId, position, length in
+      guard let self else { return }
+      sendChunk(
+        to: friendNumber,
+        fileId: fileId,
+        position: position,
+        length: length,
+        completion: { [weak self] result in
+          guard let self else { return }
+          switch result {
+          case let .success(progress):
+            updateFileSenderCallback(progress: progress, friendId: friendNumber)
+          case .failure:
+            break
+          }
+        })
     }
   }
   
+  func writeFileChunk(
+    data: Data,
+    position: UInt64,
+    to fileURL: URL,
+    completion: @escaping (Result<Double, Error>) -> Void
+  ) {
+    guard let fileInfo else {
+      return
+    }
+    do {
+      let fileManager = FileManager.default
+      let fileHandle: FileHandle
+      
+      // Проверяем, существует ли временная директория
+      let temporaryDirectory = URL(fileURLWithPath: NSTemporaryDirectory())
+      if !fileManager.fileExists(atPath: temporaryDirectory.path) {
+        try fileManager.createDirectory(at: temporaryDirectory, withIntermediateDirectories: true, attributes: nil)
+      }
+      
+      // Проверяем, существует ли файл и создаем его при необходимости
+      if fileManager.fileExists(atPath: fileURL.path) {
+        fileHandle = try FileHandle(forUpdating: fileURL)
+      } else {
+        fileManager.createFile(atPath: fileURL.path, contents: nil, attributes: nil)
+        fileHandle = try FileHandle(forWritingTo: fileURL)
+      }
+      
+      // Записываем данные в файл
+      fileHandle.seek(toFileOffset: position)
+      fileHandle.write(data)
+      fileHandle.closeFile()
+      
+      // Рассчитываем прогресс
+      let currentSize = (try fileManager.attributesOfItem(atPath: fileURL.path)[.size] as? UInt64) ?? 0
+      let progress = Double(currentSize) / Double(fileInfo.fileSize) * 100.0
+      completion(.success(progress))
+    } catch {
+      completion(.failure(error))
+    }
+  }
+}
+
+@available(iOS 16.0, *)
+private extension P2PChatManager {
   func setFriendReadReceiptCallback() {
     toxCore.setFriendReadReceiptCallback { [weak self] friendId, messageId in
       self?.updateFriendReadReceiptCallback(friendId, messageId)
@@ -148,15 +256,34 @@ private extension P2PChatManager {
 
 @available(iOS 16.0, *)
 private extension P2PChatManager {
+  func updateFileSenderCallback(progress: Double, friendId: Int32) {
+    guard let publicKey = toxCore.publicKeyFromFriendNumber(friendNumber: Int32(friendId)) else {
+      return
+    }
+    
+    DispatchQueue.main.async { [weak self] in
+      guard let self else { return }
+      // Отправка уведомления что файл отправляется
+      NotificationCenter.default.post(
+        name: Notification.Name(NotificationConstants.didUpdateFileSend.rawValue),
+        object: nil,
+        userInfo: [
+          "publicKey": publicKey,
+          "progress": progress
+        ]
+      )
+    }
+  }
+  
   func updateFileReceiveCallback(progress: Double, friendId: Int32, filePath: URL?) {
     guard let publicKey = toxCore.publicKeyFromFriendNumber(friendNumber: Int32(friendId)) else {
       return
     }
     
     DispatchQueue.main.async {
-      // Отправка уведомления о том что файл доставлен
+      // Отправка уведомления что файл получается
       NotificationCenter.default.post(
-        name: Notification.Name(NotificationConstants.didUpdateFriendReadReceipt.rawValue),
+        name: Notification.Name(NotificationConstants.didUpdateFileReceive.rawValue),
         object: nil,
         userInfo: [
           "publicKey": publicKey,
@@ -298,47 +425,6 @@ private extension P2PChatManager {
     
     // Сохранение информации о файле (можно использовать словарь или другую структуру для отслеживания нескольких файлов)
     filesInProgress[fileId] = (filePath, fileSize)
-  }
-  
-  // Функция обработки получения чанка данных
-  func receiveChunk(friendNumber: Int32, fileId: Int32, position: UInt64, data: Data) {
-    // Получение информации о файле
-    guard let (filePath, fileSize) = filesInProgress[fileId] else {
-      print("Файл не найден для fileId: \(fileId)")
-      return
-    }
-    
-    // Запись данных в файл
-    guard let fileHandle = try? FileHandle(forWritingTo: filePath) else {
-      print("Не удалось открыть файл для записи.")
-      return
-    }
-    
-    fileHandle.seek(toFileOffset: position)
-    fileHandle.write(data)
-    fileHandle.closeFile()
-    
-    // Проверка, все ли данные получены
-    let fileAttributes = try? FileManager.default.attributesOfItem(atPath: filePath.path)
-    let currentSize = fileAttributes?[.size] as? UInt64 ?? 0
-    
-    // Обновление прогресса
-    let progress = Double(currentSize) / Double(fileSize) * 100
-    print(String(format: "😍 Прогресс получения: %.2f%%", progress))
-    updateFileReceiveCallback(progress: progress, friendId: friendNumber, filePath: nil)
-    
-    if currentSize >= fileSize {
-      print("✅ Получение файла завершено: \(filePath.path)")
-      // Удаление информации о завершенном файле
-      updateFileReceiveCallback(
-        progress: progress,
-        friendId: friendNumber,
-        filePath: getFilePath(
-          for: fileId
-        )
-      )
-      filesInProgress.removeValue(forKey: fileId)
-    }
   }
   
   // Функция для получения пути к завершенному файлу

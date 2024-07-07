@@ -122,7 +122,7 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
                     messageType: .systemSuccess,
                     messageStatus: .sent,
                     message: "Вы получили приглашение на общение. Присоединитесь и начните общение.",
-                    replyMessageID: nil,
+                    replyMessageText: nil,
                     images: [],
                     videos: [],
                     recording: nil

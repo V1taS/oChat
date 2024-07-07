@@ -52,10 +52,7 @@ let fileReceiveCallback: @convention(c) (
   UnsafeMutableRawPointer?
 ) -> Void = { tox, friendId, fileId, kind, fileSize, fileName, fileNameLength, userData in
   // Проверяем, что указатель на имя файла не равен nil и длина имени больше нуля
-  guard let fileName = fileName, fileNameLength > 0 else { return }
-  
-  // Проверяем, что указатель на пользовательские данные не равен nil
-  guard let userData = userData else { return }
+  guard let fileName, fileNameLength > 0 else { return }
   
   // Получаем контекст
   guard let context = globalConnectionFileReceiveContext else {

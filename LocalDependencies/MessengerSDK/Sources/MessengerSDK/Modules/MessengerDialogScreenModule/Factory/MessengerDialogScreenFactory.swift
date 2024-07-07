@@ -39,8 +39,7 @@ protocol MessengerDialogScreenFactoryInput {
   /// Создаем модели для отображения
   func createMessageModels(
     models: [MessengeModel],
-    contactModel: ContactModel,
-    replyMessageID: String?
+    contactModel: ContactModel
   ) -> [Message]
   
   /// Получить количество сообщений исходя из максимального допустимого количества показа на экране
@@ -98,11 +97,8 @@ extension MessengerDialogScreenFactory: MessengerDialogScreenFactoryInput {
   
   func createMessageModels(
     models: [MessengeModel],
-    contactModel: ContactModel,
-    replyMessageID: String?
+    contactModel: ContactModel
   ) -> [Message] {
-    var replyMessage: ReplyMessage?
-    
     // Создаем объект User
     let user = User(
       id: contactModel.id,
@@ -111,20 +107,10 @@ extension MessengerDialogScreenFactory: MessengerDialogScreenFactoryInput {
       isCurrentUser: false
     )
     
-    // Находим сообщение для ответа, если оно есть
-    if let replyMessageID, let replyMessageIndex = models.firstIndex(where: { $0.id == replyMessageID }) {
-      let originMessage = models[replyMessageIndex]
-      replyMessage = ReplyMessage(
-        id: originMessage.id,
-        user: user.copy(isCurrentUser: originMessage.messageType == .own),
-        text: originMessage.message,
-        attachments: originMessage.images.map { $0.mapTo() } + originMessage.videos.map { $0.mapTo() },
-        recording: originMessage.recording?.mapTo()
-      )
-    }
-    
     return models.map { model in
       let status: Message.Status
+      var replyMessage: ReplyMessage?
+      
       switch model.messageStatus {
       case .sending:
         status = .sending
@@ -141,6 +127,17 @@ extension MessengerDialogScreenFactory: MessengerDialogScreenFactoryInput {
         )
       case .sent:
         status = .sent
+      }
+      
+      // Находим сообщение для ответа, если оно есть
+      if let replyMessageText = model.replyMessageText {
+        replyMessage = ReplyMessage(
+          id: UUID().uuidString,
+          user: user.copy(isCurrentUser: model.messageType == .own),
+          text: replyMessageText,
+          attachments: [],
+          recording: nil
+        )
       }
       
       return Message(
@@ -228,7 +225,7 @@ extension MessengerDialogScreenFactory: MessengerDialogScreenFactoryInput {
           messageStatus: .sent,
           message: MessengerSDKStrings.MessengerDialogScreenLocalization
             .stateInitialMessengerNote,
-          replyMessageID: nil,
+          replyMessageText: nil,
           images: [],
           videos: [],
           recording: nil

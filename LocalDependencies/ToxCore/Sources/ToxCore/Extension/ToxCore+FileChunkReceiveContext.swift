@@ -52,9 +52,6 @@ let fileChunkReceiveCallback: @convention(c) (
   // Проверяем, что указатель на данные не равен nil и длина данных больше нуля
   guard let data = data, length > 0 else { return }
   
-  // Проверяем, что указатель на пользовательские данные не равен nil
-  guard let userData = userData else { return }
-  
   // Получаем контекст
   guard let context = globalConnectionFileChunkReceiveContext else {
     print("🔴 Ошибка: контекст не установлен")
