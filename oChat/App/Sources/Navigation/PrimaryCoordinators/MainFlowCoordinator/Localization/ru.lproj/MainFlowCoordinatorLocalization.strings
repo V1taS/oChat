@@ -8,7 +8,5 @@
 
 // MARK: - Tab
 
-"Tab.MainScreen.Title" = "Кошелек";
-"Tab.ActivityScreen.Title" = "Активность";
-"Tab.MessengerScreen.Title" = "oChat!";
+"Tab.MessengerScreen.Title" = "Сообщения";
 "Tab.SettingsScreen.Title" = "Настройки";

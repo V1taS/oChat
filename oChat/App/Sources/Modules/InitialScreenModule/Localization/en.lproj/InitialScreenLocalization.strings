@@ -14,12 +14,8 @@
 "Stories.Title.Fifth" = "One more thing...";
 
 "Stories.Subtitle.First" = "Anonymity, P2P, Encryption";
-"Stories.Subtitle.Second" = "We use TOR.\nDefend yourself against tracking and surveillance.";
-"Stories.Subtitle.Third" = "Peer-to-peer (P2P) technology facilitates direct communication users without the need for central servers. ";
-"Stories.Subtitle.Fourth" = "Encryption is a powerful security technique that converts data into an unreadable format, protecting it from unauthorized access.";
+"Stories.Subtitle.Second" = "We use TOR.\nDefend yourself against tracking and surveillance";
+"Stories.Subtitle.Third" = "Peer-to-peer (P2P) technology facilitates direct communication users without the need for central servers";
+"Stories.Subtitle.Fourth" = "Encryption is a powerful security technique that converts data into an unreadable format, protecting it from unauthorized access";
 "Stories.Subtitle.Fifth" = "";
-
-// MARK: - State
-
-"State.NewWalletButton.Title" = "Создать новый кошелек";
-"State.ImportWalletButton.Title" = "Добавить существующий кошелек";
+"Stories.Button.title" = "Continue";

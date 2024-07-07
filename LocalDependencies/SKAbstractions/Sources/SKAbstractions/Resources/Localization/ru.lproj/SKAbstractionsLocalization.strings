@@ -1,0 +1,12 @@
+//
+//  SKAbstractionsLocalization.strings
+//  SKAbstractions
+//
+//  Created by Vladimir Stepanchikov on 6/23/24.
+//
+
+"Common.Status.Title.Online" = "В сети";
+"Common.Status.Title.Offline" = "Не в сети";
+"MessengerModel.Status.Title.Connecting" = "Подключение";
+"ContactModel.Status.Title.ConversationRequest" = "Запрос на переписку";
+"ContactModel.Status.Title.SentRequest" = "Отправили запрос";

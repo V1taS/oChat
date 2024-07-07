@@ -7,7 +7,7 @@
 
 // MARK: - State
 
-"State.Header.Title" = "Код доступа & Face ID";
-"State.ChangeAccessCode.Title" = "Изменить код доступа";
-"State.FaceID.Title" = "Разблокировать с помощью Face ID";
-"State.LockScreen.Title" = "Экран блокировки";
+"State.Header.Title" = "Security";
+"State.FaceID.Title" = "Use Face ID";
+"State.Passcode.Title" = "Use Passcode";
+"State.ChangeAccessCode.Title" = "Change passcode";

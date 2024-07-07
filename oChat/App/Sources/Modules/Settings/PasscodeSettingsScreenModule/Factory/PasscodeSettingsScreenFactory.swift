@@ -71,7 +71,7 @@ extension PasscodeSettingsScreenFactory: PasscodeSettingsScreenFactoryInput {
     
     let passcodeModel = createWidgetModel(
       title: OChatStrings.PasscodeSettingsScreenLocalization
-        .State.LockScreen.title,
+        .State.Passcode.title,
       initialState: stateIsShowChangeAccessCode,
       action: { [weak self] newValue in
         guard let self else {

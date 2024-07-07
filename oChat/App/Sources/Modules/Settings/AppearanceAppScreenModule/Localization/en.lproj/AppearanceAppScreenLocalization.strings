@@ -7,7 +7,7 @@
 
 // MARK: - State
 
-"State.Theme.Automatic" = "Автоматический";
-"State.Theme.Light" = "Светлый";
-"State.Theme.Dark" = "Темный";
-"State.Header.Title" = "Внешний вид";
+"State.Theme.Automatic" = "Auto";
+"State.Theme.Light" = "Dark";
+"State.Theme.Dark" = "Light";
+"State.Header.Title" = "Theme";

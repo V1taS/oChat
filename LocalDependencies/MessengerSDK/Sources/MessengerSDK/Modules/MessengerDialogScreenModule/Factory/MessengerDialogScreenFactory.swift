@@ -248,11 +248,11 @@ extension MessengerDialogScreenFactory: MessengerDialogScreenFactoryInput {
   }
   
   func createInitialPlaceholder() -> String {
-    "Введите адрес получателя"
+    MessengerSDKStrings.MessengerDialogScreenLocalization.messageRequest
   }
   
   func createMainPlaceholder() -> String {
-    "Введите сообщение"
+    MessengerSDKStrings.MessengerDialogScreenLocalization.messageText
   }
   
   func createHeaderTitleFrom(_ adress: String) -> String {

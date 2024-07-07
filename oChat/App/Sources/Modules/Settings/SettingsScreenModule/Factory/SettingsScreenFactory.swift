@@ -79,7 +79,7 @@ extension SettingsScreenFactory: SettingsScreenFactoryInput {
     let profileModel = createWidgetWithChevron(
       image: Image(systemName: "person.fill"),
       backgroundColor: #colorLiteral(red: 0.1844805479, green: 0.5407295227, blue: 0.9590529799, alpha: 1),
-      title: "My Profile",
+      title: OChatStrings.SettingsScreenLocalization.State.profile,
       additionRightTitle: "",
       action: { [weak self] in
         self?.output?.openMyProfileSection()
@@ -91,7 +91,6 @@ extension SettingsScreenFactory: SettingsScreenFactoryInput {
       backgroundColor: #colorLiteral(red: 0.4229286313, green: 0.5245543122, blue: 0.6798206568, alpha: 1),
       title: OChatStrings.SettingsScreenLocalization
         .State.PasscodeAndFaceID.title,
-      additionRightTitle: passcodeAndFaceIDValue ? isOnTitle : isOffTitle,
       action: { [weak self] in
         self?.output?.openPasscodeAndFaceIDSection()
       }

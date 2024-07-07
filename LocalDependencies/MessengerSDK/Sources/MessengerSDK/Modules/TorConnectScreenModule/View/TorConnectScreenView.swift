@@ -25,7 +25,9 @@ struct TorConnectScreenView: View {
       VStack(spacing: .s4) {
         createTorConnectAnimation()
         
-        Text("\(Int(round(presenter.stateConnectionTORProgress)) == 1 ? "Идет подключение к TOX..." : "Идет подключение к TOR...")")
+        Text(
+          "\(Int(round(presenter.stateConnectionTORProgress)) == 1 ? MessengerSDKStrings.TorConnectScreen.toxStatus : MessengerSDKStrings.TorConnectScreen.torStatus)"
+        )
           .font(.fancy.text.title)
           .foregroundColor(SKStyleAsset.ghost.swiftUIColor)
         

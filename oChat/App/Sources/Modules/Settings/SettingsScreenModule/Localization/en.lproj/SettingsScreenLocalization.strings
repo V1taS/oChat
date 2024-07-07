@@ -7,16 +7,14 @@
 
 // MARK: - State
 
-"State.Header.Title" = "Настройки";
-"State.MyWallet.Title" = "Мои Кошельки";
-"State.Currency.Title" = "Валюта";
-"State.PasscodeAndFaceID.Title" = "Код доступа & Face ID";
-"State.Messenger.Title" = "Мессенджер";
-"State.Notifications.Title" = "Уведомления";
-"State.Appearance.Title" = "Внешний вид";
-"State.Language.Title" = "Язык";
-"State.languageType.English.Title" = "Английский";
-"State.languageType.Russian.Title" = "Русский";
-"State.IsOn.Title" = "Включен";
-"State.IsOff.Title" = "Выключен";
-"State.Version.Title" = "Версия";
+"State.Header.Title" = "Settings";
+"State.Profile" = "Profile";
+"State.PasscodeAndFaceID.Title" = "Passcode & Face ID";
+"State.Notifications.Title" = "Notifications";
+"State.Appearance.Title" = "Appearance";
+"State.Language.Title" = "Language";
+"State.languageType.English.Title" = "English";
+"State.languageType.Russian.Title" = "Russian";
+"State.IsOn.Title" = "On";
+"State.IsOff.Title" = "Off";
+"State.Version.Title" = "Version";

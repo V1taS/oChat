@@ -139,9 +139,11 @@ private extension MessengerDialogScreenView {
         didSendMessage: { _ in },
         inputViewBuilder: { _, _, _, _, _, _ in
           MainButtonView(
-            text: presenter.stateIsCanResendInitialRequest ?
-            "Отправить запрос" :
-              "Отправить запрос через \(presenter.stateSecondsUntilResendInitialRequestAllowed) сек.",
+            text: presenter.stateIsCanResendInitialRequest 
+            ? MessengerSDKStrings.MessengerDialogScreenLocalization.sendRequest
+            : "\(MessengerSDKStrings.MessengerDialogScreenLocalization.sendRequest)"
+            + " \(presenter.stateSecondsUntilResendInitialRequestAllowed)"
+            + " \(MessengerSDKStrings.MessengerDialogScreenLocalization.seconds)",
             isEnabled: presenter.stateIsCanResendInitialRequest,
             style: .primary,
             action: {
