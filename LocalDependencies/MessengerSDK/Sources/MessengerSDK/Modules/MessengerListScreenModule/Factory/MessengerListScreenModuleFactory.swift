@@ -9,6 +9,7 @@ import SwiftUI
 import SKUIKit
 import SKAbstractions
 import SKFoundation
+import SKStyle
 
 /// Cобытия которые отправляем из Factory в Presenter
 protocol MessengerListScreenModuleFactoryOutput: AnyObject {
@@ -27,7 +28,11 @@ protocol MessengerListScreenModuleFactoryInput {
   func addMessageToContact(
     message: String?,
     contactModel: ContactModel,
-    messageType: MessengeModel.MessageType
+    messageType: MessengeModel.MessageType,
+    replyMessageID: String?,
+    images: [MessengeImageModel],
+    videos: [MessengeVideoModel],
+    recording: MessengeRecordingModel?
   ) -> ContactModel
   
   /// Удалить сообщение
@@ -64,16 +69,23 @@ extension MessengerListScreenModuleFactory: MessengerListScreenModuleFactoryInpu
   func addMessageToContact(
     message: String?,
     contactModel: ContactModel,
-    messageType: MessengeModel.MessageType
+    messageType: MessengeModel.MessageType,
+    replyMessageID: String?,
+    images: [MessengeImageModel],
+    videos: [MessengeVideoModel],
+    recording: MessengeRecordingModel?
   ) -> ContactModel {
     var updatedModel = contactModel
     if let message {
       updatedModel.messenges.append(
         .init(
           messageType: messageType,
-          messageStatus: messageType == .own ? .inProgress : .delivered,
+          messageStatus: messageType == .own ? .sending : .sent,
           message: message,
-          file: nil
+          replyMessageID: replyMessageID,
+          images: images,
+          videos: videos,
+          recording: recording
         )
       )
     }
@@ -102,7 +114,7 @@ extension MessengerListScreenModuleFactory: MessengerListScreenModuleFactoryInpu
     var models: [WidgetCryptoView.Model] = []
     
     messengerDialogModels.forEach { dialogModel in
-      let title = ((dialogModel.name ?? dialogModel.toxAddress) ?? "").formatString(minTextLength: 20)
+      let title = ((dialogModel.name ?? dialogModel.toxAddress) ?? "").formatString(minTextLength: 10)
       
       var contactStatusStyle: WidgetCryptoView.TextStyle = .netural
       switch dialogModel.status {
@@ -116,11 +128,33 @@ extension MessengerListScreenModuleFactory: MessengerListScreenModuleFactoryInpu
         contactStatusStyle = .netural
       }
       
+      var itemModel: WidgetCryptoView.ItemModel?
+      if dialogModel.isNewMessagesAvailable {
+        itemModel = .custom(
+          item: AnyView(
+          Circle()
+            .foregroundColor(SKStyleAsset.constantRuby.swiftUIColor)
+          ),
+          size: .custom(width: .s2, height: .s2),
+          isHitTesting: false
+        )
+      }
+      
+      if dialogModel.isTyping {
+        itemModel = .custom(
+          item: AnyView(
+            TypingIndicatorView()
+          ),
+          size: .custom(width: .s8, height: .s4),
+          isHitTesting: false
+        )
+      }
+      
       models.append(
         WidgetCryptoView.Model(
           leftSide: .init(
             imageModel: nil,
-            itemModel: nil,
+            itemModel: itemModel,
             titleModel: .init(
               text: title,
               textStyle: .standart,

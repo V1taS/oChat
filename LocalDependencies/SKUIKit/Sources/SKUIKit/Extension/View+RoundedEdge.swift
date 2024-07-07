@@ -15,12 +15,16 @@ public struct RoundedColorEdgeView: ViewModifier {
   let boarderColor: Color
   var paddingHorizontal: CGFloat = .s3
   var paddingVertical: CGFloat = .s2
+  var paddingBottom: CGFloat = .zero
+  var paddingTrailing: CGFloat = .zero
   var cornerRadius: CGFloat = .s4
   
   public func body(content: Content) -> some View {
     content
       .padding(.horizontal, paddingHorizontal)
       .padding(.vertical, paddingVertical)
+      .padding(.bottom, paddingBottom)
+      .padding(.trailing, paddingTrailing)
       .background(backgroundColor)
       .cornerRadius(cornerRadius)
       .overlay(RoundedRectangle(cornerRadius: cornerRadius)
@@ -36,6 +40,8 @@ extension View {
     boarderColor: Color = .clear,
     paddingHorizontal: CGFloat = 12,
     paddingVertical: CGFloat = 8,
+    paddingBottom: CGFloat = .zero,
+    paddingTrailing: CGFloat = .zero,
     cornerRadius: CGFloat = 16
   ) -> some View {
     self.modifier(
@@ -44,6 +50,8 @@ extension View {
         boarderColor: boarderColor,
         paddingHorizontal: paddingHorizontal,
         paddingVertical: paddingVertical,
+        paddingBottom: paddingBottom,
+        paddingTrailing: paddingTrailing,
         cornerRadius: cornerRadius
       )
     )
@@ -62,7 +70,7 @@ struct RoundedColorEdge_Previews: PreviewProvider {
       VStack {
         Text("Copy")
           .roundedEdge(
-            backgroundColor: SKStyleAsset.ruby.swiftUIColor,
+            backgroundColor: SKStyleAsset.constantRuby.swiftUIColor,
             boarderColor: .clear
           )
       }

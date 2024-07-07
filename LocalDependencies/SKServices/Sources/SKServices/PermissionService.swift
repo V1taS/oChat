@@ -22,7 +22,9 @@ public final class PermissionService: IPermissionService {
       DispatchQueue.main.async {
         completion(granted)
         guard granted else { return }
-        UIApplication.shared.registerForRemoteNotifications()
+        DispatchQueue.main.async {
+          UIApplication.shared.registerForRemoteNotifications()
+        }
       }
     }
   }

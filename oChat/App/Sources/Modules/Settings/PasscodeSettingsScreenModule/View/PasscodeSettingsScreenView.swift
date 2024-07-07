@@ -21,10 +21,10 @@ struct PasscodeSettingsScreenView: View {
   
   var body: some View {
     List {
-      ForEach(presenter.stateWidgetCryptoModels.indices, id: \.self) { index in
+      ForEach(Array(presenter.stateWidgetCryptoModels.enumerated()), id: \.element.id) { index, model in
         VStack(spacing: .zero) {
-          WidgetCryptoView(presenter.stateWidgetCryptoModels[index])
-            .if(index == 0) { view in
+          WidgetCryptoView(model)
+            .if(index == .zero) { view in
               view
                 .clipShape(RoundedCornerShape(corners: [.topLeft, .topRight], radius: .s4))
             }
@@ -35,7 +35,7 @@ struct PasscodeSettingsScreenView: View {
           
           if index < presenter.stateWidgetCryptoModels.count - 1 {
             Divider()
-              .background(SKStyleAsset.slate.swiftUIColor.opacity(0.3))
+              .background(SKStyleAsset.constantSlate.swiftUIColor.opacity(0.3))
           }
         }
         .listRowBackground(Color.clear)

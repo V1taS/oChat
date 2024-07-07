@@ -6,7 +6,7 @@ import PackageDescription
 let package = Package(
   name: "SKServices",
   defaultLocalization: "en",
-  platforms: [.iOS(.v15)],
+  platforms: [.iOS(.v16)],
   products: [
     .library(
       name: "SKServices",
@@ -24,7 +24,8 @@ let package = Package(
     .package(path: "../../LocalDependencies/CocoaAsyncSocket"),
     .package(path: "../../LocalDependencies/Ecies"),
     .package(path: "../../LocalDependencies/ToxCore"),
-    .package(path: "../../LocalDependencies/Wormholy")
+    .package(path: "../../LocalDependencies/Wormholy"),
+    .package(url: "https://github.com/marmelroy/Zip.git", exact: "2.1.2"),
   ],
   targets: [
     .target(
@@ -42,7 +43,8 @@ let package = Package(
         "SwiftTor",
         "CocoaAsyncSocket",
         "ToxCore",
-        "Wormholy"
+        "Wormholy",
+        "Zip"
       ]
     ),
     .binaryTarget(name: "WalletCore", path: "Sources/XCFrameworks/WalletCore.xcframework"),

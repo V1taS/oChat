@@ -18,7 +18,7 @@ let package = Package(
     .package(path: "../../LocalDependencies/SKStyle"),
     .package(path: "../../LocalDependencies/SwiftUICharts"),
     .package(path: "../../LocalDependencies/SKAbstractions"),
-    .package(path: "../../LocalDependencies/SKFoundation"),
+    .package(path: "../../LocalDependencies/SKFoundation")
   ],
   targets: [
     .target(

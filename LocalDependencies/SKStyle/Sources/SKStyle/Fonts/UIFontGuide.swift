@@ -20,12 +20,12 @@ public struct UIFontGuide {
     public let largeTitle = UIFont.get(font: .h1)
     /// Medium 22
     public let title = UIFont.get(font: .h2)
-    /// Medium 15
-    public let regularMedium = UIFont.get(font: .b2Medium)
+    /// Medium 17
+    public let regularMedium = UIFont.get(font: .b1Medium)
+    /// Regular 17
+    public let regular = UIFont.get(font: .b1)
     /// Regular 15
-    public let regular = UIFont.get(font: .b2)
-    /// Regular 13
-    public let small = UIFont.get(font: .b3)
+    public let small = UIFont.get(font: .b2)
   }
   
   /// Константные шрифты

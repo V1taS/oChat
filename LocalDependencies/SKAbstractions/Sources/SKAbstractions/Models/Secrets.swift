@@ -7,4 +7,10 @@
 
 import Foundation
 
-public enum Secrets {}
+public enum Secrets {
+  public static var pushNotificationAuthKey = ""
+  public static var pushNotificationKeyID = ""
+  public static var pushNotificationProdURL = ""
+  public static var pushNotificationTeamID = ""
+  public static var ushNotificationTestURL = ""
+}

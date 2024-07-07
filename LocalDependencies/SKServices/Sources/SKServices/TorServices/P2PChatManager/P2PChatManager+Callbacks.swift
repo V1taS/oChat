@@ -20,7 +20,6 @@ extension P2PChatManager {
     setSessionTORCallback()
     setFriendStatusCallback()
     setLogCallback()
-    setFriendStatusMessageCallback()
     setFriendStatusOnlineCallback()
     setFriendTypingCallback()
     setFriendReadReceiptCallback()
@@ -31,15 +30,29 @@ extension P2PChatManager {
 
 @available(iOS 16.0, *)
 private extension P2PChatManager {
+  func setupFileReceiveCallbacks() {
+    toxCore.setFileReceiveCallback { friendNumber, fileId, fileName, fileSize in
+      print("Получен запрос на файл от друга \(friendNumber), fileId: \(fileId), fileName: \(fileName), fileSize: \(fileSize) байт")
+      // Инициализация получения файла
+      self.initFileReceive(friendNumber: friendNumber, fileId: fileId, fileName: fileName, fileSize: fileSize)
+    }
+    
+    toxCore.setFileChunkReceiveCallback { friendNumber, fileId, position, data in
+      print("Получен чанк данных от друга \(friendNumber), fileId: \(fileId), позиция: \(position), размер данных: \(data.count) байт")
+      // Обработка получения чанка
+      self.receiveChunk(friendNumber: friendNumber, fileId: fileId, position: position, data: data)
+    }
+  }
+  
   func setFriendReadReceiptCallback() {
-    toxCore.setFriendReadReceiptCallback { friendId, messageId in
-      print("friendId: \(friendId), messageId: \(messageId)")
+    toxCore.setFriendReadReceiptCallback { [weak self] friendId, messageId in
+      self?.updateFriendReadReceiptCallback(friendId, messageId)
     }
   }
   
   func setFriendTypingCallback() {
-    toxCore.setFriendTypingCallback { friendId, isTyping in
-      print("friendId: \(friendId), isTyping: \(isTyping)")
+    toxCore.setFriendTypingCallback { [weak self] friendId, isTyping in
+      self?.updateFriendTyping(friendId, isTyping)
     }
   }
   
@@ -49,9 +62,18 @@ private extension P2PChatManager {
     }
   }
   
-  func setFriendStatusMessageCallback() {
-    toxCore.setFriendStatusCallback { friendId, statusMessage in
-      print("friendId: \(friendId), statusMessage: \(statusMessage)")
+  func setFriendStatusCallback() {
+    toxCore.setFriendStatusCallback { [weak self] friendId, connectionStatus in
+      let status: UserStatus
+      switch connectionStatus {
+      case .none:
+        status = .away
+      case .tcp:
+        status = .online
+      case .udp:
+        status = .online
+      }
+      self?.updateFriendStatusOnline(friendId: friendId, status: status)
     }
   }
   
@@ -74,19 +96,6 @@ private extension P2PChatManager {
     }
   }
   
-  func setFriendStatusCallback() {
-    toxCore.setFriendStatusCallback { [self] friendId, connectionStatus in
-      switch connectionStatus {
-      case .none:
-        print("friendId: \(friendId) - 🔴 НЕ в сети")
-      case .tcp:
-        print("friendId: \(friendId) - 🟢 в сети_tcp")
-      case .udp:
-        print("friendId: \(friendId) - 🟢 в сети_udp")
-      }
-    }
-  }
-  
   func setFriendRequestCallback() {
     toxCore.setFriendRequestCallback { [weak self] toxPublicKey, jsonString in
       guard let self else { return }
@@ -99,14 +108,10 @@ private extension P2PChatManager {
       guard let self else { return }
       switch connectionStatus {
       case .none:
-        print("✅ none")
         updateMyOnlineStatus(status: .offline)
       case .tcp:
-        print("✅ tcp")
         updateMyOnlineStatus(status: .online)
-        setFriendRequestCallback()
       case .udp:
-        print("✅ udp")
         updateMyOnlineStatus(status: .online)
       }
     }
@@ -143,6 +148,61 @@ private extension P2PChatManager {
 
 @available(iOS 16.0, *)
 private extension P2PChatManager {
+  func updateFileReceiveCallback(progress: Double, friendId: Int32, filePath: URL?) {
+    guard let publicKey = toxCore.publicKeyFromFriendNumber(friendNumber: Int32(friendId)) else {
+      return
+    }
+    
+    DispatchQueue.main.async {
+      // Отправка уведомления о том что файл доставлен
+      NotificationCenter.default.post(
+        name: Notification.Name(NotificationConstants.didUpdateFriendReadReceipt.rawValue),
+        object: nil,
+        userInfo: [
+          "publicKey": publicKey,
+          "progress": progress,
+          "filePath": filePath
+        ]
+      )
+    }
+  }
+  
+  func updateFriendReadReceiptCallback(_ friendId: UInt32, _ messageId: UInt32) {
+    guard let publicKey = toxCore.publicKeyFromFriendNumber(friendNumber: Int32(friendId)) else {
+      return
+    }
+    
+    DispatchQueue.main.async {
+      // Отправка уведомления о том что сообщение доставлено
+      NotificationCenter.default.post(
+        name: Notification.Name(NotificationConstants.didUpdateFriendReadReceipt.rawValue),
+        object: nil,
+        userInfo: [
+          "publicKey": publicKey,
+          "messageId": messageId
+        ]
+      )
+    }
+  }
+  
+  func updateFriendTyping(_ friendId: Int32, _ isTyping: Bool) {
+    guard let publicKey = toxCore.publicKeyFromFriendNumber(friendNumber: friendId) else {
+      return
+    }
+    
+    DispatchQueue.main.async {
+      // Отправка уведомления о том печатает ли пользователь сейчас
+      NotificationCenter.default.post(
+        name: Notification.Name(NotificationConstants.isTyping.rawValue),
+        object: nil,
+        userInfo: [
+          "publicKey": publicKey,
+          "isTyping": isTyping
+        ]
+      )
+    }
+  }
+  
   func updateFriendStatusOnline(friendId: Int32, status: UserStatus) {
     guard let publicKey = toxCore.publicKeyFromFriendNumber(friendNumber: friendId) else {
       return
@@ -222,3 +282,74 @@ private extension P2PChatManager {
     }
   }
 }
+
+// MARK: - Private
+
+@available(iOS 16.0, *)
+private extension P2PChatManager {
+  func initFileReceive(friendNumber: Int32, fileId: Int32, fileName: String, fileSize: UInt64) {
+    // Создание или открытие файла для записи данных
+    let filePath = FileManager.default.temporaryDirectory.appendingPathComponent(fileName)
+    
+    guard FileManager.default.createFile(atPath: filePath.path, contents: nil, attributes: nil) else {
+      print("Не удалось создать файл для записи.")
+      return
+    }
+    
+    // Сохранение информации о файле (можно использовать словарь или другую структуру для отслеживания нескольких файлов)
+    filesInProgress[fileId] = (filePath, fileSize)
+  }
+  
+  // Функция обработки получения чанка данных
+  func receiveChunk(friendNumber: Int32, fileId: Int32, position: UInt64, data: Data) {
+    // Получение информации о файле
+    guard let (filePath, fileSize) = filesInProgress[fileId] else {
+      print("Файл не найден для fileId: \(fileId)")
+      return
+    }
+    
+    // Запись данных в файл
+    guard let fileHandle = try? FileHandle(forWritingTo: filePath) else {
+      print("Не удалось открыть файл для записи.")
+      return
+    }
+    
+    fileHandle.seek(toFileOffset: position)
+    fileHandle.write(data)
+    fileHandle.closeFile()
+    
+    // Проверка, все ли данные получены
+    let fileAttributes = try? FileManager.default.attributesOfItem(atPath: filePath.path)
+    let currentSize = fileAttributes?[.size] as? UInt64 ?? 0
+    
+    // Обновление прогресса
+    let progress = Double(currentSize) / Double(fileSize) * 100
+    print(String(format: "😍 Прогресс получения: %.2f%%", progress))
+    updateFileReceiveCallback(progress: progress, friendId: friendNumber, filePath: nil)
+    
+    if currentSize >= fileSize {
+      print("✅ Получение файла завершено: \(filePath.path)")
+      // Удаление информации о завершенном файле
+      updateFileReceiveCallback(
+        progress: progress,
+        friendId: friendNumber,
+        filePath: getFilePath(
+          for: fileId
+        )
+      )
+      filesInProgress.removeValue(forKey: fileId)
+    }
+  }
+  
+  // Функция для получения пути к завершенному файлу
+  func getFilePath(for fileId: Int32) -> URL? {
+    guard let (filePath, _) = filesInProgress[fileId] else {
+      print("Файл не найден для fileId: \(fileId)")
+      return nil
+    }
+    return filePath
+  }
+}
+
+// Хранение информации о получаемых файлах
+private var filesInProgress: [Int32: (URL, UInt64)] = [:]

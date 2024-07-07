@@ -55,4 +55,20 @@ public protocol ICryptoService {
   /// - Parameter inputData: Данные, из которых необходимо получить хеш.
   /// - Returns: Хеш SHA-256 в виде шестнадцатеричной строки.
   func sha256(from inputData: Data) -> String
+  
+  /// Расшифровывает данные, используя приватный ключ.
+  /// - Parameters:
+  ///   - encryptedData: Зашифрованные данные.
+  /// - privateKey: Приватный ключ.
+  /// - Returns: Расшифрованные данные в виде объекта Data.
+  /// - Throws: Ошибка расшифровки данных.
+  func decrypt(_ data: Data?, privateKey: String) -> Data?
+  
+  /// Шифрует данные, используя публичный ключ.
+  /// - Parameters:
+  ///   - data: Данные для шифрования.
+  ///   - publicKey: Публичный ключ.
+  /// - Returns: Зашифрованные данные в виде объекта Data.
+  /// - Throws: Ошибка шифрования данных.
+  func encrypt(_ data: Data?, publicKey: String) -> Data?
 }

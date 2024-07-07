@@ -15,7 +15,7 @@ public final class SKBarButtonView: UIControl {
   public let iconLeftView = UIImageView()
   public let labelView = UILabel()
   public let iconRightView = UIImageView()
-  private lazy var stackView = UIStackView(arrangedSubviews: [iconLeftView, labelView, iconRightView])
+  private let stackView = UIStackView()
   private var action: (() -> Void)?
   private let impactFeedback = UIImpactFeedbackGenerator(style: .soft)
   

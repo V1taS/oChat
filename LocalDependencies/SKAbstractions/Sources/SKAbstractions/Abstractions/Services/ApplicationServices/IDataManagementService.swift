@@ -22,4 +22,7 @@ public protocol IDataManagementService {
   ///   - serviceName: Ключ для определения типа сервиса безопасного хранения данных.
   /// - Returns: Сервис безопасного хранения данных.
   func getSecureDataManagerService(_ serviceName: SecureDataManagerServiceKey) -> ISecureDataManagerService
+  
+  /// Возвращает сервис для работы с архивами
+  var zipArchiveService: IZipArchiveService { get }
 }

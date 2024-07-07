@@ -11,33 +11,50 @@ import Foundation
 public struct MessengeModel {
   /// Уникальный идентификатор сообщения.
   public let id: String
+  /// Временный ID Сообщения
+  public var tempMessageID: UInt32?
   /// Тип сообщения (отправленное или полученное).
   public let messageType: MessageType
   /// Статус доставки и чтения сообщения.
   public var messageStatus: MessageStatus
   /// Текст сообщения.
   public var message: String
-  /// Прикреплённый файл в виде данных (опционально).
-  public let file: Data?
   /// Дата отправки сообщения
   public let date: Date
+  /// Цитируемое сообщение
+  public var replyMessageID: String?
+  /// Массив изображений сообщения
+  public var images: [MessengeImageModel]
+  /// Массив видео сообщения
+  public var videos: [MessengeVideoModel]
+  /// Запись сообщения (опционально)
+  public var recording: MessengeRecordingModel?
   
   /// Инициализирует новый экземпляр сообщения.
   /// - Parameters:
   ///   - messageType: Тип сообщения (отправленное или полученное).
   ///   - messageStatus: Статус доставки и чтения сообщения.
   ///   - message: Текст сообщения.
-  ///   - file: Прикреплённый файл в виде данных (опционально).
+  ///   - replyMessageID: Ответ на сообщение
+  ///   - images: Изображения
+  ///   - videos: Видео
+  ///   - recording: Аудиозапись
   public init(
     messageType: MessageType,
     messageStatus: MessageStatus,
     message: String,
-    file: Data? = nil
+    replyMessageID: String?,
+    images: [MessengeImageModel],
+    videos: [MessengeVideoModel],
+    recording: MessengeRecordingModel?
   ) {
     self.messageType = messageType
     self.messageStatus = messageStatus
     self.message = message
-    self.file = file
+    self.replyMessageID = replyMessageID
+    self.images = images
+    self.videos = videos
+    self.recording = recording
     self.id = UUID().uuidString
     self.date = Date()
   }
@@ -52,8 +69,22 @@ extension MessengeModel {
     case own
     /// Сообщение получено от другого пользователя.
     case received
+    /// Системное сообщение Успех
+    case systemSuccess
+    /// Системное сообщение Внимание
+    case systemAttention
+    /// Системное сообщение Опасность
+    case systemDanger
+    
     /// Системное сообщение
-    case system
+    public var isSystem: Bool {
+      switch self {
+      case .systemSuccess, .systemAttention, .systemDanger:
+        return true
+      default:
+        return false
+      }
+    }
   }
 }
 
@@ -62,16 +93,17 @@ extension MessengeModel {
 extension MessengeModel {
   /// Перечисление, представляющее статусы сообщений
   public enum MessageStatus {
-    /// Сообщение не отправлено
-    case notSent
-    /// В процессе отправки
-    case inProgress
-    /// Сообщение отправлено
+    /// Статус отправки сообщения.
+    /// Указывает, что сообщение в процессе отправки.
+    case sending
+    
+    /// Статус ошибки отправки сообщения.
+    /// Указывает, что произошла ошибка при отправке сообщения.
+    case failed
+    
+    /// Статус успешной отправки сообщения.
+    /// Указывает, что сообщение было успешно отправлено.
     case sent
-    /// Сообщение доставлено
-    case delivered
-    /// Сообщение прочитано
-    case read
   }
 }
 

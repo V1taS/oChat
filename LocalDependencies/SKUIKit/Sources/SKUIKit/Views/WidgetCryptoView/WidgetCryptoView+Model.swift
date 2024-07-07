@@ -147,13 +147,13 @@ extension WidgetCryptoView {
       case .standart:
         return SKStyleAsset.ghost.swiftUIColor
       case .positive:
-        return SKStyleAsset.lime.swiftUIColor
+        return SKStyleAsset.constantLime.swiftUIColor
       case .negative:
-        return SKStyleAsset.ruby.swiftUIColor
+        return SKStyleAsset.constantRuby.swiftUIColor
       case .attention:
-        return SKStyleAsset.amberGlow.swiftUIColor
+        return SKStyleAsset.constantAmberGlow.swiftUIColor
       case .netural:
-        return SKStyleAsset.slate.swiftUIColor
+        return SKStyleAsset.constantSlate.swiftUIColor
       }
     }
     
@@ -262,7 +262,7 @@ extension WidgetCryptoView {
       case let .custom(_, _, color, _, _, _):
         return color ?? SKStyleAsset.ghost.swiftUIColor
       case .chevron:
-        return SKStyleAsset.slate.swiftUIColor
+        return SKStyleAsset.constantSlate.swiftUIColor
       }
     }
     

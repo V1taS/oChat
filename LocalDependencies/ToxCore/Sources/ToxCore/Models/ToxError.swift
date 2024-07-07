@@ -354,4 +354,27 @@ extension ToxError {
       self = .unknown
     }
   }
+  
+  /// Инициализатор для ошибок управления файлами.
+  /// - Parameter fileControlError: Значение ошибки C-перечисления TOX_ERR_FILE_CONTROL.
+  public init(fileControlError: TOX_ERR_FILE_CONTROL) {
+    switch fileControlError {
+    case TOX_ERR_FILE_CONTROL_OK:
+      self = .ok
+    case TOX_ERR_FILE_CONTROL_FRIEND_NOT_FOUND:
+      self = .fileSendFriendNotFound
+    case TOX_ERR_FILE_CONTROL_FRIEND_NOT_CONNECTED:
+      self = .fileSendFriendNotConnected
+    case TOX_ERR_FILE_CONTROL_NOT_FOUND:
+      self = .fileChunkNotFound
+    case TOX_ERR_FILE_CONTROL_DENIED:
+      self = .fileSendError
+    case TOX_ERR_FILE_CONTROL_ALREADY_PAUSED:
+      self = .fileSendError
+    case TOX_ERR_FILE_CONTROL_NOT_PAUSED:
+      self = .fileSendError
+    default:
+      self = .unknown
+    }
+  }
 }

@@ -26,6 +26,11 @@ final class DataManagementService: IDataManagementService {
     DataMappingService()
   }
   
+  /// Возвращает сервис для работы с архивами
+  var zipArchiveService: IZipArchiveService {
+    ZipArchiveService()
+  }
+  
   // MARK: - Funcs
   
   /// Возвращает сервис управления безопасным хранением данных.

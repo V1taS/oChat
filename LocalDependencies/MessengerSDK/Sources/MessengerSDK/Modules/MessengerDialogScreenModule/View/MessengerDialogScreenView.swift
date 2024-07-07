@@ -12,6 +12,8 @@ import SKAbstractions
 import Lottie
 import Combine
 import Foundation
+import ExyteChat
+import ExyteMediaPicker
 
 struct MessengerDialogScreenView: View {
   
@@ -22,22 +24,11 @@ struct MessengerDialogScreenView: View {
   
   // MARK: - Private properties
   
-  @State private var keyboardHeight: CGFloat = .zero
-  @State private var keyboardCancellable: AnyCancellable?
-  
   // MARK: - Body
   
   var body: some View {
     VStack(spacing: .zero) {
       getContent()
-    }
-    .padding(.horizontal, .s4)
-    .padding(.bottom, .s4)
-    .onAppear {
-      subscribeToKeyboardNotifications()
-    }
-    .onDisappear {
-      unsubscribeFromKeyboardNotifications()
     }
   }
 }
@@ -46,11 +37,10 @@ struct MessengerDialogScreenView: View {
 
 private extension MessengerDialogScreenView {
   func getContent() -> AnyView {
-    if presenter.stateContactModel.status == .initialChat && 
-        (presenter.stateContactModel.toxAddress.isNilOrEmpty || presenter.stateIsDeeplinkAdress) {
+    if presenter.isInitialAddressEntryState() {
       return AnyView(informationView(model: presenter.getInitialHintModel()))
     }
-    if presenter.stateContactModel.status == .requestChat {
+    if presenter.isRequestChatState() {
       return AnyView(informationView(model: presenter.getRequestHintModel()))
     }
     return AnyView(readyToChatView())
@@ -60,16 +50,17 @@ private extension MessengerDialogScreenView {
     messageType: MessengeModel.MessageType,
     message: String
   ) -> some View {
+    
     let backgroundColor: Color
     let foregroundColor: Color
     
     switch messageType {
     case .own:
-      backgroundColor = SKStyleAsset.azure.swiftUIColor
+      backgroundColor = SKStyleAsset.constantAzure.swiftUIColor
     case .received:
-      backgroundColor = SKStyleAsset.navy.swiftUIColor
-    case .system:
-      backgroundColor = SKStyleAsset.amberGlow.swiftUIColor
+      backgroundColor = SKStyleAsset.constantNavy.swiftUIColor
+    default:
+      backgroundColor = SKStyleAsset.constantAmberGlow.swiftUIColor
     }
     
     return Text(message)
@@ -91,7 +82,7 @@ private extension MessengerDialogScreenView {
         message: isInitialState ? $presenter.stateContactAdress : $presenter.stateInputMessengeText,
         maxLength: isInitialState ? presenter.stateContactAdressMaxLength : presenter.stateInputMessengeTextMaxLength,
         onChange: { newvalue in
-          // TODO: -
+          presenter.setUserIsTyping(text: newvalue)
         },
         header: {
           EmptyView()
@@ -106,113 +97,110 @@ private extension MessengerDialogScreenView {
         UIImpactFeedbackGenerator(style: .soft).impactOccurred()
         
         if isInitialState {
-          presenter.sendInitiateChatFromDialog()
-        } else {
-          presenter.sendMessage()
+          presenter.sendInitiateChatFromDialog(toxAddress: nil)
+          presenter.startScheduleResendInitialRequest()
         }
       }) {
         Image(systemName: "arrow.up.circle.fill")
           .resizable()
           .aspectRatio(contentMode: .fit)
           .frame(height: .s7)
-          .foregroundColor(isValidate ? SKStyleAsset.azure.swiftUIColor : SKStyleAsset.slate.swiftUIColor)
+          .foregroundColor(isValidate ? SKStyleAsset.constantAzure.swiftUIColor : SKStyleAsset.constantSlate.swiftUIColor)
           .opacity(isValidate ? 1 : 0.5)
       }
       .disabled(!isValidate)
     }
+    .padding(.s4)
   }
   
-  func subscribeToKeyboardNotifications() {
-    keyboardCancellable = Publishers.Merge(
-      NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification),
-      NotificationCenter.default.publisher(for: UIResponder.keyboardWillHideNotification)
-    )
-    .compactMap { notification in
-      if notification.name == UIResponder.keyboardWillShowNotification,
-         let keyboardFrame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect {
-        return keyboardFrame.height
-      } else {
-        return CGFloat(0)
-      }
+  func getStyleForTips(messengeModel: MessengeModel) -> TipsView.Style {
+    let style: TipsView.Style
+    switch messengeModel.messageType {
+    case .systemSuccess:
+      return .success
+    case .systemAttention:
+      return .attention
+    case .systemDanger:
+      return .danger
+    default:
+      return .success
     }
-    .assign(to: \.keyboardHeight, on: self)
-  }
-  
-  func unsubscribeFromKeyboardNotifications() {
-    keyboardCancellable?.cancel()
-    keyboardCancellable = nil
   }
 }
 
 // MARK: - Private Ready To Chat
 
 private extension MessengerDialogScreenView {
+  @ViewBuilder
   func readyToChatView() -> some View {
-    ScrollViewReader { scrollViewProxy in
-      VStack {
-        ScrollView(.vertical, showsIndicators: false) {
-          LazyVStack(spacing: .zero) {
-            ForEach(presenter.stateMessengeModels, id: \.id) { messengeModel in
-              if messengeModel.messageType == .own {
-                HStack(spacing: .zero) {
-                  Spacer()
-                  createMessageView(
-                    messageType: messengeModel.messageType,
-                    message: messengeModel.message
-                  )
-                }
-                .padding(.top, .s4)
-                .id(messengeModel.id)
-              }
-              
-              if messengeModel.messageType == .received {
-                HStack(spacing: .zero) {
-                  createMessageView(
-                    messageType: messengeModel.messageType,
-                    message: messengeModel.message
-                  )
-                  Spacer()
-                }
-                .padding(.top, .s4)
-                .id(messengeModel.id)
-              }
-              
-              if messengeModel.messageType == .system {
-                TipsView(
-                  .init(
-                    text: messengeModel.message,
-                    style: .success,
-                    isSelectableTips: false,
-                    actionTips: {},
-                    isCloseButton: true,
-                    closeButtonAction: {
-                      presenter.removeMessage(id: messengeModel.id)
-                    }
-                  )
-                )
-                .padding(.top, .s4)
-                .id(messengeModel.id)
-              }
+    if presenter.isInitialWaitConfirmState() {
+      ChatView(
+        messages: presenter.stateMessengeModels,
+        didSendMessage: { _ in },
+        inputViewBuilder: { _, _, _, _, _, _ in
+          MainButtonView(
+            text: presenter.stateIsCanResendInitialRequest ?
+            "Отправить запрос" :
+              "Отправить запрос через \(presenter.stateSecondsUntilResendInitialRequestAllowed) сек.",
+            isEnabled: presenter.stateIsCanResendInitialRequest,
+            style: .primary,
+            action: {
+              presenter.sendInitiateChatFromDialog(toxAddress: nil)
+              presenter.startScheduleResendInitialRequest()
             }
-          }
-          .onChange(of: presenter.stateMessengeModels) { _ in
-            scrollViewProxy.scrollTo(presenter.stateMessengeModels.last?.id, anchor: .bottom)
-          }
-          .onChange(of: keyboardHeight) { _ in
-            Timer.scheduledTimer(withTimeInterval: 0.3, repeats: false) { _ in
-              withAnimation {
-                scrollViewProxy.scrollTo(presenter.stateMessengeModels.last?.id, anchor: .bottom)
-              }
-            }
-          }
+          )
+          .padding(.horizontal, .s4)
+          .padding(.top, .s4)
         }
-        .padding(.bottom, .s4)
-        
-        createChatFieldView(isInitialState: false)
+      )
+    } else if presenter.stateContactModel.status == .offline {
+      ChatView(
+        messages: presenter.stateMessengeModels,
+        didSendMessage: { _ in },
+        inputViewBuilder: { _, _, _, _, _, _ in
+          MainButtonView(
+            text: presenter.stateIsAskToComeContact ?
+            "Позвать контакт" :
+              "Позвать контакт через \(presenter.stateSecondsUntilAskToComeContactAllowed) сек.",
+            isEnabled: presenter.stateIsAskToComeContact,
+            style: .primary,
+            action: {
+              presenter.sendPushNotification()
+              presenter.startAskToComeContactTimer()
+            }
+          )
+          .padding(.horizontal, .s4)
+          .padding(.top, .s4)
+        }
+      )
+    } else {
+      ChatView(messages: presenter.stateMessengeModels) { draft in
+        Task {
+          let images = await draft.makeImages()
+          let videos = await draft.makeVideos()
+          presenter.sendMessage(messenge: draft.text, images: images, videos: videos)
+        }
       }
-      .onAppear {
-        scrollViewProxy.scrollTo(presenter.stateMessengeModels.last?.id, anchor: .bottom)
+      .setAvailableInput(.full)
+      .showMessageTimeView(true)
+      .showDateHeaders(showDateHeaders: true)
+      .setMediaPickerSelectionParameters(
+        .init(
+          mediaType: .photoAndVideo,
+          selectionStyle: .checkmark,
+          selectionLimit: 10,
+          showFullscreenPreview: false
+        )
+      )
+      .messageUseMarkdown(messageUseMarkdown: true)
+      .showMessageMenuOnLongPress(true)
+      .showNetworkConnectionProblem(true)
+      .assetsPickerLimit(assetsPickerLimit: 10)
+      .enableLoadMore(offset: presenter.stateShowMessengeMaxCount) { message in
+        presenter.loadMoreMessage(before: message)
       }
+      .messageUseMarkdown(messageUseMarkdown: true)
+      .mediaPickerTheme()
     }
   }
 }
@@ -224,6 +212,22 @@ private extension MessengerDialogScreenView {
     VStack {
       ScrollView(.vertical, showsIndicators: false) {
         VStack(spacing: .zero) {
+          if let note = model.note, presenter.stateShowInitialTips {
+            TipsView(
+              .init(
+                text: note,
+                style: .attention,
+                isSelectableTips: false,
+                actionTips: {},
+                isCloseButton: true,
+                closeButtonAction: {
+                  presenter.stateShowInitialTips.toggle()
+                }
+              )
+            )
+            .padding(.bottom, .s10)
+          }
+          
           createHeaderView(model: model)
           createInformationBloksView(model: model)
             .padding(.top, .s12)
@@ -250,7 +254,11 @@ private extension MessengerDialogScreenView {
               presenter.cancelRequestForDialog()
             }
         }
+        .padding(.horizontal, .s4)
       }
+    }
+    .onTapGesture {
+      dismissKeyboard()
     }
   }
   
@@ -308,7 +316,7 @@ private extension MessengerDialogScreenView {
       Image(systemName: systemImageName)
         .resizable()
         .aspectRatio(contentMode: .fit)
-        .foregroundColor(SKStyleAsset.azure.swiftUIColor)
+        .foregroundColor(SKStyleAsset.constantAzure.swiftUIColor)
         .frame(width: 30, height: 30)
         .allowsHitTesting(false)
       
@@ -322,7 +330,7 @@ private extension MessengerDialogScreenView {
         
         Text(description)
           .font(.fancy.text.small)
-          .foregroundColor(SKStyleAsset.slate.swiftUIColor)
+          .foregroundColor(SKStyleAsset.constantSlate.swiftUIColor)
           .multilineTextAlignment(.leading)
           .allowsHitTesting(false)
           .padding(.horizontal, .s4)
@@ -330,6 +338,15 @@ private extension MessengerDialogScreenView {
       Spacer()
     }
     .padding(.horizontal, .s4)
+  }
+  
+  func dismissKeyboard() {
+    UIApplication.shared.sendAction(
+      #selector(UIResponder.resignFirstResponder),
+      to: nil,
+      from: nil,
+      for: nil
+    )
   }
 }
 
@@ -345,5 +362,51 @@ struct MessengerDialogScreenView_Previews: PreviewProvider {
         services: ApplicationServicesStub()
       ).viewController
     }
+  }
+}
+
+// TODO: - Вынести этот код
+
+extension DraftMessage {
+  func makeImages() async -> [MessengeImageModel] {
+    await medias
+      .filter { $0.type == .image }
+      .asyncMap { (media : Media) -> (Media, URL?, URL?) in
+        (media, await media.getThumbnailURL(), await media.getURL())
+      }
+      .filter { (media: Media, thumb: URL?, full: URL?) -> Bool in
+        thumb != nil && full != nil
+      }
+      .map { media, thumb, full in
+        MessengeImageModel(id: media.id.uuidString, thumbnail: thumb!, full: full!)
+      }
+  }
+  
+  func makeVideos() async -> [MessengeVideoModel] {
+    await medias
+      .filter { $0.type == .video }
+      .asyncMap { (media : Media) -> (Media, URL?, URL?) in
+        (media, await media.getThumbnailURL(), await media.getURL())
+      }
+      .filter { (media: Media, thumb: URL?, full: URL?) -> Bool in
+        thumb != nil && full != nil
+      }
+      .map { media, thumb, full in
+        MessengeVideoModel(id: media.id.uuidString, thumbnail: thumb!, full: full!)
+      }
+  }
+}
+
+extension Sequence {
+  func asyncMap<T>(
+    _ transform: (Element) async throws -> T
+  ) async rethrows -> [T] {
+    var values = [T]()
+    
+    for element in self {
+      try await values.append(transform(element))
+    }
+    
+    return values
   }
 }

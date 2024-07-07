@@ -57,18 +57,7 @@ public struct AsyncNetworkImageView: View {
 
 private extension AsyncNetworkImageView {
   func getFailureView() -> AnyView {
-    return AnyView(
-      ZStack {
-        SKStyleAsset.constantSlate.swiftUIColor.opacity(0.1)
-        SKUIKitAsset.skWatermark.swiftUIImage
-          .resizable()
-          .aspectRatio(contentMode: .fit)
-          .blendMode(.destinationOut)
-          .padding(.s2)
-      }
-        .frame(width: model.size.width, height: model.size.height)
-        .cornerRadius(model.cornerRadiusType.cornerRadius(for: model.size))
-    )
+    return AnyView(EmptyView())
   }
   
   func getLoadingView() -> AnyView {

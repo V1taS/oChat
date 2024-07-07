@@ -31,12 +31,48 @@ struct ConfigurationValueConfigurator: Configurator {
   
   // MARK: - Internal func
   
-  func configure() {}
+  func configure() {
+    getPushNotificationAuthKey()
+    getPushNotificationKeyID()
+    getPushNotificationProdURL()
+    getPushNotificationTeamID()
+    getPushNotificationTestURL()
+  }
 }
 
 // MARK: - Private
 
 private extension ConfigurationValueConfigurator {
+  func getPushNotificationAuthKey() {
+    getConfigurationValue(forKey: Constants.pushNotificationAuthKey) { value in
+      Secrets.pushNotificationAuthKey = value
+    }
+  }
+  
+  func getPushNotificationKeyID() {
+    getConfigurationValue(forKey: Constants.pushNotificationKeyID) { value in
+      Secrets.pushNotificationKeyID = value
+    }
+  }
+  
+  func getPushNotificationProdURL() {
+    getConfigurationValue(forKey: Constants.pushNotificationProdURL) { value in
+      Secrets.pushNotificationProdURL = value
+    }
+  }
+  
+  func getPushNotificationTeamID() {
+    getConfigurationValue(forKey: Constants.pushNotificationTeamID) { value in
+      Secrets.pushNotificationTeamID = value
+    }
+  }
+  
+  func getPushNotificationTestURL() {
+    getConfigurationValue(forKey: Constants.ushNotificationTestURL) { value in
+      Secrets.ushNotificationTestURL = value
+    }
+  }
+  
   func getConfigurationValue(forKey key: String, completion: @escaping (String) -> Void) {
     if let value = secureDataManagerService.getString(for: key) {
       completion(value)
@@ -54,7 +90,9 @@ private extension ConfigurationValueConfigurator {
 // MARK: - Private
 
 private enum Constants {
-  static let infuraKey = "infura_keys"
-  static let tokenBaseUrlKey = "token_base_url"
-  static let oneInchKeys = "one_inch_keys"
+  static let pushNotificationAuthKey = "PushNotificationAuthKey"
+  static let pushNotificationKeyID = "PushNotificationKeyID"
+  static let pushNotificationProdURL = "PushNotificationProdURL"
+  static let pushNotificationTeamID = "PushNotificationTeamID"
+  static let ushNotificationTestURL = "PushNotificationTestURL"
 }

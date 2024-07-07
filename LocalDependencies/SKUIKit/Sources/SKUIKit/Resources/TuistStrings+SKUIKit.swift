@@ -28,6 +28,23 @@ public enum SKUIKitStrings {
     public static let weeks = SKUIKitStrings.tr("ChartSectionViewLocalization", "State.weeks")
     /// Y
     public static let yearly = SKUIKitStrings.tr("ChartSectionViewLocalization", "State.yearly")
+    
+    public static let messageContextMenuTitle = SKUIKitStrings.tr(
+      "MessageViewLocalization",
+      "State.Message.ContextMenu.Title"
+    )
+    public static let messageCopyButtonTitle = SKUIKitStrings.tr(
+      "MessageViewLocalization",
+      "State.Message.CopyButton.Title"
+    )
+    public static let messageDeleteButtonTitle = SKUIKitStrings.tr(
+      "MessageViewLocalization",
+      "State.Message.DeleteButton.Title"
+    )
+    public static let messageRetryButtonTitle = SKUIKitStrings.tr(
+      "MessageViewLocalization",
+      "State.Message.RetryButton.Title"
+    )
   }
 }
 // swiftlint:enable explicit_type_interface function_parameter_count identifier_name line_length

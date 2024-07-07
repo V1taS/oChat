@@ -60,13 +60,13 @@ public struct CheckmarkView: View {
             .resizable()
             .aspectRatio(contentMode: .fit)
             .frame(height: .s6)
-            .foregroundColor(toggleValue ? SKStyleAsset.azure.swiftUIColor : SKStyleAsset.slate.swiftUIColor)
+            .foregroundColor(toggleValue ? SKStyleAsset.constantAzure.swiftUIColor : SKStyleAsset.constantSlate.swiftUIColor)
         }
         
         if let text {
           Text(text)
             .font(.fancy.text.small)
-            .foregroundColor(SKStyleAsset.slate.swiftUIColor)
+            .foregroundColor(SKStyleAsset.constantSlate.swiftUIColor)
             .lineLimit(.max)
             .allowsHitTesting(false)
           

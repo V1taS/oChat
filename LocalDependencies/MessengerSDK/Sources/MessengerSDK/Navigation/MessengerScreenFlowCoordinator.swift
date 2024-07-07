@@ -69,6 +69,31 @@ extension MessengerScreenFlowCoordinator: MessengerListScreenModuleOutput {
 // MARK: - MessengerDialogScreenModuleOutput
 
 extension MessengerScreenFlowCoordinator: MessengerDialogScreenModuleOutput {
+  public func sendPushNotification(contact: ContactModel) {
+    messengerListScreenModuleModule?.input.sendPushNotification(contact: contact)
+  }
+  
+  public func setUserIsTyping(
+    _ isTyping: Bool,
+    to toxPublicKey: String,
+    completion: @escaping (Result<Void, any Error>) -> Void
+  ) {
+    messengerListScreenModuleModule?.input.setUserIsTyping(
+      isTyping,
+      to: toxPublicKey,
+      completion: completion
+    )
+  }
+  
+  public func closeMessengerDialog() {
+    navigationController?.popViewController(animated: true)
+    messengerDialogModule = nil
+  }
+  
+  public func saveContactModel(_ model: ContactModel) {
+    messengerListScreenModuleModule?.input.saveContactModel(model)
+  }
+  
   public func removeMessage(id: String, contact: ContactModel) {
     messengerListScreenModuleModule?.input.removeMessage(id: id, contact: contact)
   }
@@ -85,8 +110,8 @@ extension MessengerScreenFlowCoordinator: MessengerDialogScreenModuleOutput {
     messengerListScreenModuleModule?.input.sendInitiateChat(contactModel: contactModel)
   }
   
-  public func sendMessage(_ message: String, contact: ContactModel) {
-    messengerListScreenModuleModule?.input.sendMessage(message, contact: contact)
+  public func sendMessage(contact: ContactModel) {
+    messengerListScreenModuleModule?.input.sendMessage(contact: contact, completion: nil)
   }
   
   public func messengerDialogWillDisappear() {

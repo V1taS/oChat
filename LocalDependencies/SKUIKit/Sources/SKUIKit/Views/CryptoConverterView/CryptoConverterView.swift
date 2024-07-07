@@ -65,7 +65,7 @@ private extension CryptoConverterView {
         Text(model.leftSide.title)
           .font(.fancy.text.title)
           .fontWeight(.bold)
-          .foregroundColor(SKStyleAsset.slate.swiftUIColor)
+          .foregroundColor(SKStyleAsset.constantSlate.swiftUIColor)
           .multilineTextAlignment(.leading)
           .lineLimit(1)
           .truncationMode(.middle)
@@ -80,7 +80,7 @@ private extension CryptoConverterView {
           } label: {
             Text("\(totalAmountModel.totalCryptoTitle) \(totalAmountModel.totalCrypto)")
               .font(.fancy.text.regularMedium)
-              .foregroundColor(SKStyleAsset.azure.swiftUIColor)
+              .foregroundColor(SKStyleAsset.constantAzure.swiftUIColor)
               .multilineTextAlignment(.leading)
               .lineLimit(1)
               .truncationMode(.middle)
@@ -124,7 +124,7 @@ private extension CryptoConverterView {
                     .resizable()
                     .frame(width: .s3, height: .s2)
                     .aspectRatio(contentMode: .fit)
-                    .foregroundColor(SKStyleAsset.slate.swiftUIColor)
+                    .foregroundColor(SKStyleAsset.constantSlate.swiftUIColor)
                     .background(.clear)
                     .allowsHitTesting(true)
                 }
@@ -140,7 +140,7 @@ private extension CryptoConverterView {
           if let currency = model.rightSide?.fieldWithAmount.currency {
             Text("\(currency)")
               .font(.fancy.text.title)
-              .foregroundColor(SKStyleAsset.slate.swiftUIColor)
+              .foregroundColor(SKStyleAsset.constantSlate.swiftUIColor)
               .lineLimit(1)
               .truncationMode(.middle)
               .allowsHitTesting(false)
@@ -156,7 +156,7 @@ private extension CryptoConverterView {
         if let longFormCryptoName = model.leftSide.longFormCryptoName {
           Text(longFormCryptoName)
             .font(.fancy.text.regular)
-            .foregroundColor(SKStyleAsset.slate.swiftUIColor)
+            .foregroundColor(SKStyleAsset.constantSlate.swiftUIColor)
             .multilineTextAlignment(.leading)
             .lineLimit(1)
             .truncationMode(.middle)
@@ -173,7 +173,7 @@ private extension CryptoConverterView {
             HStack(alignment: .center, spacing: .s2) {
               Text("\(Constants.approxSign) \(currencySwitcher.amountInCurrency)")
                 .font(.fancy.text.regular)
-                .foregroundColor(SKStyleAsset.azure.swiftUIColor)
+                .foregroundColor(SKStyleAsset.constantAzure.swiftUIColor)
                 .multilineTextAlignment(.leading)
                 .lineLimit(1)
                 .truncationMode(.middle)
@@ -183,11 +183,11 @@ private extension CryptoConverterView {
                 .resizable()
                 .frame(width: .s4, height: .s4)
                 .aspectRatio(contentMode: .fit)
-                .foregroundColor(SKStyleAsset.azure.swiftUIColor)
+                .foregroundColor(SKStyleAsset.constantAzure.swiftUIColor)
                 .allowsHitTesting(false)
             }
           }
-          .accentColor(SKStyleAsset.azure.swiftUIColor)
+          .accentColor(SKStyleAsset.constantAzure.swiftUIColor)
         }
       }
     )
@@ -195,7 +195,7 @@ private extension CryptoConverterView {
   
   func createPlaceholderView() -> Text {
     return Text(model.placeholder)
-      .foregroundColor(SKStyleAsset.slate.swiftUIColor.opacity(0.4))
+      .foregroundColor(SKStyleAsset.constantSlate.swiftUIColor.opacity(0.4))
   }
   
   func createTextField(model: CryptoConverterView.Model) -> AnyView {
@@ -222,7 +222,7 @@ private extension CryptoConverterView {
         .focused($isTextFieldFocused)
         .foregroundColor(SKStyleAsset.ghost.swiftUIColor)
         .truncationMode(.tail)
-        .accentColor(SKStyleAsset.azure.swiftUIColor)
+        .accentColor(SKStyleAsset.constantAzure.swiftUIColor)
         .onChange(of: text) { newValue in
           guard isCryptocurrency else {
             return

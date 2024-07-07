@@ -37,4 +37,7 @@ struct MessengerDialogHintModel: Equatable {
   let threeDescription: String
   /// Название системного изображения
   let threeSystemImageName: String
+  
+  /// Примечания.
+  let note: String?
 }

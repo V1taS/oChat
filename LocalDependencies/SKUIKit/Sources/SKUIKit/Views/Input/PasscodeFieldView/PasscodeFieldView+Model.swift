@@ -16,11 +16,11 @@ extension PasscodeFieldView {
     var color: Color {
       switch self {
       case .failure:
-        return SKStyleAsset.ruby.swiftUIColor
+        return SKStyleAsset.constantRuby.swiftUIColor
       case .success:
-        return SKStyleAsset.lime.swiftUIColor
+        return SKStyleAsset.constantLime.swiftUIColor
       case .standart:
-        return SKStyleAsset.azure.swiftUIColor
+        return SKStyleAsset.constantAzure.swiftUIColor
       }
     }
     

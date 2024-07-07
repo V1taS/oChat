@@ -14,7 +14,8 @@ final class TorConnectScreenPresenter: ObservableObject {
   
   // MARK: - View state
   
-  @Published var stateConnectionProgress: Double = .zero
+  @Published var stateConnectionTORProgress: CGFloat = .zero
+  @Published var stateConnectionTOXProgress: CGFloat = .zero
   @Published var stateSystemMessage = ""
   
   // MARK: - Internal properties
@@ -54,8 +55,7 @@ final class TorConnectScreenPresenter: ObservableObject {
     guard let self else {
       return
     }
-    
-    moduleOutput?.stratTorConnectService()
+    // TODO: -
   }
   
   // MARK: - Internal func
@@ -98,24 +98,6 @@ private extension TorConnectScreenPresenter {
 
 private extension TorConnectScreenPresenter {
   @objc
-  func handleServerState(_ notification: Notification) {
-    if let serverState = notification.userInfo?["serverState"] as? TorServerState {
-      switch serverState {
-      case let .serverIsRunning(onPort):
-        print("✅ ServerIsRunning on port: \(onPort)")
-      case let .errorStartingServer(error):
-        print("❌ \(error)")
-      case .didAcceptNewSocket:
-        print("✅ DidAcceptNewSocket")
-      case .didSentResponse:
-        print("✅ didSentResponse")
-      case .socketDidDisconnect:
-        print("🟡 socketDidDisconnect")
-      }
-    }
-  }
-  
-  @objc
   func handleSessionState(_ notification: Notification) {
     if let sessionState = notification.userInfo?["sessionState"] as? TorSessionState {
       switch sessionState {
@@ -123,10 +105,9 @@ private extension TorConnectScreenPresenter {
       case .started:
         stateSystemMessage = "Started"
       case let .connectingProgress(result):
-        stateConnectionProgress = Double(result / 100)
+        stateConnectionTORProgress = Double(result / 100)
       case .connected:
         stateSystemMessage = "Connected"
-        moduleOutput?.torServiceConnected()
       case .stopped:
         stateSystemMessage = "Stopped"
       case .refreshing:

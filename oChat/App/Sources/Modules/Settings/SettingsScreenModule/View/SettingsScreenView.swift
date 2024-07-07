@@ -21,9 +21,9 @@ struct SettingsScreenView: View {
   
   var body: some View {
     List {
-      ForEach(presenter.stateSectionsModels.indices, id: \.self) { index in
+      ForEach(Array(presenter.stateSectionsModels.enumerated()), id: \.element.id) { index, model in
         VStack(spacing: .zero) {
-          WidgetCryptoView(presenter.stateSectionsModels[index])
+          WidgetCryptoView(model)
             .if(index == 0) { view in
               view
                 .clipShape(RoundedCornerShape(corners: [.topLeft, .topRight], radius: .s4))
@@ -35,7 +35,7 @@ struct SettingsScreenView: View {
           
           if index < presenter.stateSectionsModels.count - 1 {
             Divider()
-              .background(SKStyleAsset.slate.swiftUIColor.opacity(0.3))
+              .background(SKStyleAsset.constantSlate.swiftUIColor.opacity(0.3))
           }
           if index == presenter.stateSectionsModels.count - 1 {
             applicationVersionView()

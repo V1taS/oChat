@@ -27,4 +27,11 @@ public protocol IAppSettingsManager {
   ///   - value: Значение, указывающее, следует ли включить уведомления.
   ///   - completion: Опциональный блок завершения, вызываемый после сохранения изменений.
   func setIsEnabledNotifications(_ value: Bool, completion: (() -> Void)?)
+  
+  /// Устанавливает прочитанное или не прочитанное сообщение у контакта
+  func setIsNewMessagesAvailable(
+    _ value: Bool,
+    toxAddress: String,
+    completion: (() -> Void)?
+  )
 }

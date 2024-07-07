@@ -96,7 +96,7 @@ private extension WidgetCryptoView {
               .frame(width: imageModel.size.width, height: imageModel.size.height)
               .aspectRatio(contentMode: .fit)
               .if(imageModel.imageColor?.foregroundColor != nil, transform: { view in
-                view.foregroundColor(imageModel.imageColor ?? SKStyleAsset.azure.swiftUIColor)
+                view.foregroundColor(imageModel.imageColor ?? SKStyleAsset.constantAzure.swiftUIColor)
               })
               .if(imageModel.backgroundColor != nil, transform: { view in
                 view.background(imageModel.backgroundColor ?? .clear)
@@ -133,7 +133,7 @@ private extension WidgetCryptoView {
               .frame(width: imageModel.size.width, height: imageModel.size.height)
               .aspectRatio(contentMode: .fit)
               .if(imageModel.imageColor?.foregroundColor != nil, transform: { view in
-                view.foregroundColor(imageModel.imageColor ?? SKStyleAsset.azure.swiftUIColor)
+                view.foregroundColor(imageModel.imageColor ?? SKStyleAsset.constantAzure.swiftUIColor)
               })
               .if(imageModel.backgroundColor != nil, transform: { view in
                 view.background(imageModel.backgroundColor ?? .clear)
@@ -354,7 +354,7 @@ private extension WidgetCryptoView {
             .resizable()
             .aspectRatio(contentMode: .fit)
             .frame(width: itemModel.size.width, height: itemModel.size.height)
-            .foregroundColor(SKStyleAsset.azure.swiftUIColor)
+            .foregroundColor(SKStyleAsset.constantAzure.swiftUIColor)
         })
       )
     }

@@ -12,6 +12,15 @@ import SKStyle
 // MARK: - MessengerModelSettingsManager
 
 extension MessengerModelHandlerService: IMessengerModelSettingsManager {
+  public func saveMyPushNotificationToken(_ token: String, completion: (() -> Void)?) {
+    getMessengerModel { [weak self] model in
+      guard let self else { return }
+      var updatedModel = model
+      updatedModel.pushNotificationToken = token
+      saveMessengerModel(updatedModel, completion: completion)
+    }
+  }
+  
   public func setToxStateAsString(
     _ toxStateAsString: String?,
     completion: (() -> Void)?
@@ -58,6 +67,45 @@ extension MessengerModelHandlerService: IMessengerModelSettingsManager {
     }
   }
   
+  public func setAllContactsNoTyping(completion: (() -> Void)?) {
+    getMessengerModel { [weak self] model in
+      guard let self else {
+        return
+      }
+      var updatedModel = model
+      var updatedContacts = model.contacts.compactMap { model in
+        var updatedModel = model
+        if model.isTyping {
+          updatedModel.isTyping = false
+        }
+        return updatedModel
+      }
+      updatedModel.contacts = updatedContacts
+      saveMessengerModel(updatedModel, completion: completion)
+    }
+  }
+  
+  public func clearAllMessengeTempID(completion: (() -> Void)?) {
+    getMessengerModel { [weak self] model in
+      guard let self else {
+        return
+      }
+      var updatedModel = model
+      var updatedContacts = model.contacts.compactMap { contact in
+        var updatedContact = contact
+        var updatedMessenges = updatedContact.messenges.compactMap { messenge in
+          var updatedMessenge = messenge
+          updatedMessenge.tempMessageID = nil
+          return updatedMessenge
+        }
+        updatedContact.messenges = updatedMessenges
+        return updatedContact
+      }
+      updatedModel.contacts = updatedContacts
+      saveMessengerModel(updatedModel, completion: completion)
+    }
+  }
+  
   public func setNameContact(
     _ contactModel: ContactModel,
     _ name: String,
@@ -82,7 +130,7 @@ extension MessengerModelHandlerService: IMessengerModelSettingsManager {
     }
   }
   
-  public func setOnionAddress(
+  public func setToxAddress(
     _ contactModel: ContactModel,
     _ address: String,
     completion: ((ContactModel?) -> Void)?

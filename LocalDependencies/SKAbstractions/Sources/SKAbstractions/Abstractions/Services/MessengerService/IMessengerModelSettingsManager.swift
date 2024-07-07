@@ -47,11 +47,14 @@ public protocol IMessengerModelSettingsManager {
   ///   - model: Модель контакта `ContactModel`.
   ///   - address: Новый адрес для контакта.
   ///   - completion: Опциональный блок завершения, который вызывается после завершения операции. Может быть `nil`.
-  func setOnionAddress(
+  func setToxAddress(
     _ model: ContactModel,
     _ address: String,
     completion: ((_ model: ContactModel?) -> Void)?
   )
+  
+  /// Очищает временные ИД у всех сообщений
+  func clearAllMessengeTempID(completion: (() -> Void)?)
   
   /// Устанавливает локальный адрес контакта.
   /// - Parameters:
@@ -86,6 +89,14 @@ public protocol IMessengerModelSettingsManager {
     completion: ((_ model: ContactModel?) -> Void)?
   )
   
+  /// Сохраняет токен для пуш сообщений
+  /// - Parameters:
+  ///   - token: Токен для пуш сообщений
+  func saveMyPushNotificationToken(
+    _ token: String,
+    completion: (() -> Void)?
+  )
+  
   /// Удаляет контакт.
   /// - Parameters:
   ///   - model: Модель контакта `ContactModel`, которую нужно удалить.
@@ -98,4 +109,7 @@ public protocol IMessengerModelSettingsManager {
   /// Переводит всех контактов в состояние оффлайн.
   /// - Parameter completion: Опциональный блок завершения, вызываемый после того, как все контакты будут переведены в оффлайн.
   func setAllContactsIsOffline(completion: (() -> Void)?)
+  
+  /// Переводит всех контактов в состояние Не Печатают
+  func setAllContactsNoTyping(completion: (() -> Void)?)
 }

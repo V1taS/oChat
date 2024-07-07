@@ -90,7 +90,7 @@ private extension HighTechImageIDView {
             
             Image(systemName: "photo.badge.plus.fill")
               .resizable()
-              .foregroundColor(SKStyleAsset.azure.swiftUIColor)
+              .foregroundColor(SKStyleAsset.constantAzure.swiftUIColor)
               .aspectRatio(contentMode: .fit)
               .frame(width: .s18, height: .s18)
             

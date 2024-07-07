@@ -18,4 +18,10 @@ public enum NotificationConstants: String {
   case sessionState
   /// Онлайн статус друзей
   case didUpdateFriendOnlineStatus
+  /// Печатает ли в данный момент пользователь
+  case isTyping
+  /// Сообщение доставлено
+  case didUpdateFriendReadReceipt
+  /// Файл доставлен
+  case didUpdateFileReceive
 }

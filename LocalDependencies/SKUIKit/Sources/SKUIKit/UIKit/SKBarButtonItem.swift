@@ -29,7 +29,7 @@ final public class SKBarButtonItem: UIBarButtonItem {
     self.action = #selector(barButtonSelector)
     self.barButtonAction = buttonType.action
     self.buttonItem = buttonType.buttonItem
-    self.tintColor = SKStyleAsset.azure.color
+    self.tintColor = SKStyleAsset.constantAzure.color
     self.isEnabled = isEnabled
     buttonItem?(self)
   }

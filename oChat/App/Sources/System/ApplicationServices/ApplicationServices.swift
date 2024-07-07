@@ -44,11 +44,16 @@ final class ApplicationServices: IApplicationServices {
   
   /// Возвращает сервис  для управления сервисами, связанными с мессенджером
   var messengerService: IMessengerService {
-    MessengerService()
+    MessengerService.shared
   }
   
   /// Управляет чатом P2P через Tor.
   var p2pChatManager: IP2PChatManager {
     P2PChatManager.shared
+  }
+  
+  /// Возвращает сервис для отправки push-уведомлений
+  var pushNotificationService: IPushNotificationService {
+    PushNotificationService()
   }
 }

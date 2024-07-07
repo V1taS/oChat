@@ -12,6 +12,10 @@ public enum MessengerSDKStrings {
       "MessengerListScreenModuleLocalization",
       "State.Notification.PasscodeNotSet.Title"
     )
+    public static let stateBannerPushNotificationTitle = MessengerSDKStrings.tr(
+      "MessengerListScreenModuleLocalization",
+      "State.Banner.PushNotification.Title"
+    )
   }
   public enum MessengerDialogScreenLocalization {
     public static let stateNotificationFailureTitle = MessengerSDKStrings.tr(
@@ -53,6 +57,10 @@ public enum MessengerSDKStrings {
     public static let stateInitialMessengerThreeDescription = MessengerSDKStrings.tr(
       "MessengerDialogScreenLocalization",
       "Messenger.Initial.Three.Description"
+    )
+    public static let stateInitialMessengerNote = MessengerSDKStrings.tr(
+      "MessengerDialogScreenLocalization",
+      "Messenger.Initial.Note"
     )
     
     public static let stateRequestMessengerHeaderTitle = MessengerSDKStrings.tr(

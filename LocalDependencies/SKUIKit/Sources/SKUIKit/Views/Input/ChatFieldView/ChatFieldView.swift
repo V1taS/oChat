@@ -20,7 +20,6 @@ public struct ChatFieldView<ContentView: View>: View {
   private var footer: (() -> ContentView)?
   private let maxLength: Int
   
-  
   public init(
     _ titleKey: LocalizedStringKey,
     message: Binding<String>,
@@ -47,8 +46,7 @@ public struct ChatFieldView<ContentView: View>: View {
         .foregroundColor(SKStyleAsset.ghost.swiftUIColor)
         .font(.fancy.text.regular)
         .foregroundStyle(.secondary)
-        .accentColor(SKStyleAsset.azure.swiftUIColor)
-        .autocorrectionDisabled(true)
+        .accentColor(SKStyleAsset.constantAzure.swiftUIColor)
         .lineLimit(5)
       
       if let footer = footer?() {

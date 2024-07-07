@@ -15,16 +15,22 @@ public final class ApplicationServicesStub: IApplicationServices, IDataManagerSe
                                             IAnalyticsService, ISecureDataManagerService, ICryptoService,
                                             ICloudKitService, IAppSettingsManager, IDataManagementService,
                                             IAccessAndSecurityManagementService, IUserInterfaceAndExperienceService,
-                                            IDeepLinkService {
+                                            IDeepLinkService, IPushNotificationService, IZipArchiveService {
+  public func zipFiles(atPaths paths: [URL], toDestination destinationPath: URL, password: String?, progress: ((Double) -> ())?) throws {}
+  public func unzipFile(atPath path: URL, toDestination destinationPath: URL, overwrite: Bool, password: String?, progress: ((Double) -> ())?, fileOutputHandler: ((URL) -> Void)?) throws {}
+  public var zipArchiveService: any IZipArchiveService { self }
+  public func decrypt(_ data: Data?, privateKey: String) -> Data? { nil }
+  public func encrypt(_ data: Data?, publicKey: String) -> Data? { nil }
+  public func setIsNewMessagesAvailable(_ value: Bool, toxAddress: String, completion: (() -> Void)?) {}
+  public func sendPushNotification(title: String, body: String, customData: [String : Any], deviceToken: String) {}
+  public var pushNotificationService: any IPushNotificationService { self }
   public func setAllContactsIsOffline(completion: (() -> Void)?) {}
-  
   public func saveDeepLinkURL(_ url: URL, completion: (() -> Void)?) {}
   public func deleteDeepLinkURL() {}
   public func getMessengerAdress(completion: ((String?) -> Void)?) {}
   public var deepLinkService: any IDeepLinkService { self }
   public func generateQRCode(from string: String, backgroundColor: Color, foregroundColor: Color, iconIntoQR: UIImage?, iconSize: CGSize, iconBackgroundColor: Color?, completion: ((UIImage?) -> Void)?) {}
   public var messengerService: any IMessengerService { MessengerServiceStub() }
-  
   public func deleteAllData() -> Bool { false }
   public init() {}
   public func getDataManagerService() -> any IDataManagerService { self }
@@ -167,10 +173,18 @@ public final class ApplicationServicesStub: IApplicationServices, IDataManagerSe
 
 public final class MessengerServiceStub: IMessengerModelSettingsManager, IMessengerModelHandlerService,
                                          IMessagesService, IMessengerService, IP2PChatManager, IAppSettingsManager {
+  public func sendFile(toxPublicKey: String, model: MessengerNetworkRequestDTO, files: [URL]) {}
+  public func setToxAddress(_ model: ContactModel, _ address: String, completion: ((ContactModel?) -> Void)?) {}
+  public func clearAllMessengeTempID(completion: (() -> Void)?) {}
+  public func startPeriodicFriendStatusCheck(completion: (([String : Bool]) -> Void)?) {}
+  public func friendStatus(completion: @escaping (Bool) -> Void) {}
+  public func setIsNewMessagesAvailable(_ value: Bool, toxAddress: String, completion: (() -> Void)?) {}
+  public func saveMyPushNotificationToken(_ token: String, completion: (() -> Void)?) {}
+  public func setAllContactsNoTyping(completion: (() -> Void)?) {}
+  public func setSelfStatus(isOnline: Bool) {}
+  public func setUserIsTyping(_ isTyping: Bool, to toxPublicKey: String, completion: @escaping (Result<Void, any Error>) -> Void) {}
   public func setAllContactsIsOffline(completion: (() -> Void)?) { }
-  
   public func getToxPublicKey(from address: String) -> String? { nil }
-  
   public func confirmFriendRequest(with publicKey: String, completion: @escaping (Result<String, any Error>) -> Void) {}
   public func deleteFriend(toxPublicKey: String, completion: ((Bool) -> Void)?) {}
   public func friendConnectionStatus(toxPublicKey: String, completion: ((ConnectionToxStatus?) -> Void)?) {}
