@@ -412,6 +412,12 @@ private extension MessengerListScreenModulePresenter {
       name: Notification.Name(NotificationConstants.didUpdateFileSend.rawValue),
       object: nil
     )
+    NotificationCenter.default.addObserver(
+      self,
+      selector: #selector(handleFileErrorSender(_:)),
+      name: Notification.Name(NotificationConstants.didUpdateFileErrorSend.rawValue),
+      object: nil
+    )
   }
   
   func updateContactStatus(
@@ -469,6 +475,7 @@ private extension MessengerListScreenModulePresenter {
   
   func createRequestModel(
     message: String?,
+    messageID: String?,
     replyMessageText: String?,
     senderAddress: String?,
     senderLocalMeshAddress: String?,
@@ -485,6 +492,7 @@ private extension MessengerListScreenModulePresenter {
     
     let requestModel = MessengerNetworkRequestModel(
       messageText: message,
+      messageID: messageID,
       replyMessageText: replyMessageText,
       senderAddress: senderAddress,
       senderLocalMeshAddress: senderLocalMeshAddress ?? "",
@@ -520,9 +528,12 @@ private extension MessengerListScreenModulePresenter {
     }
     
     var message = ""
+    var messageID = ""
     var replyMessageText: String?
+    
     if let messengeModel = contact.messenges.last, messengeModel.messageStatus == .sending {
       message = messengeModel.message
+      messageID = messengeModel.id
       replyMessageText = messengeModel.replyMessageText
     }
     
@@ -553,7 +564,8 @@ private extension MessengerListScreenModulePresenter {
             interactor.getToxPublicKey { [weak self] toxPublicKey in
               guard let self, let toxPublicKey else { return }
               createRequestModel(
-                message: messageForSend,
+                message: messageForSend, 
+                messageID: messageID,
                 replyMessageText: replyMessageText,
                 senderAddress: toxAddress,
                 senderLocalMeshAddress: nil,
@@ -602,7 +614,7 @@ private extension MessengerListScreenModulePresenter {
       contact: contact
     ) {
       [weak self] recipientTorAddress, requestModel in
-      guard let self else { return }
+      guard let self, let encryptionPublicKey = contact.encryptionPublicKey else { return }
       let messengeIndex = contact.messenges.firstIndex(where: {
         $0.id == contact.messenges.last?.id
       })
@@ -618,6 +630,7 @@ private extension MessengerListScreenModulePresenter {
         
         interactor.sendFile(
           toxPublicKey: toxPublicKey, 
+          recipientPublicKey: encryptionPublicKey,
           recordModel: contact.messenges[messengeIndex].recording,
           messengerRequest: requestModel,
           files: files
@@ -731,35 +744,75 @@ private extension MessengerListScreenModulePresenter {
   }
   
   @objc
-  func handleFileSender(_ notification: Notification) {
-    if let publicKey = notification.userInfo?["publicKey"] as? String,
-       let messageID = notification.userInfo?["messageID"] as? String,
-       let progress = notification.userInfo?["progress"] as? Double {
+  func handleFileErrorSender(_ notification: Notification) {
+    if let toxPublicKey = notification.userInfo?["publicKey"] as? String,
+       let messageID = notification.userInfo?["messageID"] as? String {
       
-      if progress < 100 {
-        barButtonView?.labelView.text = "Отправка файла \(Int(progress))%"
-        return
+      interactor.getContactModelsFrom(toxPublicKey: toxPublicKey) { [weak self] contactModel in
+        guard let self, let contactModel else { return }
+        var updatedContactModel = contactModel
+        var updatedMessenges = updatedContactModel.messenges
+        updatedContactModel.status = .online
+        
+        if let messengesIndex = updatedMessenges.firstIndex(where: { $0.id == messageID }) {
+          updatedMessenges[messengesIndex].messageStatus = .failed
+        }
+        updatedContactModel.messenges = updatedMessenges
+        
+        interactor.saveContactModel(updatedContactModel) { [weak self] in
+          guard let self else { return }
+          updateListContacts()
+          moduleOutput?.dataModelHasBeenUpdated()
+        }
       }
-      barButtonView?.labelView.text = "В сети"
+    }
+  }
+  
+  @objc
+  func handleFileSender(_ notification: Notification) {
+    if let toxPublicKey = notification.userInfo?["publicKey"] as? String,
+       let progress = notification.userInfo?["progress"] as? Double,
+       let messageID = notification.userInfo?["messageID"] as? String {
+      
+      moduleOutput?.handleFileSender(progress: Int(progress), publicToxKey: toxPublicKey)
+      if progress < 100 { return }
+      
+      interactor.getContactModelsFrom(toxPublicKey: toxPublicKey) { [weak self] contactModel in
+        guard let self, let contactModel else { return }
+        var updatedContactModel = contactModel
+        var updatedMessenges = updatedContactModel.messenges
+        updatedContactModel.status = .online
+        
+        if let messengesIndex = updatedMessenges.firstIndex(where: { $0.id == messageID }) {
+          updatedMessenges[messengesIndex].messageStatus = .sent
+        }
+        updatedContactModel.messenges = updatedMessenges
+        
+        interactor.saveContactModel(updatedContactModel) { [weak self] in
+          guard let self else { return }
+          updateListContacts()
+          moduleOutput?.dataModelHasBeenUpdated()
+        }
+      }
     }
   }
   
   @objc
   func handleFileReceive(_ notification: Notification) {
-    if let publicKey = notification.userInfo?["publicKey"] as? String,
+    if let publicToxKey = notification.userInfo?["publicKey"] as? String,
        let filePath = notification.userInfo?["filePath"] as? URL,
        let progress = notification.userInfo?["progress"] as? Double {
       
-      if progress < 100 {
-        barButtonView?.labelView.text = "Получение файла \(Int(progress))%"
-        return
-      }
-      barButtonView?.labelView.text = "В сети"
+      moduleOutput?.handleFileReceive(progress: Int(progress), publicToxKey: publicToxKey)
+      if progress < 100 { return }
       
       interactor.getContactModels { [weak self] contactModels in
         guard let self else { return }
-        
-        interactor.receiveAndUnzipFile(zipFileURL: filePath) { [weak self] result in
+ 
+        interactor.receiveAndUnzipFile(
+          zipFileURL: filePath,
+          password: "777"
+        ) { [weak self] result in
           guard let self, let result = try? result.get() else {
             return
           }
@@ -773,30 +826,60 @@ private extension MessengerListScreenModulePresenter {
               var images: [MessengeImageModel] = []
               var videos: [MessengeVideoModel] = []
               
-              for fileUrl in result.files {
-                if fileUrl.isImageFile() {
+              for fileTempURL in result.files {
+                
+                if fileTempURL.isImageFile() {
+                  let imageFile = interactor.readObjectWith(fileURL: fileTempURL) ?? Data()
+                  let fileExtension = fileTempURL.pathExtension
+                  let thumbnailData = interactor.resizeThumbnailImageWithFrame(data: imageFile) ?? Data()
+                  let thumbnailURL = interactor.saveObjectWith(
+                    fileName: UUID().uuidString,
+                    fileExtension: fileExtension,
+                    data: thumbnailData
+                  )
+                  
+                  guard let thumbnailURL,
+                        let fullImage = interactor.saveObjectWith(tempURL: fileTempURL) else {
+                    continue
+                  }
+                  
                   images.append(
                     .init(
                       id: UUID().uuidString,
-                      thumbnail: fileUrl,
-                      full: fileUrl
+                      thumbnail: thumbnailURL,
+                      full: fullImage
                     )
                   )
                   continue
                 }
                 
-                if fileUrl.isVideoFile() {
+                if fileTempURL.isVideoFile() {
                   videos.append(
                     .init(
                       id: UUID().uuidString,
-                      thumbnail: fileUrl,
-                      full: fileUrl
+                      thumbnail: fileTempURL,
+                      full: fileTempURL
                     )
                   )
                   continue
                 }
               }
               
+              var recordingModel: MessengeRecordingModel?
+              
+              if let recordingDTO = result.recordingDTO,
+                 let recordingURL = interactor.saveObjectWith(
+                    fileName: UUID().uuidString,
+                    fileExtension: "aac",
+                    data: recordingDTO.data
+                  ) {
+                recordingModel = .init(
+                  duration: recordingDTO.duration,
+                  waveformSamples: recordingDTO.waveformSamples,
+                  url: recordingURL
+                )
+              }
+
               if let contact = factory.searchContact(
                 contactModels: contactModels,
                 torAddress: messageModel.senderAddress
@@ -809,7 +892,7 @@ private extension MessengerListScreenModulePresenter {
                   replyMessageText: messageModel.replyMessageText,
                   images: images,
                   videos: videos,
-                  recording: result.recordingModel
+                  recording: recordingModel
                 )
                 updatedContact.status = .online
                 if let senderPushNotificationToken = pushNotificationToken {
@@ -822,6 +905,7 @@ private extension MessengerListScreenModulePresenter {
                   guard let self else { return }
                   updateListContacts()
                   moduleOutput?.dataModelHasBeenUpdated()
+                  interactor.clearTemporaryDirectory()
                 })
               } else {
                 let contact = ContactModel(
@@ -840,6 +924,7 @@ private extension MessengerListScreenModulePresenter {
                   guard let self else { return }
                   updateListContacts()
                   moduleOutput?.dataModelHasBeenUpdated()
+                  interactor.clearTemporaryDirectory()
                 })
               }
             }

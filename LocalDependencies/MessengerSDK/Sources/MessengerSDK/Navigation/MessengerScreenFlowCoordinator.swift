@@ -45,6 +45,14 @@ public final class MessengerScreenFlowCoordinator: Coordinator<Void, MessengerSc
 // MARK: - MessengerListScreenModuleModuleOutput
 
 extension MessengerScreenFlowCoordinator: MessengerListScreenModuleOutput {
+  public func handleFileSender(progress: Int, publicToxKey: String) {
+    messengerDialogModule?.input.handleFileSender(progress: progress, publicToxKey: publicToxKey)
+  }
+  
+  public func handleFileReceive(progress: Int, publicToxKey: String) {
+    messengerDialogModule?.input.handleFileReceive(progress: progress, publicToxKey: publicToxKey)
+  }
+  
   public func userDidScreenshot() {
     // TODO: - 🟡
   }

@@ -16,6 +16,45 @@ public class DataManagerService: IDataManagerService {
   
   // MARK: - Internal func
   
+  public func saveObjectWith(tempURL: URL) -> URL? {
+    guard let objectData = readObjectWith(fileURL: tempURL) else {
+      return nil
+    }
+    
+    // Получение расширения файла
+    let fileExtension = tempURL.pathExtension
+    
+    let directoryURL = FileManager.default.urls(for: .libraryDirectory, in: .userDomainMask).first
+    let fileURL = directoryURL?.appendingPathComponent(UUID().uuidString.lowercased()).appendingPathExtension(fileExtension)
+    guard let fileURL else {
+      return nil
+    }
+    
+    do {
+      try objectData.write(to: fileURL)
+      return fileURL.absoluteURL
+    } catch {
+      return nil
+    }
+  }
+  
+  public func clearTemporaryDirectory() {
+    let tempDirectory = FileManager.default.temporaryDirectory
+    
+    do {
+      let tempDirectoryContents = try FileManager.default.contentsOfDirectory(
+        at: tempDirectory,
+        includingPropertiesForKeys: nil,
+        options: []
+      )
+      for file in tempDirectoryContents {
+        try FileManager.default.removeItem(at: file)
+      }
+    } catch {
+      print("Error clearing temporary directory: \(error)")
+    }
+  }
+  
   public func saveObjectWith(
     fileName: String,
     fileExtension: String,
@@ -35,12 +74,33 @@ public class DataManagerService: IDataManagerService {
     }
   }
   
-  public func readObjectWith(fileURL: URL) -> Data? {
+  public func saveObjectToCachesWith(
+    fileName: String,
+    fileExtension: String,
+    data: Data
+  ) -> URL? {
+    let directoryURL = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first
+    let fileURL = directoryURL?.appendingPathComponent(fileName).appendingPathExtension(fileExtension)
+    guard let fileURL else {
+      return nil
+    }
+    
     do {
-      return try Data(contentsOf: fileURL)
+      try data.write(to: fileURL)
+      return fileURL.absoluteURL
     } catch {
       return nil
     }
+  }
+  
+  public func readObjectWith(fileURL: URL) -> Data? {
+    if let object = FileManager.default.contents(atPath: fileURL.path()) {
+      return object
+    }
+    if let object = try? Data(contentsOf: fileURL) {
+      return object
+    }
+    return nil
   }
   
   public func deleteObjectWith(fileURL: URL, isRemoved: ((Bool) -> Void)?) {

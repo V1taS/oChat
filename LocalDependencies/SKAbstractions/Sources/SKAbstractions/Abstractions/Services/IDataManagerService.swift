@@ -9,7 +9,7 @@ import Foundation
 
 /// Протокол для сервиса управления данными.
 public protocol IDataManagerService {
-
+  
   /// Сохранить объект
   /// - Parameters:
   ///  - fileName: Название файла
@@ -17,6 +17,18 @@ public protocol IDataManagerService {
   ///  - data: Файл для записи
   /// - Returns: Путь до файла `URL`
   func saveObjectWith(
+    fileName: String,
+    fileExtension: String,
+    data: Data
+  ) -> URL?
+  
+  /// Сохранить объект в кеш
+  /// - Parameters:
+  ///  - fileName: Название файла
+  ///  - fileExtension: Расширение файла `.txt`
+  ///  - data: Файл для записи
+  /// - Returns: Путь до файла `URL`
+  func saveObjectToCachesWith(
     fileName: String,
     fileExtension: String,
     data: Data
@@ -33,4 +45,12 @@ public protocol IDataManagerService {
   ///  - isRemoved: Удален объект или нет
   /// - Returns: Путь до файла `URL`
   func deleteObjectWith(fileURL: URL, isRemoved: ((Bool) -> Void)?)
+  
+  /// Очищает временную директорию.
+  func clearTemporaryDirectory()
+  
+  /// Сохраняет объект по указанному временному URL и возвращает новый URL сохраненного объекта.
+  /// - Parameter tempURL: Временный URL, по которому сохраняется объект.
+  /// - Returns: Новый URL сохраненного объекта или nil в случае ошибки.
+  func saveObjectWith(tempURL: URL) -> URL?
 }

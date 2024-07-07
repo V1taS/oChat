@@ -11,7 +11,14 @@ import SKAbstractions
 import ExyteChat
 
 /// Cобытия которые отправляем из Factory в Presenter
-protocol MessengerDialogScreenFactoryOutput: AnyObject {}
+protocol MessengerDialogScreenFactoryOutput: AnyObject {
+  /// Пользователь выбрал повторить отправку сообщения
+  func userSelectRetryAction(_ model: MessengeModel)
+  /// Пользователь выбрал удалить сообщение
+  func userSelectDeleteAction(_ model: MessengeModel)
+  /// Пользователь выбрал скопировать сообщение
+  func userSelectCopyAction(_ model: MessengeModel)
+}
 
 /// Cобытия которые отправляем от Presenter к Factory
 protocol MessengerDialogScreenFactoryInput {
@@ -115,16 +122,7 @@ extension MessengerDialogScreenFactory: MessengerDialogScreenFactoryInput {
       case .sending:
         status = .sending
       case .failed:
-        status = .error(
-          DraftMessage(
-            id: model.id,
-            text: model.message,
-            medias: [],
-            recording: model.recording?.mapTo(),
-            replyMessage: replyMessage,
-            createdAt: Date()
-          )
-        )
+        status = .error
       case .sent:
         status = .sent
       }
@@ -148,7 +146,16 @@ extension MessengerDialogScreenFactory: MessengerDialogScreenFactoryInput {
         text: model.message,
         attachments: model.images.map { $0.mapTo() } + model.videos.map { $0.mapTo() },
         recording: model.recording?.mapTo(),
-        replyMessage: replyMessage
+        replyMessage: replyMessage,
+        retryAction: { [weak self] _ in
+          self?.output?.userSelectRetryAction(model)
+        },
+        deleteAction: { [weak self] _ in
+          self?.output?.userSelectDeleteAction(model)
+        },
+        copyAction: { [weak self] _ in
+          self?.output?.userSelectCopyAction(model)
+        }
       )
     }
   }

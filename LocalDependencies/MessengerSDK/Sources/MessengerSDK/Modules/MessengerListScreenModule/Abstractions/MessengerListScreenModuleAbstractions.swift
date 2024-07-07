@@ -24,6 +24,12 @@ public protocol MessengerListScreenModuleOutput: AnyObject {
   
   /// Был сделан скриншот
   func userDidScreenshot()
+  
+  /// Пользователь отправляет файл
+  func handleFileSender(progress: Int, publicToxKey: String)
+  
+  /// Пользователь получает файл
+  func handleFileReceive(progress: Int, publicToxKey: String)
 }
 
 /// События которые отправляем из `Coordinator` в `MessengerListScreenModuleModule`

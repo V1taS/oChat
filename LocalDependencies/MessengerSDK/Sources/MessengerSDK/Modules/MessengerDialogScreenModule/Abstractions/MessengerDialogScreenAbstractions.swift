@@ -53,6 +53,12 @@ public protocol MessengerDialogScreenModuleOutput: AnyObject {
 
 /// События которые отправляем из `Coordinator` в `MessengerDialogScreenModule`
 public protocol MessengerDialogScreenModuleInput {
+  /// Пользователь отправляет файл
+  func handleFileSender(progress: Int, publicToxKey: String)
+  
+  /// Пользователь получает файл
+  func handleFileReceive(progress: Int, publicToxKey: String)
+  
   /// Обновить список контактов
   func updateDialog()
   

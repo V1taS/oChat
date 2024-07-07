@@ -1,32 +1,32 @@
 //
-//  MessengeRecordingModel.swift
+//  MessengeRecordingDTO.swift
 //  SKAbstractions
 //
-//  Created by Vitalii Sosin on 02.07.2024.
+//  Created by Vitalii Sosin on 08.07.2024.
 //
 
 import Foundation
 
-public struct MessengeRecordingModel {
+public struct MessengeRecordingDTO {
   /// Продолжительность записи в секундах
   public var duration: Double
   /// Массив выборок формы волны записи
   public var waveformSamples: [CGFloat]
-  /// URL записи (опционально)
-  public var url: URL
+  /// Запись звука
+  public var data: Data
   
   /// Инициализатор модели записи
   /// - Parameters:
   ///   - duration: Продолжительность записи в секундах
   ///   - waveformSamples: Массив выборок формы волны записи
-  ///   - url: URL записи (опционально)
-  public init(duration: Double, waveformSamples: [CGFloat], url: URL) {
+  ///   - data: Запись звука
+  public init(duration: Double, waveformSamples: [CGFloat], data: Data) {
     self.duration = duration
     self.waveformSamples = waveformSamples
-    self.url = url
+    self.data = data
   }
 }
 
 // MARK: - IdentifiableAndCodable
 
-extension MessengeRecordingModel: IdentifiableAndCodable {}
+extension MessengeRecordingDTO: IdentifiableAndCodable {}

@@ -26,4 +26,6 @@ public enum NotificationConstants: String {
   case didUpdateFileReceive
   /// Файл отправляется
   case didUpdateFileSend
+  /// Файл отправляется с ошибкой
+  case didUpdateFileErrorSend
 }

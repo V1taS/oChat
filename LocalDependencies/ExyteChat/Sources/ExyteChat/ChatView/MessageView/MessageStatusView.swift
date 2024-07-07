@@ -9,7 +9,6 @@ struct MessageStatusView: View {
   @Environment(\.chatTheme) private var theme
   
   let status: Message.Status
-  let onRetry: () -> Void
   
   var body: some View {
     Group {
@@ -28,13 +27,9 @@ struct MessageStatusView: View {
           .resizable()
           .foregroundColor(theme.colors.messageReadStatus)
       case .error:
-        Button {
-          onRetry()
-        } label: {
-          theme.images.message.error
-            .resizable()
-        }
-        .foregroundColor(theme.colors.messageErrorStatus)
+        theme.images.message.error
+          .resizable()
+          .foregroundColor(theme.colors.messageErrorStatus)
       }
     }
     .viewSize(MessageView.statusViewSize)
@@ -45,9 +40,9 @@ struct MessageStatusView: View {
 struct SwiftUIView_Previews: PreviewProvider {
   static var previews: some View {
     VStack {
-      MessageStatusView(status: .sending, onRetry: {})
-      MessageStatusView(status: .sent, onRetry: {})
-      MessageStatusView(status: .read, onRetry: {})
+      MessageStatusView(status: .sending)
+      MessageStatusView(status: .sent)
+      MessageStatusView(status: .read)
     }
   }
 }

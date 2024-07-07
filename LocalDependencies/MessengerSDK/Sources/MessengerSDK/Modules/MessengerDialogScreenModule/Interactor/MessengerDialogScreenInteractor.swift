@@ -25,6 +25,11 @@ protocol MessengerDialogScreenInteractorInput {
   /// - Parameters:
   ///   - text: Текст для копирования.
   func copyToClipboard(text: String)
+  
+  /// Сохраняет объект по указанному временному URL и возвращает новый URL сохраненного объекта.
+  /// - Parameter tempURL: Временный URL, по которому сохраняется объект.
+  /// - Returns: Новый URL сохраненного объекта или nil в случае ошибки.
+  func saveObjectWith(tempURL: URL) -> URL?
 }
 
 /// Интерактор
@@ -40,6 +45,7 @@ final class MessengerDialogScreenInteractor {
   private let systemService: ISystemService
   private let cryptoService: ICryptoService
   private let notificationService: INotificationService
+  private let dataManagementService: IDataManagerService
   
   // MARK: - Initialization
   
@@ -50,12 +56,17 @@ final class MessengerDialogScreenInteractor {
     systemService = services.userInterfaceAndExperienceService.systemService
     cryptoService = services.accessAndSecurityManagementService.cryptoService
     notificationService = services.userInterfaceAndExperienceService.notificationService
+    dataManagementService = services.dataManagementService.dataManagerService
   }
 }
 
 // MARK: - MessengerDialogScreenInteractorInput
 
 extension MessengerDialogScreenInteractor: MessengerDialogScreenInteractorInput {
+  func saveObjectWith(tempURL: URL) -> URL? {
+    dataManagementService.saveObjectWith(tempURL: tempURL)
+  }
+  
   func copyToClipboard(text: String) {
     systemService.copyToClipboard(text: text)
   }

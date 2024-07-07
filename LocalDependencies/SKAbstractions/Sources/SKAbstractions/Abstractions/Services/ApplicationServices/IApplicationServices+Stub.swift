@@ -16,6 +16,9 @@ public final class ApplicationServicesStub: IApplicationServices, IDataManagerSe
                                             ICloudKitService, IAppSettingsManager, IDataManagementService,
                                             IAccessAndSecurityManagementService, IUserInterfaceAndExperienceService,
                                             IDeepLinkService, IPushNotificationService, IZipArchiveService {
+  public func saveObjectToCachesWith(fileName: String, fileExtension: String, data: Data) -> URL? { nil }
+  public func clearTemporaryDirectory() {}
+  public func saveObjectWith(tempURL: URL) -> URL? {  nil }
   public func zipFiles(atPaths paths: [URL], toDestination destinationPath: URL, password: String?, progress: ((Double) -> ())?) throws {}
   public func unzipFile(atPath path: URL, toDestination destinationPath: URL, overwrite: Bool, password: String?, progress: ((Double) -> ())?, fileOutputHandler: ((URL) -> Void)?) throws {}
   public var zipArchiveService: any IZipArchiveService { self }
@@ -173,6 +176,8 @@ public final class ApplicationServicesStub: IApplicationServices, IDataManagerSe
 
 public final class MessengerServiceStub: IMessengerModelSettingsManager, IMessengerModelHandlerService,
                                          IMessagesService, IMessengerService, IP2PChatManager, IAppSettingsManager {
+  public func sendFile(toxPublicKey: String, recipientPublicKey: String, model: MessengerNetworkRequestDTO, recordModel: MessengeRecordingModel?, files: [URL]) {}
+  
   public func sendFile(toxPublicKey: String, model: MessengerNetworkRequestDTO, recordModel: MessengeRecordingModel?, files: [URL]) {}
   
   public func sendFile(toxPublicKey: String, model: MessengerNetworkRequestDTO, files: [URL]) {}

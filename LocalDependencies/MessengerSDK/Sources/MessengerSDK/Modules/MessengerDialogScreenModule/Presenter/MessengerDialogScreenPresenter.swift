@@ -11,6 +11,7 @@ import SwiftUI
 import SKAbstractions
 import SKFoundation
 import ExyteChat
+import ExyteMediaPicker
 
 final class MessengerDialogScreenPresenter: ObservableObject {
   
@@ -107,74 +108,141 @@ final class MessengerDialogScreenPresenter: ObservableObject {
     }
   }
   
-  func retrySendMessage(messengeModel: MessengeModel) {
+  func retrySendMessage(messengeModel: MessengeModel) {}
+  
+  func sendMessage(
+    messenge: String,
+    replyMessageText: String?
+  ) {
     var updatedContactModel = stateContactModel
     
-    // Удаление старого сообщения
-    if let messengeIndex = stateMessengeModels.firstIndex(where: { $0.id == messengeModel.id }) {
-      stateMessengeModels.remove(at: messengeIndex)
-    }
-    
-    // Создание нового сообщения
-    let newMessengeModel = MessengeModel(
+    let messengeModel = MessengeModel(
       messageType: .own,
       messageStatus: .sending,
-      message: messengeModel.message,
-      replyMessageText: messengeModel.replyMessageText,
+      message: messenge,
+      replyMessageText: replyMessageText,
       images: [],
       videos: [],
       recording: nil
     )
-    updatedContactModel.messenges.append(newMessengeModel)
+    
+    updatedContactModel.messenges.append(messengeModel)
+    stateContactModel = updatedContactModel
     
     stateMessengeModels = factory.createMessageModels(
       models: updatedContactModel.messenges,
       contactModel: stateContactModel
     )
-    stateContactModel = updatedContactModel
-    
-    // Удаление старого сообщения и отправка нового через moduleOutput
-    moduleOutput?.removeMessage(id: messengeModel.id, contact: stateContactModel)
     
     DispatchQueue.global().async { [weak self] in
-      guard let self = self else { return }
-      self.moduleOutput?.sendMessage(contact: updatedContactModel)
+      guard let self else { return }
+      moduleOutput?.sendMessage(contact: updatedContactModel)
     }
   }
   
+  @MainActor
   func sendMessage(
     messenge: String,
-    images: [MessengeImageModel],
-    videos: [MessengeVideoModel],
-    recordingModel: MessengeRecordingModel?,
+    medias: [Media],
+    recording: ExyteChat.Recording?,
     replyMessageText: String?
-  ) {
-    DispatchQueue.main.async { [weak self] in
-      guard let self else { return }
-      var updatedContactModel = stateContactModel
-      
-      let messengeModel = MessengeModel(
-        messageType: .own,
-        messageStatus: .sending,
-        message: messenge,
-        replyMessageText: replyMessageText,
-        images: images,
-        videos: videos,
-        recording: recordingModel
+  ) async {
+    var updatedContactModel = stateContactModel
+    var recordingModel: MessengeRecordingModel?
+    
+    if let recording,
+       let recordingTempURL = recording.url,
+       let recordingURL = interactor.saveObjectWith(tempURL: recordingTempURL) {
+      recordingModel = .init(
+        duration: recording.duration,
+        waveformSamples: recording.waveformSamples,
+        url: recordingURL
       )
-      
-      updatedContactModel.messenges.append(messengeModel)
-      stateContactModel = updatedContactModel
-      
-      stateMessengeModels = factory.createMessageModels(
-        models: updatedContactModel.messenges,
-        contactModel: stateContactModel
-      )
-      
-      DispatchQueue.global().async { [weak self] in
-        guard let self else { return }
-        moduleOutput?.sendMessage(contact: updatedContactModel)
+    }
+    
+    let imageTasks = medias.filter { $0.type == .image }.map { media in
+      Task { () -> MessengeImageModel? in
+        guard let thumbnailTempURL = await media.getThumbnailURL(),
+              let thumbnailURL = interactor.saveObjectWith(tempURL: thumbnailTempURL),
+              let fullTempURL = await media.getURL(),
+              let fullURL = interactor.saveObjectWith(tempURL: fullTempURL) else {
+          return nil
+        }
+        
+        return MessengeImageModel(
+          id: UUID().uuidString,
+          thumbnail: thumbnailURL,
+          full: fullURL
+        )
       }
+    }
+    
+    let videoTasks = medias.filter { $0.type == .video }.map { media in
+      Task { () -> MessengeVideoModel? in
+        guard let thumbnailTempURL = await media.getThumbnailURL(),
+              let thumbnailURL = interactor.saveObjectWith(tempURL: thumbnailTempURL),
+              let fullTempURL = await media.getURL(),
+              let fullURL = interactor.saveObjectWith(tempURL: fullTempURL) else {
+          return nil
+        }
+        
+        return MessengeVideoModel(
+          id: UUID().uuidString,
+          thumbnail: thumbnailURL,
+          full: fullURL
+        )
+      }
+    }
+    
+    let videos = await withTaskGroup(of: MessengeVideoModel?.self) { group -> [MessengeVideoModel] in
+      for task in videoTasks {
+        group.addTask { await task.value }
+      }
+      
+      var results = [MessengeVideoModel]()
+      for await result in group {
+        if let videoModel = result {
+          results.append(videoModel)
+        }
+      }
+      return results
+    }
+    
+    let images = await withTaskGroup(of: MessengeImageModel?.self) { group -> [MessengeImageModel] in
+      for task in imageTasks {
+        group.addTask { await task.value }
+      }
+      
+      var results = [MessengeImageModel]()
+      for await result in group {
+        if let videoModel = result {
+          results.append(videoModel)
+        }
+      }
+      return results
+    }
+    
+    let messengeModel = MessengeModel(
+      messageType: .own,
+      messageStatus: .sending,
+      message: messenge,
+      replyMessageText: replyMessageText,
+      images: images,
+      videos: videos,
+      recording: recordingModel
+    )
+    
+    updatedContactModel.messenges.append(messengeModel)
+    stateContactModel = updatedContactModel
+    
+    stateMessengeModels = factory.createMessageModels(
+      models: updatedContactModel.messenges,
+      contactModel: stateContactModel
+    )
+    
+    DispatchQueue.global().async { [weak self] in
+      guard let self else { return }
+      moduleOutput?.sendMessage(contact: updatedContactModel)
     }
   }
   
@@ -325,6 +393,30 @@ final class MessengerDialogScreenPresenter: ObservableObject {
 // MARK: - MessengerDialogScreenModuleInput
 
 extension MessengerDialogScreenPresenter: MessengerDialogScreenModuleInput {
+  func handleFileSender(progress: Int, publicToxKey: String) {
+    guard stateContactModel.toxPublicKey == publicToxKey else {
+      return
+    }
+    
+    if progress == 100 {
+      updateCenterBarButtonView()
+      return
+    }
+    updateCenterBarButtonView(descriptionForSendFile: "Передача файла: \(progress)%")
+  }
+  
+  func handleFileReceive(progress: Int, publicToxKey: String) {
+    guard stateContactModel.toxPublicKey == publicToxKey else {
+      return
+    }
+    
+    if progress == 100 {
+      updateCenterBarButtonView()
+      return
+    }
+    updateCenterBarButtonView(descriptionForSendFile: "Получение файла: \(progress)%")
+  }
+  
   func updateDialog() {
     interactor.getNewContactModels(stateContactModel) { [weak self] contactModel in
       guard let self else { return }
@@ -351,7 +443,19 @@ extension MessengerDialogScreenPresenter: MessengerDialogScreenInteractorOutput 
 
 // MARK: - MessengerDialogScreenFactoryOutput
 
-extension MessengerDialogScreenPresenter: MessengerDialogScreenFactoryOutput {}
+extension MessengerDialogScreenPresenter: MessengerDialogScreenFactoryOutput {
+  func userSelectRetryAction(_ model: SKAbstractions.MessengeModel) {
+    retrySendMessage(messengeModel: model)
+  }
+  
+  func userSelectDeleteAction(_ model: SKAbstractions.MessengeModel) {
+    removeMessage(id: model.id)
+  }
+  
+  func userSelectCopyAction(_ model: SKAbstractions.MessengeModel) {
+    copyToClipboard(text: model.message)
+  }
+}
 
 // MARK: - SceneViewModel
 
@@ -410,15 +514,21 @@ private extension MessengerDialogScreenPresenter {
   }
   
   func updateCenterBarButtonView(
-    isHidden: Bool = false
+    isHidden: Bool = false,
+    descriptionForSendFile: String? = nil
   ) {
     var title = stateContactAdress
     if let toxAddress = stateContactModel.toxAddress, !toxAddress.isEmpty {
       title = toxAddress
     }
     
+    var descriptionView = stateContactModel.isTyping ? "Печатает..." : stateContactModel.status.title
+    if let descriptionForSendFile {
+      descriptionView = descriptionForSendFile
+    }
+    
     barButtonView?.titleView.text = factory.createHeaderTitleFrom(title)
-    barButtonView?.descriptionView.text = stateContactModel.isTyping ? "Печатает..." : stateContactModel.status.title
+    barButtonView?.descriptionView.text = descriptionView
     
     barButtonView?.iconLeftView.isHidden = stateContactModel.isTyping
     barButtonView?.typingIndicator.isHidden = !stateContactModel.isTyping

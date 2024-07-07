@@ -139,7 +139,7 @@ private extension MessengerDialogScreenView {
         didSendMessage: { _ in },
         inputViewBuilder: { _, _, _, _, _, _ in
           MainButtonView(
-            text: presenter.stateIsCanResendInitialRequest 
+            text: presenter.stateIsCanResendInitialRequest
             ? MessengerSDKStrings.MessengerDialogScreenLocalization.sendRequest
             : "\(MessengerSDKStrings.MessengerDialogScreenLocalization.sendRequest)"
             + " \(presenter.stateSecondsUntilResendInitialRequestAllowed)"
@@ -178,25 +178,19 @@ private extension MessengerDialogScreenView {
     } else {
       ChatView(messages: presenter.stateMessengeModels) { draft in
         Task {
-          let images = await draft.makeImages()
-          let videos = await draft.makeVideos()
-          var recordingModel: MessengeRecordingModel?
-          
-          if let recording = draft.recording {
-            recordingModel = .init(
-              duration: recording.duration,
-              waveformSamples: recording.waveformSamples,
-              url: recording.url
+          if draft.medias.isEmpty && draft.recording == nil {
+            await presenter.sendMessage(
+              messenge: draft.text,
+              replyMessageText: draft.replyMessage?.text
+            )
+          } else {
+            await presenter.sendMessage(
+              messenge: draft.text,
+              medias: draft.medias,
+              recording: draft.recording,
+              replyMessageText: draft.replyMessage?.text
             )
           }
-          
-          presenter.sendMessage(
-            messenge: draft.text,
-            images: images,
-            videos: videos,
-            recordingModel: recordingModel,
-            replyMessageText: draft.replyMessage?.text
-          )
         }
       }
       .setAvailableInput(.full)
@@ -380,51 +374,5 @@ struct MessengerDialogScreenView_Previews: PreviewProvider {
         services: ApplicationServicesStub()
       ).viewController
     }
-  }
-}
-
-// TODO: - Вынести этот код
-
-extension DraftMessage {
-  func makeImages() async -> [MessengeImageModel] {
-    await medias
-      .filter { $0.type == .image }
-      .asyncMap { (media : Media) -> (Media, URL?, URL?) in
-        (media, await media.getThumbnailURL(), await media.getURL())
-      }
-      .filter { (media: Media, thumb: URL?, full: URL?) -> Bool in
-        thumb != nil && full != nil
-      }
-      .map { media, thumb, full in
-        MessengeImageModel(id: media.id.uuidString, thumbnail: thumb!, full: full!)
-      }
-  }
-  
-  func makeVideos() async -> [MessengeVideoModel] {
-    await medias
-      .filter { $0.type == .video }
-      .asyncMap { (media : Media) -> (Media, URL?, URL?) in
-        (media, await media.getThumbnailURL(), await media.getURL())
-      }
-      .filter { (media: Media, thumb: URL?, full: URL?) -> Bool in
-        thumb != nil && full != nil
-      }
-      .map { media, thumb, full in
-        MessengeVideoModel(id: media.id.uuidString, thumbnail: thumb!, full: full!)
-      }
-  }
-}
-
-extension Sequence {
-  func asyncMap<T>(
-    _ transform: (Element) async throws -> T
-  ) async rethrows -> [T] {
-    var values = [T]()
-    
-    for element in self {
-      try await values.append(transform(element))
-    }
-    
-    return values
   }
 }

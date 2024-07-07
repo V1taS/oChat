@@ -13,6 +13,9 @@ public struct MessengerNetworkRequestModel {
   /// Текст сообщения, которое необходимо отправить другому пользователю.
   public var messageText: String?
   
+  /// ID сообщения
+  public var messageID: String?
+  
   /// Цитируемое сообщение
   public var replyMessageText: String?
   
@@ -34,6 +37,7 @@ public struct MessengerNetworkRequestModel {
   /// Инициализирует новый экземпляр сетевого запроса для мессенджера с заданными параметрами.
   /// - Parameters:
   ///   - messageText: Текст сообщения.
+  ///   - messageID: ID сообщения
   ///   - replyMessageText: Цитируемое сообщение
   ///   - senderAddress: Адрес в сети для отправки.
   ///   - senderLocalMeshAddress: Адрес в локальной сети для отправки.
@@ -42,6 +46,7 @@ public struct MessengerNetworkRequestModel {
   ///   - senderPushNotificationToken: Токен для отправки пушей
   public init(
     messageText: String?,
+    messageID: String?,
     replyMessageText: String?,
     senderAddress: String,
     senderLocalMeshAddress: String?,
@@ -50,6 +55,7 @@ public struct MessengerNetworkRequestModel {
     senderPushNotificationToken: String?
   ) {
     self.messageText = messageText
+    self.messageID = messageID
     self.replyMessageText = replyMessageText
     self.senderAddress = senderAddress
     self.senderLocalMeshAddress = senderLocalMeshAddress
@@ -65,7 +71,8 @@ extension MessengerNetworkRequestModel {
   /// Преобразует модель запроса в объект передачи данных (DTO).
   public func mapToDTO() -> MessengerNetworkRequestDTO {
     MessengerNetworkRequestDTO(
-      messageText: messageText,
+      messageText: messageText, 
+      messageID: messageID,
       replyMessageText: replyMessageText,
       senderAddress: senderAddress,
       senderLocalMeshAddress: senderLocalMeshAddress,

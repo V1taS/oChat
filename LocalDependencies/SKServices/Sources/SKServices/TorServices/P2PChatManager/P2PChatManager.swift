@@ -26,7 +26,10 @@ public final class P2PChatManager: IP2PChatManager {
   private var periodicFriendStatusChecktimer: DispatchSourceTimer?
   private let zipArchiveService = ZipArchiveService()
   private var fileData: Data?
+  
   var fileInfo: (friendNumber: Int32, fileId: Int32, fileName: String, fileSize: UInt64)?
+  var cacheMessengerModel: MessengerNetworkRequestDTO?
+  let dataManagerService = DataManagerService()
   
   // MARK: - Init
   
@@ -257,13 +260,23 @@ public extension P2PChatManager {
   
   func sendFile(
     toxPublicKey: String,
+    recipientPublicKey: String,
     model: MessengerNetworkRequestDTO,
     recordModel: MessengeRecordingModel?,
     files: [URL]
   ) {
-    clearTemporaryDirectory()
+    dataManagerService.clearTemporaryDirectory()
+    var recordDTO: MessengeRecordingDTO?
     
-    // MARK: - ШАГ 1 Инициализация отправки файла ❤️❤️❤️
+    if let recordModel, let data = dataManagerService.readObjectWith(fileURL: recordModel.url) {
+      recordDTO = .init(
+        duration: recordModel.duration,
+        waveformSamples: recordModel.waveformSamples,
+        data: data
+      )
+    }
+
+    cacheMessengerModel = model
     let encoder = JSONEncoder()
     
     let tempDirectory = FileManager.default.temporaryDirectory
@@ -273,7 +286,7 @@ public extension P2PChatManager {
     
     do {
       let jsonData = try encoder.encode(model)
-      let recordData = try? encoder.encode(recordModel)
+      let recordData = try? encoder.encode(recordDTO)
       // Сохранение model во временное хранилище
       try jsonData.write(to: modelURL)
       
@@ -297,7 +310,11 @@ public extension P2PChatManager {
       }
       
       // Архивирование model и files
-      try zipArchiveService.zipFiles(atPaths: pathsToArchive, toDestination: archiveURL)
+      try zipArchiveService.zipFiles(
+        atPaths: pathsToArchive,
+        toDestination: archiveURL,
+        password: "777"
+      )
       
       // Чтение данных архива
       let fileData = try Data(contentsOf: archiveURL)
@@ -339,24 +356,6 @@ public extension P2PChatManager {
 
 @available(iOS 16.0, *)
 extension P2PChatManager {
-  func clearTemporaryDirectory() {
-    let tempDirectory = FileManager.default.temporaryDirectory
-    
-    do {
-      let tempDirectoryContents = try FileManager.default.contentsOfDirectory(
-        at: tempDirectory,
-        includingPropertiesForKeys: nil,
-        options: []
-      )
-      for file in tempDirectoryContents {
-        try FileManager.default.removeItem(at: file)
-      }
-      print("Temporary directory cleared successfully.")
-    } catch {
-      print("Error clearing temporary directory: \(error)")
-    }
-  }
-  
   // Коллбек для отправки запрошенных чанков
   func sendChunk(
     to friendNumber: Int32,

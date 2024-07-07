@@ -216,9 +216,10 @@ protocol MessengerListScreenModuleInteractorInput {
   /// Метод для разархивирования файлов
   func receiveAndUnzipFile(
     zipFileURL: URL,
+    password: String,
     completion: @escaping (Result<(
       model: MessengerNetworkRequestModel,
-      recordingModel: MessengeRecordingModel?,
+      recordingDTO: MessengeRecordingDTO?,
       files: [URL]
     ), Error>) -> Void
   )
@@ -226,10 +227,51 @@ protocol MessengerListScreenModuleInteractorInput {
   /// Отправить файл с сообщением
   func sendFile(
     toxPublicKey: String,
+    recipientPublicKey: String,
     recordModel: MessengeRecordingModel?,
     messengerRequest: MessengerNetworkRequestModel,
     files: [URL]
   )
+  
+  /// Делаем маленькое изображение
+  func resizeThumbnailImageWithFrame(data: Data) -> Data?
+  
+  /// Получить объект
+  /// - Parameter fileURL: Путь к файлу
+  /// - Returns: Путь до файла `URL`
+  func readObjectWith(fileURL: URL) -> Data?
+  
+  /// Очищает временную директорию.
+  func clearTemporaryDirectory()
+  
+  /// Сохраняет объект по указанному временному URL и возвращает новый URL сохраненного объекта.
+  /// - Parameter tempURL: Временный URL, по которому сохраняется объект.
+  /// - Returns: Новый URL сохраненного объекта или nil в случае ошибки.
+  func saveObjectWith(tempURL: URL) -> URL?
+  
+  /// Сохранить объект
+  /// - Parameters:
+  ///  - fileName: Название файла
+  ///  - fileExtension: Расширение файла `.txt`
+  ///  - data: Файл для записи
+  /// - Returns: Путь до файла `URL`
+  func saveObjectWith(
+    fileName: String,
+    fileExtension: String,
+    data: Data
+  ) -> URL?
+  
+  /// Сохранить объект в кеш
+  /// - Parameters:
+  ///  - fileName: Название файла
+  ///  - fileExtension: Расширение файла `.txt`
+  ///  - data: Файл для записи
+  /// - Returns: Путь до файла `URL`
+  func saveObjectToCachesWith(
+    fileName: String,
+    fileExtension: String,
+    data: Data
+  ) -> URL?
 }
 
 /// Интерактор
@@ -252,6 +294,7 @@ final class MessengerListScreenModuleInteractor {
   private let pushNotificationService: IPushNotificationService
   private let zipArchiveService: IZipArchiveService
   private var cacheFriendStatus: [String : Bool] = [:]
+  private let dataManagementService: IDataManagerService
   
   // MARK: - Initialization
   
@@ -268,38 +311,94 @@ final class MessengerListScreenModuleInteractor {
     permissionService = services.accessAndSecurityManagementService.permissionService
     pushNotificationService = services.pushNotificationService
     zipArchiveService = services.dataManagementService.zipArchiveService
+    dataManagementService = services.dataManagementService.dataManagerService
   }
 }
 
 // MARK: - MessengerListScreenModuleInteractorInput
 
 extension MessengerListScreenModuleInteractor: MessengerListScreenModuleInteractorInput {
+  func saveObjectToCachesWith(
+    fileName: String,
+    fileExtension: String,
+    data: Data
+  ) -> URL? {
+    dataManagementService.saveObjectToCachesWith(fileName: fileName, fileExtension: fileExtension, data: data)
+  }
+  
+  func saveObjectWith(
+    fileName: String,
+    fileExtension: String,
+    data: Data
+  ) -> URL? {
+    dataManagementService.saveObjectWith(fileName: fileName, fileExtension: fileExtension, data: data)
+  }
+  
+  func readObjectWith(fileURL: URL) -> Data? {
+    dataManagementService.readObjectWith(fileURL: fileURL)
+  }
+  
+  func clearTemporaryDirectory() {
+    dataManagementService.clearTemporaryDirectory()
+  }
+  
+  func saveObjectWith(tempURL: URL) -> URL? {
+    dataManagementService.saveObjectWith(tempURL: tempURL)
+  }
+  
+  func resizeThumbnailImageWithFrame(data: Data) -> Data? {
+    guard let originalImage = UIImage(data: data) else { return nil }
+    
+    let targetSize = CGSize(width: 300, height: 300)
+    
+    let widthRatio = targetSize.width / originalImage.size.width
+    let heightRatio = targetSize.height / originalImage.size.height
+    let scaleFactor = max(widthRatio, heightRatio)
+    
+    let scaledImageSize = CGSize(
+      width: originalImage.size.width * scaleFactor,
+      height: originalImage.size.height * scaleFactor
+    )
+    
+    let renderer = UIGraphicsImageRenderer(size: targetSize)
+    let framedImage = renderer.image { context in
+      let origin = CGPoint(
+        x: (targetSize.width - scaledImageSize.width) / 2,
+        y: (targetSize.height - scaledImageSize.height) / 2
+      )
+      originalImage.draw(in: CGRect(origin: origin, size: scaledImageSize))
+    }
+    
+    return framedImage.pngData()
+  }
+  
   func receiveAndUnzipFile(
     zipFileURL: URL,
+    password: String,
     completion: @escaping (Result<(
       model: MessengerNetworkRequestModel,
-      recordingModel: MessengeRecordingModel?,
+      recordingDTO: MessengeRecordingDTO?,
       files: [URL]
     ), Error>) -> Void
   ) {
     DispatchQueue.global().async { [weak self] in
       guard let self else { return }
       // Для получения директории Documents
-      guard let documentDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else {
+      guard let documentDirectory = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first else {
         print("Ошибка: не удалось получить путь к директории Documents")
         return
       }
       let destinationURL = documentDirectory.appendingPathComponent(UUID().uuidString)
       
       var model: MessengerNetworkRequestModel?
-      var recordingModel: MessengeRecordingModel?
+      var recordingModel: MessengeRecordingDTO?
       var fileURLs: [URL] = []
       
       try? zipArchiveService.unzipFile(
         atPath: zipFileURL,
         toDestination: destinationURL,
         overwrite: true,
-        password: nil,
+        password: password,
         progress: nil
       ) { [weak self] unzippedFile in
         guard let self else { return }
@@ -321,7 +420,7 @@ extension MessengerListScreenModuleInteractor: MessengerListScreenModuleInteract
         } else if unzippedFile.pathExtension == "record" {
           if let modelData = FileManager.default.contents(atPath: unzippedFile.path()) {
             let decoder = JSONDecoder()
-            guard let model = try? decoder.decode(MessengeRecordingModel.self, from: modelData) else {
+            guard let model = try? decoder.decode(MessengeRecordingDTO.self, from: modelData) else {
               DispatchQueue.main.async {
                 completion(.failure(URLError(.unknown)))
               }
@@ -624,6 +723,7 @@ extension MessengerListScreenModuleInteractor: MessengerListScreenModuleInteract
   
   func sendFile(
     toxPublicKey: String,
+    recipientPublicKey: String,
     recordModel: MessengeRecordingModel?,
     messengerRequest: MessengerNetworkRequestModel,
     files: [URL]
@@ -631,8 +731,9 @@ extension MessengerListScreenModuleInteractor: MessengerListScreenModuleInteract
     DispatchQueue.global().async { [weak self] in
       guard let self else { return }
       p2pChatManager.sendFile(
-        toxPublicKey: toxPublicKey,
-        model: messengerRequest.mapToDTO(), 
+        toxPublicKey: toxPublicKey, 
+        recipientPublicKey: recipientPublicKey,
+        model: messengerRequest.mapToDTO(),
         recordModel: recordModel,
         files: files
       )

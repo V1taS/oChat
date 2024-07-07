@@ -100,6 +100,7 @@ public protocol IP2PChatManager {
   /// Отправить файл с сообщением
   func sendFile(
     toxPublicKey: String,
+    recipientPublicKey: String,
     model: MessengerNetworkRequestDTO,
     recordModel: MessengeRecordingModel?,
     files: [URL]

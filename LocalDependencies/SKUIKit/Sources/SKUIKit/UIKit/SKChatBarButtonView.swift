@@ -86,7 +86,7 @@ private extension SKChatBarButtonView {
       verticalStackView.leadingAnchor.constraint(equalTo: leadingAnchor),
       verticalStackView.topAnchor.constraint(equalTo: topAnchor),
       verticalStackView.trailingAnchor.constraint(equalTo: trailingAnchor),
-      verticalStackView.bottomAnchor.constraint(equalTo: bottomAnchor)
+      verticalStackView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -.s2)
     ])
   }
   

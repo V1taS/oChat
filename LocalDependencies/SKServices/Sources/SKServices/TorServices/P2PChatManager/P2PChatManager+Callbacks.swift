@@ -49,7 +49,7 @@ private extension P2PChatManager {
       }
       
       // Для получения директории Documents
-      guard let documentDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else {
+      guard let documentDirectory = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first else {
         print("Ошибка: не удалось получить путь к директории Documents")
         return
       }
@@ -80,6 +80,7 @@ private extension P2PChatManager {
             )
           case .failure:
             print("❌ Что-то пошло не так")
+            // TODO: - Очищаем хранилище куда получали файлик
             break
           }
         }
@@ -101,10 +102,12 @@ private extension P2PChatManager {
           switch result {
           case let .success(progress):
             updateFileSenderCallback(progress: progress, friendId: friendNumber)
+            dataManagerService.clearTemporaryDirectory()
           case .failure:
-            break
+            dataManagerService.clearTemporaryDirectory()
           }
-        })
+        }
+      )
     }
   }
   
@@ -256,6 +259,25 @@ private extension P2PChatManager {
 
 @available(iOS 16.0, *)
 private extension P2PChatManager {
+  func updateFileSenderErrorCallback(friendId: Int32) {
+    guard let publicKey = toxCore.publicKeyFromFriendNumber(friendNumber: Int32(friendId)) else {
+      return
+    }
+    
+    DispatchQueue.main.async { [weak self] in
+      guard let self else { return }
+      // Отправка уведомления что файл отправляется с ошибкой
+      NotificationCenter.default.post(
+        name: Notification.Name(NotificationConstants.didUpdateFileErrorSend.rawValue),
+        object: nil,
+        userInfo: [
+          "publicKey": publicKey,
+          "messageID": cacheMessengerModel?.messageID
+        ]
+      )
+    }
+  }
+  
   func updateFileSenderCallback(progress: Double, friendId: Int32) {
     guard let publicKey = toxCore.publicKeyFromFriendNumber(friendNumber: Int32(friendId)) else {
       return
@@ -269,7 +291,8 @@ private extension P2PChatManager {
         object: nil,
         userInfo: [
           "publicKey": publicKey,
-          "progress": progress
+          "progress": progress,
+          "messageID": cacheMessengerModel?.messageID
         ]
       )
     }
