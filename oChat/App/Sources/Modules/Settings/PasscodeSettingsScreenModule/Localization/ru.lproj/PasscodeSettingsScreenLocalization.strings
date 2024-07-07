@@ -9,5 +9,5 @@
 
 "State.Header.Title" = "Безопасность";
 "State.FaceID.Title" = "Face ID";
-"State.Passcode.Title" = "Экран блокировки";
+"State.Passcode.Title" = "Код доступа";
 "State.ChangeAccessCode.Title" = "Изменить код доступа";

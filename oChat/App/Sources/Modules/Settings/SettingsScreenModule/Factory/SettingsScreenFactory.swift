@@ -91,7 +91,6 @@ extension SettingsScreenFactory: SettingsScreenFactoryInput {
       backgroundColor: #colorLiteral(red: 0.4229286313, green: 0.5245543122, blue: 0.6798206568, alpha: 1),
       title: OChatStrings.SettingsScreenLocalization
         .State.PasscodeAndFaceID.title,
-      additionRightTitle: passcodeAndFaceIDValue ? isOnTitle : isOffTitle,
       action: { [weak self] in
         self?.output?.openPasscodeAndFaceIDSection()
       }
