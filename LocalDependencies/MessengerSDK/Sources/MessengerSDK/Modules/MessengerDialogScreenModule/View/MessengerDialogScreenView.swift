@@ -193,9 +193,9 @@ private extension MessengerDialogScreenView {
       },
       messageBuilder: { _, _, _ in
         AnyView(
-          informationView(model: presenter.getRequestHintModel())
+          informationView(model: presenter.getInitialHintModel())
         )
-        .padding(.bottom, .s20)
+        .padding(.bottom, .s4)
       }
     )
     .setAvailableInput(.textOnly)
@@ -268,7 +268,7 @@ private extension MessengerDialogScreenView {
         .looping()
         .aspectRatio(contentMode: .fit)
         .frame(width: 300, height: 300)
-        .offset(y: -20)
+        .offset(y: -10)
       }
       
       TitleAndSubtitleView(

@@ -313,7 +313,7 @@ public extension P2PChatManager {
       try zipArchiveService.zipFiles(
         atPaths: pathsToArchive,
         toDestination: archiveURL,
-        password: "777"
+        password: "lS5qhO#p4&^YzM)ZxtW62^5w1u$@a9^0wn*F68aTT)Y20JX(5DUC(X7(yK@F65%0%(mrc7z"
       )
       
       // Чтение данных архива

@@ -52,6 +52,7 @@ final class MessengerDialogScreenPresenter: ObservableObject {
   private var barButtonView: SKChatBarButtonView?
   private var resendInitialRequestTimer: Timer?
   private var timer: Timer?
+  private let impactFeedback = UIImpactFeedbackGenerator(style: .soft)
   
   // MARK: - Initialization
   
@@ -119,12 +120,14 @@ final class MessengerDialogScreenPresenter: ObservableObject {
         interactor.showNotification(.negative(title: "Ошибка сохранения"))
       }
     }
+    impactFeedback.impactOccurred()
   }
   
   func sendMessage(
     messenge: String,
     replyMessageText: String?
   ) {
+    impactFeedback.impactOccurred()
     var updatedContactModel = stateContactModel
     
     let messengeModel = MessengeModel(
@@ -158,6 +161,7 @@ final class MessengerDialogScreenPresenter: ObservableObject {
     recording: ExyteChat.Recording?,
     replyMessageText: String?
   ) async {
+    impactFeedback.impactOccurred()
     var updatedContactModel = stateContactModel
     var recordingModel: MessengeRecordingModel?
     
@@ -258,6 +262,7 @@ final class MessengerDialogScreenPresenter: ObservableObject {
   }
   
   func sendInitiateChatFromDialog(toxAddress: String?) {
+    impactFeedback.impactOccurred()
     var updatedModel = stateContactModel
     updatedModel.toxAddress = toxAddress ?? stateContactAdress
     stateContactModel = updatedModel
@@ -353,6 +358,7 @@ final class MessengerDialogScreenPresenter: ObservableObject {
   }
   
   func copyToClipboard(text: String) {
+    impactFeedback.impactOccurred()
     Timer.scheduledTimer(withTimeInterval: 0.4, repeats: false) { [weak self] _ in
       guard let self else { return }
       interactor.copyToClipboard(text: text)

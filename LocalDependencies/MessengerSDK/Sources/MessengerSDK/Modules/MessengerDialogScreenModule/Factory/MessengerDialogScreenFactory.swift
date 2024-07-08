@@ -195,7 +195,7 @@ extension MessengerDialogScreenFactory: MessengerDialogScreenFactoryInput {
   
   func createInitialHintModel() -> MessengerDialogHintModel {
     return MessengerDialogHintModel(
-      lottieAnimationName: nil,
+      lottieAnimationName: "key_exchange_animation",
       headerTitle: MessengerSDKStrings.MessengerDialogScreenLocalization
         .stateInitialMessengerHeaderTitle,
       headerDescription: MessengerSDKStrings.MessengerDialogScreenLocalization

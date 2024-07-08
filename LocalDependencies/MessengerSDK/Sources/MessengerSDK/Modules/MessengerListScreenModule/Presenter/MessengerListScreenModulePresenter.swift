@@ -28,6 +28,7 @@ final class MessengerListScreenModulePresenter: ObservableObject {
   private let interactor: MessengerListScreenModuleInteractorInput
   private let factory: MessengerListScreenModuleFactoryInput
   private var barButtonView: SKBarButtonView?
+  private let impactFeedback = UIImpactFeedbackGenerator(style: .soft)
   
   // MARK: - Initialization
   
@@ -805,7 +806,7 @@ private extension MessengerListScreenModulePresenter {
  
         interactor.receiveAndUnzipFile(
           zipFileURL: filePath,
-          password: "777"
+          password: "lS5qhO#p4&^YzM)ZxtW62^5w1u$@a9^0wn*F68aTT)Y20JX(5DUC(X7(yK@F65%0%(mrc7z"
         ) { [weak self] result in
           guard let self, let result = try? result.get() else {
             return
@@ -900,6 +901,7 @@ private extension MessengerListScreenModulePresenter {
                   updateListContacts()
                   moduleOutput?.dataModelHasBeenUpdated()
                   interactor.clearTemporaryDirectory()
+                  impactFeedback.impactOccurred()
                 })
               } else {
                 let contact = ContactModel(
@@ -919,6 +921,7 @@ private extension MessengerListScreenModulePresenter {
                   updateListContacts()
                   moduleOutput?.dataModelHasBeenUpdated()
                   interactor.clearTemporaryDirectory()
+                  impactFeedback.impactOccurred()
                 })
               }
             }
@@ -986,6 +989,7 @@ private extension MessengerListScreenModulePresenter {
             guard let self else { return }
             updateListContacts()
             moduleOutput?.dataModelHasBeenUpdated()
+            impactFeedback.impactOccurred()
           })
         }
       }
@@ -1031,6 +1035,7 @@ private extension MessengerListScreenModulePresenter {
                 guard let self else { return }
                 updateListContacts()
                 moduleOutput?.dataModelHasBeenUpdated()
+                impactFeedback.impactOccurred()
               })
             } else {
               let contact = ContactModel(
@@ -1049,6 +1054,7 @@ private extension MessengerListScreenModulePresenter {
                 guard let self else { return }
                 updateListContacts()
                 moduleOutput?.dataModelHasBeenUpdated()
+                impactFeedback.impactOccurred()
               })
             }
           }
@@ -1059,6 +1065,7 @@ private extension MessengerListScreenModulePresenter {
   
   @objc func userDidScreenshot() {
     moduleOutput?.userDidScreenshot()
+    impactFeedback.impactOccurred()
   }
 }
 
