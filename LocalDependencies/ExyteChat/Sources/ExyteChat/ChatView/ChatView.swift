@@ -94,13 +94,19 @@ public struct ChatView<MessageContent: View, InputViewContent: View>: View {
   @State private var menuCellOpacity: CGFloat = 0
   @State private var menuScrollView: UIScrollView?
   @State private var onSaveFile: ((URL) -> Void)?
+  private let placeholder: String
+  private var onChange: (_ newValue: String) -> Void
   
   public init(messages: [Message],
+              placeholder: String,
+              onChange: @escaping (_ newValue: String) -> Void,
               didSendMessage: @escaping (DraftMessage) -> Void,
               messageBuilder: @escaping MessageBuilderClosure,
               inputViewBuilder: @escaping InputViewBuilderClosure,
               onSaveFile: ((URL) -> Void)? = nil) {
     self.didSendMessage = didSendMessage
+    self.placeholder = placeholder
+    self.onChange = onChange
     self.sections = ChatView.mapMessages(messages)
     self.ids = messages.map { $0.id }
     self.messageBuilder = messageBuilder
@@ -169,7 +175,9 @@ public struct ChatView<MessageContent: View, InputViewContent: View>: View {
         messageUseMarkdown: messageUseMarkdown,
         orientationHandler: orientationHandler,
         mediaPickerSelectionParameters: mediaPickerSelectionParameters,
-        availableInput: availablelInput
+        availableInput: availablelInput,
+        placeholder: placeholder,
+        onChange: onChange
       )
         .environmentObject(globalFocusState)
     }
@@ -276,7 +284,13 @@ public struct ChatView<MessageContent: View, InputViewContent: View>: View {
   var inputView: some View {
     Group {
       if let inputViewBuilder = inputViewBuilder {
-        inputViewBuilder($inputViewModel.attachments.text, inputViewModel.attachments, inputViewModel.state, .message, inputViewModel.inputViewAction()) {
+        inputViewBuilder(
+          $inputViewModel.attachments.text,
+          inputViewModel.attachments,
+          inputViewModel.state,
+          .message,
+          inputViewModel.inputViewAction()
+        ) {
           globalFocusState.focus = nil
         }
       } else {
@@ -285,7 +299,9 @@ public struct ChatView<MessageContent: View, InputViewContent: View>: View {
           inputFieldId: inputFieldId,
           style: .message,
           availableInput: availablelInput,
-          messageUseMarkdown: messageUseMarkdown
+          messageUseMarkdown: messageUseMarkdown,
+          placeholder: placeholder,
+          onChange: onChange
         )
       }
     }
@@ -535,9 +551,13 @@ public extension ChatView {
 public extension ChatView where MessageContent == EmptyView {
   
   init(messages: [Message],
+       placeholder: String,
+       onChange: @escaping (_ newValue: String) -> Void,
        didSendMessage: @escaping (DraftMessage) -> Void,
        onSaveFile: ((URL) -> Void)? = nil,
        inputViewBuilder: @escaping InputViewBuilderClosure) {
+    self.placeholder = placeholder
+    self.onChange = onChange
     self.didSendMessage = didSendMessage
     self.onSaveFile = onSaveFile
     self.sections = ChatView.mapMessages(messages)
@@ -549,9 +569,13 @@ public extension ChatView where MessageContent == EmptyView {
 public extension ChatView where InputViewContent == EmptyView {
   
   init(messages: [Message],
+       placeholder: String,
+       onChange: @escaping (_ newValue: String) -> Void,
        didSendMessage: @escaping (DraftMessage) -> Void,
        onSaveFile: ((URL) -> Void)? = nil,
        messageBuilder: @escaping MessageBuilderClosure) {
+    self.placeholder = placeholder
+    self.onChange = onChange
     self.didSendMessage = didSendMessage
     self.onSaveFile = onSaveFile
     self.sections = ChatView.mapMessages(messages)
@@ -562,8 +586,12 @@ public extension ChatView where InputViewContent == EmptyView {
 
 public extension ChatView where MessageContent == EmptyView, InputViewContent == EmptyView {
   init(messages: [Message],
+       placeholder: String,
+       onChange: @escaping (_ newValue: String) -> Void,
        didSendMessage: @escaping (DraftMessage) -> Void,
        onSaveFile: ((URL) -> Void)? = nil) {
+    self.placeholder = placeholder
+    self.onChange = onChange
     self.didSendMessage = didSendMessage
     self.onSaveFile = onSaveFile
     self.sections = ChatView.mapMessages(messages)

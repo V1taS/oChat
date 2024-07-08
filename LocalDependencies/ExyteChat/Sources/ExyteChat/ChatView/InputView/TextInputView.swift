@@ -13,12 +13,14 @@ struct TextInputView: View {
   var inputFieldId: UUID
   var style: InputViewStyle
   var availableInput: AvailableInputType
+  var placeholder: String
+  var onChange: (_ newValue: String) -> Void
   
   var body: some View {
     TextField("", text: $text, axis: .vertical)
       .customFocus($globalFocusState.focus, equals: .uuid(inputFieldId))
       .placeholder(when: text.isEmpty) {
-        Text(style.placeholder)
+        Text(placeholder)
           .foregroundColor(theme.colors.inputPlaceholder)
       }
       .foregroundColor(theme.colors.inputText)
@@ -26,6 +28,9 @@ struct TextInputView: View {
       .padding(.leading, !availableInput.isMediaAvailable ? 12 : 0)
       .onTapGesture {
         globalFocusState.focus = .uuid(inputFieldId)
+      }
+      .onChange(of: text) { newValue in
+        onChange(newValue)
       }
   }
 }

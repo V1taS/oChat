@@ -12,15 +12,6 @@ import SKStyle
 public enum InputViewStyle {
   case message
   case signature
-  
-  var placeholder: String {
-    switch self {
-    case .message:
-      return "Type a message..."
-    case .signature:
-      return "Add signature..."
-    }
-  }
 }
 
 public enum InputViewAction {
@@ -91,6 +82,8 @@ struct InputView: View {
   var style: InputViewStyle
   var availableInput: AvailableInputType
   var messageUseMarkdown: Bool
+  var placeholder: String
+  var onChange: (_ newValue: String) -> Void
   
   @StateObject var recordingPlayer = RecordingPlayer()
   
@@ -169,7 +162,14 @@ struct InputView: View {
       case .isRecordingTap:
         recordingInProgress
       default:
-        TextInputView(text: $viewModel.attachments.text, inputFieldId: inputFieldId, style: style, availableInput: availableInput)
+        TextInputView(
+          text: $viewModel.attachments.text,
+          inputFieldId: inputFieldId,
+          style: style,
+          availableInput: availableInput,
+          placeholder: placeholder,
+          onChange: onChange
+        )
       }
     }
     .frame(minHeight: 48)
@@ -330,7 +330,7 @@ struct InputView: View {
     }) {
       theme.images.inputView.arrowSend
         .viewSize(.s10)
-        .circleBackground(theme.colors.sendButtonBackground)
+        .circleBackground(state.canSend ? theme.colors.sendButtonBackground : SKStyleAsset.constantSlate.swiftUIColor)
     }
     .disabled(!state.canSend)
   }

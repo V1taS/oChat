@@ -38,7 +38,7 @@ struct MessengerDialogScreenView: View {
 private extension MessengerDialogScreenView {
   func getContent() -> AnyView {
     if presenter.isInitialAddressEntryState() {
-      return AnyView(informationView(model: presenter.getInitialHintModel()))
+      return AnyView(createInitialAddressView())
     }
     if presenter.isRequestChatState() {
       return AnyView(informationView(model: presenter.getRequestHintModel()))
@@ -72,60 +72,6 @@ private extension MessengerDialogScreenView {
       .roundedEdge(backgroundColor: backgroundColor)
       .allowsHitTesting(false)
   }
-  
-  func createChatFieldView(isInitialState: Bool) -> some View {
-    let isValidate = isInitialState ? presenter.isInitialChatValidation() : presenter.isChatValidation()
-    
-    return HStack(spacing: .s4) {
-      ChatFieldView(
-        isInitialState ? "\(presenter.getInitialPlaceholder())" : "\(presenter.getMainPlaceholder())",
-        message: isInitialState ? $presenter.stateContactAdress : $presenter.stateInputMessengeText,
-        maxLength: isInitialState ? presenter.stateContactAdressMaxLength : presenter.stateInputMessengeTextMaxLength,
-        onChange: { newvalue in
-          presenter.setUserIsTyping(text: newvalue)
-        },
-        header: {
-          EmptyView()
-        },
-        footer: {
-          EmptyView()
-        }
-      )
-      .chatFieldStyle(.capsule)
-      
-      Button(action: {
-        UIImpactFeedbackGenerator(style: .soft).impactOccurred()
-        
-        if isInitialState {
-          presenter.sendInitiateChatFromDialog(toxAddress: nil)
-          presenter.startScheduleResendInitialRequest()
-        }
-      }) {
-        Image(systemName: "arrow.up.circle.fill")
-          .resizable()
-          .aspectRatio(contentMode: .fit)
-          .frame(height: .s7)
-          .foregroundColor(isValidate ? SKStyleAsset.constantAzure.swiftUIColor : SKStyleAsset.constantSlate.swiftUIColor)
-          .opacity(isValidate ? 1 : 0.5)
-      }
-      .disabled(!isValidate)
-    }
-    .padding(.s4)
-  }
-  
-  func getStyleForTips(messengeModel: MessengeModel) -> TipsView.Style {
-    let style: TipsView.Style
-    switch messengeModel.messageType {
-    case .systemSuccess:
-      return .success
-    case .systemAttention:
-      return .attention
-    case .systemDanger:
-      return .danger
-    default:
-      return .success
-    }
-  }
 }
 
 // MARK: - Private Ready To Chat
@@ -135,7 +81,9 @@ private extension MessengerDialogScreenView {
   func readyToChatView() -> some View {
     if presenter.isInitialWaitConfirmState() {
       ChatView(
-        messages: presenter.stateMessengeModels,
+        messages: presenter.stateMessengeModels, 
+        placeholder: "", 
+        onChange: { _ in },
         didSendMessage: { _ in },
         inputViewBuilder: { _, _, _, _, _, _ in
           MainButtonView(
@@ -158,6 +106,8 @@ private extension MessengerDialogScreenView {
     } else if presenter.stateContactModel.status == .offline {
       ChatView(
         messages: presenter.stateMessengeModels,
+        placeholder: "",
+        onChange: { _ in },
         didSendMessage: { _ in },
         inputViewBuilder: { _, _, _, _, _, _ in
           MainButtonView(
@@ -178,6 +128,10 @@ private extension MessengerDialogScreenView {
     } else {
       ChatView(
         messages: presenter.stateMessengeModels,
+        placeholder: presenter.getMainPlaceholder(),
+        onChange: { newValue in
+          presenter.setUserIsTyping(text: newValue)
+        },
         didSendMessage: { draft in
           Task {
             if draft.medias.isEmpty && draft.recording == nil {
@@ -226,6 +180,32 @@ private extension MessengerDialogScreenView {
 // MARK: - Private Initial
 
 private extension MessengerDialogScreenView {
+  func createInitialAddressView() -> some View {
+    ChatView(
+      messages: presenter.stateMessengeModels, 
+      placeholder: presenter.getInitialPlaceholder(),
+      onChange: { _ in },
+      didSendMessage: { draft in
+        DispatchQueue.main.async {
+          presenter.sendInitiateChatFromDialog(toxAddress: draft.text)
+          presenter.startScheduleResendInitialRequest()
+        }
+      },
+      messageBuilder: { _, _, _ in
+        AnyView(
+          informationView(model: presenter.getRequestHintModel())
+        )
+        .padding(.bottom, .s20)
+      }
+    )
+    .setAvailableInput(.textOnly)
+    .showMessageTimeView(false)
+    .showDateHeaders(showDateHeaders: false)
+    .showMessageMenuOnLongPress(false)
+    .showNetworkConnectionProblem(true)
+    .mediaPickerTheme()
+  }
+  
   func informationView(model: MessengerDialogHintModel) -> some View {
     VStack {
       ScrollView(.vertical, showsIndicators: false) {
@@ -255,9 +235,6 @@ private extension MessengerDialogScreenView {
       
       Spacer()
       
-      if presenter.stateContactModel.status == .initialChat {
-        createChatFieldView(isInitialState: true)
-      }
       if presenter.stateContactModel.status == .requestChat {
         VStack(spacing: .s4) {
           MainButtonView(
