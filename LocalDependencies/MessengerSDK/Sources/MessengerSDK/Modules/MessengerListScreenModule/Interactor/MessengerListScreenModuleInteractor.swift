@@ -349,7 +349,7 @@ extension MessengerListScreenModuleInteractor: MessengerListScreenModuleInteract
   func resizeThumbnailImageWithFrame(data: Data) -> Data? {
     guard let originalImage = UIImage(data: data) else { return nil }
     
-    let targetSize = CGSize(width: 300, height: 300)
+    let targetSize = CGSize(width: 200, height: 200)
     
     let widthRatio = targetSize.width / originalImage.size.width
     let heightRatio = targetSize.height / originalImage.size.height

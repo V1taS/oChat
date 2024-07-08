@@ -297,7 +297,8 @@ public struct ChatView<MessageContent: View, InputViewContent: View>: View {
   func messageMenu(_ row: MessageRow) -> some View {
     MessageMenu(
       isShowingMenu: $isShowingMenu,
-      menuButtonsSize: $menuButtonsSize, 
+      menuButtonsSize: $menuButtonsSize,
+      isBottomDirection: row.positionInGroup != .last,
       messageStatus: row.message.status,
       alignment: row.message.user.isCurrentUser ? .right : .left,
       leadingPadding: avatarSize + MessageView.horizontalAvatarPadding * 2,

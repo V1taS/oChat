@@ -673,12 +673,6 @@ private extension MessengerListScreenModulePresenter {
     interactor.setSelfStatus(isOnline: true)
     interactor.passcodeNotSetInSystemIOSheck()
     
-    interactor.setAllContactsIsOffline { [weak self] in
-      guard let self else { return }
-      updateListContacts()
-      moduleOutput?.dataModelHasBeenUpdated()
-    }
-    
     Timer.scheduledTimer(withTimeInterval: 0.5, repeats: false) { [weak self] _ in
       guard let self else { return }
       
