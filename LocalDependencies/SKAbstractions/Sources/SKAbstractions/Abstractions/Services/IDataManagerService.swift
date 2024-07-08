@@ -53,4 +53,13 @@ public protocol IDataManagerService {
   /// - Parameter tempURL: Временный URL, по которому сохраняется объект.
   /// - Returns: Новый URL сохраненного объекта или nil в случае ошибки.
   func saveObjectWith(tempURL: URL) -> URL?
+  
+  /// Получить URL на файл по имени файла
+  func constructFileURL(fileName: String, fileExtension: String?) -> URL?
+  
+  /// Получить имя файла по URL
+  func getFileName(from url: URL) -> String?
+  
+  /// Получить имя файла по URL без расширения
+  func getFileNameWithoutExtension(from url: URL) -> String
 }

@@ -167,11 +167,12 @@ final class MessengerDialogScreenPresenter: ObservableObject {
     
     if let recording,
        let recordingTempURL = recording.url,
-       let recordingURL = interactor.saveObjectWith(tempURL: recordingTempURL) {
+       let recordingURL = interactor.saveObjectWith(tempURL: recordingTempURL),
+       let recordingName = interactor.getFileName(from: recordingURL) {
       recordingModel = .init(
         duration: recording.duration,
         waveformSamples: recording.waveformSamples,
-        url: recordingURL
+        name: recordingName
       )
     }
     
@@ -180,14 +181,16 @@ final class MessengerDialogScreenPresenter: ObservableObject {
         guard let thumbnailTempURL = await media.getThumbnailURL(),
               let thumbnailURL = interactor.saveObjectWith(tempURL: thumbnailTempURL),
               let fullTempURL = await media.getURL(),
-              let fullURL = interactor.saveObjectWith(tempURL: fullTempURL) else {
+              let fullURL = interactor.saveObjectWith(tempURL: fullTempURL),
+              let thumbnailName = interactor.getFileName(from: thumbnailURL),
+              let fullName = interactor.getFileName(from: fullURL) else {
           return nil
         }
         
         return MessengeImageModel(
           id: UUID().uuidString,
-          thumbnail: thumbnailURL,
-          full: fullURL
+          thumbnailName: thumbnailName,
+          fullName: fullName
         )
       }
     }
@@ -197,14 +200,16 @@ final class MessengerDialogScreenPresenter: ObservableObject {
         guard let thumbnailTempURL = await media.getThumbnailURL(),
               let thumbnailURL = interactor.saveObjectWith(tempURL: thumbnailTempURL),
               let fullTempURL = await media.getURL(),
-              let fullURL = interactor.saveObjectWith(tempURL: fullTempURL) else {
+              let fullURL = interactor.saveObjectWith(tempURL: fullTempURL),
+              let thumbnailName = interactor.getFileName(from: thumbnailURL),
+              let fullName = interactor.getFileName(from: fullURL) else {
           return nil
         }
         
         return MessengeVideoModel(
           id: UUID().uuidString,
-          thumbnail: thumbnailURL,
-          full: fullURL
+          thumbnailName: thumbnailName,
+          fullName: fullName
         )
       }
     }

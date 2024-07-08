@@ -353,6 +353,15 @@ private extension MessengerListScreenModulePresenter {
       }
     }
     
+    interactor.getPushNotificationToken { [weak self] token in
+      guard token == nil else {
+        return
+      }
+      DispatchQueue.main.async {
+        UIApplication.shared.registerForRemoteNotifications()
+      }
+    }
+    
     NotificationCenter.default.addObserver(
       self,
       selector: #selector(appDidBecomeActive),
@@ -624,7 +633,7 @@ private extension MessengerListScreenModulePresenter {
          !contact.messenges[messengeIndex].videos.isEmpty ||
          !contact.messenges[messengeIndex].images.isEmpty ||
          contact.messenges[messengeIndex].recording != nil {
-        var files: [URL] = []
+        var files: [URL?] = []
         
         contact.messenges[messengeIndex].videos.forEach { files.append($0.full) }
         contact.messenges[messengeIndex].images.forEach { files.append($0.full) }
@@ -634,7 +643,7 @@ private extension MessengerListScreenModulePresenter {
           recipientPublicKey: encryptionPublicKey,
           recordModel: contact.messenges[messengeIndex].recording,
           messengerRequest: requestModel,
-          files: files
+          files: files.compactMap({ $0 })
         )
         
         return
@@ -684,6 +693,15 @@ private extension MessengerListScreenModulePresenter {
         
         moduleOutput?.openNewMessengeScreen(contactAdress: contactAdress)
         interactor.deleteDeepLinkURL()
+      }
+    }
+    
+    interactor.getPushNotificationToken { [weak self] token in
+      guard token == nil else {
+        return
+      }
+      DispatchQueue.main.async {
+        UIApplication.shared.registerForRemoteNotifications()
       }
     }
   }
@@ -803,126 +821,142 @@ private extension MessengerListScreenModulePresenter {
       
       interactor.getContactModels { [weak self] contactModels in
         guard let self else { return }
- 
-        interactor.receiveAndUnzipFile(
-          zipFileURL: filePath,
-          password: "lS5qhO#p4&^YzM)ZxtW62^5w1u$@a9^0wn*F68aTT)Y20JX(5DUC(X7(yK@F65%0%(mrc7z"
-        ) { [weak self] result in
-          guard let self, let result = try? result.get() else {
-            return
-          }
-          let messageModel = result.model
-          updateRedDotToTabBar(contactModels: contactModels)
-          
-          interactor.decrypt(messageModel.messageText) { [weak self] messageText in
-            guard let self else { return }
-            interactor.decrypt(messageModel.senderPushNotificationToken) { [weak self] pushNotificationToken in
+        
+        let passwordEncodedString = interactor.getFileNameWithoutExtension(from: filePath)
+        guard let decodedPasswordEncrypt = passwordEncodedString.removingPercentEncoding else {
+          return
+        }
+        
+        interactor.decrypt(decodedPasswordEncrypt) { [weak self] password in
+          guard let self, let password else { return }
+          interactor.receiveAndUnzipFile(
+            zipFileURL: filePath,
+            password: password
+          ) { [weak self] result in
+            guard let self, let result = try? result.get() else {
+              return
+            }
+            let messageModel = result.model
+            updateRedDotToTabBar(contactModels: contactModels)
+            
+            interactor.decrypt(messageModel.messageText) { [weak self] messageText in
               guard let self else { return }
-              var images: [MessengeImageModel] = []
-              var videos: [MessengeVideoModel] = []
-              
-              for fileTempURL in result.files {
+              interactor.decrypt(messageModel.senderPushNotificationToken) { [weak self] pushNotificationToken in
+                guard let self else { return }
+                var images: [MessengeImageModel] = []
+                var videos: [MessengeVideoModel] = []
                 
-                if fileTempURL.isImageFile() {
-                  let imageFile = interactor.readObjectWith(fileURL: fileTempURL) ?? Data()
-                  let fileExtension = fileTempURL.pathExtension
-                  let thumbnailData = interactor.resizeThumbnailImageWithFrame(data: imageFile) ?? Data()
-                  let thumbnailURL = interactor.saveObjectWith(
-                    fileName: UUID().uuidString,
-                    fileExtension: fileExtension,
-                    data: thumbnailData
-                  )
+                for fileTempURL in result.files {
                   
-                  guard let thumbnailURL,
-                        let fullImage = interactor.saveObjectWith(tempURL: fileTempURL) else {
+                  if fileTempURL.isImageFile() {
+                    let imageFile = interactor.readObjectWith(fileURL: fileTempURL) ?? Data()
+                    let fileExtension = fileTempURL.pathExtension
+                    let thumbnailData = interactor.resizeThumbnailImageWithFrame(data: imageFile) ?? Data()
+                    let thumbnailURL = interactor.saveObjectWith(
+                      fileName: UUID().uuidString,
+                      fileExtension: fileExtension,
+                      data: thumbnailData
+                    )
+                    
+                    guard let thumbnailURL,
+                          let fullImage = interactor.saveObjectWith(tempURL: fileTempURL),
+                          let thumbnailName = interactor.getFileName(from: thumbnailURL),
+                          let fullImageName = interactor.getFileName(from: fullImage) else {
+                      continue
+                    }
+                    
+                    images.append(
+                      .init(
+                        id: UUID().uuidString,
+                        thumbnailName: thumbnailName,
+                        fullName: fullImageName
+                      )
+                    )
                     continue
                   }
                   
-                  images.append(
-                    .init(
-                      id: UUID().uuidString,
-                      thumbnail: thumbnailURL,
-                      full: fullImage
+                  if fileTempURL.isVideoFile() {
+                    guard let videoFileURL = interactor.saveObjectWith(tempURL: fileTempURL),
+                          let videoFileName = interactor.getFileName(from: videoFileURL) else {
+                      continue
+                    }
+                    
+                    videos.append(
+                      .init(
+                        id: UUID().uuidString,
+                        thumbnailName: videoFileName,
+                        fullName: videoFileName
+                      )
                     )
-                  )
-                  continue
+                    continue
+                  }
                 }
                 
-                if fileTempURL.isVideoFile() {
-                  videos.append(
-                    .init(
-                      id: UUID().uuidString,
-                      thumbnail: fileTempURL,
-                      full: fileTempURL
-                    )
-                  )
-                  continue
-                }
-              }
-              
-              var recordingModel: MessengeRecordingModel?
-              
-              if let recordingDTO = result.recordingDTO,
-                 let recordingURL = interactor.saveObjectWith(
+                var recordingModel: MessengeRecordingModel?
+                
+                if let recordingDTO = result.recordingDTO,
+                   let recordingURL = interactor.saveObjectWith(
                     fileName: UUID().uuidString,
                     fileExtension: "aac",
                     data: recordingDTO.data
-                  ) {
-                recordingModel = .init(
-                  duration: recordingDTO.duration,
-                  waveformSamples: recordingDTO.waveformSamples,
-                  url: recordingURL
-                )
-              }
-
-              if let contact = factory.searchContact(
-                contactModels: contactModels,
-                torAddress: messageModel.senderAddress
-              ) {
-                var updatedContact = contact
-                updatedContact = factory.addMessageToContact(
-                  message: messageText,
-                  contactModel: updatedContact,
-                  messageType: .received,
-                  replyMessageText: messageModel.replyMessageText,
-                  images: images,
-                  videos: videos,
-                  recording: recordingModel
-                )
-                updatedContact.status = .online
-                if let senderPushNotificationToken = pushNotificationToken {
-                  updatedContact.pushNotificationToken = senderPushNotificationToken
+                   ),
+                   let recordingName = interactor.getFileName(from: recordingURL) {
+                  recordingModel = .init(
+                    duration: recordingDTO.duration,
+                    waveformSamples: recordingDTO.waveformSamples,
+                    name: recordingName
+                  )
                 }
-                updatedContact.toxAddress = messageModel.senderAddress
-                updatedContact.isNewMessagesAvailable = true
-                updatedContact.encryptionPublicKey = messageModel.senderPublicKey
-                interactor.saveContactModel(updatedContact, completion: { [weak self] in
-                  guard let self else { return }
-                  updateListContacts()
-                  moduleOutput?.dataModelHasBeenUpdated()
-                  interactor.clearTemporaryDirectory()
-                  impactFeedback.impactOccurred()
-                })
-              } else {
-                let contact = ContactModel(
-                  name: nil,
-                  toxAddress: messageModel.senderAddress,
-                  meshAddress: messageModel.senderLocalMeshAddress,
-                  messenges: [],
-                  status: .online,
-                  encryptionPublicKey: messageModel.senderPublicKey,
-                  toxPublicKey: nil,
-                  pushNotificationToken: pushNotificationToken,
-                  isNewMessagesAvailable: true,
-                  isTyping: false
-                )
-                interactor.saveContactModel(contact, completion: { [weak self] in
-                  guard let self else { return }
-                  updateListContacts()
-                  moduleOutput?.dataModelHasBeenUpdated()
-                  interactor.clearTemporaryDirectory()
-                  impactFeedback.impactOccurred()
-                })
+                
+                if let contact = factory.searchContact(
+                  contactModels: contactModels,
+                  torAddress: messageModel.senderAddress
+                ) {
+                  var updatedContact = contact
+                  updatedContact = factory.addMessageToContact(
+                    message: messageText,
+                    contactModel: updatedContact,
+                    messageType: .received,
+                    replyMessageText: messageModel.replyMessageText,
+                    images: images,
+                    videos: videos,
+                    recording: recordingModel
+                  )
+                  updatedContact.status = .online
+                  if let senderPushNotificationToken = pushNotificationToken {
+                    updatedContact.pushNotificationToken = senderPushNotificationToken
+                  }
+                  updatedContact.toxAddress = messageModel.senderAddress
+                  updatedContact.isNewMessagesAvailable = true
+                  updatedContact.encryptionPublicKey = messageModel.senderPublicKey
+                  interactor.saveContactModel(updatedContact, completion: { [weak self] in
+                    guard let self else { return }
+                    updateListContacts()
+                    moduleOutput?.dataModelHasBeenUpdated()
+                    interactor.clearTemporaryDirectory()
+                    impactFeedback.impactOccurred()
+                  })
+                } else {
+                  let contact = ContactModel(
+                    name: nil,
+                    toxAddress: messageModel.senderAddress,
+                    meshAddress: messageModel.senderLocalMeshAddress,
+                    messenges: [],
+                    status: .online,
+                    encryptionPublicKey: messageModel.senderPublicKey,
+                    toxPublicKey: nil,
+                    pushNotificationToken: pushNotificationToken,
+                    isNewMessagesAvailable: true,
+                    isTyping: false
+                  )
+                  interactor.saveContactModel(contact, completion: { [weak self] in
+                    guard let self else { return }
+                    updateListContacts()
+                    moduleOutput?.dataModelHasBeenUpdated()
+                    interactor.clearTemporaryDirectory()
+                    impactFeedback.impactOccurred()
+                  })
+                }
               }
             }
           }

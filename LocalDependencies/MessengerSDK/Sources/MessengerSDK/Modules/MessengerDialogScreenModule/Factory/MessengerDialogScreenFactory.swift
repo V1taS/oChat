@@ -69,37 +69,37 @@ final class MessengerDialogScreenFactory {
 
 extension MessengerDialogScreenFactory: MessengerDialogScreenFactoryInput {
   func loadMessage(
-      before: Message?,
-      messengeModels: [Message],
-      showMessengeMaxCount: Int
+    before: Message?,
+    messengeModels: [Message],
+    showMessengeMaxCount: Int
   ) -> [Message] {
-      // Если `before` равно nil, берем сообщения с самого начала
-      guard let before = before else {
-          // Проверка границ диапазона
-          let endIndex = min(showMessengeMaxCount, messengeModels.count)
-          return Array(messengeModels.prefix(endIndex))
-      }
-      
-      // Найти индекс сообщения `before`
-      guard let beforeIndex = messengeModels.firstIndex(where: { $0.id == before.id }) else {
-          // Если сообщение не найдено, возвращаем пустой массив или обрабатываем ошибку
-          return []
-      }
-      
-      // Проверка на валидность индекса
-      guard beforeIndex < messengeModels.count else {
-          return []
-      }
-      
-      // Получаем сообщения до и включая `before`
-      let previousMessages = Array(messengeModels[beforeIndex...])
-      
+    // Если `before` равно nil, берем сообщения с самого начала
+    guard let before = before else {
       // Проверка границ диапазона
-      let endIndex = min(beforeIndex + showMessengeMaxCount, messengeModels.count)
-      let nextMessages = Array(messengeModels[beforeIndex..<endIndex])
-      
-      // Объединяем оба массива
-      return nextMessages + previousMessages
+      let endIndex = min(showMessengeMaxCount, messengeModels.count)
+      return Array(messengeModels.prefix(endIndex))
+    }
+    
+    // Найти индекс сообщения `before`
+    guard let beforeIndex = messengeModels.firstIndex(where: { $0.id == before.id }) else {
+      // Если сообщение не найдено, возвращаем пустой массив или обрабатываем ошибку
+      return []
+    }
+    
+    // Проверка на валидность индекса
+    guard beforeIndex < messengeModels.count else {
+      return []
+    }
+    
+    // Получаем сообщения до и включая `before`
+    let previousMessages = Array(messengeModels[beforeIndex...])
+    
+    // Проверка границ диапазона
+    let endIndex = min(beforeIndex + showMessengeMaxCount, messengeModels.count)
+    let nextMessages = Array(messengeModels[beforeIndex..<endIndex])
+    
+    // Объединяем оба массива
+    return nextMessages + previousMessages
   }
   
   func createMessageModels(
@@ -144,7 +144,7 @@ extension MessengerDialogScreenFactory: MessengerDialogScreenFactoryInput {
         status: status,
         createdAt: model.date,
         text: model.message,
-        attachments: model.images.map { $0.mapTo() } + model.videos.map { $0.mapTo() },
+        attachments: model.images.compactMap { $0.mapTo() } + model.videos.compactMap { $0.mapTo() },
         recording: model.recording?.mapTo(),
         replyMessage: replyMessage,
         retryAction: { [weak self] _ in
@@ -297,12 +297,15 @@ extension MessengeRecordingModel {
 // MARK: - Mapping MessengeVideoModel
 
 extension MessengeVideoModel {
-  func mapTo() -> Attachment {
-    Attachment(
-        id: id,
-        thumbnail: thumbnail,
-        full: full,
-        type: .image
+  func mapTo() -> Attachment? {
+    guard let thumbnail, let full else {
+      return nil
+    }
+    return Attachment(
+      id: id,
+      thumbnail: thumbnail,
+      full: full,
+      type: .image
     )
   }
 }
@@ -310,12 +313,15 @@ extension MessengeVideoModel {
 // MARK: - Mapping MessengeImageModel
 
 extension MessengeImageModel {
-  func mapTo() -> Attachment {
-    Attachment(
-        id: id,
-        thumbnail: thumbnail,
-        full: full,
-        type: .image
+  func mapTo() -> Attachment? {
+    guard let thumbnail, let full else {
+      return nil
+    }
+    return Attachment(
+      id: id,
+      thumbnail: thumbnail,
+      full: full,
+      type: .image
     )
   }
 }

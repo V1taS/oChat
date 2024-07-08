@@ -26,6 +26,7 @@ public final class P2PChatManager: IP2PChatManager {
   private var periodicFriendStatusChecktimer: DispatchSourceTimer?
   private let zipArchiveService = ZipArchiveService()
   private var fileData: Data?
+  private let cryptoService = CryptoService()
   
   var fileInfo: (friendNumber: Int32, fileId: Int32, fileName: String, fileSize: UInt64)?
   var cacheMessengerModel: MessengerNetworkRequestDTO?
@@ -268,7 +269,9 @@ public extension P2PChatManager {
     dataManagerService.clearTemporaryDirectory()
     var recordDTO: MessengeRecordingDTO?
     
-    if let recordModel, let data = dataManagerService.readObjectWith(fileURL: recordModel.url) {
+    if let recordModel,
+       let url = recordModel.url,
+       let data = dataManagerService.readObjectWith(fileURL: url) {
       recordDTO = .init(
         duration: recordModel.duration,
         waveformSamples: recordModel.waveformSamples,
@@ -279,10 +282,17 @@ public extension P2PChatManager {
     cacheMessengerModel = model
     let encoder = JSONEncoder()
     
+    let password = generatePassword(length: 30)
+    let passwordEncrypt = cryptoService.encrypt(password, publicKey: recipientPublicKey)
+    guard let passwordEncrypt,
+          let passwordEncodedString = passwordEncrypt.addingPercentEncoding(withAllowedCharacters: .urlHostAllowed) else {
+      return
+    }
+    
     let tempDirectory = FileManager.default.temporaryDirectory
     let modelURL = tempDirectory.appendingPathComponent(UUID().uuidString).appendingPathExtension("model")
     let recordURL = tempDirectory.appendingPathComponent(UUID().uuidString).appendingPathExtension("record")
-    let archiveURL = tempDirectory.appendingPathComponent(UUID().uuidString).appendingPathExtension("zip")
+    let archiveURL = tempDirectory.appendingPathComponent(passwordEncodedString).appendingPathExtension("zip")
     
     do {
       let jsonData = try encoder.encode(model)
@@ -313,7 +323,7 @@ public extension P2PChatManager {
       try zipArchiveService.zipFiles(
         atPaths: pathsToArchive,
         toDestination: archiveURL,
-        password: "lS5qhO#p4&^YzM)ZxtW62^5w1u$@a9^0wn*F68aTT)Y20JX(5DUC(X7(yK@F65%0%(mrc7z"
+        password: password
       )
       
       // Чтение данных архива
@@ -356,6 +366,20 @@ public extension P2PChatManager {
 
 @available(iOS 16.0, *)
 extension P2PChatManager {
+  func generatePassword(length: Int) -> String {
+    let characters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+-=[]{}|;:',.<>?/~`"
+    let charactersArray = Array(characters)
+    var password = ""
+    
+    for _ in 0..<length {
+      if let randomCharacter = charactersArray.randomElement() {
+        password.append(randomCharacter)
+      }
+    }
+    
+    return password
+  }
+  
   // Коллбек для отправки запрошенных чанков
   func sendChunk(
     to friendNumber: Int32,

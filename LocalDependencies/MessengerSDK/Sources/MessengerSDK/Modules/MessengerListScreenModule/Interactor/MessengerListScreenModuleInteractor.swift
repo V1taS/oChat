@@ -272,6 +272,12 @@ protocol MessengerListScreenModuleInteractorInput {
     fileExtension: String,
     data: Data
   ) -> URL?
+  
+  /// Получить имя файла по URL
+  func getFileName(from url: URL) -> String?
+  
+  /// Получить имя файла по URL без расширения
+  func getFileNameWithoutExtension(from url: URL) -> String
 }
 
 /// Интерактор
@@ -318,6 +324,14 @@ final class MessengerListScreenModuleInteractor {
 // MARK: - MessengerListScreenModuleInteractorInput
 
 extension MessengerListScreenModuleInteractor: MessengerListScreenModuleInteractorInput {
+  func getFileNameWithoutExtension(from url: URL) -> String {
+    dataManagementService.getFileNameWithoutExtension(from: url)
+  }
+  
+  func getFileName(from url: URL) -> String? {
+    dataManagementService.getFileName(from: url)
+  }
+  
   func saveObjectToCachesWith(
     fileName: String,
     fileExtension: String,

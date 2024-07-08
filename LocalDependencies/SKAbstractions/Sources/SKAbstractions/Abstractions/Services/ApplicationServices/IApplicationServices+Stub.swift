@@ -16,6 +16,9 @@ public final class ApplicationServicesStub: IApplicationServices, IDataManagerSe
                                             ICloudKitService, IAppSettingsManager, IDataManagementService,
                                             IAccessAndSecurityManagementService, IUserInterfaceAndExperienceService,
                                             IDeepLinkService, IPushNotificationService, IZipArchiveService {
+  public func getFileNameWithoutExtension(from url: URL) -> String { "" }
+  public func getFileName(from url: URL) -> String? { nil }
+  public func constructFileURL(fileName: String, fileExtension: String?) -> URL? { nil }
   public func saveObjectToCachesWith(fileName: String, fileExtension: String, data: Data) -> URL? { nil }
   public func clearTemporaryDirectory() {}
   public func saveObjectWith(tempURL: URL) -> URL? {  nil }

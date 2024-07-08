@@ -103,6 +103,28 @@ public class DataManagerService: IDataManagerService {
     return nil
   }
   
+  public func constructFileURL(fileName: String, fileExtension: String? = nil) -> URL? {
+    let directoryURL = FileManager.default.urls(for: .libraryDirectory, in: .userDomainMask).first
+    guard let directoryURL else {
+      return nil
+    }
+    
+    var fullFileName = fileName
+    if let fileExtension = fileExtension, !fileName.hasSuffix(".\(fileExtension)") {
+      fullFileName = "\(fileName).\(fileExtension)"
+    }
+    
+    return directoryURL.appendingPathComponent(fullFileName)
+  }
+  
+  public func getFileName(from url: URL) -> String? {
+    return url.lastPathComponent
+  }
+  
+  public func getFileNameWithoutExtension(from url: URL) -> String {
+    return (url.lastPathComponent as NSString).deletingPathExtension
+  }
+  
   public func deleteObjectWith(fileURL: URL, isRemoved: ((Bool) -> Void)?) {
     do {
       try FileManager.default.removeItem(at: fileURL)

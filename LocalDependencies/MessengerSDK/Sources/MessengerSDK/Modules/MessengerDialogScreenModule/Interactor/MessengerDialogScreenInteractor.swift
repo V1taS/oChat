@@ -33,6 +33,9 @@ protocol MessengerDialogScreenInteractorInput {
   
   /// Сохраняет изображение в галерее устройства.
   func saveImageToGallery(_ imageURL: URL, completion: ((Bool) -> Void)?)
+  
+  /// Получить имя файла по URL
+  func getFileName(from url: URL) -> String?
 }
 
 /// Интерактор
@@ -70,6 +73,10 @@ final class MessengerDialogScreenInteractor {
 // MARK: - MessengerDialogScreenInteractorInput
 
 extension MessengerDialogScreenInteractor: MessengerDialogScreenInteractorInput {
+  func getFileName(from url: URL) -> String? {
+    dataManagementService.getFileName(from: url)
+  }
+  
   func saveImageToGallery(_ imageURL: URL, completion: ((Bool) -> Void)?) {
     let dataImage = dataManagementService.readObjectWith(fileURL: imageURL)
     

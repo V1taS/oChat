@@ -12,18 +12,27 @@ public struct MessengeRecordingModel {
   public var duration: Double
   /// Массив выборок формы волны записи
   public var waveformSamples: [CGFloat]
-  /// URL записи (опционально)
-  public var url: URL
+  /// Полное название файла
+  public var name: String
   
   /// Инициализатор модели записи
   /// - Parameters:
   ///   - duration: Продолжительность записи в секундах
   ///   - waveformSamples: Массив выборок формы волны записи
-  ///   - url: URL записи (опционально)
-  public init(duration: Double, waveformSamples: [CGFloat], url: URL) {
+  ///   - name: Полное название файла
+  public init(duration: Double, waveformSamples: [CGFloat], name: String) {
     self.duration = duration
     self.waveformSamples = waveformSamples
-    self.url = url
+    self.name = name
+  }
+}
+
+// MARK: - URLs
+
+public extension MessengeRecordingModel {
+  var url: URL? {
+    let directoryURL = FileManager.default.urls(for: .libraryDirectory, in: .userDomainMask).first
+    return directoryURL?.appendingPathComponent(name)
   }
 }
 
