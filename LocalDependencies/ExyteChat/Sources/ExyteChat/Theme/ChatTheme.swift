@@ -264,8 +264,12 @@ extension ChatTheme {
     public var messageErrorStatus: Color
     public var myMessageBubbleBackground: Color
     public var friendMessageBubbleBackground: Color
+    public var systemMessageBubbleBackground: Color
+
     public var myMessageBubbleText: Color
     public var friendMessageBubbleText: Color
+    public var systemMessageBubbleText: Color
+    
     public var myMessageTime: Color
     public var friendMessageTime: Color
     
@@ -329,8 +333,10 @@ extension ChatTheme {
      - messageErrorStatus: Цвет статуса ошибки сообщения.
      - myMessageBubbleBackground: Цвет фона пузыря моего сообщения.
      - friendMessageBubbleBackground: Цвет фона пузыря сообщения друга.
+     - systemMessageBubbleBackground: Цвет фона пузыря системного сообщения.
      - myMessageBubbleText: Цвет текста в моем сообщении.
      - friendMessageBubbleText: Цвет текста в сообщении друга.
+     - systemMessageBubbleText: Цвет текста в сообщении системный.
      - myMessageTime: Цвет времени моего сообщения.
      - friendMessageTime: Цвет времени сообщения друга.
      - inputMessageBackground: Цвет фона ввода сообщения.
@@ -377,8 +383,10 @@ extension ChatTheme {
       messageErrorStatus: Color = SKStyleAsset.constantRuby.swiftUIColor,
       myMessageBubbleBackground: Color = SKStyleAsset.constantAzure.swiftUIColor,
       friendMessageBubbleBackground: Color = SKStyleAsset.componentSlateMessageBG.swiftUIColor,
+      systemMessageBubbleBackground: Color = SKStyleAsset.constantAmberGlow.swiftUIColor,
       myMessageBubbleText: Color = SKStyleAsset.constantGhost.swiftUIColor,
       friendMessageBubbleText: Color = SKStyleAsset.constantNavy.swiftUIColor,
+      systemMessageBubbleText: Color = SKStyleAsset.constantNavy.swiftUIColor,
       myMessageTime: Color = SKStyleAsset.constantGhost.swiftUIColor.opacity(0.4),
       friendMessageTime: Color = SKStyleAsset.constantNavy.swiftUIColor.opacity(0.4),
       inputMessageBackground: Color = SKStyleAsset.navy.swiftUIColor,
@@ -424,8 +432,10 @@ extension ChatTheme {
       self.messageErrorStatus = messageErrorStatus
       self.myMessageBubbleBackground = myMessageBubbleBackground
       self.friendMessageBubbleBackground = friendMessageBubbleBackground
+      self.systemMessageBubbleBackground = systemMessageBubbleBackground
       self.myMessageBubbleText = myMessageBubbleText
       self.friendMessageBubbleText = friendMessageBubbleText
+      self.systemMessageBubbleText = systemMessageBubbleText
       self.myMessageTime = myMessageTime
       self.friendMessageTime = friendMessageTime
       self.inputMessageBackground = inputMessageBackground

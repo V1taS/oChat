@@ -564,9 +564,6 @@ private extension MessengerDialogScreenPresenter {
     
     barButtonView?.titleView.text = factory.createHeaderTitleFrom(title)
     barButtonView?.descriptionView.text = descriptionView
-    
-    barButtonView?.iconLeftView.isHidden = stateContactModel.isTyping
-    barButtonView?.typingIndicator.isHidden = !stateContactModel.isTyping
     barButtonView?.isHidden = isHidden
     barButtonView?.iconLeftView.image = stateContactModel.status.imageStatus
   }

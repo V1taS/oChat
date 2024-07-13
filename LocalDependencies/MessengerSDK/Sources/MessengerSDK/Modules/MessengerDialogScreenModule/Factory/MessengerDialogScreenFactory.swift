@@ -143,6 +143,7 @@ extension MessengerDialogScreenFactory: MessengerDialogScreenFactoryInput {
         user: user.copy(isCurrentUser: model.messageType == .own),
         status: status,
         createdAt: model.date,
+        isSystemMessage: model.messageType.isSystem,
         text: model.message,
         attachments: model.images.compactMap { $0.mapTo() } + model.videos.compactMap { $0.mapTo() },
         recording: model.recording?.mapTo(),

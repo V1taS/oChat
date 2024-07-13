@@ -90,7 +90,6 @@ struct MessageView: View {
       VStack(alignment: message.user.isCurrentUser ? .trailing : .leading, spacing: 2) {
         if !isDisplayingMessageMenu, let reply = message.replyMessage?.toMessage() {
           replyBubbleView(reply)
-            .opacity(0.5)
             .padding(message.user.isCurrentUser ? .trailing : .leading, 10)
             .overlay(alignment: message.user.isCurrentUser ? .trailing : .leading) {
               Capsule()
@@ -135,16 +134,12 @@ struct MessageView: View {
         }
       }
     }
-    .bubbleBackground(message, theme: theme)
+    .bubbleBackground(message, theme: theme, isSystemMessage: message.isSystemMessage)
   }
   
   @ViewBuilder
   func replyBubbleView(_ message: Message) -> some View {
     VStack(alignment: .leading, spacing: 0) {
-      Text(message.user.name)
-        .fontWeight(.semibold)
-        .padding(.horizontal, MessageView.horizontalTextPadding)
-      
       if !message.attachments.isEmpty {
         attachmentsView(message)
           .padding(.top, 4)
@@ -269,19 +264,28 @@ struct MessageView: View {
 }
 
 extension View {
-  
   @ViewBuilder
-  func bubbleBackground(_ message: Message, theme: ChatTheme, isReply: Bool = false) -> some View {
+  func bubbleBackground(
+    _ message: Message,
+    theme: ChatTheme,
+    isReply: Bool = false,
+    isSystemMessage: Bool = false
+  ) -> some View {
     let radius: CGFloat = !message.attachments.isEmpty ? 12 : 20
     let additionalMediaInset: CGFloat = message.attachments.count > 1 ? 2 : 0
     self
       .frame(width: message.attachments.isEmpty ? nil : MessageView.widthWithMedia + additionalMediaInset)
-      .foregroundColor(message.user.isCurrentUser ? theme.colors.myMessageBubbleText : theme.colors.friendMessageBubbleText)
+      .foregroundColor(
+        isSystemMessage ? theme.colors.systemMessageBubbleText :
+          message.user.isCurrentUser ? theme.colors.myMessageBubbleText : theme.colors.friendMessageBubbleText
+      )
       .background {
         if isReply || !message.text.isEmpty || message.recording != nil {
           RoundedRectangle(cornerRadius: radius)
-            .foregroundColor(message.user.isCurrentUser ? theme.colors.myMessageBubbleBackground : theme.colors.friendMessageBubbleBackground)
-            .opacity(isReply ? 0.5 : 1)
+            .foregroundColor(
+              isSystemMessage ? theme.colors.systemMessageBubbleBackground :
+                message.user.isCurrentUser ? theme.colors.myMessageBubbleBackground : theme.colors.friendMessageBubbleBackground
+            )
         }
       }
       .cornerRadius(radius)
@@ -300,6 +304,7 @@ struct MessageView_Preview: PreviewProvider {
     id: UUID().uuidString,
     user: stan,
     status: .read,
+    isSystemMessage: false, 
     text: longMessage,
     attachments: [
       Attachment.randomImage(),
@@ -314,6 +319,7 @@ struct MessageView_Preview: PreviewProvider {
     id: UUID().uuidString,
     user: stan,
     status: .read,
+    isSystemMessage: false, 
     text: shortMessage,
     replyMessage: replyedMessage.toReplyMessage()
   )

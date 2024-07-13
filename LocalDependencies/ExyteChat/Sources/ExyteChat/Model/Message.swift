@@ -12,6 +12,7 @@ public struct Message: Identifiable, Hashable {
   public var user: User
   public var status: Status
   public var createdAt: Date
+  public var isSystemMessage: Bool
   
   public var text: String
   public var attachments: [Attachment]
@@ -27,6 +28,7 @@ public struct Message: Identifiable, Hashable {
     user: User,
     status: Status,
     createdAt: Date = Date(),
+    isSystemMessage: Bool,
     text: String = "",
     attachments: [Attachment] = [],
     recording: Recording? = nil,
@@ -39,6 +41,7 @@ public struct Message: Identifiable, Hashable {
     self.user = user
     self.status = status
     self.createdAt = createdAt
+    self.isSystemMessage = isSystemMessage
     self.text = text
     self.attachments = attachments
     self.recording = recording
@@ -74,6 +77,7 @@ public struct Message: Identifiable, Hashable {
         user: user,
         status: status,
         createdAt: draft.createdAt,
+        isSystemMessage: false,
         text: draft.text,
         attachments: attachments,
         recording: draft.recording,
@@ -165,7 +169,15 @@ public struct ReplyMessage: Codable, Identifiable, Hashable {
   }
   
   func toMessage() -> Message {
-    Message(id: id, user: user, status: .sending, text: text, attachments: attachments, recording: recording)
+    Message(
+      id: id,
+      user: user,
+      status: .sending,
+      isSystemMessage: false, 
+      text: text,
+      attachments: attachments,
+      recording: recording
+    )
   }
 }
 
