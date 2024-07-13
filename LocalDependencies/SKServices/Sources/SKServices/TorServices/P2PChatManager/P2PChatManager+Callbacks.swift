@@ -17,7 +17,6 @@ extension P2PChatManager {
     setConnectionStatusCallback()
     setFriendRequestCallback()
     setMessageCallback()
-    setSessionTORCallback()
     setFriendStatusCallback()
     setLogCallback()
     setFriendStatusOnlineCallback()
@@ -226,25 +225,6 @@ private extension P2PChatManager {
         updateMyOnlineStatus(status: .online)
       }
     }
-  }
-  
-  func setSessionTORCallback() {
-    //    torService.stateAction = { [weak self] result in
-    //      guard let self else { return }
-    //      switch result {
-    //      case .none: break
-    //      case .started: break
-    //      case .connectingProgress: break
-    //      case .connected: break
-    //      case .stopped:
-    //        updateMyOnlineStatus(status: .offline)
-    //        torService.stop()
-    //        torService.start(completion: { _ in })
-    //      case .refreshing:
-    //        updateMyOnlineStatus(status: .inProgress)
-    //      }
-    //      updateSessionState(state: result)
-    //    }
   }
   
   func setMessageCallback() {

@@ -16,7 +16,6 @@ let package = Package(
   dependencies: [
     .package(path: "../../LocalDependencies/lottie-ios"),
     .package(path: "../../LocalDependencies/SKStyle"),
-    .package(path: "../../LocalDependencies/SwiftUICharts"),
     .package(path: "../../LocalDependencies/SKAbstractions"),
     .package(path: "../../LocalDependencies/SKFoundation")
   ],
@@ -26,7 +25,6 @@ let package = Package(
       dependencies: [
         .product(name: "Lottie", package: "lottie-ios"),
         "SKStyle",
-        "SwiftUICharts",
         "SKAbstractions",
         "SKFoundation"
       ]
