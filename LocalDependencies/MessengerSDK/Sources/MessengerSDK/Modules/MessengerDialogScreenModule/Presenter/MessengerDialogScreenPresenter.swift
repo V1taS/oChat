@@ -39,6 +39,7 @@ final class MessengerDialogScreenPresenter: ObservableObject {
   @Published var stateInputMessengeText = ""
   @Published var stateInputMessengeTextMaxLength = 1_000
   let stateShowMessengeMaxCount = 100
+  @Published var stateIsDownloadAvailability = true
   
   // MARK: - Internal properties
   
@@ -116,6 +117,18 @@ final class MessengerDialogScreenPresenter: ObservableObject {
       guard let self else { return }
       if isSuccess {
         interactor.showNotification(.positive(title: "Изображение сохранено в галерее"))
+      } else {
+        interactor.showNotification(.negative(title: "Ошибка сохранения"))
+      }
+    }
+    impactFeedback.impactOccurred()
+  }
+  
+  func saveVideoToGallery(_ imageURL: URL) {
+    interactor.saveVideoToGallery(imageURL) { [weak self] isSuccess in
+      guard let self else { return }
+      if isSuccess {
+        interactor.showNotification(.positive(title: "Видео сохранено в галерее"))
       } else {
         interactor.showNotification(.negative(title: "Ошибка сохранения"))
       }

@@ -93,25 +93,32 @@ public struct ChatView<MessageContent: View, InputViewContent: View>: View {
   @State private var menuBgOpacity: CGFloat = 0
   @State private var menuCellOpacity: CGFloat = 0
   @State private var menuScrollView: UIScrollView?
-  @State private var onSaveFile: ((URL) -> Void)?
+  @State private var onImageSave: ((URL) -> Void)?
+  @State private var onVideoSave: ((URL) -> Void)?
+  private let isDownloadAvailability: Bool
+  
   private let placeholder: String
   private var onChange: (_ newValue: String) -> Void
   
   public init(messages: [Message],
               placeholder: String,
+              isDownloadAvailability: Bool,
               onChange: @escaping (_ newValue: String) -> Void,
               didSendMessage: @escaping (DraftMessage) -> Void,
               messageBuilder: @escaping MessageBuilderClosure,
               inputViewBuilder: @escaping InputViewBuilderClosure,
-              onSaveFile: ((URL) -> Void)? = nil) {
+              onImageSave: ((URL) -> Void)? = nil,
+              onVideoSave: ((URL) -> Void)? = nil) {
     self.didSendMessage = didSendMessage
     self.placeholder = placeholder
+    self.isDownloadAvailability = isDownloadAvailability
     self.onChange = onChange
     self.sections = ChatView.mapMessages(messages)
     self.ids = messages.map { $0.id }
     self.messageBuilder = messageBuilder
     self.inputViewBuilder = inputViewBuilder
-    self.onSaveFile = onSaveFile
+    self.onImageSave = onImageSave
+    self.onVideoSave = onVideoSave
   }
   
   public var body: some View {
@@ -159,10 +166,14 @@ public struct ChatView<MessageContent: View, InputViewContent: View>: View {
           safeAreaInsets: g.safeAreaInsets,
           onClose: { [weak viewModel] in
             viewModel?.dismissAttachmentFullScreen()
-          }, 
-          onSave: { url in
-            onSaveFile?(url)
-          }
+          },
+          onImageSave: { url in
+            onImageSave?(url)
+          },
+          onVideoSave: { url in
+            onVideoSave?(url)
+          },
+          isDownloadAvailability: isDownloadAvailability
         )
         .ignoresSafeArea()
       }
@@ -179,7 +190,7 @@ public struct ChatView<MessageContent: View, InputViewContent: View>: View {
         placeholder: placeholder,
         onChange: onChange
       )
-        .environmentObject(globalFocusState)
+      .environmentObject(globalFocusState)
     }
     .onChange(of: inputViewModel.showPicker) {
       if $0 {
@@ -552,14 +563,18 @@ public extension ChatView where MessageContent == EmptyView {
   
   init(messages: [Message],
        placeholder: String,
+       isDownloadAvailability: Bool = true,
        onChange: @escaping (_ newValue: String) -> Void,
        didSendMessage: @escaping (DraftMessage) -> Void,
-       onSaveFile: ((URL) -> Void)? = nil,
+       onImageSave: ((URL) -> Void)? = nil,
+       onVideoSave: ((URL) -> Void)? = nil,
        inputViewBuilder: @escaping InputViewBuilderClosure) {
     self.placeholder = placeholder
+    self.isDownloadAvailability = isDownloadAvailability
     self.onChange = onChange
     self.didSendMessage = didSendMessage
-    self.onSaveFile = onSaveFile
+    self.onImageSave = onImageSave
+    self.onVideoSave = onVideoSave
     self.sections = ChatView.mapMessages(messages)
     self.ids = messages.map { $0.id }
     self.inputViewBuilder = inputViewBuilder
@@ -570,14 +585,18 @@ public extension ChatView where InputViewContent == EmptyView {
   
   init(messages: [Message],
        placeholder: String,
+       isDownloadAvailability: Bool = true,
        onChange: @escaping (_ newValue: String) -> Void,
        didSendMessage: @escaping (DraftMessage) -> Void,
-       onSaveFile: ((URL) -> Void)? = nil,
+       onImageSave: ((URL) -> Void)? = nil,
+       onVideoSave: ((URL) -> Void)? = nil,
        messageBuilder: @escaping MessageBuilderClosure) {
     self.placeholder = placeholder
+    self.isDownloadAvailability = isDownloadAvailability
     self.onChange = onChange
     self.didSendMessage = didSendMessage
-    self.onSaveFile = onSaveFile
+    self.onImageSave = onImageSave
+    self.onVideoSave = onVideoSave
     self.sections = ChatView.mapMessages(messages)
     self.ids = messages.map { $0.id }
     self.messageBuilder = messageBuilder
@@ -587,13 +606,17 @@ public extension ChatView where InputViewContent == EmptyView {
 public extension ChatView where MessageContent == EmptyView, InputViewContent == EmptyView {
   init(messages: [Message],
        placeholder: String,
+       isDownloadAvailability: Bool = true,
        onChange: @escaping (_ newValue: String) -> Void,
        didSendMessage: @escaping (DraftMessage) -> Void,
-       onSaveFile: ((URL) -> Void)? = nil) {
+       onImageSave: ((URL) -> Void)? = nil,
+       onVideoSave: ((URL) -> Void)? = nil) {
     self.placeholder = placeholder
+    self.isDownloadAvailability = isDownloadAvailability
     self.onChange = onChange
     self.didSendMessage = didSendMessage
-    self.onSaveFile = onSaveFile
+    self.onImageSave = onImageSave
+    self.onVideoSave = onVideoSave
     self.sections = ChatView.mapMessages(messages)
     self.ids = messages.map { $0.id }
   }

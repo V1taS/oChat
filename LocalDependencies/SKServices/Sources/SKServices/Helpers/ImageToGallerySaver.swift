@@ -7,11 +7,14 @@
 
 import Foundation
 import UIKit
+import Photos
 
-final class ImageToGallerySaver: NSObject {
+final class MediaToGallerySaver: NSObject {
   override init() {}
   
   private var statusAction: ((_ isSuccess: Bool) -> Void)?
+  
+  // Сохранение изображения в галерею
   func saveImageToGallery(_ imageData: Data?, completion: ((_ isSuccess: Bool) -> Void)?) {
     statusAction = completion
     
@@ -30,5 +33,38 @@ final class ImageToGallerySaver: NSObject {
       statusAction?(true)
     }
   }
+  
+  // Сохранение видео в галерею
+  func saveVideoToGallery(_ videoURL: URL?, completion: ((_ isSuccess: Bool) -> Void)?) {
+    statusAction = completion
+    
+    guard let videoURL = videoURL else {
+      completion?(false)
+      return
+    }
+    
+    // Проверяем доступ к фотогалерее
+    PHPhotoLibrary.requestAuthorization { status in
+      guard status == .authorized else {
+        DispatchQueue.main.async {
+          completion?(false)
+        }
+        return
+      }
+      
+      // Начинаем сохранение видео в альбом
+      PHPhotoLibrary.shared().performChanges({
+        PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: videoURL)
+      }) { success, error in
+        DispatchQueue.main.async {
+          if let error = error {
+            print("Error saving video: \(error)")
+            completion?(false)
+          } else {
+            completion?(true)
+          }
+        }
+      }
+    }
+  }
 }
-

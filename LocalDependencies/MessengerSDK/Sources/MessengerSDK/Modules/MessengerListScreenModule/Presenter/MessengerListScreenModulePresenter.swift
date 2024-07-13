@@ -877,14 +877,22 @@ private extension MessengerListScreenModulePresenter {
                   
                   if fileTempURL.isVideoFile() {
                     guard let videoFileURL = interactor.saveObjectWith(tempURL: fileTempURL),
-                          let videoFileName = interactor.getFileName(from: videoFileURL) else {
+                          let videoFileName = interactor.getFileName(from: videoFileURL),
+                          let firstFrameData = interactor.getFirstFrame(from: videoFileURL),
+                          let thumbnailResizeData = interactor.resizeThumbnailImageWithFrame(data: firstFrameData),
+                          let thumbnailURL = interactor.saveObjectWith(
+                            fileName: UUID().uuidString,
+                            fileExtension: "jpg",
+                            data: thumbnailResizeData
+                          ),
+                          let thumbnailName = interactor.getFileName(from: thumbnailURL) else {
                       continue
                     }
                     
                     videos.append(
                       .init(
                         id: UUID().uuidString,
-                        thumbnailName: videoFileName,
+                        thumbnailName: thumbnailName,
                         fullName: videoFileName
                       )
                     )

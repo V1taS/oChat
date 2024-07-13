@@ -305,7 +305,7 @@ extension MessengeVideoModel {
       id: id,
       thumbnail: thumbnail,
       full: full,
-      type: .image
+      type: .video
     )
   }
 }

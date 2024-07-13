@@ -8,6 +8,7 @@
 import SwiftUI
 import SKAbstractions
 import SKStyle
+import AVFoundation
 
 /// События которые отправляем из Interactor в Presenter
 protocol MessengerListScreenModuleInteractorOutput: AnyObject {}
@@ -278,6 +279,9 @@ protocol MessengerListScreenModuleInteractorInput {
   
   /// Получить имя файла по URL без расширения
   func getFileNameWithoutExtension(from url: URL) -> String
+  
+  /// Получить кадр первой секунлы из видео
+  func getFirstFrame(from url: URL) -> Data?
 }
 
 /// Интерактор
@@ -358,6 +362,24 @@ extension MessengerListScreenModuleInteractor: MessengerListScreenModuleInteract
   
   func saveObjectWith(tempURL: URL) -> URL? {
     dataManagementService.saveObjectWith(tempURL: tempURL)
+  }
+  
+  func getFirstFrame(from url: URL) -> Data? {
+    let asset = AVAsset(url: url)
+    let imageGenerator = AVAssetImageGenerator(asset: asset)
+    imageGenerator.appliesPreferredTrackTransform = true
+    
+    let time = CMTime(seconds: 1, preferredTimescale: 600)
+    do {
+      let cgImage = try imageGenerator.copyCGImage(at: time, actualTime: nil)
+      let uiImage = UIImage(cgImage: cgImage)
+      if let imageData = uiImage.jpegData(compressionQuality: 1.0) {
+        return imageData
+      }
+    } catch {
+      print("Error extracting image from video: \(error.localizedDescription)")
+    }
+    return nil
   }
   
   func resizeThumbnailImageWithFrame(data: Data) -> Data? {

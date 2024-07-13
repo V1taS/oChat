@@ -4,6 +4,7 @@
 
 import Foundation
 import SwiftUI
+import SKStyle
 
 struct FullscreenMediaPages: View {
   
@@ -13,22 +14,13 @@ struct FullscreenMediaPages: View {
   @StateObject var viewModel: FullscreenMediaPagesViewModel
   var safeAreaInsets: EdgeInsets
   var onClose: () -> Void
-  var onSave: (URL) -> Void
+  let onImageSave: (URL) -> Void
+  let onVideoSave: (URL) -> Void
+  let isDownloadAvailability: Bool
   
   var body: some View {
-    let closeGesture = DragGesture()
-      .onChanged { viewModel.offset = closeSize(from: $0.translation) }
-      .onEnded {
-        withAnimation {
-          viewModel.offset = .zero
-        }
-        if $0.translation.height >= 100 {
-          onClose()
-        }
-      }
-    
     ZStack {
-      Color.black
+      SKStyleAsset.onyx.swiftUIColor
         .opacity(max((200.0 - viewModel.offset.height) / 200.0, 0.5))
       VStack {
         TabView(selection: $viewModel.index) {
@@ -45,11 +37,8 @@ struct FullscreenMediaPages: View {
         .tabViewStyle(.page(indexDisplayMode: .never))
       }
       .offset(viewModel.offset)
-      .gesture(closeGesture)
       .onTapGesture {
-        withAnimation {
-          viewModel.showMinis.toggle()
-        }
+        viewModel.showMinis.toggle()
       }
       
       VStack {
@@ -71,7 +60,7 @@ struct FullscreenMediaPages: View {
                   .overlay {
                     if viewModel.index == index {
                       RoundedRectangle(cornerRadius: 4)
-                        .stroke(theme.colors.attachmentCellStroke, lineWidth: 2)
+                        .stroke(SKStyleAsset.constantAzure.swiftUIColor, lineWidth: 2)
                     }
                   }
                   .padding(.vertical, 1)
@@ -79,7 +68,7 @@ struct FullscreenMediaPages: View {
               }
             }
             .padding([.top, .horizontal], 12)
-            .background(Color.black)
+            .background(.clear)
             .onAppear {
               proxy.scrollTo(viewModel.index)
             }
@@ -98,7 +87,7 @@ struct FullscreenMediaPages: View {
     .overlay(alignment: .top) {
       if viewModel.showMinis {
         Text("\(viewModel.index + 1)/\(viewModel.attachments.count)")
-          .foregroundColor(.white)
+          .foregroundColor(SKStyleAsset.constantAzure.swiftUIColor)
           .offset(y: safeAreaInsets.top)
       }
     }
@@ -106,26 +95,49 @@ struct FullscreenMediaPages: View {
       if viewModel.showMinis {
         Button(action: onClose) {
           theme.images.mediaPicker.cross
+            .resizable()
+            .renderingMode(.template)
+            .foregroundColor(SKStyleAsset.constantAzure.swiftUIColor)
+            .aspectRatio(contentMode: .fit)
+            .frame(height: 24)
             .padding(5)
         }
-        .tint(.white)
+        .tint(SKStyleAsset.constantAzure.swiftUIColor)
         .padding(.leading, 15)
         .offset(y: safeAreaInsets.top - 5)
       }
     }
     .overlay(alignment: .topTrailing) {
-      if viewModel.showMinis, viewModel.attachments[viewModel.index].type == .image {
+      if isDownloadAvailability, viewModel.showMinis, viewModel.attachments[viewModel.index].type == .image {
         Button(action: {
-          onSave(viewModel.attachments[viewModel.index].full)
+          onImageSave(viewModel.attachments[viewModel.index].full)
         }) {
           theme.images.mediaPicker.save
+            .resizable()
+            .renderingMode(.template)
+            .foregroundColor(SKStyleAsset.constantAzure.swiftUIColor)
+            .aspectRatio(contentMode: .fit)
+            .frame(height: 24)
             .padding(5)
         }
-        .tint(.white)
-        .padding(.leading, 15)
+        .tint(SKStyleAsset.constantAzure.swiftUIColor)
+        .padding(.trailing, 15)
         .offset(y: safeAreaInsets.top - 5)
       } else if viewModel.showMinis, viewModel.attachments[viewModel.index].type == .video {
-        HStack(spacing: 20) {
+        HStack(alignment: .center,spacing: 20) {
+          if isDownloadAvailability {
+            Button(action: {
+              onVideoSave(viewModel.attachments[viewModel.index].full)
+            }) {
+              theme.images.mediaPicker.save
+                .resizable()
+                .renderingMode(.template)
+                .foregroundColor(SKStyleAsset.constantAzure.swiftUIColor)
+                .aspectRatio(contentMode: .fit)
+                .frame(height: 24)
+            }
+          }
+          
           (viewModel.videoPlaying ? theme.images.fullscreenMedia.pause : theme.images.fullscreenMedia.play)
             .resizable()
             .scaledToFit()
@@ -136,7 +148,7 @@ struct FullscreenMediaPages: View {
               viewModel.toggleVideoPlaying()
             }
           
-          (viewModel.videoMuted ? theme.images.fullscreenMedia.unmute : theme.images.fullscreenMedia.mute)
+          (!viewModel.videoMuted ? theme.images.fullscreenMedia.unmute : theme.images.fullscreenMedia.mute)
             .resizable()
             .scaledToFit()
             .frame(width: 24, height: 24)
@@ -146,7 +158,7 @@ struct FullscreenMediaPages: View {
               viewModel.toggleVideoMuted()
             }
         }
-        .foregroundColor(.white)
+        .foregroundColor(SKStyleAsset.constantAzure.swiftUIColor)
         .padding(.trailing, 10)
         .offset(y: safeAreaInsets.top - 5)
       }

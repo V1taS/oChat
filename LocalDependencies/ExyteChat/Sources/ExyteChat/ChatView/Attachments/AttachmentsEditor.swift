@@ -8,6 +8,7 @@
 import SwiftUI
 import ExyteMediaPicker
 import ActivityIndicatorView
+import SKStyle
 
 struct AttachmentsEditor<InputViewContent: View>: View {
   
@@ -144,16 +145,18 @@ struct AttachmentsEditor<InputViewContent: View>: View {
           seleсtedMedias = []
           inputViewModel.showPicker = false
         } label: {
-          Text("Cancel")
-            .foregroundColor(.white.opacity(0.7))
+          Text(ExyteChatStrings.attachmentsEditorButtonCancelTitle)
+            .foregroundColor(SKStyleAsset.constantAzure.swiftUIColor.opacity(0.7))
         }
         
         Spacer()
       }
       
       HStack {
-        Text("Recents")
+        Text(ExyteChatStrings.attachmentsEditorButtonRecentsTitle)
+          .foregroundColor(SKStyleAsset.constantAzure.swiftUIColor.opacity(0.7))
         Image(systemName: "chevron.down")
+          .foregroundColor(SKStyleAsset.constantAzure.swiftUIColor.opacity(0.7))
           .rotationEffect(Angle(radians: showingAlbums ? .pi : 0))
       }
       .foregroundColor(.white)
@@ -173,7 +176,10 @@ struct AttachmentsEditor<InputViewContent: View>: View {
       Button {
         cancelClosure()
       } label: {
-        theme.images.mediaPicker.cross
+        Image(systemName: "xmark")
+          .resizable()
+          .foregroundColor(SKStyleAsset.constantAzure.swiftUIColor)
+          .frame(width: 16, height: 16)
       }
       .padding(.trailing, 30)
       
@@ -181,7 +187,7 @@ struct AttachmentsEditor<InputViewContent: View>: View {
         theme.images.mediaPicker.chevronRight
         Text(chatTitle)
           .font(.title3)
-          .foregroundColor(theme.colors.textMediaPicker)
+          .foregroundColor(SKStyleAsset.constantAzure.swiftUIColor.opacity(0.7))
       }
       
       Spacer()

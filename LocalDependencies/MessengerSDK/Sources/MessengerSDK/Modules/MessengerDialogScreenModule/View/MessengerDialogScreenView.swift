@@ -129,6 +129,7 @@ private extension MessengerDialogScreenView {
       ChatView(
         messages: presenter.stateMessengeModels,
         placeholder: presenter.getMainPlaceholder(),
+        isDownloadAvailability: presenter.stateIsDownloadAvailability,
         onChange: { newValue in
           presenter.setUserIsTyping(text: newValue)
         },
@@ -149,13 +150,16 @@ private extension MessengerDialogScreenView {
             }
           }
         },
-        onSaveFile: { url in
+        onImageSave: { url in
           presenter.saveImageToGallery(url)
+        },
+        onVideoSave: { url in
+          presenter.saveVideoToGallery(url)
         }
       )
       .setAvailableInput(.full)
-      .showMessageTimeView(true)
-      .showDateHeaders(showDateHeaders: true)
+      .showMessageTimeView(false)
+      .showDateHeaders(showDateHeaders: false)
       .setMediaPickerSelectionParameters(
         .init(
           mediaType: .photoAndVideo,

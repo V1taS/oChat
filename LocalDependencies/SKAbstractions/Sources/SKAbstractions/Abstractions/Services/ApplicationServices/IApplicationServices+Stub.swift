@@ -16,6 +16,7 @@ public final class ApplicationServicesStub: IApplicationServices, IDataManagerSe
                                             ICloudKitService, IAppSettingsManager, IDataManagementService,
                                             IAccessAndSecurityManagementService, IUserInterfaceAndExperienceService,
                                             IDeepLinkService, IPushNotificationService, IZipArchiveService {
+  public func saveVideoToGallery(_ video: URL?, completion: ((Bool) -> Void)?) {}
   public func getFileNameWithoutExtension(from url: URL) -> String { "" }
   public func getFileName(from url: URL) -> String? { nil }
   public func constructFileURL(fileName: String, fileExtension: String?) -> URL? { nil }

@@ -17,7 +17,7 @@ public final class UIService: IUIService {
 
   // MARK: - Private properties
   
-  private lazy var imageSaver = ImageToGallerySaver()
+  private lazy var mediaSaver = MediaToGallerySaver()
   
   // MARK: - Init
   
@@ -102,7 +102,11 @@ public final class UIService: IUIService {
   }
   
   public func saveImageToGallery(_ imageData: Data?, completion: ((Bool) -> Void)?) {
-    imageSaver.saveImageToGallery(imageData, completion: completion)
+    mediaSaver.saveImageToGallery(imageData, completion: completion)
+  }
+  
+  public func saveVideoToGallery(_ video: URL?, completion: ((Bool) -> Void)?) {
+    mediaSaver.saveVideoToGallery(video, completion: completion)
   }
   
   public func getImage(for url: URL?, completion: @escaping (UIImage?) -> Void) {

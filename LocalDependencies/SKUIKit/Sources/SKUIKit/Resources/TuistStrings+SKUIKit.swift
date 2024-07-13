@@ -13,22 +13,7 @@ import Foundation
 // swiftlint:disable nesting type_body_length type_name
 public enum SKUIKitStrings {
   
-  public enum State {
-    /// All
-    public static let allTime = SKUIKitStrings.tr("ChartSectionViewLocalization", "State.allTime")
-    /// D
-    public static let days = SKUIKitStrings.tr("ChartSectionViewLocalization", "State.days")
-    /// H
-    public static let hours = SKUIKitStrings.tr("ChartSectionViewLocalization", "State.hours")
-    /// M
-    public static let months = SKUIKitStrings.tr("ChartSectionViewLocalization", "State.months")
-    /// Price
-    public static let price = SKUIKitStrings.tr("ChartSectionViewLocalization", "State.price")
-    /// W
-    public static let weeks = SKUIKitStrings.tr("ChartSectionViewLocalization", "State.weeks")
-    /// Y
-    public static let yearly = SKUIKitStrings.tr("ChartSectionViewLocalization", "State.yearly")
-    
+  public enum State {    
     public static let messageContextMenuTitle = SKUIKitStrings.tr(
       "MessageViewLocalization",
       "State.Message.ContextMenu.Title"

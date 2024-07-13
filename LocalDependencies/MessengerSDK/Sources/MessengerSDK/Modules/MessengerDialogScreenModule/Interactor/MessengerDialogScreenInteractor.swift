@@ -36,6 +36,12 @@ protocol MessengerDialogScreenInteractorInput {
   
   /// Получить имя файла по URL
   func getFileName(from url: URL) -> String?
+  
+  /// Сохраняет видео в галерее устройства.
+  /// - Parameters:
+  ///   - video: Ссылка на видео
+  ///   - completion: Коллбэк, который вызывается после попытки сохранения. Передает `Bool`, указывающий успешно ли было сохранение видео.
+  func saveVideoToGallery(_ video: URL?, completion: ((Bool) -> Void)?)
 }
 
 /// Интерактор
@@ -83,6 +89,14 @@ extension MessengerDialogScreenInteractor: MessengerDialogScreenInteractorInput 
     permissionService.requestGallery { [weak self] granted in
       guard let self else { return }
       uiService.saveImageToGallery(dataImage, completion: { _ in })
+      completion?(granted)
+    }
+  }
+  
+  func saveVideoToGallery(_ video: URL?, completion: ((Bool) -> Void)?) {
+    permissionService.requestGallery { [weak self] granted in
+      guard let self else { return }
+      uiService.saveVideoToGallery(video, completion: { _ in })
       completion?(granted)
     }
   }
