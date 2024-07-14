@@ -15,6 +15,15 @@ import Foundation
 import ExyteChat
 import ExyteMediaPicker
 
+typealias InputViewBuilder = ((
+  Binding<String>,
+  InputViewAttachments,
+  InputViewState,
+  InputViewStyle,
+  @escaping (InputViewAction) -> Void,
+  ()->()
+) -> AnyView)
+
 struct MessengerDialogScreenView: View {
   
   // MARK: - Internal properties
@@ -72,21 +81,13 @@ private extension MessengerDialogScreenView {
       .roundedEdge(backgroundColor: backgroundColor)
       .allowsHitTesting(false)
   }
-}
-
-// MARK: - Private Ready To Chat
-
-private extension MessengerDialogScreenView {
-  @ViewBuilder
-  func readyToChatView() -> some View {
+  
+  func createInputViewBuilder() -> InputViewBuilder? {
+    var inputViewBuilder: InputViewBuilder?
+    
     if presenter.isInitialWaitConfirmState() {
-      ChatView(
-        messages: presenter.stateMessengeModels, 
-        placeholder: "",
-        isDownloadAvailability: presenter.stateIsDownloadAvailability,
-        onChange: { _ in },
-        didSendMessage: { _ in },
-        inputViewBuilder: { _, _, _, _, _, _ in
+      inputViewBuilder = { _, _, _, _, _, _ in
+        AnyView(
           MainButtonView(
             text: presenter.stateIsCanResendInitialRequest
             ? MessengerSDKStrings.MessengerDialogScreenLocalization.sendRequest
@@ -102,18 +103,11 @@ private extension MessengerDialogScreenView {
           )
           .padding(.horizontal, .s4)
           .padding(.top, .s4)
-        }
-      )
-      .showMessageTimeView(false)
-      .showDateHeaders(showDateHeaders: false)
+        )
+      }
     } else if presenter.stateContactModel.status == .offline {
-      ChatView(
-        messages: presenter.stateMessengeModels,
-        placeholder: "",
-        isDownloadAvailability: presenter.stateIsDownloadAvailability,
-        onChange: { _ in },
-        didSendMessage: { _ in },
-        inputViewBuilder: { _, _, _, _, _, _ in
+      inputViewBuilder = { _, _, _, _, _, _ in
+        AnyView(
           MainButtonView(
             text: presenter.stateIsAskToComeContact ?
             "Позвать контакт" :
@@ -127,63 +121,71 @@ private extension MessengerDialogScreenView {
           )
           .padding(.horizontal, .s4)
           .padding(.top, .s4)
-        }
-      )
-      .showMessageTimeView(false)
-      .showDateHeaders(showDateHeaders: false)
-    } else {
-      ChatView(
-        messages: presenter.stateMessengeModels,
-        placeholder: presenter.getMainPlaceholder(),
-        isDownloadAvailability: presenter.stateIsDownloadAvailability,
-        onChange: { newValue in
-          presenter.setUserIsTyping(text: newValue)
-        },
-        didSendMessage: { draft in
-          Task {
-            if draft.medias.isEmpty && draft.recording == nil {
-              await presenter.sendMessage(
-                messenge: draft.text,
-                replyMessageText: draft.replyMessage?.text
-              )
-            } else {
-              await presenter.sendMessage(
-                messenge: draft.text,
-                medias: draft.medias,
-                recording: draft.recording,
-                replyMessageText: draft.replyMessage?.text
-              )
-            }
-          }
-        },
-        onImageSave: { url in
-          presenter.saveImageToGallery(url)
-        },
-        onVideoSave: { url in
-          presenter.saveVideoToGallery(url)
-        }
-      )
-      .setAvailableInput(.full)
-      .showMessageTimeView(false)
-      .showDateHeaders(showDateHeaders: false)
-      .setMediaPickerSelectionParameters(
-        .init(
-          mediaType: .photoAndVideo,
-          selectionStyle: .checkmark,
-          selectionLimit: 10,
-          showFullscreenPreview: false
         )
-      )
-      .messageUseMarkdown(messageUseMarkdown: true)
-      .showMessageMenuOnLongPress(true)
-      .showNetworkConnectionProblem(true)
-      .assetsPickerLimit(assetsPickerLimit: 10)
-      .enableLoadMore(offset: presenter.stateShowMessengeMaxCount) { message in
-        presenter.loadMoreMessage(before: message)
+        
       }
-      .messageUseMarkdown(messageUseMarkdown: true)
-      .mediaPickerTheme()
     }
+    return inputViewBuilder
+  }
+}
+
+// MARK: - Private Ready To Chat
+
+private extension MessengerDialogScreenView {
+  @ViewBuilder
+  func readyToChatView() -> some View {
+    ChatView(
+      messages: presenter.stateMessengeModels,
+      placeholder: presenter.getMainPlaceholder(),
+      isDownloadAvailability: presenter.stateIsDownloadAvailability,
+      onChange: { newValue in
+        presenter.setUserIsTyping(text: newValue)
+      },
+      didSendMessage: { draft in
+        Task {
+          if draft.medias.isEmpty && draft.recording == nil {
+            await presenter.sendMessage(
+              messenge: draft.text,
+              replyMessageText: draft.replyMessage?.text
+            )
+          } else {
+            await presenter.sendMessage(
+              messenge: draft.text,
+              medias: draft.medias,
+              recording: draft.recording,
+              replyMessageText: draft.replyMessage?.text
+            )
+          }
+        }
+      },
+      onImageSave: { url in
+        presenter.saveImageToGallery(url)
+      },
+      onVideoSave: { url in
+        presenter.saveVideoToGallery(url)
+      },
+      inputViewBuilder: createInputViewBuilder()
+    )
+    .setAvailableInput(.full)
+    .showMessageTimeView(false)
+    .showDateHeaders(showDateHeaders: false)
+    .setMediaPickerSelectionParameters(
+      .init(
+        mediaType: .photoAndVideo,
+        selectionStyle: .checkmark,
+        selectionLimit: 10,
+        showFullscreenPreview: false
+      )
+    )
+    .messageUseMarkdown(messageUseMarkdown: true)
+    .showMessageMenuOnLongPress(true)
+    .showNetworkConnectionProblem(true)
+    .assetsPickerLimit(assetsPickerLimit: 10)
+    .enableLoadMore(offset: presenter.stateShowMessengeMaxCount) { message in
+      presenter.loadMoreMessage(before: message)
+    }
+    .messageUseMarkdown(messageUseMarkdown: true)
+    .mediaPickerTheme()
   }
 }
 
@@ -192,7 +194,7 @@ private extension MessengerDialogScreenView {
 private extension MessengerDialogScreenView {
   func createInitialAddressView() -> some View {
     ChatView(
-      messages: presenter.stateMessengeModels, 
+      messages: presenter.stateMessengeModels,
       placeholder: presenter.getInitialPlaceholder(),
       isDownloadAvailability: presenter.stateIsDownloadAvailability,
       onChange: { _ in },

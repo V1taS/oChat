@@ -23,7 +23,13 @@ public struct ChatView<MessageContent: View, InputViewContent: View>: View {
   /// - message containing user, attachments, etc.
   /// - position of message in its continuous group of messages from the same user
   /// - pass attachment to this closure to use ChatView's fullscreen media viewer
-  public typealias MessageBuilderClosure = ((Message, PositionInGroup, @escaping (Attachment) -> Void) -> MessageContent)
+  public typealias MessageBuilderClosure = (
+    (
+      Message,
+      PositionInGroup,
+      @escaping (Attachment) -> Void
+    ) -> MessageContent
+  )
   
   /// To build a custom input view use the following parameters passed by this closure:
   /// - binding to the text in input view
@@ -32,8 +38,16 @@ public struct ChatView<MessageContent: View, InputViewContent: View>: View {
   /// - .message for main input view mode and .signature for input view in media picker mode
   /// - closure to pass user interaction, .recordAudioTap for example
   /// - dismiss keyboard closure
-  public typealias InputViewBuilderClosure = ((
-    Binding<String>, InputViewAttachments, InputViewState, InputViewStyle, @escaping (InputViewAction) -> Void, ()->()) -> InputViewContent)
+  public typealias InputViewBuilderClosure = (
+    (
+      Binding<String>,
+      InputViewAttachments,
+      InputViewState,
+      InputViewStyle,
+      @escaping (InputViewAction) -> Void,
+      ()->()
+    ) -> InputViewContent
+  )
   
   /// User and MessageId
   public typealias TapAvatarClosure = (User, String) -> ()
@@ -564,7 +578,7 @@ public extension ChatView where MessageContent == EmptyView {
        didSendMessage: @escaping (DraftMessage) -> Void,
        onImageSave: ((URL) -> Void)? = nil,
        onVideoSave: ((URL) -> Void)? = nil,
-       inputViewBuilder: @escaping InputViewBuilderClosure) {
+       inputViewBuilder: InputViewBuilderClosure?) {
     self.placeholder = placeholder
     self.isDownloadAvailability = isDownloadAvailability
     self.onChange = onChange

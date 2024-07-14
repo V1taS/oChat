@@ -76,16 +76,15 @@ private extension MessengerListScreenModuleView {
         .listRowInsets(.init(top: .zero, leading: .s4, bottom: .zero, trailing: .s4))
         .listRowSeparator(.hidden)
         .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-          Button(role: .destructive) {
-            presenter.removeContact(index: index)
-          } label: {
-            Text("Удалить")
-          }
-          
           Button {
             presenter.clearContact(index: index)
           } label: {
             Text("Очистить")
+          }
+          Button(role: .destructive) {
+            presenter.removeContact(index: index)
+          } label: {
+            Text("Удалить")
           }
           .tint(.orange)
         }
