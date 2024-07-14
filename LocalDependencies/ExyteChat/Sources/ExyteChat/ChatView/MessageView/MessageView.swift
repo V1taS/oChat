@@ -88,15 +88,6 @@ struct MessageView: View {
   var body: some View {
     HStack(alignment: .bottom, spacing: 0) {
       VStack(alignment: message.user.isCurrentUser ? .trailing : .leading, spacing: 2) {
-        if !isDisplayingMessageMenu, let reply = message.replyMessage?.toMessage() {
-          replyBubbleView(reply)
-            .padding(message.user.isCurrentUser ? .trailing : .leading, 10)
-            .overlay(alignment: message.user.isCurrentUser ? .trailing : .leading) {
-              Capsule()
-                .foregroundColor(theme.colors.replySeparator)
-                .frame(width: 2)
-            }
-        }
         bubbleView(message)
       }
       
@@ -116,6 +107,12 @@ struct MessageView: View {
   @ViewBuilder
   func bubbleView(_ message: Message) -> some View {
     VStack(alignment: .leading, spacing: 0) {
+      if !isDisplayingMessageMenu, let reply = message.replyMessage?.toMessage() {
+        replyBubbleView(reply)
+          .padding(.horizontal, .s2)
+          .padding(.top, .s2)
+      }
+      
       if !message.attachments.isEmpty {
         attachmentsView(message)
       }
@@ -140,25 +137,20 @@ struct MessageView: View {
   @ViewBuilder
   func replyBubbleView(_ message: Message) -> some View {
     VStack(alignment: .leading, spacing: 0) {
-      if !message.attachments.isEmpty {
-        attachmentsView(message)
-          .padding(.top, 4)
-          .padding(.bottom, message.text.isEmpty ? 0 : 4)
-      }
-      
       if !message.text.isEmpty {
         MessageTextView(text: message.text, messageUseMarkdown: messageUseMarkdown)
           .padding(.horizontal, MessageView.horizontalTextPadding)
       }
-      
-      if let recording = message.recording {
-        recordingView(recording)
-      }
     }
     .font(.caption2)
-    .padding(.vertical, 8)
-    .frame(width: message.attachments.isEmpty ? nil : MessageView.widthWithMedia + additionalMediaInset)
-    .bubbleBackground(message, theme: theme, isReply: true)
+    .padding(.vertical, .s1)
+    .bubbleBackground(
+      message,
+      theme: theme,
+      foregroundColor: SKStyleAsset.ghost.swiftUIColor,
+      background: SKStyleAsset.onyx.swiftUIColor.opacity(0.5),
+      radius: .s2
+    )
   }
   
   @ViewBuilder
@@ -268,23 +260,27 @@ extension View {
   func bubbleBackground(
     _ message: Message,
     theme: ChatTheme,
-    isReply: Bool = false,
-    isSystemMessage: Bool = false
+    isSystemMessage: Bool = false,
+    foregroundColor: Color? = nil,
+    background: Color? = nil,
+    radius: CGFloat? = nil
   ) -> some View {
-    let radius: CGFloat = !message.attachments.isEmpty ? 12 : 20
+    let radius: CGFloat =  radius ?? (!message.attachments.isEmpty ? 12 : 20)
     let additionalMediaInset: CGFloat = message.attachments.count > 1 ? 2 : 0
     self
       .frame(width: message.attachments.isEmpty ? nil : MessageView.widthWithMedia + additionalMediaInset)
       .foregroundColor(
-        isSystemMessage ? theme.colors.systemMessageBubbleText :
-          message.user.isCurrentUser ? theme.colors.myMessageBubbleText : theme.colors.friendMessageBubbleText
+        foregroundColor ??
+        (isSystemMessage ? theme.colors.systemMessageBubbleText :
+          message.user.isCurrentUser ? theme.colors.myMessageBubbleText : theme.colors.friendMessageBubbleText)
       )
       .background {
-        if isReply || !message.text.isEmpty || message.recording != nil {
+        if !message.text.isEmpty || message.recording != nil {
           RoundedRectangle(cornerRadius: radius)
             .foregroundColor(
-              isSystemMessage ? theme.colors.systemMessageBubbleBackground :
-                message.user.isCurrentUser ? theme.colors.myMessageBubbleBackground : theme.colors.friendMessageBubbleBackground
+              background ??
+              (isSystemMessage ? theme.colors.systemMessageBubbleBackground :
+                message.user.isCurrentUser ? theme.colors.myMessageBubbleBackground : theme.colors.friendMessageBubbleBackground)
             )
         }
       }
