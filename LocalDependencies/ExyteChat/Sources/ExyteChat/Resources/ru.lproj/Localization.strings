@@ -12,3 +12,7 @@
 "GalleryHeader.Image.Title" = "Изображение";
 "GalleryHeader.Video.Title" = "Видео";
 "GridPhotos.Header.Title" = "Все медиа с контактом";
+"MessageMenu.Reply.Title" = "Ответить";
+"MessageMenu.Copy.Title" = "Копировать";
+"MessageMenu.Delete.Title" = "Удалить";
+"MessageMenu.Retry.Title" = "Повторить";

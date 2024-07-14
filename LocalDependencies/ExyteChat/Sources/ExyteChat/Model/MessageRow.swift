@@ -4,11 +4,19 @@
 
 import Foundation
 
+/// Перечисление, определяющее позицию сообщения в группе
 public enum PositionInGroup {
+  /// Первое сообщение в группе
   case first
+  
+  /// Сообщение в середине группы
   case middle
+  
+  /// Последнее сообщение в группе
   case last
-  case single // the only message in its group
+  
+  /// Единственное сообщение в группе
+  case single
 }
 
 struct MessageRow: Equatable {

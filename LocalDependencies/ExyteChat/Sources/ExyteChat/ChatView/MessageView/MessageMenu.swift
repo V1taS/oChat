@@ -8,6 +8,7 @@
 import SwiftUI
 import FloatingButton
 import enum FloatingButton.Alignment
+import SKStyle
 
 enum MessageMenuAction {
   case reply
@@ -17,7 +18,6 @@ enum MessageMenuAction {
 }
 
 struct MessageMenu<MainButton: View>: View {
-  
   @Environment(\.chatTheme) private var theme
   
   @Binding var isShowingMenu: Bool
@@ -33,45 +33,94 @@ struct MessageMenu<MainButton: View>: View {
   
   private var buttons: [AnyView] {
     var buttons: [AnyView] = [
-      AnyView(menuButton(title: "Reply", icon: theme.images.messageMenu.reply, action: .reply)),
-      AnyView(menuButton(title: "Delete", icon: theme.images.messageMenu.delete, action: .delete)),
-      AnyView(menuButton(title: "Copy", icon: theme.images.messageMenu.save, action: .copy))
+      AnyView(
+        menuButton(
+          title: ExyteChatStrings.messageMenuReplyTitle,
+          icon: theme.images.messageMenu.reply,
+          action: .reply
+        )
+      ),
+      AnyView(
+        menuButton(
+          title: ExyteChatStrings.messageMenuCopyTitle,
+          icon: theme.images.messageMenu.save,
+          action: .copy
+        )
+      ),
+      AnyView(
+        menuButton(
+          title: ExyteChatStrings.messageMenuDeleteTitle,
+          icon: theme.images.messageMenu.delete,
+          action: .delete
+        )
+      )
     ]
     
     if messageStatus == .error {
-      buttons.insert(AnyView(menuButton(title: "Retry", icon: theme.images.messageMenu.retry, action: .retry)), at: .zero)
+      buttons.insert(
+        AnyView(
+          menuButton(
+            title: ExyteChatStrings.messageMenuRetryTitle,
+            icon: theme.images.messageMenu.retry,
+            action: .retry
+          )
+        ),
+        at: .zero
+      )
     }
+    
+    if !isBottomDirection {
+      buttons.reverse()
+    }
+    
     return buttons
   }
   
   var body: some View {
     FloatingButton(mainButtonView: mainButton().allowsHitTesting(false), buttons: buttons, isOpen: $isShowingMenu)
-    .straight()
+      .straight()
     //.mainZStackAlignment(.top)
-    .initialOpacity(0)
-    .direction(isBottomDirection ? .bottom : .top)
-    .alignment(alignment)
-    .spacing(2)
-    .animation(.linear(duration: 0.2))
-    .menuButtonsSize($menuButtonsSize)
+      .initialOpacity(0)
+      .direction(isBottomDirection ? .bottom : .top)
+      .alignment(alignment)
+      .spacing(2)
+      .animation(.spring(response: 0.2, dampingFraction: 0.7, blendDuration: 0.2))
+      .menuButtonsSize($menuButtonsSize)
   }
   
+  @ViewBuilder
   func menuButton(title: String, icon: Image, action: MessageMenuAction) -> some View {
-    HStack(spacing: 0) {
+    let buttonBackgroundColor: Color
+    switch action {
+    case .retry:
+      buttonBackgroundColor = SKStyleAsset.constantLime.swiftUIColor
+    case .delete:
+      buttonBackgroundColor = SKStyleAsset.constantRuby.swiftUIColor
+    default:
+      buttonBackgroundColor = theme.colors.menuButtonBackground
+    }
+    
+    return HStack(spacing: 0) {
       if alignment == .left {
         Color.clear.viewSize(leadingPadding)
       }
       
       ZStack {
-        theme.colors.menuButtonBackground
+        buttonBackgroundColor
           .background(.ultraThinMaterial)
-          .opacity(0.5)
+          .opacity(1)
           .cornerRadius(12)
+        
         HStack {
           Text(title)
             .foregroundColor(theme.colors.menuButtonText)
           Spacer()
           icon
+            .resizable()
+            .renderingMode(.template)
+            .foregroundColor(theme.colors.menuButtonText)
+            .aspectRatio(contentMode: .fit)
+            .frame(width: .s5, height: .s5)
         }
         .padding(.vertical, 11)
         .padding(.horizontal, 12)

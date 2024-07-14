@@ -12,3 +12,7 @@
 "GalleryHeader.Image.Title" = "Image";
 "GalleryHeader.Video.Title" = "Video";
 "GridPhotos.Header.Title" = "All media with contact";
+"MessageMenu.Reply.Title" = "Reply";
+"MessageMenu.Copy.Title" = "Copy";
+"MessageMenu.Delete.Title" = "Delete";
+"MessageMenu.Retry.Title" = "Retry";

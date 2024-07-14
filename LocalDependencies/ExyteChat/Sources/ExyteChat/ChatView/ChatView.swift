@@ -9,6 +9,7 @@ import SwiftUI
 import FloatingButton
 import SwiftUIIntrospect
 import ExyteMediaPicker
+import SKStyle
 
 public typealias MediaPickerParameters = SelectionParamsHolder
 
@@ -253,13 +254,15 @@ public struct ChatView<MessageContent: View, InputViewContent: View>: View {
     .transparentNonAnimatingFullScreenCover(item: $viewModel.messageMenuRow) {
       if let row = viewModel.messageMenuRow {
         ZStack(alignment: .topLeading) {
-          Color.white
+          SKStyleAsset.onyx.swiftUIColor
             .opacity(menuBgOpacity)
             .ignoresSafeArea(.all)
           
           if needsScrollView {
             ScrollView {
-              messageMenu(row)
+              if let frame = cellFrames[row.id] {
+                messageMenu(row, isBottomDirection: frame.minY < UIScreen.main.bounds.height / 2)
+              }
             }
             .introspect(.scrollView, on: .iOS(.v16, .v17)) { scrollView in
               DispatchQueue.main.async {
@@ -269,8 +272,10 @@ public struct ChatView<MessageContent: View, InputViewContent: View>: View {
             .opacity(readyToShowScrollView ? 1 : 0)
           }
           if !needsScrollView || !readyToShowScrollView {
-            messageMenu(row)
-              .position(menuCellPosition)
+            if let frame = cellFrames[row.id] {
+              messageMenu(row, isBottomDirection: frame.minY < UIScreen.main.bounds.height / 2)
+                .position(menuCellPosition)
+            }
           }
         }
         .onAppear {
@@ -331,14 +336,14 @@ public struct ChatView<MessageContent: View, InputViewContent: View>: View {
     .onDisappear(perform: inputViewModel.onStop)
   }
   
-  func messageMenu(_ row: MessageRow) -> some View {
+  func messageMenu(_ row: MessageRow, isBottomDirection: Bool) -> some View {
     MessageMenu(
       isShowingMenu: $isShowingMenu,
       menuButtonsSize: $menuButtonsSize,
-      isBottomDirection: row.positionInGroup != .last,
+      isBottomDirection: isBottomDirection,
       messageStatus: row.message.status,
       alignment: row.message.user.isCurrentUser ? .right : .left,
-      leadingPadding: avatarSize + MessageView.horizontalAvatarPadding * 2,
+      leadingPadding: MessageView.statusViewSize + MessageView.horizontalStatusPadding,
       trailingPadding: MessageView.statusViewSize + MessageView.horizontalStatusPadding) {
         ChatMessageView(
           viewModel: viewModel,
@@ -375,12 +380,14 @@ public struct ChatView<MessageContent: View, InputViewContent: View>: View {
         if needsScrollTemp ||
             cellFrame.minY + wholeMenuHeight + safeAreaInsets.bottom > UIScreen.main.bounds.height {
           
-          finalCellPosition = CGPoint(x: cellFrame.midX, y: UIScreen.main.bounds.height - wholeMenuHeight/2 - safeAreaInsets.top - safeAreaInsets.bottom
+          finalCellPosition = CGPoint(
+            x: cellFrame.midX,
+            y: UIScreen.main.bounds.height - wholeMenuHeight/2 - safeAreaInsets.top - safeAreaInsets.bottom
           )
         }
         
-        withAnimation(.linear(duration: 0.1)) {
-          menuBgOpacity = 0.9
+        withAnimation(.spring(response: 0.5, dampingFraction: 0.7, blendDuration: 0.5)) {
+          menuBgOpacity = 0.8
           menuCellPosition = finalCellPosition
           isShowingMenu = true
         }

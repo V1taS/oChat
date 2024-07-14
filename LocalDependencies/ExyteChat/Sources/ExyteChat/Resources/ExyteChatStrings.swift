@@ -29,6 +29,22 @@ public enum ExyteChatStrings {
     "Localization",
     "GridPhotos.Header.Title"
   )
+  public static let messageMenuReplyTitle = ExyteChatStrings.tr(
+    "Localization",
+    "MessageMenu.Reply.Title"
+  )
+  public static let messageMenuCopyTitle = ExyteChatStrings.tr(
+    "Localization",
+    "MessageMenu.Copy.Title"
+  )
+  public static let messageMenuDeleteTitle = ExyteChatStrings.tr(
+    "Localization",
+    "MessageMenu.Delete.Title"
+  )
+  public static let messageMenuRetryTitle = ExyteChatStrings.tr(
+    "Localization",
+    "MessageMenu.Retry.Title"
+  )
 }
 
 // MARK: - Implementation Details

@@ -412,7 +412,18 @@ struct UIList<MessageContent: View>: UIViewRepresentable {
       
       let row = sections[indexPath.section].rows[indexPath.row]
       tableViewCell.contentConfiguration = UIHostingConfiguration {
-        ChatMessageView(viewModel: viewModel, messageBuilder: messageBuilder, row: row, chatType: type, avatarSize: avatarSize, tapAvatarClosure: tapAvatarClosure, messageUseMarkdown: messageUseMarkdown, isDisplayingMessageMenu: false, showMessageTimeView: showMessageTimeView, messageFont: messageFont)
+        ChatMessageView(
+          viewModel: viewModel,
+          messageBuilder: messageBuilder,
+          row: row,
+          chatType: type,
+          avatarSize: avatarSize,
+          tapAvatarClosure: tapAvatarClosure,
+          messageUseMarkdown: messageUseMarkdown,
+          isDisplayingMessageMenu: false,
+          showMessageTimeView: showMessageTimeView,
+          messageFont: messageFont
+        )
           .background(MessageMenuPreferenceViewSetter(id: row.id))
           .rotationEffect(Angle(degrees: (type == .chat ? 180 : 0)))
           .onTapGesture { }
