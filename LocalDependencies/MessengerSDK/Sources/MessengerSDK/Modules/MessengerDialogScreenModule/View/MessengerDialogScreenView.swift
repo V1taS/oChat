@@ -82,7 +82,8 @@ private extension MessengerDialogScreenView {
     if presenter.isInitialWaitConfirmState() {
       ChatView(
         messages: presenter.stateMessengeModels, 
-        placeholder: "", 
+        placeholder: "",
+        isDownloadAvailability: presenter.stateIsDownloadAvailability,
         onChange: { _ in },
         didSendMessage: { _ in },
         inputViewBuilder: { _, _, _, _, _, _ in
@@ -103,10 +104,13 @@ private extension MessengerDialogScreenView {
           .padding(.top, .s4)
         }
       )
+      .showMessageTimeView(false)
+      .showDateHeaders(showDateHeaders: false)
     } else if presenter.stateContactModel.status == .offline {
       ChatView(
         messages: presenter.stateMessengeModels,
         placeholder: "",
+        isDownloadAvailability: presenter.stateIsDownloadAvailability,
         onChange: { _ in },
         didSendMessage: { _ in },
         inputViewBuilder: { _, _, _, _, _, _ in
@@ -125,6 +129,8 @@ private extension MessengerDialogScreenView {
           .padding(.top, .s4)
         }
       )
+      .showMessageTimeView(false)
+      .showDateHeaders(showDateHeaders: false)
     } else {
       ChatView(
         messages: presenter.stateMessengeModels,
@@ -188,6 +194,7 @@ private extension MessengerDialogScreenView {
     ChatView(
       messages: presenter.stateMessengeModels, 
       placeholder: presenter.getInitialPlaceholder(),
+      isDownloadAvailability: presenter.stateIsDownloadAvailability,
       onChange: { _ in },
       didSendMessage: { draft in
         DispatchQueue.main.async {
