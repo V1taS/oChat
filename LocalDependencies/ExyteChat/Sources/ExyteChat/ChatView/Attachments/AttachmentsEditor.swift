@@ -62,7 +62,7 @@ struct AttachmentsEditor<InputViewContent: View>: View {
           inputView
             .padding(.bottom, g.safeAreaInsets.bottom)
         }
-        .background(pickerTheme.main.albumSelectionBackground)
+        .background(SKStyleAsset.onyx.swiftUIColor)
         .ignoresSafeArea()
       } cameraSelectionBuilder: { _, cancelClosure, cameraSelectionView in
         VStack {
@@ -84,7 +84,7 @@ struct AttachmentsEditor<InputViewContent: View>: View {
       .pickerMode($inputViewModel.mediaPickerMode)
       .orientationHandler(orientationHandler)
       .padding(.top)
-      .background(pickerTheme.main.albumSelectionBackground)
+      .background(SKStyleAsset.onyx.swiftUIColor)
       .ignoresSafeArea(.all)
       .onChange(of: currentFullscreenMedia) { newValue in
         assembleSelectedMedia()
@@ -146,7 +146,7 @@ struct AttachmentsEditor<InputViewContent: View>: View {
           inputViewModel.showPicker = false
         } label: {
           Text(ExyteChatStrings.attachmentsEditorButtonCancelTitle)
-            .foregroundColor(SKStyleAsset.constantAzure.swiftUIColor.opacity(0.7))
+            .foregroundColor(SKStyleAsset.constantAzure.swiftUIColor)
         }
         
         Spacer()
@@ -154,9 +154,9 @@ struct AttachmentsEditor<InputViewContent: View>: View {
       
       HStack {
         Text(ExyteChatStrings.attachmentsEditorButtonRecentsTitle)
-          .foregroundColor(SKStyleAsset.constantAzure.swiftUIColor.opacity(0.7))
+          .foregroundColor(SKStyleAsset.ghost.swiftUIColor)
         Image(systemName: "chevron.down")
-          .foregroundColor(SKStyleAsset.constantAzure.swiftUIColor.opacity(0.7))
+          .foregroundColor(SKStyleAsset.constantAzure.swiftUIColor)
           .rotationEffect(Angle(radians: showingAlbums ? .pi : 0))
       }
       .foregroundColor(.white)
@@ -187,7 +187,7 @@ struct AttachmentsEditor<InputViewContent: View>: View {
         theme.images.mediaPicker.chevronRight
         Text(chatTitle)
           .font(.title3)
-          .foregroundColor(SKStyleAsset.constantAzure.swiftUIColor.opacity(0.7))
+          .foregroundColor(SKStyleAsset.constantAzure.swiftUIColor)
       }
       
       Spacer()

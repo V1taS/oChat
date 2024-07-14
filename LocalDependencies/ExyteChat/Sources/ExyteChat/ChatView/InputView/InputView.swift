@@ -541,7 +541,7 @@ struct InputView: View {
     case .message:
       return theme.colors.mainBackground
     case .signature:
-      return pickerTheme.main.albumSelectionBackground
+      return SKStyleAsset.onyx.swiftUIColor
     }
   }
   

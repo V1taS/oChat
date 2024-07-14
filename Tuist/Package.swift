@@ -16,6 +16,7 @@ let package = Package(
     .package(path: "../../../LocalDependencies/SKStoriesWidget"),
     .package(path: "../../../LocalDependencies/SKUIKit"),
     .package(path: "../../../LocalDependencies/SKServices"),
-    .package(path: "../../../LocalDependencies/ExyteChat")
+    .package(path: "../../../LocalDependencies/ExyteChat"),
+    .package(path: "../../../LocalDependencies/ExyteMediaPicker")
   ]
 )
