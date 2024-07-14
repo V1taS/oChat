@@ -16,7 +16,6 @@ public enum ExyteChatStrings {
     "Localization",
     "AttachmentsEditor.Button.Recents.Title"
   )
-  
   public static let galleryHeaderImageTitle = ExyteChatStrings.tr(
     "Localization",
     "GalleryHeader.Image.Title"
@@ -44,6 +43,18 @@ public enum ExyteChatStrings {
   public static let messageMenuRetryTitle = ExyteChatStrings.tr(
     "Localization",
     "MessageMenu.Retry.Title"
+  )
+  public static let inputReplyTitle = ExyteChatStrings.tr(
+    "Localization",
+    "Input.Reply.Title"
+  )
+  public static let inputRecordingTitle = ExyteChatStrings.tr(
+    "Localization",
+    "Input.Recording.Title"
+  )
+  public static let inputCancelTitle = ExyteChatStrings.tr(
+    "Localization",
+    "Input.Cancel.Title"
   )
 }
 

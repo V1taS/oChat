@@ -16,3 +16,6 @@
 "MessageMenu.Copy.Title" = "Копировать";
 "MessageMenu.Delete.Title" = "Удалить";
 "MessageMenu.Retry.Title" = "Повторить";
+"Input.Reply.Title" = "Ответить";
+"Input.Recording.Title" = "Запись";
+"Input.Cancel.Title" = "Отмена";

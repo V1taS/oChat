@@ -251,7 +251,7 @@ struct InputView: View {
             .frame(width: 2)
           
           VStack(alignment: .leading) {
-            Text("Ответить:")
+            Text("\(ExyteChatStrings.inputReplyTitle):")
               .font(.fancy.text.regular)
               .foregroundColor(SKStyleAsset.constantAzure.swiftUIColor)
             
@@ -360,7 +360,11 @@ struct InputView: View {
       onAction(.deleteRecord)
     } label: {
       theme.images.recordAudio.deleteRecord
-        .viewSize(24)
+        .resizable()
+        .renderingMode(.template)
+        .foregroundColor(SKStyleAsset.constantRuby.swiftUIColor)
+        .aspectRatio(contentMode: .fit)
+        .viewSize(.s5)
         .padding(EdgeInsets(top: 12, leading: 12, bottom: 12, trailing: 8))
     }
     .frameGetter($deleteRecordFrame)
@@ -371,10 +375,13 @@ struct InputView: View {
       onAction(.stopRecordAudio)
     } label: {
       theme.images.recordAudio.stopRecord
+        .renderingMode(.template)
         .viewSize(28)
+        .foregroundColor(SKStyleAsset.constantOnyx.swiftUIColor)
+      
         .background(
           Capsule()
-            .fill(Color.white)
+            .fill(SKStyleAsset.componentSlateMessageBG.swiftUIColor)
             .shadow(color: .black.opacity(0.4), radius: 1)
         )
     }
@@ -386,13 +393,24 @@ struct InputView: View {
     } label: {
       VStack(spacing: 20) {
         theme.images.recordAudio.lockRecord
+          .resizable()
+          .renderingMode(.template)
+          .foregroundColor(SKStyleAsset.constantOnyx.swiftUIColor)
+          .aspectRatio(contentMode: .fit)
+          .frame(height: .s4)
+        
         theme.images.recordAudio.sendRecord
+          .resizable()
+          .renderingMode(.template)
+          .foregroundColor(SKStyleAsset.constantOnyx.swiftUIColor)
+          .aspectRatio(contentMode: .fit)
+          .frame(height: .s4)
       }
       .frame(width: 28)
       .padding(.vertical, 16)
       .background(
         Capsule()
-          .fill(Color.white)
+          .fill(SKStyleAsset.componentSlateMessageBG.swiftUIColor)
           .shadow(color: .black.opacity(0.4), radius: 1)
       )
     }
@@ -407,9 +425,15 @@ struct InputView: View {
       } label: {
         HStack {
           theme.images.recordAudio.cancelRecord
-          Text("Cancel")
+            .resizable()
+            .renderingMode(.template)
+            .foregroundColor(SKStyleAsset.constantRuby.swiftUIColor)
+            .aspectRatio(contentMode: .fit)
+            .frame(height: .s3)
+          
+          Text(ExyteChatStrings.inputCancelTitle)
             .font(.footnote)
-            .foregroundColor(theme.colors.cancelText)
+            .foregroundColor(SKStyleAsset.constantRuby.swiftUIColor)
         }
       }
       Spacer()
@@ -419,9 +443,9 @@ struct InputView: View {
   var recordingInProgress: some View {
     HStack {
       Spacer()
-      Text("Recording...")
+      Text("\(ExyteChatStrings.inputRecordingTitle)...")
         .font(.footnote)
-        .foregroundColor(theme.colors.recordingText)
+        .foregroundColor(SKStyleAsset.constantSlate.swiftUIColor)
       Spacer()
     }
   }
@@ -429,7 +453,7 @@ struct InputView: View {
   var recordDurationInProcess: some View {
     HStack {
       Circle()
-        .foregroundColor(theme.colors.recordDot)
+        .foregroundColor(SKStyleAsset.constantRuby.swiftUIColor)
         .viewSize(6)
       recordDuration
     }
@@ -437,8 +461,8 @@ struct InputView: View {
   
   var recordDuration: some View {
     Text(DateFormatter.timeString(Int(viewModel.attachments.recording?.duration ?? 0)))
-      .foregroundColor(theme.colors.recordDurationText)
-      .opacity(0.6)
+      .foregroundColor(SKStyleAsset.ghost.swiftUIColor)
+      .opacity(0.8)
       .font(.caption2)
       .monospacedDigit()
       .padding(.trailing, 12)
@@ -446,8 +470,8 @@ struct InputView: View {
   
   var recordDurationLeft: some View {
     Text(DateFormatter.timeString(Int(recordingPlayer.secondsLeft)))
-      .foregroundColor(theme.colors.recordDurationLeftText)
-      .opacity(0.6)
+      .foregroundColor(SKStyleAsset.ghost.swiftUIColor)
+      .opacity(0.8)
       .font(.caption2)
       .monospacedDigit()
       .padding(.trailing, 12)
@@ -458,6 +482,11 @@ struct InputView: View {
       onAction(.playRecord)
     } label: {
       theme.images.recordAudio.playRecord
+        .resizable()
+        .renderingMode(.template)
+        .foregroundColor(SKStyleAsset.constantAzure.swiftUIColor)
+        .aspectRatio(contentMode: .fit)
+        .frame(height: .s6)
     }
   }
   
@@ -466,6 +495,11 @@ struct InputView: View {
       onAction(.pauseRecord)
     } label: {
       theme.images.recordAudio.pauseRecord
+        .resizable()
+        .renderingMode(.template)
+        .foregroundColor(SKStyleAsset.constantAzure.swiftUIColor)
+        .aspectRatio(contentMode: .fit)
+        .frame(height: .s6)
     }
   }
   
@@ -485,7 +519,7 @@ struct InputView: View {
         RecordWaveformPlaying(
           samples: samples,
           progress: recordingPlayer.progress,
-          color: theme.colors.recordWaveformPlayingText,
+          color: SKStyleAsset.constantAzure.swiftUIColor,
           addExtraDots: true
         )
       }

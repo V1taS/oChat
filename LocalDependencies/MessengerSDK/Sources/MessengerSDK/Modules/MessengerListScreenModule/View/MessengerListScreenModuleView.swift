@@ -81,12 +81,13 @@ private extension MessengerListScreenModuleView {
           } label: {
             Text("Очистить")
           }
+          .tint(.orange)
+          
           Button(role: .destructive) {
             presenter.removeContact(index: index)
           } label: {
             Text("Удалить")
           }
-          .tint(.orange)
         }
       }
     }

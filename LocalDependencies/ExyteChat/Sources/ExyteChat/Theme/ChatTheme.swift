@@ -282,7 +282,6 @@ extension ChatTheme {
     // Ответы на сообщения
     public var replyToUser: Color
     public var replyToText: Color
-    public var cancelText: Color
     
     // Запись сообщений
     public var recordingMicrophone: Color
@@ -294,11 +293,6 @@ extension ChatTheme {
     public var recordWaveFormColorButtonReceived: Color
     public var recordWaveFormColorButtonBgOwn: Color
     public var recordWaveFormColorButtonBgReceived: Color
-    public var recordDot: Color
-    public var recordDurationText: Color
-    public var recordDurationLeftText: Color
-    public var recordWaveformPlayingText: Color
-    public var recordingText: Color
     
     // Медиа и вложения
     public var attachmentImage: Color
@@ -344,7 +338,6 @@ extension ChatTheme {
      - inputText: Цвет текста ввода.
      - replyToUser: Цвет текста при ответе пользователю.
      - replyToText: Цвет текста при ответе.
-     - cancelText: Цвет текста отмены.
      - recordingMicrophone: Цвет иконки микрофона при записи.
      - recordButtonBackground: Цвет фона кнопки записи.
      - recordIndicator: Цвет индикатора записи.
@@ -354,11 +347,6 @@ extension ChatTheme {
      - recordWaveFormColorButtonReceived: Цвет кнопки формы волны (полученной).
      - recordWaveFormColorButtonBgOwn: Цвет фона кнопки формы волны (собственной).
      - recordWaveFormColorButtonBgReceived: Цвет фона кнопки формы волны (полученной).
-     - recordDot: Цвет точки записи.
-     - recordDurationText: Цвет текста длительности записи.
-     - recordDurationLeftText: Цвет текста оставшегося времени записи.
-     - recordWaveformPlayingText: Цвет текста воспроизведения формы волны.
-     - recordingText: Цвет текста записи.
      - attachmentImage: Цвет изображения вложения.
      - attachmentCellStroke: Цвет обводки ячейки вложения.
      - textMediaPicker: Цвет текста медиапикера.
@@ -393,7 +381,6 @@ extension ChatTheme {
       inputText: Color = SKStyleAsset.ghost.swiftUIColor,
       replyToUser: Color = SKStyleAsset.constantSlate.swiftUIColor,
       replyToText: Color = SKStyleAsset.constantSlate.swiftUIColor,
-      cancelText: Color = SKStyleAsset.constantNavy.swiftUIColor,
       recordingMicrophone: Color = SKStyleAsset.constantSlate.swiftUIColor,
       recordButtonBackground: Color = SKStyleAsset.constantAzure.swiftUIColor,
       recordIndicator: Color = SKStyleAsset.constantAzure.swiftUIColor,
@@ -403,11 +390,6 @@ extension ChatTheme {
       recordWaveFormColorButtonReceived: Color = SKStyleAsset.constantSlate.swiftUIColor,
       recordWaveFormColorButtonBgOwn: Color = SKStyleAsset.constantSlate.swiftUIColor,
       recordWaveFormColorButtonBgReceived: Color = SKStyleAsset.constantAzure.swiftUIColor,
-      recordDot: Color = SKStyleAsset.constantRuby.swiftUIColor,
-      recordDurationText: Color = SKStyleAsset.constantSlate.swiftUIColor,
-      recordDurationLeftText: Color = SKStyleAsset.constantSlate.swiftUIColor,
-      recordWaveformPlayingText: Color = SKStyleAsset.constantSlate.swiftUIColor,
-      recordingText: Color = SKStyleAsset.constantSlate.swiftUIColor,
       attachmentImage: Color = SKStyleAsset.constantLightMistGray.swiftUIColor,
       attachmentCellStroke: Color = SKStyleAsset.constantLightMistGray.swiftUIColor,
       textMediaPicker: Color = SKStyleAsset.ghost.swiftUIColor,
@@ -441,7 +423,6 @@ extension ChatTheme {
       self.inputText = inputText
       self.replyToUser = replyToUser
       self.replyToText = replyToText
-      self.cancelText = cancelText
       self.recordingMicrophone = recordingMicrophone
       self.recordButtonBackground = recordButtonBackground
       self.recordIndicator = recordIndicator
@@ -451,11 +432,6 @@ extension ChatTheme {
       self.recordWaveFormColorButtonReceived = recordWaveFormColorButtonReceived
       self.recordWaveFormColorButtonBgOwn = recordWaveFormColorButtonBgOwn
       self.recordWaveFormColorButtonBgReceived = recordWaveFormColorButtonBgReceived
-      self.recordDot = recordDot
-      self.recordDurationText = recordDurationText
-      self.recordDurationLeftText = recordDurationLeftText
-      self.recordWaveformPlayingText = recordWaveformPlayingText
-      self.recordingText = recordingText
       self.attachmentImage = attachmentImage
       self.attachmentCellStroke = attachmentCellStroke
       self.textMediaPicker = textMediaPicker
