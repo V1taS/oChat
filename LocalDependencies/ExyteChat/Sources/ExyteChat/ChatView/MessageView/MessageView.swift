@@ -227,18 +227,16 @@ struct MessageView: View {
     }
   }
   
-  
-  
   @ViewBuilder
   func recordingView(_ recording: Recording) -> some View {
     RecordWaveformWithButtons(
       recording: recording,
-      colorButton: message.user.isCurrentUser ? theme.colors.recordWaveFormColorButtonOwn : theme.colors.recordWaveFormColorButtonReceived,
-      colorButtonBg: message.user.isCurrentUser ? theme.colors.recordWaveFormColorButtonBgOwn : theme.colors.recordWaveFormColorButtonBgReceived,
-      colorWaveform: message.user.isCurrentUser ? theme.colors.recordWaveFormOwn : theme.colors.recordWaveFormReceived
+      colorButton: SKStyleAsset.constantOnyx.swiftUIColor.opacity(0.5),
+      colorButtonBg: SKStyleAsset.constantOnyx.swiftUIColor.opacity(0.3),
+      colorWaveform: SKStyleAsset.constantOnyx.swiftUIColor.opacity(0.3)
     )
     .padding(.horizontal, MessageView.horizontalTextPadding)
-    .padding(.top, 8)
+    .padding(.vertical, 8)
   }
   
   func messageTimeView(needsCapsule: Bool = false) -> some View {

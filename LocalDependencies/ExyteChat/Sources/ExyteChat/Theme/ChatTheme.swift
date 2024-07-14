@@ -287,12 +287,6 @@ extension ChatTheme {
     public var recordingMicrophone: Color
     public var recordButtonBackground: Color
     public var recordIndicator: Color
-    public var recordWaveFormOwn: Color
-    public var recordWaveFormReceived: Color
-    public var recordWaveFormColorButtonOwn: Color
-    public var recordWaveFormColorButtonReceived: Color
-    public var recordWaveFormColorButtonBgOwn: Color
-    public var recordWaveFormColorButtonBgReceived: Color
     
     // Медиа и вложения
     public var attachmentImage: Color
@@ -341,12 +335,6 @@ extension ChatTheme {
      - recordingMicrophone: Цвет иконки микрофона при записи.
      - recordButtonBackground: Цвет фона кнопки записи.
      - recordIndicator: Цвет индикатора записи.
-     - recordWaveFormOwn: Цвет формы волны записи (собственной).
-     - recordWaveFormReceived: Цвет формы волны записи (полученной).
-     - recordWaveFormColorButtonOwn: Цвет кнопки формы волны (собственной).
-     - recordWaveFormColorButtonReceived: Цвет кнопки формы волны (полученной).
-     - recordWaveFormColorButtonBgOwn: Цвет фона кнопки формы волны (собственной).
-     - recordWaveFormColorButtonBgReceived: Цвет фона кнопки формы волны (полученной).
      - attachmentImage: Цвет изображения вложения.
      - attachmentCellStroke: Цвет обводки ячейки вложения.
      - textMediaPicker: Цвет текста медиапикера.
@@ -384,12 +372,6 @@ extension ChatTheme {
       recordingMicrophone: Color = SKStyleAsset.constantSlate.swiftUIColor,
       recordButtonBackground: Color = SKStyleAsset.constantAzure.swiftUIColor,
       recordIndicator: Color = SKStyleAsset.constantAzure.swiftUIColor,
-      recordWaveFormOwn: Color = SKStyleAsset.constantSlate.swiftUIColor,
-      recordWaveFormReceived: Color = SKStyleAsset.constantGhost.swiftUIColor,
-      recordWaveFormColorButtonOwn: Color = SKStyleAsset.constantAzure.swiftUIColor,
-      recordWaveFormColorButtonReceived: Color = SKStyleAsset.constantSlate.swiftUIColor,
-      recordWaveFormColorButtonBgOwn: Color = SKStyleAsset.constantSlate.swiftUIColor,
-      recordWaveFormColorButtonBgReceived: Color = SKStyleAsset.constantAzure.swiftUIColor,
       attachmentImage: Color = SKStyleAsset.constantLightMistGray.swiftUIColor,
       attachmentCellStroke: Color = SKStyleAsset.constantLightMistGray.swiftUIColor,
       textMediaPicker: Color = SKStyleAsset.ghost.swiftUIColor,
@@ -426,12 +408,6 @@ extension ChatTheme {
       self.recordingMicrophone = recordingMicrophone
       self.recordButtonBackground = recordButtonBackground
       self.recordIndicator = recordIndicator
-      self.recordWaveFormOwn = recordWaveFormOwn
-      self.recordWaveFormReceived = recordWaveFormReceived
-      self.recordWaveFormColorButtonOwn = recordWaveFormColorButtonOwn
-      self.recordWaveFormColorButtonReceived = recordWaveFormColorButtonReceived
-      self.recordWaveFormColorButtonBgOwn = recordWaveFormColorButtonBgOwn
-      self.recordWaveFormColorButtonBgReceived = recordWaveFormColorButtonBgReceived
       self.attachmentImage = attachmentImage
       self.attachmentCellStroke = attachmentCellStroke
       self.textMediaPicker = textMediaPicker
