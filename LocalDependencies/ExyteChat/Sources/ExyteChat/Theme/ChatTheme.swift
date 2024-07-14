@@ -281,7 +281,6 @@ extension ChatTheme {
     
     // Ответы на сообщения
     public var replyToUser: Color
-    public var replySeparator: Color
     public var replyToText: Color
     public var cancelText: Color
     
@@ -344,7 +343,6 @@ extension ChatTheme {
      - inputPlaceholder: Цвет плейсхолдера ввода.
      - inputText: Цвет текста ввода.
      - replyToUser: Цвет текста при ответе пользователю.
-     - replySeparator: Цвет разделителя при ответе.
      - replyToText: Цвет текста при ответе.
      - cancelText: Цвет текста отмены.
      - recordingMicrophone: Цвет иконки микрофона при записи.
@@ -394,8 +392,7 @@ extension ChatTheme {
       inputPlaceholder: Color = SKStyleAsset.constantSlate.swiftUIColor,
       inputText: Color = SKStyleAsset.ghost.swiftUIColor,
       replyToUser: Color = SKStyleAsset.constantSlate.swiftUIColor,
-      replySeparator: Color = SKStyleAsset.constantSlate.swiftUIColor,
-      replyToText: Color = SKStyleAsset.constantNavy.swiftUIColor,
+      replyToText: Color = SKStyleAsset.constantSlate.swiftUIColor,
       cancelText: Color = SKStyleAsset.constantNavy.swiftUIColor,
       recordingMicrophone: Color = SKStyleAsset.constantSlate.swiftUIColor,
       recordButtonBackground: Color = SKStyleAsset.constantAzure.swiftUIColor,
@@ -443,7 +440,6 @@ extension ChatTheme {
       self.inputPlaceholder = inputPlaceholder
       self.inputText = inputText
       self.replyToUser = replyToUser
-      self.replySeparator = replySeparator
       self.replyToText = replyToText
       self.cancelText = cancelText
       self.recordingMicrophone = recordingMicrophone

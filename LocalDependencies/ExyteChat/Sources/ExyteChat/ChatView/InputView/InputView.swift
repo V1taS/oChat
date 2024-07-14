@@ -235,21 +235,29 @@ struct InputView: View {
     if let message = viewModel.attachments.replyMessage {
       VStack(spacing: 8) {
         Rectangle()
-          .foregroundColor(theme.colors.replySeparator)
-          .frame(height: 2)
+          .foregroundColor(SKStyleAsset.constantSlate.swiftUIColor.opacity(0.6))
+          .frame(height: 1)
         
-        HStack {
+        HStack(alignment: .center) {
           theme.images.reply.replyToMessage
+            .resizable()
+            .renderingMode(.template)
+            .foregroundColor(SKStyleAsset.constantAzure.swiftUIColor)
+            .aspectRatio(contentMode: .fit)
+            .frame(width: .s6, height: .s6)
+          
           Capsule()
-            .foregroundColor(theme.colors.replySeparator)
+            .foregroundColor(SKStyleAsset.constantAzure.swiftUIColor)
             .frame(width: 2)
+          
           VStack(alignment: .leading) {
-            Text("Reply to \(message.user.name)")
-              .font(.caption2)
-              .foregroundColor(theme.colors.replyToUser)
+            Text("Ответить:")
+              .font(.fancy.text.regular)
+              .foregroundColor(SKStyleAsset.constantAzure.swiftUIColor)
+            
             if !message.text.isEmpty {
               textView(message.text)
-                .font(.caption2)
+                .font(.fancy.constant.b3)
                 .lineLimit(1)
                 .foregroundColor(theme.colors.replyToText)
             }
@@ -271,7 +279,12 @@ struct InputView: View {
               .foregroundColor(theme.colors.recordingMicrophone)
           }
           
-          theme.images.reply.cancelReply
+          theme.images.mediaPicker.cross
+            .resizable()
+            .renderingMode(.template)
+            .foregroundColor(SKStyleAsset.constantAzure.swiftUIColor)
+            .aspectRatio(contentMode: .fit)
+            .frame(height: 24)
             .onTapGesture {
               viewModel.attachments.replyMessage = nil
             }

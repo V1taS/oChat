@@ -110,7 +110,9 @@ final class MessengerDialogScreenPresenter: ObservableObject {
     }
   }
   
-  func retrySendMessage(messengeModel: MessengeModel) {}
+  func retrySendMessage(messengeModel: MessengeModel) {
+    // TODO: 🔴
+  }
   
   func saveImageToGallery(_ imageURL: URL) {
     interactor.saveImageToGallery(imageURL) { [weak self] isSuccess in
@@ -380,7 +382,7 @@ final class MessengerDialogScreenPresenter: ObservableObject {
     Timer.scheduledTimer(withTimeInterval: 0.4, repeats: false) { [weak self] _ in
       guard let self else { return }
       interactor.copyToClipboard(text: text)
-      interactor.showNotification(.neutral(title: "Текст скопирован"))
+      interactor.showNotification(.positive(title: "Текст скопирован"))
     }
   }
   
@@ -401,19 +403,17 @@ final class MessengerDialogScreenPresenter: ObservableObject {
     }
     
     var updatedContactModel = stateContactModel
-    if updatedContactModel.messenges.last?.messageType != .systemSuccess {
-      updatedContactModel.messenges.append(
-        .init(
-          messageType: .systemSuccess,
-          messageStatus: .sent,
-          message: "Вы уведомили вашего контакта, что вы хотите пообщаться. Ожидайте его появления в чате.",
-          replyMessageText: nil,
-          images: [],
-          videos: [],
-          recording: nil
-        )
+    updatedContactModel.messenges.append(
+      .init(
+        messageType: .systemSuccess,
+        messageStatus: .sent,
+        message: "Вы уведомили вашего контакта, что вы хотите пообщаться. Ожидайте его появления в чате.",
+        replyMessageText: nil,
+        images: [],
+        videos: [],
+        recording: nil
       )
-    }
+    )
     
     stateContactModel = updatedContactModel
     
