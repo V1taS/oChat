@@ -9,3 +9,6 @@
 
 "AttachmentsEditor.Button.Cancel.Title" = "Отмена";
 "AttachmentsEditor.Button.Recents.Title" = "Недавние";
+"GalleryHeader.Image.Title" = "Изображение";
+"GalleryHeader.Video.Title" = "Видео";
+"GridPhotos.Header.Title" = "Все медиа с контактом";

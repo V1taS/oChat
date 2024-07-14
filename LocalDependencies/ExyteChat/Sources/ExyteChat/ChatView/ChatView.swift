@@ -158,16 +158,13 @@ public struct ChatView<MessageContent: View, InputViewContent: View>: View {
       let index = attachments.firstIndex { $0.id == viewModel.fullscreenAttachmentItem?.id }
       
       GeometryReader { g in
-        FullscreenMediaPages(
+        GalleryView(
           viewModel: FullscreenMediaPagesViewModel(
             attachments: attachments,
             index: index ?? 0
           ),
-          safeAreaInsets: g.safeAreaInsets,
-          onClose: { [weak viewModel] in
-            viewModel?.dismissAttachmentFullScreen()
-          },
-          onImageSave: { url in
+          isShown: $viewModel.fullscreenAttachmentPresented,
+          selected: index ?? 0, onImageSave: { url in
             onImageSave?(url)
           },
           onVideoSave: { url in
@@ -175,7 +172,6 @@ public struct ChatView<MessageContent: View, InputViewContent: View>: View {
           },
           isDownloadAvailability: isDownloadAvailability
         )
-        .ignoresSafeArea()
       }
     }
     .fullScreenCover(isPresented: $inputViewModel.showPicker) {

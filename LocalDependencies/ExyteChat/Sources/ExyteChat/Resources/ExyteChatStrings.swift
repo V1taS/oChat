@@ -16,6 +16,19 @@ public enum ExyteChatStrings {
     "Localization",
     "AttachmentsEditor.Button.Recents.Title"
   )
+  
+  public static let galleryHeaderImageTitle = ExyteChatStrings.tr(
+    "Localization",
+    "GalleryHeader.Image.Title"
+  )
+  public static let galleryHeaderVideoTitle = ExyteChatStrings.tr(
+    "Localization",
+    "GalleryHeader.Video.Title"
+  )
+  public static let gridPhotosHeaderTitle = ExyteChatStrings.tr(
+    "Localization",
+    "GridPhotos.Header.Title"
+  )
 }
 
 // MARK: - Implementation Details

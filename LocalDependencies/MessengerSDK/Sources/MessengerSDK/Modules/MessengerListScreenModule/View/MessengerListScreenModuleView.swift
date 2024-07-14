@@ -94,7 +94,6 @@ private extension MessengerListScreenModuleView {
     .background(Color.clear)
     .listStyle(PlainListStyle())
     .listRowSpacing(.s4)
-    .padding(.vertical, .s4)
   }
   
   func createEmptyState() -> some View {

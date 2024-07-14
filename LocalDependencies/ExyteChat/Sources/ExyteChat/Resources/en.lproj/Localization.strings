@@ -9,3 +9,6 @@
 
 "AttachmentsEditor.Button.Cancel.Title" = "Cancel";
 "AttachmentsEditor.Button.Recents.Title" = "Recents";
+"GalleryHeader.Image.Title" = "Image";
+"GalleryHeader.Video.Title" = "Video";
+"GridPhotos.Header.Title" = "All media with contact";
