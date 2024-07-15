@@ -15,6 +15,7 @@ struct TextInputView: View {
   var availableInput: AvailableInputType
   var placeholder: String
   var onChange: (_ newValue: String) -> Void
+  let maxLength: Int
   
   var body: some View {
     TextField("", text: $text, axis: .vertical)
@@ -31,6 +32,11 @@ struct TextInputView: View {
       }
       .onChange(of: text) { newValue in
         onChange(newValue)
+      }
+      .onChange(of: text) { newValue in
+        if newValue.count > maxLength {
+          text = String(newValue.prefix(maxLength))
+        }
       }
   }
 }

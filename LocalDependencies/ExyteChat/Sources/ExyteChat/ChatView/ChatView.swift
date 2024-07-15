@@ -115,10 +115,12 @@ public struct ChatView<MessageContent: View, InputViewContent: View>: View {
   
   private let placeholder: String
   private var onChange: (_ newValue: String) -> Void
+  private let maxLength: Int
   
   public init(messages: [Message],
               placeholder: String,
               isDownloadAvailability: Bool,
+              maxLength: Int,
               onChange: @escaping (_ newValue: String) -> Void,
               didSendMessage: @escaping (DraftMessage) -> Void,
               messageBuilder: @escaping MessageBuilderClosure,
@@ -128,6 +130,7 @@ public struct ChatView<MessageContent: View, InputViewContent: View>: View {
     self.didSendMessage = didSendMessage
     self.placeholder = placeholder
     self.isDownloadAvailability = isDownloadAvailability
+    self.maxLength = maxLength
     self.onChange = onChange
     self.sections = ChatView.mapMessages(messages)
     self.ids = messages.map { $0.id }
@@ -199,7 +202,8 @@ public struct ChatView<MessageContent: View, InputViewContent: View>: View {
         mediaPickerSelectionParameters: mediaPickerSelectionParameters,
         availableInput: availablelInput,
         placeholder: placeholder,
-        onChange: onChange
+        onChange: onChange,
+        maxLength: maxLength
       )
       .environmentObject(globalFocusState)
     }
@@ -327,7 +331,8 @@ public struct ChatView<MessageContent: View, InputViewContent: View>: View {
           availableInput: availablelInput,
           messageUseMarkdown: messageUseMarkdown,
           placeholder: placeholder,
-          onChange: onChange
+          onChange: onChange,
+          maxLength: maxLength
         )
       }
     }
@@ -577,10 +582,10 @@ public extension ChatView {
 }
 
 public extension ChatView where MessageContent == EmptyView {
-  
   init(messages: [Message],
        placeholder: String,
        isDownloadAvailability: Bool = true,
+       maxLength: Int = .max,
        onChange: @escaping (_ newValue: String) -> Void,
        didSendMessage: @escaping (DraftMessage) -> Void,
        onImageSave: ((URL) -> Void)? = nil,
@@ -588,6 +593,7 @@ public extension ChatView where MessageContent == EmptyView {
        inputViewBuilder: InputViewBuilderClosure?) {
     self.placeholder = placeholder
     self.isDownloadAvailability = isDownloadAvailability
+    self.maxLength = maxLength
     self.onChange = onChange
     self.didSendMessage = didSendMessage
     self.onImageSave = onImageSave
@@ -599,10 +605,10 @@ public extension ChatView where MessageContent == EmptyView {
 }
 
 public extension ChatView where InputViewContent == EmptyView {
-  
   init(messages: [Message],
        placeholder: String,
        isDownloadAvailability: Bool = true,
+       maxLength: Int = .max,
        onChange: @escaping (_ newValue: String) -> Void,
        didSendMessage: @escaping (DraftMessage) -> Void,
        onImageSave: ((URL) -> Void)? = nil,
@@ -610,6 +616,7 @@ public extension ChatView where InputViewContent == EmptyView {
        messageBuilder: @escaping MessageBuilderClosure) {
     self.placeholder = placeholder
     self.isDownloadAvailability = isDownloadAvailability
+    self.maxLength = maxLength
     self.onChange = onChange
     self.didSendMessage = didSendMessage
     self.onImageSave = onImageSave
@@ -624,12 +631,14 @@ public extension ChatView where MessageContent == EmptyView, InputViewContent ==
   init(messages: [Message],
        placeholder: String,
        isDownloadAvailability: Bool = true,
+       maxLength: Int = .max,
        onChange: @escaping (_ newValue: String) -> Void,
        didSendMessage: @escaping (DraftMessage) -> Void,
        onImageSave: ((URL) -> Void)? = nil,
        onVideoSave: ((URL) -> Void)? = nil) {
     self.placeholder = placeholder
     self.isDownloadAvailability = isDownloadAvailability
+    self.maxLength = maxLength
     self.onChange = onChange
     self.didSendMessage = didSendMessage
     self.onImageSave = onImageSave

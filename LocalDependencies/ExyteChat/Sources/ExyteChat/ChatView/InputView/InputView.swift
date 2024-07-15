@@ -44,8 +44,10 @@ public enum InputViewState {
   
   var canSend: Bool {
     switch self {
-    case .hasTextOrMedia, .hasRecording, .isRecordingTap, .playingRecording, .pausedRecording: return true
-    default: return false
+    case .hasTextOrMedia, .hasRecording, .isRecordingTap, .playingRecording, .pausedRecording: 
+      return true
+    default:
+      return false
     }
   }
 }
@@ -72,10 +74,29 @@ public struct InputViewAttachments {
   public var replyMessage: ReplyMessage?
 }
 
-struct InputView: View {
+public struct InputView: View {
   
-  @Environment(\.chatTheme) private var theme
-  @Environment(\.mediaPickerTheme) private var pickerTheme
+  // MARK: - Public properties
+  
+  public init(
+    viewModel: InputViewModel,
+    inputFieldId: UUID,
+    style: InputViewStyle,
+    availableInput: AvailableInputType,
+    messageUseMarkdown: Bool,
+    placeholder: String,
+    onChange: @escaping (String) -> Void,
+    maxLength: Int
+  ) {
+    self.viewModel = viewModel
+    self.inputFieldId = inputFieldId
+    self.style = style
+    self.availableInput = availableInput
+    self.messageUseMarkdown = messageUseMarkdown
+    self.placeholder = placeholder
+    self.onChange = onChange
+    self.maxLength = maxLength
+  }
   
   @ObservedObject var viewModel: InputViewModel
   var inputFieldId: UUID
@@ -84,17 +105,14 @@ struct InputView: View {
   var messageUseMarkdown: Bool
   var placeholder: String
   var onChange: (_ newValue: String) -> Void
+  let maxLength: Int
   
-  @StateObject var recordingPlayer = RecordingPlayer()
+  // MARK: - Private properties
   
-  private var onAction: (InputViewAction) -> Void {
-    viewModel.inputViewAction()
-  }
+  @Environment(\.chatTheme) private var theme
+  @Environment(\.mediaPickerTheme) private var pickerTheme
   
-  private var state: InputViewState {
-    viewModel.state
-  }
-  
+  @StateObject private var recordingPlayer = RecordingPlayer()
   @State private var overlaySize: CGSize = .zero
   
   @State private var recordButtonFrame: CGRect = .zero
@@ -105,8 +123,16 @@ struct InputView: View {
   @State private var tapDelayTimer: Timer?
   @State private var cancelGesture = false
   private let tapDelay = 0.2
+  private var onAction: (InputViewAction) -> Void {
+    viewModel.inputViewAction()
+  }
+  private var state: InputViewState {
+    viewModel.state
+  }
   
-  var body: some View {
+  // MARK: - Body
+  
+  public var body: some View {
     VStack {
       viewOnTop
       HStack(alignment: .bottom, spacing: 10) {
@@ -168,7 +194,8 @@ struct InputView: View {
           style: style,
           availableInput: availableInput,
           placeholder: placeholder,
-          onChange: onChange
+          onChange: onChange,
+          maxLength: maxLength
         )
       }
     }

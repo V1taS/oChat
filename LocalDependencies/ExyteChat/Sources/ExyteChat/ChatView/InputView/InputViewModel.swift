@@ -7,15 +7,16 @@ import Combine
 import ExyteMediaPicker
 import UIKit
 
-final class InputViewModel: ObservableObject {
+public final class InputViewModel: ObservableObject {
+  public init(){}
   
-  @Published var attachments = InputViewAttachments()
-  @Published var state: InputViewState = .empty
+  @Published public var attachments = InputViewAttachments()
+  @Published public var state: InputViewState = .empty
   
-  @Published var showPicker = false
-  @Published var mediaPickerMode = MediaPickerMode.photos
+  @Published public var showPicker = false
+  @Published public var mediaPickerMode = MediaPickerMode.photos
   
-  @Published var showActivityIndicator = false
+  @Published public var showActivityIndicator = false
   
   var recordingPlayer: RecordingPlayer?
   var didSendMessage: ((DraftMessage) -> Void)?

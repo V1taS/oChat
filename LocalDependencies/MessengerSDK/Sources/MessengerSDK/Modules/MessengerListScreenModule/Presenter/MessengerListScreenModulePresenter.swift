@@ -133,7 +133,6 @@ extension MessengerListScreenModulePresenter: MessengerListScreenModuleModuleInp
   func saveContactModel(_ model: SKAbstractions.ContactModel) {
     interactor.saveContactModel(model) { [weak self] in
       guard let self else { return }
-      moduleOutput?.dataModelHasBeenUpdated()
       updateListContacts()
     }
   }
@@ -646,6 +645,17 @@ private extension MessengerListScreenModulePresenter {
           files: files.compactMap({ $0 })
         )
         
+        return
+      }
+      
+      if let messageText = requestModel.messageText, messageText.count > 300 {
+        interactor.sendFile(
+          toxPublicKey: toxPublicKey,
+          recipientPublicKey: encryptionPublicKey,
+          recordModel: nil,
+          messengerRequest: requestModel,
+          files: []
+        )
         return
       }
       

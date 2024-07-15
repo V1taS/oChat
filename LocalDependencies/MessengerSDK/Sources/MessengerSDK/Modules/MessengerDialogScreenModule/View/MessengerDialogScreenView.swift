@@ -193,30 +193,45 @@ private extension MessengerDialogScreenView {
 
 private extension MessengerDialogScreenView {
   func createInitialAddressView() -> some View {
-    ChatView(
-      messages: presenter.stateMessengeModels,
-      placeholder: presenter.getInitialPlaceholder(),
-      isDownloadAvailability: presenter.stateIsDownloadAvailability,
-      onChange: { _ in },
-      didSendMessage: { draft in
-        DispatchQueue.main.async {
-          presenter.sendInitiateChatFromDialog(toxAddress: draft.text)
-          presenter.startScheduleResendInitialRequest()
-        }
-      },
-      messageBuilder: { _, _, _ in
-        AnyView(
-          informationView(model: presenter.getInitialHintModel())
-        )
-        .padding(.bottom, .s4)
+    VStack {
+      ScrollView(.vertical, showsIndicators: false) {
+        informationView(model: presenter.getInitialHintModel())
       }
-    )
-    .setAvailableInput(.textOnly)
-    .showMessageTimeView(false)
-    .showDateHeaders(showDateHeaders: false)
-    .showMessageMenuOnLongPress(false)
-    .showNetworkConnectionProblem(true)
-    .mediaPickerTheme()
+      
+      Spacer()
+      
+      HStack {
+        ChatFieldView(
+          "\(presenter.getInitialPlaceholder())",
+          message: $presenter.stateContactAdress,
+          maxLength: presenter.stateContactAdressMaxLength,
+          onChange: nil,
+          header: {
+            EmptyView()
+          },
+          footer: {
+            EmptyView()
+          }
+        )
+        .chatFieldStyle(.capsule)
+        
+        CircleButtonView(
+          isEnabled: presenter.isInitialChatValidation(),
+          type: .send,
+          size: .standart,
+          style: .custom(color: SKStyleAsset.constantAzure.swiftUIColor),
+          action: {
+            DispatchQueue.main.async {
+              presenter.sendInitiateChatFromDialog(toxAddress: presenter.stateContactAdress)
+              presenter.startScheduleResendInitialRequest()
+            }
+          }
+        )
+        
+      }
+      .padding(.horizontal, .s4)
+      .frame(minHeight: .s14)
+    }
   }
   
   func informationView(model: MessengerDialogHintModel) -> some View {

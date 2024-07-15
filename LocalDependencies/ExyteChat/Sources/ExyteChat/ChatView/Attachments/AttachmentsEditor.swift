@@ -30,6 +30,8 @@ struct AttachmentsEditor<InputViewContent: View>: View {
   var availableInput: AvailableInputType
   var placeholder: String
   var onChange: (_ newValue: String) -> Void
+  let maxLength: Int
+  
   private let impactFeedback = UIImpactFeedbackGenerator(style: .soft)
   
   @State private var seleсtedMedias: [Media] = []
@@ -134,7 +136,8 @@ struct AttachmentsEditor<InputViewContent: View>: View {
           availableInput: availableInput,
           messageUseMarkdown: messageUseMarkdown,
           placeholder: placeholder,
-          onChange: onChange
+          onChange: onChange,
+          maxLength: maxLength
         )
       }
     }
