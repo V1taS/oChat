@@ -307,10 +307,20 @@ public struct MediaPicker<AlbumSelectionContent: View, CameraSelectionContent: V
 #elseif os(iOS)
     Group {
       if let cameraViewBuilder = cameraViewBuilder {
-        CustomCameraView<CameraViewContent>(viewModel: viewModel, didTakePicture: didTakePicture, didPressCancel: didPressCancel, cameraViewBuilder: cameraViewBuilder)
+        CustomCameraView<CameraViewContent>(
+          viewModel: viewModel,
+          didTakePicture: didTakePicture,
+          didPressCancel: didPressCancel,
+          cameraViewBuilder: cameraViewBuilder
+        )
           .ignoresSafeArea()
       } else {
-        StandardConrolsCameraView(viewModel: viewModel, didTakePicture: didTakePicture, didPressCancel: didPressCancel, selectionParamsHolder: selectionParamsHolder)
+        StandardConrolsCameraView(
+          viewModel: viewModel,
+          didTakePicture: didTakePicture,
+          didPressCancel: didPressCancel,
+          selectionParamsHolder: selectionParamsHolder
+        )
           .ignoresSafeArea()
       }
     }

@@ -33,9 +33,9 @@ extension MediaPickerTheme {
     public let cameraBackground: Color
     public let cameraSelectionBackground: Color
     
-    public init(text: Color = Color(uiColor: .label),
+    public init(text: Color = SKStyleAsset.ghost.swiftUIColor,
                 fullscreenPhotoBackground: Color = SKStyleAsset.onyx.swiftUIColor,
-                cameraBackground: Color = SKStyleAsset.onyx.swiftUIColor,
+                cameraBackground: Color = SKStyleAsset.constantOnyx.swiftUIColor,
                 cameraSelectionBackground: Color = SKStyleAsset.onyx.swiftUIColor) {
       self.text = text
       self.fullscreenPhotoBackground = fullscreenPhotoBackground
