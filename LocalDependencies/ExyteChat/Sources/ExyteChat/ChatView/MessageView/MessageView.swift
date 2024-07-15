@@ -88,7 +88,7 @@ struct MessageView: View {
   var body: some View {
     HStack(alignment: .bottom, spacing: 0) {
       VStack(alignment: message.user.isCurrentUser ? .trailing : .leading, spacing: 2) {
-        if let countEmojis = countEmojis(in: message.text) {
+        if let countEmojis = countEmojis(in: message.text), countEmojis != .zero {
           Text(message.text)
             .font(.system(size: countEmojis == 1 ? .s13 : .s8))
         } else {
