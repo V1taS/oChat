@@ -297,7 +297,6 @@ extension ChatTheme {
     public var mainBackground: Color
     public var addButtonBackground: Color
     public var sendButtonBackground: Color
-    public var menuButtonBackground: Color
     public var menuButtonText: Color
     public var circleScrolledButtonBackground: Color
     public var activityIndicator: Color
@@ -341,7 +340,6 @@ extension ChatTheme {
      - mainBackground: Цвет основного фона.
      - addButtonBackground: Цвет фона кнопки добавления.
      - sendButtonBackground: Цвет фона кнопки отправки.
-     - menuButtonBackground: Цвет фона кнопки меню.
      - menuButtonText: Цвет текста кнопки меню.
      - circleScrolledButtonBackground: Цвет фона кнопки скролла.
      - activityIndicator: Цвет индикатора активности.
@@ -378,7 +376,6 @@ extension ChatTheme {
       mainBackground: Color = SKStyleAsset.onyx.swiftUIColor,
       addButtonBackground: Color = SKStyleAsset.constantAzure.swiftUIColor,
       sendButtonBackground: Color = SKStyleAsset.constantAzure.swiftUIColor,
-      menuButtonBackground: Color = SKStyleAsset.constantSlate.swiftUIColor,
       menuButtonText: Color = SKStyleAsset.constantOnyx.swiftUIColor,
       circleScrolledButtonBackground: Color = SKStyleAsset.componentSlateMessageBG.swiftUIColor,
       activityIndicator: Color = SKStyleAsset.constantLightMistGray.swiftUIColor,
@@ -414,7 +411,6 @@ extension ChatTheme {
       self.mainBackground = mainBackground
       self.addButtonBackground = addButtonBackground
       self.sendButtonBackground = sendButtonBackground
-      self.menuButtonBackground = menuButtonBackground
       self.menuButtonText = menuButtonText
       self.circleScrolledButtonBackground = circleScrolledButtonBackground
       self.activityIndicator = activityIndicator

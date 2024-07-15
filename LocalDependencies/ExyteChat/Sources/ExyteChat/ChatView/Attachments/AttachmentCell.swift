@@ -7,6 +7,7 @@ import SwiftUI
 struct AttachmentCell: View {
   
   @Environment(\.chatTheme) private var theme
+  private let impactFeedback = UIImpactFeedbackGenerator(style: .soft)
   
   let attachment: Attachment
   let onTap: (Attachment) -> Void
@@ -32,6 +33,7 @@ struct AttachmentCell: View {
     }
     .contentShape(Rectangle())
     .onTapGesture {
+      impactFeedback.impactOccurred()
       onTap(attachment)
     }
   }

@@ -16,12 +16,14 @@ struct GalleryHeaderView: View {
   
   @Binding var isShown: Bool
   @Environment(\.chatTheme) private var theme
+  private let impactFeedback = UIImpactFeedbackGenerator(style: .soft)
   
   var body: some View {
     ZStack {
       HStack {
         Button {
           isShown = false
+          impactFeedback.impactOccurred()
         } label: {
           theme.images.mediaPicker.cross
             .resizable()

@@ -104,6 +104,7 @@ private extension P2PChatManager {
             dataManagerService.clearTemporaryDirectory()
           case .failure:
             dataManagerService.clearTemporaryDirectory()
+            updateFileSenderErrorCallback(friendId: friendNumber)
           }
         }
       )

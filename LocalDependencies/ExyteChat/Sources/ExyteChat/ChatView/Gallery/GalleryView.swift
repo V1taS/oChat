@@ -15,9 +15,11 @@ public struct GalleryView: View {
   @Environment(\.presentationMode) var presentationMode
   @StateObject var viewModel: FullscreenMediaPagesViewModel
   @Environment(\.chatTheme) private var theme
+  private let impactFeedback = UIImpactFeedbackGenerator(style: .soft)
   
   @Binding var isShown: Bool
   @State private var selected: Int
+  @State var player: AVPlayer = AVPlayer()
   @State private var loadedImages = [Int: UIImage]()
   @State private var gridShown = false
   let onImageSave: ((URL) -> Void)?
@@ -76,7 +78,16 @@ public struct GalleryView: View {
                 .background(SKStyleAsset.onyx.swiftUIColor)
                 .tag(index)
               } else {
-                StreamVideoPlayer(url: attachment.full)
+                VideoPlayer(player: player)
+                  .clipped()
+                  .onAppear {
+                    player = AVPlayer(url: attachment.full)
+                    try? AVAudioSession.sharedInstance().setCategory(.playback, options: [])
+                    player.play()
+                  }
+                  .onDisappear {
+                    player.pause()
+                  }
                   .background(SKStyleAsset.onyx.swiftUIColor)
                   .tag(index)
               }
@@ -94,18 +105,19 @@ public struct GalleryView: View {
               } else if viewModel.showMinis, viewModel.attachments[selected].type == .video {
                 onVideoSave?(viewModel.attachments[selected].full)
               }
+              impactFeedback.impactOccurred()
             }, label: {
               theme.images.mediaPicker.save
                 .resizable()
                 .renderingMode(.template)
                 .foregroundColor(SKStyleAsset.constantAzure.swiftUIColor)
                 .aspectRatio(contentMode: .fit)
-                .frame(height: 24)
+                .frame(height: .s7)
                 .padding(.s4)
             })
           } else {
             Color.clear
-              .frame(height: 24)
+              .frame(height: .s7)
               .padding(.s4)
           }
 
@@ -118,9 +130,13 @@ public struct GalleryView: View {
           
           Button {
             gridShown = true
+            impactFeedback.impactOccurred()
           } label: {
             Image(systemName: "photo")
+              .resizable()
               .renderingMode(.template)
+              .aspectRatio(contentMode: .fit)
+              .frame(height: .s5)
               .foregroundColor(SKStyleAsset.constantAzure.swiftUIColor)
           }
           .padding(.s4)
@@ -147,23 +163,5 @@ public struct GalleryView: View {
     } else {
       return []
     }
-  }
-}
-
-struct StreamVideoPlayer: View {
-  
-  @State var player: AVPlayer
-  
-  init(url: URL) {
-    let player = AVPlayer(url: url)
-    _player = State(wrappedValue: player)
-  }
-  
-  var body: some View {
-    VideoPlayer(player: player)
-      .clipped()
-      .onAppear {
-        try? AVAudioSession.sharedInstance().setCategory(.playback, options: [])
-      }
   }
 }

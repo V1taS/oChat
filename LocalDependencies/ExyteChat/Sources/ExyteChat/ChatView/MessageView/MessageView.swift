@@ -88,7 +88,12 @@ struct MessageView: View {
   var body: some View {
     HStack(alignment: .bottom, spacing: 0) {
       VStack(alignment: message.user.isCurrentUser ? .trailing : .leading, spacing: 2) {
-        bubbleView(message)
+        if let countEmojis = countEmojis(in: message.text) {
+          Text(message.text)
+            .font(.system(size: countEmojis == 1 ? .s13 : .s8))
+        } else {
+          bubbleView(message)
+        }
       }
       
       if message.user.isCurrentUser {
@@ -338,3 +343,29 @@ struct MessageView_Preview: PreviewProvider {
   }
 }
 #endif
+
+// MARK: - Private
+
+private extension MessageView {
+  func countEmojis(in string: String) -> Int? {
+    let emojiCount = string.filter { $0.isEmoji }.count
+    return emojiCount == string.count ? emojiCount : nil
+  }
+}
+
+// MARK: - ContainsOnlyEmojis
+
+private extension String {
+  var containsOnlyEmojis: Bool {
+    return !self.isEmpty && self.allSatisfy { $0.isEmoji }
+  }
+}
+
+// MARK: - IsEmoji
+
+private extension Character {
+  var isEmoji: Bool {
+    // Проверка, что символ является смайлом по Unicode свойствам
+    return self.unicodeScalars.allSatisfy { $0.properties.isEmojiPresentation || $0.properties.isEmoji }
+  }
+}

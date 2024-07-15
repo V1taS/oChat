@@ -16,6 +16,7 @@ struct GridPhotosView: View {
   @StateObject var viewModel: FullscreenMediaPagesViewModel
   @Environment(\.chatTheme) private var theme
   let onSelectMedia: (_ index: Int) -> Void
+  private let impactFeedback = UIImpactFeedbackGenerator(style: .soft)
   
   private static let spacing: CGFloat = 2
   
@@ -48,6 +49,7 @@ struct GridPhotosView: View {
               imageTapped: { index in
                 isShown = false
                 onSelectMedia(index)
+                impactFeedback.impactOccurred()
               },
               index: index
             )

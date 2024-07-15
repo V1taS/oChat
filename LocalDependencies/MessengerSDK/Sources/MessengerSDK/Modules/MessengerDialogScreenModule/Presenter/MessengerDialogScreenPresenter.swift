@@ -123,7 +123,6 @@ final class MessengerDialogScreenPresenter: ObservableObject {
         interactor.showNotification(.negative(title: "Ошибка сохранения"))
       }
     }
-    impactFeedback.impactOccurred()
   }
   
   func saveVideoToGallery(_ imageURL: URL) {

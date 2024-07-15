@@ -111,6 +111,7 @@ public struct ChatView<MessageContent: View, InputViewContent: View>: View {
   @State private var onImageSave: ((URL) -> Void)?
   @State private var onVideoSave: ((URL) -> Void)?
   private let isDownloadAvailability: Bool
+  private let impactFeedback = UIImpactFeedbackGenerator(style: .soft)
   
   private let placeholder: String
   private var onChange: (_ newValue: String) -> Void
@@ -160,7 +161,6 @@ public struct ChatView<MessageContent: View, InputViewContent: View>: View {
         }
         
         inputView
-        
       case .comments:
         inputView
         list
@@ -386,11 +386,10 @@ public struct ChatView<MessageContent: View, InputViewContent: View>: View {
           )
         }
         
-        withAnimation(.spring(response: 0.5, dampingFraction: 0.7, blendDuration: 0.5)) {
-          menuBgOpacity = 0.8
-          menuCellPosition = finalCellPosition
-          isShowingMenu = true
-        }
+        menuBgOpacity = 0.9
+        menuCellPosition = finalCellPosition
+        isShowingMenu = true
+        impactFeedback.impactOccurred()
       }
       DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
         needsScrollView = needsScrollTemp
@@ -420,6 +419,7 @@ public struct ChatView<MessageContent: View, InputViewContent: View>: View {
   
   func onMessageMenuAction(row: MessageRow, action: MessageMenuAction) {
     hideMessageMenu()
+    impactFeedback.impactOccurred()
     
     switch action {
     case .reply:

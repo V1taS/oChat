@@ -338,7 +338,6 @@ struct InputView: View {
   
   var sendButton: some View {
     Button(action: {
-      UIImpactFeedbackGenerator(style: .soft).impactOccurred()
       onAction(.send)
     }) {
       theme.images.inputView.arrowSend

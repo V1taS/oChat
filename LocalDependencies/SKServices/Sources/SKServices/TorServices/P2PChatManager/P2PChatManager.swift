@@ -341,7 +341,7 @@ extension P2PChatManager {
     // Проверяем, запрашивается ли чанк с нулевой длиной
     if length == .zero {
       print("Запрос на чанк с нулевой длиной, завершение передачи")
-      completion?(.failure(URLError(.unknown)))
+      completion?(.success(100))
       return
     }
     
@@ -359,8 +359,10 @@ extension P2PChatManager {
         }
         completion?(.success(progress))
       case let .failure(error):
-        completion?(.failure(error))
-        print("❌ Ошибка при отправке чанка: \(error.localizedDescription)")
+        if progress < 100 {
+          completion?(.failure(error))
+          print("❌ Ошибка при отправке чанка: \(error.localizedDescription)")
+        }
       }
     }
   }

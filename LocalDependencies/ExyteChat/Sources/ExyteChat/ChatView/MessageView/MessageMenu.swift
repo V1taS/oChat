@@ -93,11 +93,11 @@ struct MessageMenu<MainButton: View>: View {
     let buttonBackgroundColor: Color
     switch action {
     case .retry:
-      buttonBackgroundColor = SKStyleAsset.constantLime.swiftUIColor
+      buttonBackgroundColor = SKStyleAsset.constantLime.swiftUIColor.opacity(0.8)
     case .delete:
-      buttonBackgroundColor = SKStyleAsset.constantRuby.swiftUIColor
+      buttonBackgroundColor = SKStyleAsset.constantRuby.swiftUIColor.opacity(0.8)
     default:
-      buttonBackgroundColor = theme.colors.menuButtonBackground
+      buttonBackgroundColor = SKStyleAsset.constantSlate.swiftUIColor.opacity(0.8)
     }
     
     return HStack(spacing: 0) {

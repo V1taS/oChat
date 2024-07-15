@@ -30,6 +30,7 @@ struct AttachmentsEditor<InputViewContent: View>: View {
   var availableInput: AvailableInputType
   var placeholder: String
   var onChange: (_ newValue: String) -> Void
+  private let impactFeedback = UIImpactFeedbackGenerator(style: .soft)
   
   @State private var seleсtedMedias: [Media] = []
   @State private var currentFullscreenMedia: Media?
@@ -77,6 +78,7 @@ struct AttachmentsEditor<InputViewContent: View>: View {
       }
       .didPressCancelCamera {
         inputViewModel.showPicker = false
+        impactFeedback.impactOccurred()
       }
       .currentFullscreenMedia($currentFullscreenMedia)
       .showLiveCameraCell()
@@ -144,6 +146,7 @@ struct AttachmentsEditor<InputViewContent: View>: View {
         Button {
           seleсtedMedias = []
           inputViewModel.showPicker = false
+          impactFeedback.impactOccurred()
         } label: {
           Text(ExyteChatStrings.attachmentsEditorButtonCancelTitle)
             .foregroundColor(SKStyleAsset.constantAzure.swiftUIColor)
@@ -161,6 +164,7 @@ struct AttachmentsEditor<InputViewContent: View>: View {
       }
       .foregroundColor(.white)
       .onTapGesture {
+        impactFeedback.impactOccurred()
         withAnimation {
           inputViewModel.mediaPickerMode = showingAlbums ? .photos : .albums
         }
@@ -175,6 +179,7 @@ struct AttachmentsEditor<InputViewContent: View>: View {
     HStack {
       Button {
         cancelClosure()
+        impactFeedback.impactOccurred()
       } label: {
         Image(systemName: "xmark")
           .resizable()

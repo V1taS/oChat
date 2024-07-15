@@ -17,6 +17,7 @@ final class VideoViewModel: ObservableObject {
   
   private var subscriptions = Set<AnyCancellable>()
   @Published var status: AVPlayer.Status = .unknown
+  private let impactFeedback = UIImpactFeedbackGenerator(style: .soft)
   
   init(attachment: Attachment) {
     self.attachment = attachment
@@ -34,6 +35,7 @@ final class VideoViewModel: ObservableObject {
   
   func onStop() {
     pauseVideo()
+    impactFeedback.impactOccurred()
   }
   
   func togglePlay() {
@@ -47,16 +49,19 @@ final class VideoViewModel: ObservableObject {
   func toggleMute() {
     player?.isMuted.toggle()
     isMuted = player?.isMuted ?? false
+    impactFeedback.impactOccurred()
   }
   
   func playVideo() {
     player?.play()
     isPlaying = player?.isPlaying ?? false
+    impactFeedback.impactOccurred()
   }
   
   func pauseVideo() {
     player?.pause()
     isPlaying = player?.isPlaying ?? false
+    impactFeedback.impactOccurred()
   }
   
   @objc func finishVideo() {
