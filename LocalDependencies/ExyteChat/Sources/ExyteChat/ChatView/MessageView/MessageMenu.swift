@@ -19,60 +19,64 @@ enum MessageMenuAction {
 
 struct MessageMenu<MainButton: View>: View {
   @Environment(\.chatTheme) private var theme
+  @EnvironmentObject private var keyboardState: KeyboardState
   
   @Binding var isShowingMenu: Bool
   @Binding var menuButtonsSize: CGSize
-  var isBottomDirection: Bool
+  var frame: CGRect
   
-  let messageStatus: Message.Status
+  let message: Message
   var alignment: Alignment
   var leadingPadding: CGFloat
   var trailingPadding: CGFloat
   var mainButton: () -> MainButton
   var onAction: (MessageMenuAction) -> ()
   
+  private var isBottomDirection: Bool {
+    frame.minY < UIScreen.main.bounds.height / 2
+  }
+  
   private var buttons: [AnyView] {
-    var buttons: [AnyView] = [
-      AnyView(
+    var buttons: [AnyView] = []
+    
+    if message.status == .error {
+      buttons.append(AnyView(
+        menuButton(
+          title: ExyteChatStrings.messageMenuRetryTitle,
+          icon: theme.images.messageMenu.retry,
+          action: .retry
+        )
+      ))
+    }
+    
+    if !message.text.isEmpty {
+      buttons.append(AnyView(
         menuButton(
           title: ExyteChatStrings.messageMenuReplyTitle,
           icon: theme.images.messageMenu.reply,
           action: .reply
         )
-      ),
-      AnyView(
+      ))
+      buttons.append(AnyView(
         menuButton(
           title: ExyteChatStrings.messageMenuCopyTitle,
           icon: theme.images.messageMenu.save,
           action: .copy
         )
-      ),
-      AnyView(
-        menuButton(
-          title: ExyteChatStrings.messageMenuDeleteTitle,
-          icon: theme.images.messageMenu.delete,
-          action: .delete
-        )
-      )
-    ]
-    
-    if messageStatus == .error {
-      buttons.insert(
-        AnyView(
-          menuButton(
-            title: ExyteChatStrings.messageMenuRetryTitle,
-            icon: theme.images.messageMenu.retry,
-            action: .retry
-          )
-        ),
-        at: .zero
-      )
+      ))
     }
+    
+    buttons.append(AnyView(
+      menuButton(
+        title: ExyteChatStrings.messageMenuDeleteTitle,
+        icon: theme.images.messageMenu.delete,
+        action: .delete
+      )
+    ))
     
     if !isBottomDirection {
       buttons.reverse()
     }
-    
     return buttons
   }
   

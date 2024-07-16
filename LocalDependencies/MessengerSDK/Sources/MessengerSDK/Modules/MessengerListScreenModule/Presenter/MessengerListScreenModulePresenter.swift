@@ -322,6 +322,9 @@ private extension MessengerListScreenModulePresenter {
   }
   
   func initialSetup() {
+    // Отключаем таймер простоя
+    UIApplication.shared.isIdleTimerDisabled = true
+    
     interactor.clearAllMessengeTempID(completion: {})
     interactor.startPeriodicFriendStatusCheck { [weak self] in
       guard let self else { return }
@@ -682,6 +685,30 @@ private extension MessengerListScreenModulePresenter {
       }
     }
   }
+  
+  func sendLocalNotificationIfNeeded(contactModel: ContactModel) {
+    // Проверка, находится ли приложение в фоне
+    if UIApplication.shared.applicationState == .background {
+      sendLocalNotification(contactModel: contactModel)
+    }
+  }
+  
+  func sendLocalNotification(contactModel: ContactModel) {
+    let address: String = "\(contactModel.toxAddress?.formatString(minTextLength: 10) ?? "unknown")"
+    let content = UNMutableNotificationContent()
+    content.title = "Новое сообщение"
+    content.body = "У вас есть новое сообщение в чате от \(address)."
+    content.sound = UNNotificationSound.default
+    
+    let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
+    let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: trigger)
+    
+    UNUserNotificationCenter.current().add(request) { error in
+      if let error = error {
+        print("Error adding notification: \(error)")
+      }
+    }
+  }
 }
 
 // MARK: - Handle NotificationCenter
@@ -953,6 +980,7 @@ private extension MessengerListScreenModulePresenter {
                     moduleOutput?.dataModelHasBeenUpdated()
                     interactor.clearTemporaryDirectory()
                     impactFeedback.impactOccurred()
+                    sendLocalNotificationIfNeeded(contactModel: contact)
                   })
                 } else {
                   let contact = ContactModel(
@@ -973,6 +1001,7 @@ private extension MessengerListScreenModulePresenter {
                     moduleOutput?.dataModelHasBeenUpdated()
                     interactor.clearTemporaryDirectory()
                     impactFeedback.impactOccurred()
+                    sendLocalNotificationIfNeeded(contactModel: contact)
                   })
                 }
               }
@@ -1088,6 +1117,7 @@ private extension MessengerListScreenModulePresenter {
                 updateListContacts()
                 moduleOutput?.dataModelHasBeenUpdated()
                 impactFeedback.impactOccurred()
+                sendLocalNotificationIfNeeded(contactModel: updatedContact)
               })
             } else {
               let contact = ContactModel(
@@ -1107,6 +1137,7 @@ private extension MessengerListScreenModulePresenter {
                 updateListContacts()
                 moduleOutput?.dataModelHasBeenUpdated()
                 impactFeedback.impactOccurred()
+                sendLocalNotificationIfNeeded(contactModel: contact)
               })
             }
           }

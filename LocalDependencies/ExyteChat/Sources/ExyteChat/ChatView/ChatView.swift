@@ -92,7 +92,7 @@ public struct ChatView<MessageContent: View, InputViewContent: View>: View {
   @StateObject private var globalFocusState = GlobalFocusState()
   @StateObject private var paginationState = PaginationState()
   @StateObject private var networkMonitor = NetworkMonitor()
-  @StateObject private var keyboardState = KeyboardState()
+  @StateObject private var keyboardState = KeyboardState.shared
   
   @State private var inputFieldId = UUID()
   
@@ -265,7 +265,7 @@ public struct ChatView<MessageContent: View, InputViewContent: View>: View {
           if needsScrollView {
             ScrollView {
               if let frame = cellFrames[row.id] {
-                messageMenu(row, isBottomDirection: frame.minY < UIScreen.main.bounds.height / 2)
+                messageMenu(row, frame: frame)
               }
             }
             .introspect(.scrollView, on: .iOS(.v16, .v17)) { scrollView in
@@ -277,7 +277,7 @@ public struct ChatView<MessageContent: View, InputViewContent: View>: View {
           }
           if !needsScrollView || !readyToShowScrollView {
             if let frame = cellFrames[row.id] {
-              messageMenu(row, isBottomDirection: frame.minY < UIScreen.main.bounds.height / 2)
+              messageMenu(row, frame: frame)
                 .position(menuCellPosition)
             }
           }
@@ -341,12 +341,12 @@ public struct ChatView<MessageContent: View, InputViewContent: View>: View {
     .onDisappear(perform: inputViewModel.onStop)
   }
   
-  func messageMenu(_ row: MessageRow, isBottomDirection: Bool) -> some View {
+  func messageMenu(_ row: MessageRow, frame: CGRect) -> some View {
     MessageMenu(
       isShowingMenu: $isShowingMenu,
       menuButtonsSize: $menuButtonsSize,
-      isBottomDirection: isBottomDirection,
-      messageStatus: row.message.status,
+      frame: frame,
+      message: row.message,
       alignment: row.message.user.isCurrentUser ? .right : .left,
       leadingPadding: MessageView.statusViewSize + MessageView.horizontalStatusPadding,
       trailingPadding: MessageView.statusViewSize + MessageView.horizontalStatusPadding) {
@@ -368,6 +368,7 @@ public struct ChatView<MessageContent: View, InputViewContent: View>: View {
       } onAction: { action in
         onMessageMenuAction(row: row, action: action)
       }
+      .environmentObject(keyboardState)
       .frame(height: menuButtonsSize.height + (cellFrames[row.id]?.height ?? 0), alignment: .top)
       .opacity(menuCellOpacity)
   }
