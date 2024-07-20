@@ -43,6 +43,10 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     guard let windowScene = scene as? UIWindowScene else { return }
     window = TouchWindow(windowScene: windowScene)
     window?.makeKeyAndVisible()
+    if let window {
+      makeBanScreenshot(window: window)
+    }
+
     clearDataOnFirstLaunch()
     configurators().configure()
     rootCoordinator = RootCoordinator(services)
