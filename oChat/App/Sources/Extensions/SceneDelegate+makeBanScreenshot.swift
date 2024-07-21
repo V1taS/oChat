@@ -11,26 +11,27 @@ import SKStyle
 
 extension SceneDelegate {
   func makeBanScreenshot(window: UIWindow) {
-    let field = UITextField()
-    field.isSecureTextEntry = true
+    DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+      let field = UITextField()
+      let view = UIView(frame: CGRect(x: 0, y: 0, width: field.frame.width, height: field.frame.height))
+      let banScreenshotView = UIHostingController(rootView: BanScreenshotView())
+      banScreenshotView.view.frame = CGRect(
+        x: 0,
+        y: 0,
+        width: UIScreen.main.bounds.width,
+        height: UIScreen.main.bounds.height
+      )
 
-    let view = UIView(frame: CGRect(x: 0, y: 0, width: field.frame.width, height: field.frame.height))
-    let banScreenshotView = UIHostingController(rootView: BanScreenshotView())
-    banScreenshotView.view.frame = CGRect(
-      x: 0,
-      y: 0,
-      width: UIScreen.main.bounds.width,
-      height: UIScreen.main.bounds.height
-    )
+      field.isSecureTextEntry = true
+      window.addSubview(field)
+      view.addSubview(banScreenshotView.view)
 
-    window.addSubview(field)
-    view.addSubview(banScreenshotView.view)
+      window.layer.superlayer?.addSublayer(field.layer)
+      field.layer.sublayers?.last!.addSublayer(window.layer)
 
-    window.layer.superlayer?.addSublayer(field.layer)
-    field.layer.sublayers?.last!.addSublayer(window.layer)
-
-    field.leftView = view
-    field.leftViewMode = .always
+      field.leftView = view
+      field.leftViewMode = .always
+    }
   }
 }
 
