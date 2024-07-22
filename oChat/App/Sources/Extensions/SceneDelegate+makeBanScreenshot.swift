@@ -7,15 +7,16 @@
 //
 
 import SwiftUI
-import SKFoundation
-import SKStyle
+import SKUIKit
 
 extension SceneDelegate {
   func makeBanScreenshot(window: UIWindow) {
     Timer.scheduledTimer(withTimeInterval: 2, repeats: false) { _ in
       let field = UITextField()
       let view = UIView(frame: CGRect(x: 0, y: 0, width: field.frame.width, height: field.frame.height))
-      let banScreenshotView = UIHostingController(rootView: BanScreenshotView())
+      let banScreenshotView = UIHostingController(
+        rootView: BlankView(text: OChatStrings.CommonStrings.BanScreenshotView.description)
+      )
       banScreenshotView.view.frame = CGRect(
         x: 0,
         y: 0,
@@ -35,28 +36,3 @@ extension SceneDelegate {
     }
   }
 }
-
-private struct BanScreenshotView: View {
-  var body: some View {
-    ZStack {
-      SKStyleAsset.onyx.swiftUIColor
-      VStack {
-        Text(OChatStrings.CommonStrings.BanScreenshotView.description)
-          .font(.fancy.text.largeTitle)
-          .foregroundStyle(SKStyleAsset.ghost.swiftUIColor)
-          .multilineTextAlignment(.center)
-        Image(SKStyleAsset.oChatLogo.name, bundle: SKStyleResources.bundle)
-          .resizable()
-          .aspectRatio(contentMode: .fit)
-          .frame(width: .gridSteps(35))
-      }
-    }
-    .ignoresSafeArea()
-  }
-}
-
-#if DEBUG
-#Preview {
-  BanScreenshotView()
-}
-#endif
