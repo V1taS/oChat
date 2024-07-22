@@ -7,11 +7,12 @@
 //
 
 import SwiftUI
+import SKFoundation
 import SKStyle
 
 extension SceneDelegate {
   func makeBanScreenshot(window: UIWindow) {
-    DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+    Timer.scheduledTimer(withTimeInterval: 2, repeats: false) { _ in
       let field = UITextField()
       let view = UIView(frame: CGRect(x: 0, y: 0, width: field.frame.width, height: field.frame.height))
       let banScreenshotView = UIHostingController(rootView: BanScreenshotView())
