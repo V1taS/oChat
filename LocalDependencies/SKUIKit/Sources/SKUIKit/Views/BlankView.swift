@@ -9,13 +9,21 @@ import SwiftUI
 import SKStyle
 import SKFoundation
 
+/// Представление-заглушка, например, используется для отображения, когда пользователь делает скришот экрана.
 public struct BlankView: View {
+
+  // MARK: - Private properties
   private let text: String
 
+  // MARK: - Initialization
+  /// Инициализатор
+  /// - Parameters:
+  ///   - text: Описание, отображаемое на экране
   public init(text: String) {
     self.text = text
   }
 
+  // MARK: - Body
   public var body: some View {
     ZStack {
       SKStyleAsset.onyx.swiftUIColor
@@ -34,6 +42,7 @@ public struct BlankView: View {
   }
 }
 
+// MARK: - Preview
 #if DEBUG
 #Preview {
   BlankView(text: "Taking a screenshot is not available")
