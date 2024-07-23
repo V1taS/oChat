@@ -12,6 +12,6 @@ public protocol ICloudKitService {
   /// Получает значение конфигурации по ключу.
   /// - Parameters:
   ///   - keyName: Имя ключа, по которому нужно получить значение.
-  ///   - completion: Замыкание, которое будет вызвано с результатом операции. Возвращает значение типа `T?`.
-  func getConfigurationValue<T>(from keyName: String, completion: @escaping (_ value: T?) -> Void)
+  ///   - return: Ррезультат операции. Возвращает значение типа `T?`.
+  func getConfigurationValue<T>(from keyName: String) async throws -> T?
 }
