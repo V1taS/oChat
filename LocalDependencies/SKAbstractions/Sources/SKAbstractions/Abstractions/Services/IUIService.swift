@@ -52,14 +52,14 @@ public protocol IUIService {
   /// Сохраняет изображение в галерее устройства.
   /// - Parameters:
   ///   - imageData: Данные изображения в формате `Data?`. Если передается `nil`, изображение не будет сохранено.
-  ///   - completion: Коллбэк, который вызывается после попытки сохранения. Передает `Bool`, указывающий успешно ли было сохранение изображения.
-  func saveImageToGallery(_ imageData: Data?, completion: ((_ isSuccess: Bool) -> Void)?)
+  ///   - return: `Bool`, указывающий успешно ли было сохранение изображения.
+  func saveImageToGallery(_ imageData: Data?) async -> Bool
   
   /// Сохраняет видео в галерее устройства.
   /// - Parameters:
   ///   - video: Ссылка на видео
-  ///   - completion: Коллбэк, который вызывается после попытки сохранения. Передает `Bool`, указывающий успешно ли было сохранение видео.
-  func saveVideoToGallery(_ video: URL?, completion: ((Bool) -> Void)?)
+  ///   - return: `Bool`, указывающий успешно ли было сохранение видео.
+  func saveVideoToGallery(_ video: URL?) async -> Bool
   
   /// Получение изображения по URL.
   /// - Parameters:

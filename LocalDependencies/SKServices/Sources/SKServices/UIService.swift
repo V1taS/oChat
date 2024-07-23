@@ -101,12 +101,12 @@ public final class UIService: IUIService {
     }
   }
   
-  public func saveImageToGallery(_ imageData: Data?, completion: ((Bool) -> Void)?) {
-    mediaSaver.saveImageToGallery(imageData, completion: completion)
+  public func saveImageToGallery(_ imageData: Data?) async -> Bool {
+    await mediaSaver.saveImageToGallery(imageData)
   }
   
-  public func saveVideoToGallery(_ video: URL?, completion: ((Bool) -> Void)?) {
-    mediaSaver.saveVideoToGallery(video, completion: completion)
+  public func saveVideoToGallery(_ video: URL?) async -> Bool {
+    await mediaSaver.saveVideoToGallery(video)
   }
   
   public func getImage(for url: URL?, completion: @escaping (UIImage?) -> Void) {

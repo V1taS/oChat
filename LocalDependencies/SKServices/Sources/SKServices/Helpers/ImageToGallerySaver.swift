@@ -10,61 +10,80 @@ import UIKit
 import Photos
 
 final class MediaToGallerySaver: NSObject {
+  
+  // MARK: - Init
+  
   override init() {}
+  
+  // MARK: - Private properties
   
   private var statusAction: ((_ isSuccess: Bool) -> Void)?
   
-  // Сохранение изображения в галерею
-  func saveImageToGallery(_ imageData: Data?, completion: ((_ isSuccess: Bool) -> Void)?) {
-    statusAction = completion
-    
-    guard let imageData, let image = UIImage(data: imageData) else {
-      completion?(false)
-      return
-    }
-    UIImageWriteToSavedPhotosAlbum(image, self, #selector(image(_:didFinishSavingWithError:contextInfo:)), nil)
-  }
+  // MARK: - Internal funcs
   
-  @objc
-  private func image(_ image: UIImage, didFinishSavingWithError error: Error?, contextInfo: UnsafeRawPointer) {
-    if error != nil {
-      statusAction?(false)
-    } else {
-      statusAction?(true)
+  // Сохранение изображения в галерею
+  func saveImageToGallery(_ imageData: Data?) async -> Bool {
+    await withCheckedContinuation { continuation in
+      guard let imageData, let image = UIImage(data: imageData) else {
+        continuation.resume(returning: false)
+        return
+      }
+      
+      // Сохраняем изображение в альбом
+      UIImageWriteToSavedPhotosAlbum(
+        image,
+        self,
+        #selector(image(_:didFinishSavingWithError:contextInfo:)),
+        nil
+      )
+      
+      // Определяем результат сохранения в селекторе
+      self.statusAction = { isSuccess in
+        continuation.resume(returning: isSuccess)
+      }
     }
   }
   
   // Сохранение видео в галерею
-  func saveVideoToGallery(_ videoURL: URL?, completion: ((_ isSuccess: Bool) -> Void)?) {
-    statusAction = completion
-    
-    guard let videoURL = videoURL else {
-      completion?(false)
-      return
-    }
-    
-    // Проверяем доступ к фотогалерее
-    PHPhotoLibrary.requestAuthorization { status in
-      guard status == .authorized else {
-        DispatchQueue.main.async {
-          completion?(false)
-        }
+  func saveVideoToGallery(_ videoURL: URL?) async -> Bool {
+    await withCheckedContinuation { continuation in
+      guard let videoURL = videoURL else {
+        continuation.resume(returning: false)
         return
       }
       
-      // Начинаем сохранение видео в альбом
-      PHPhotoLibrary.shared().performChanges({
-        PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: videoURL)
-      }) { success, error in
-        DispatchQueue.main.async {
+      // Проверяем доступ к фотогалерее
+      PHPhotoLibrary.requestAuthorization { status in
+        guard status == .authorized else {
+          continuation.resume(returning: false)
+          return
+        }
+        
+        // Начинаем сохранение видео в альбом
+        PHPhotoLibrary.shared().performChanges({
+          PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: videoURL)
+        }) { success, error in
           if let error = error {
             print("Error saving video: \(error)")
-            completion?(false)
+            continuation.resume(returning: false)
           } else {
-            completion?(true)
+            continuation.resume(returning: success)
           }
         }
       }
+    }
+  }
+}
+
+// MARK: - Private
+
+private extension MediaToGallerySaver {
+  @objc
+  func image(_ image: UIImage, didFinishSavingWithError error: Error?, contextInfo: UnsafeRawPointer) {
+    if error != nil {
+      statusAction?(false)
+    } else {
+      statusAction?(true)
     }
   }
 }
