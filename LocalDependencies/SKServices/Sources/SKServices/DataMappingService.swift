@@ -14,20 +14,15 @@ import SKAbstractions
 public final class DataMappingService: IDataMappingService {
   public init() {}
   
-  public func encodeModel<T: Encodable>(
-    _ model: T,
-    completion: @escaping (Result<Data, Error>
-    ) -> Void) {
+  public func encodeModel<T: Encodable>(_ model: T) async throws -> Data {
     let encoder = JSONEncoder()
-    DispatchQueue.global(qos: .userInitiated).async {
-      do {
-        let encodedData = try encoder.encode(model)
-        DispatchQueue.main.async {
-          completion(.success(encodedData))
-        }
-      } catch {
-        DispatchQueue.main.async {
-          completion(.failure(error))
+    return try await withCheckedThrowingContinuation { continuation in
+      DispatchQueue.global(qos: .userInitiated).async {
+        do {
+          let encodedData = try encoder.encode(model)
+          continuation.resume(returning: encodedData)
+        } catch {
+          continuation.resume(throwing: error)
         }
       }
     }
@@ -35,20 +30,16 @@ public final class DataMappingService: IDataMappingService {
   
   public func decodeModel<T: Decodable>(
     _ type: T.Type,
-    from data: Data,
-    completion: @escaping (Result<T, Error>) -> Void
-  ) {
+    from data: Data
+  ) async throws -> T {
     let decoder = JSONDecoder()
-    DispatchQueue.global(qos: .userInitiated).async {
-      do {
-        let decodedObject = try decoder.decode(type, from: data)
-        DispatchQueue.main.async {
-          completion(.success(decodedObject))
-        }
-        
-      } catch {
-        DispatchQueue.main.async {
-          completion(.failure(error))
+    return try await withCheckedThrowingContinuation { continuation in
+      DispatchQueue.global(qos: .userInitiated).async {
+        do {
+          let decodedObject = try decoder.decode(type, from: data)
+          continuation.resume(returning: decodedObject)
+        } catch {
+          continuation.resume(throwing: error)
         }
       }
     }
