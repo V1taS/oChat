@@ -10,3 +10,4 @@
 "NSCameraUsageDescription" = "Please grant access to your camera so you can take photos to create your Image ID.";
 "NSFaceIDUsageDescription" = "oChat requires access to Face ID for quick and secure authentication.";
 "NSMicrophoneUsageDescription" = "oChat requires access to Face ID for quick and secure authentication.";
+"BanScreenshotView.description" = "Taking a screenshot is not available";

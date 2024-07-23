@@ -43,6 +43,7 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     guard let windowScene = scene as? UIWindowScene else { return }
     window = TouchWindow(windowScene: windowScene)
     window?.makeKeyAndVisible()
+
     clearDataOnFirstLaunch()
     configurators().configure()
     rootCoordinator = RootCoordinator(services)
@@ -67,7 +68,8 @@ private extension SceneDelegate {
   func configurators() -> [Configurator] {
     return [
       AppearanceConfigurator(services: services),
-      ConfigurationValueConfigurator(services: services)
+      ConfigurationValueConfigurator(services: services),
+      BanScreenshotConfigurator(window: window)
     ]
   }
   
