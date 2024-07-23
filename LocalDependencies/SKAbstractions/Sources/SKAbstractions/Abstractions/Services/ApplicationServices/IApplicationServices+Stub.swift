@@ -16,6 +16,19 @@ public final class ApplicationServicesStub: IApplicationServices, IDataManagerSe
                                             ICloudKitService, IAppSettingsManager, IDataManagementService,
                                             IAccessAndSecurityManagementService, IUserInterfaceAndExperienceService,
                                             IDeepLinkService, IPushNotificationService, IZipArchiveService {
+  public func encodeModel<T>(_ model: T) async throws -> Data? where T : Encodable { nil }
+  public func decodeModel<T>(_ type: T.Type, from data: Data) async throws -> T? where T : Decodable { nil }
+  public func requestNotification() async -> Bool { false}
+  public func isNotificationsEnabled() async -> Bool { false }
+  public func requestCamera() async -> Bool { false }
+  public func requestGallery() async -> Bool { false }
+  public func requestFaceID() async -> Bool { false }
+  public func openSettings() async -> Result<Void, SystemServiceError> { .success(()) }
+  public func saveImageToGallery(_ imageData: Data?) async -> Bool { false }
+  public func saveVideoToGallery(_ video: URL?) async -> Bool { false }
+  public func getConfigurationValue<T>(from keyName: String) async throws -> T? { nil }
+  public func saveDeepLinkURL(_ url: URL) async { }
+  public func getMessengerAddress() async -> String? { nil }
   public func isFirstLaunch() -> Bool { false }
   public func saveVideoToGallery(_ video: URL?, completion: ((Bool) -> Void)?) {}
   public func getFileNameWithoutExtension(from url: URL) -> String { "" }
@@ -181,10 +194,19 @@ public final class ApplicationServicesStub: IApplicationServices, IDataManagerSe
 
 public final class MessengerServiceStub: IMessengerModelSettingsManager, IMessengerModelHandlerService,
                                          IMessagesService, IMessengerService, IP2PChatManager, IAppSettingsManager {
+  public func start(saveDataString: String?) async throws {}
+  public func getToxAddress() async -> String? { nil }
+  public func getToxPublicKey() async -> String? { nil }
+  public func addFriend(address: String, message: String) async -> Int32? { nil }
+  public func deleteFriend(toxPublicKey: String) async -> Bool { false }
+  public func friendNumber(publicToxKey: String) async -> Int32? { nil }
+  public func friendConnectionStatus(toxPublicKey: String) async -> ConnectionToxStatus? { nil }
+  public func confirmFriendRequest(with publicToxKey: String) async -> String? { nil }
+  public func sendMessage(to toxPublicKey: String, message: String, messageType: ToxSendMessageType) async throws -> Int32? { nil }
+  public func setUserIsTyping(_ isTyping: Bool, to toxPublicKey: String) async -> Result<Void, any Error> { .success(()) }
+  public func startPeriodicFriendStatusCheck(completion: @escaping ([String : Bool]) -> Void) async { }
   public func sendFile(toxPublicKey: String, recipientPublicKey: String, model: MessengerNetworkRequestDTO, recordModel: MessengeRecordingModel?, files: [URL]) {}
-  
   public func sendFile(toxPublicKey: String, model: MessengerNetworkRequestDTO, recordModel: MessengeRecordingModel?, files: [URL]) {}
-  
   public func sendFile(toxPublicKey: String, model: MessengerNetworkRequestDTO, files: [URL]) {}
   public func setToxAddress(_ model: ContactModel, _ address: String, completion: ((ContactModel?) -> Void)?) {}
   public func clearAllMessengeTempID(completion: (() -> Void)?) {}

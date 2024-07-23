@@ -19,9 +19,6 @@ public protocol IApplicationServices {
   /// Возвращает сервис для управления интерфейсом пользователя и опытом использования приложения.
   var userInterfaceAndExperienceService: IUserInterfaceAndExperienceService { get }
   
-  /// Возвращает сервис для работы с аналитикой.
-  var analyticsService: IAnalyticsService { get }
-  
   /// Возвращает сервис CloudKit для получения конфигурационных данных.
   var cloudKitService: ICloudKitService { get }
   

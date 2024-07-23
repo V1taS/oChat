@@ -78,7 +78,8 @@ private extension ConfigurationValueConfigurator {
       completion(value)
     }
     
-    cloudKitService.getConfigurationValue(from: key) { (value: String?) in
+    Task {
+      let value: String? = try? await cloudKitService.getConfigurationValue(from: key)
       if let value {
         completion(value)
         secureDataManagerService.saveString(value, key: key)

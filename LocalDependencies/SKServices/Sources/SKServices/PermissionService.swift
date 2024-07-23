@@ -17,6 +17,7 @@ import LocalAuthentication
 public final class PermissionService: IPermissionService {
   public init() {}
   
+  @MainActor
   @discardableResult
   public func requestNotification() async -> Bool {
     await withCheckedContinuation { continuation in
@@ -28,6 +29,7 @@ public final class PermissionService: IPermissionService {
     }
   }
   
+  @MainActor
   @discardableResult
   public func isNotificationsEnabled() async -> Bool {
     await withCheckedContinuation { continuation in
@@ -37,6 +39,7 @@ public final class PermissionService: IPermissionService {
     }
   }
   
+  @MainActor
   @discardableResult
   public func requestCamera() async -> Bool {
     await withCheckedContinuation { continuation in
@@ -46,6 +49,7 @@ public final class PermissionService: IPermissionService {
     }
   }
   
+  @MainActor
   @discardableResult
   public func requestGallery() async -> Bool {
     await withCheckedContinuation { continuation in
@@ -61,6 +65,7 @@ public final class PermissionService: IPermissionService {
     }
   }
   
+  @MainActor
   @discardableResult
   public func requestFaceID() async -> Bool {
     await withCheckedContinuation { continuation in

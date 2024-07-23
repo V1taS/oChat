@@ -71,7 +71,9 @@ extension SettingsScreenFlowCoordinator: SettingsScreenModuleOutput {
       customButtonText: OChatStrings.SettingsScreenFlowCoordinatorLocalization
         .LanguageSection.Alert.CustomButton.title,
       customButtonAction: { [weak self] in
-        self?.services.userInterfaceAndExperienceService.systemService.openSettings()
+        Task { [weak self] in
+          await self?.services.userInterfaceAndExperienceService.systemService.openSettings()
+        }
       }
     )
   }

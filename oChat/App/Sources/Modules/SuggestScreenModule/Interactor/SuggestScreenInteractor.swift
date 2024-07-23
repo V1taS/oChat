@@ -63,15 +63,24 @@ final class SuggestScreenInteractor {
 
 extension SuggestScreenInteractor: SuggestScreenInteractorInput {
   func isNotificationsEnabled(completion: @escaping (Bool) -> Void) {
-    permissionService.isNotificationsEnabled(completion: completion)
+    Task {
+      let isNotificationsEnabled = await permissionService.isNotificationsEnabled()
+      completion(isNotificationsEnabled)
+    }
   }
   
   func requestNotification(completion: @escaping (Bool) -> Void) {
-    permissionService.requestNotification(completion: completion)
+    Task {
+      let granted = await permissionService.requestNotification()
+      completion(granted)
+    }
   }
   
   func requestFaceID(completion: @escaping (Bool) -> Void) {
-    permissionService.requestFaceID(completion: completion)
+    Task {
+      let granted = await permissionService.requestFaceID()
+      completion(granted)
+    }
   }
   
   func getAppSettingsModel(completion: @escaping (SKAbstractions.AppSettingsModel) -> Void) {

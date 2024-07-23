@@ -46,11 +46,17 @@ final class NotificationsSettingsScreenInteractor {
 
 extension NotificationsSettingsScreenInteractor: NotificationsSettingsScreenInteractorInput {
   func requestNotification(completion: @escaping (Bool) -> Void) {
-    permissionService.requestNotification(completion: completion)
+    Task {
+      let granted = await permissionService.requestNotification()
+      completion(granted)
+    }
   }
   
   func isNotificationsEnabled(completion: @escaping (Bool) -> Void) {
-    permissionService.isNotificationsEnabled(completion: completion)
+    Task {
+      let isNotificationsEnabled = await permissionService.isNotificationsEnabled()
+      completion(isNotificationsEnabled)
+    }
   }
 }
 

@@ -74,7 +74,10 @@ extension AuthenticationScreenInteractor: AuthenticationScreenInteractorInput {
   }
   
   func authenticationWithFaceID(completion: @escaping (_ granted: Bool) -> Void) {
-    permissionService.requestFaceID(completion: completion)
+    Task {
+      let granted = await permissionService.requestFaceID()
+      completion(granted)
+    }
   }
 }
 

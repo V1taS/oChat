@@ -87,7 +87,10 @@ extension PasscodeSettingsScreenInteractor: PasscodeSettingsScreenInteractorInpu
   }
   
   func requestFaceID(completion: @escaping (Bool) -> Void) {
-    permissionService.requestFaceID(completion: completion)
+    Task {
+      let granted = await permissionService.requestFaceID()
+      completion(granted)
+    }
   }
 }
 

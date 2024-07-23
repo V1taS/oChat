@@ -46,8 +46,8 @@ public final class P2PChatManager: IP2PChatManager {
   ) async throws {
     let nodesJSON: String = try await getConfigurationValue(forKey: Constants.nodesKeys)
     
-    await configurationCallback()
     try await createNewTox(saveDataString: saveDataString, nodesJSON: nodesJSON)
+    await configurationCallback()
   }
 }
 

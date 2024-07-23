@@ -32,11 +32,6 @@ final class ApplicationServices: IApplicationServices {
     UserInterfaceAndExperienceService()
   }
   
-  /// Возвращает сервис для работы с аналитикой.
-  var analyticsService: IAnalyticsService {
-    AnalyticsService()
-  }
-  
   /// Возвращает сервис CloudKit для получения конфигурационных данных.
   var cloudKitService: ICloudKitService {
     CloudKitService()

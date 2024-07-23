@@ -86,18 +86,25 @@ extension MessengerDialogScreenInteractor: MessengerDialogScreenInteractorInput 
   func saveImageToGallery(_ imageURL: URL, completion: ((Bool) -> Void)?) {
     let dataImage = dataManagementService.readObjectWith(fileURL: imageURL)
     
-    permissionService.requestGallery { [weak self] granted in
-      guard let self else { return }
-      uiService.saveImageToGallery(dataImage, completion: { _ in })
-      completion?(granted)
+    Task { [weak self] in
+      guard await permissionService.requestGallery() else {
+        completion?(false)
+        return
+      }
+      
+      await uiService.saveImageToGallery(dataImage)
+      completion?(true)
     }
   }
   
   func saveVideoToGallery(_ video: URL?, completion: ((Bool) -> Void)?) {
-    permissionService.requestGallery { [weak self] granted in
-      guard let self else { return }
-      uiService.saveVideoToGallery(video, completion: { _ in })
-      completion?(granted)
+    Task {
+      guard await permissionService.requestGallery() else {
+        completion?(false)
+        return
+      }
+      await uiService.saveVideoToGallery(video)
+      completion?(true)
     }
   }
   

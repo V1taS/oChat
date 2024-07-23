@@ -14,34 +14,18 @@ import SKAbstractions
 public final class DataMappingService: IDataMappingService {
   public init() {}
   
-  public func encodeModel<T: Encodable>(_ model: T) async throws -> Data {
+  public func encodeModel<T: Encodable>(_ model: T) async throws -> Data? {
     let encoder = JSONEncoder()
-    return try await withCheckedThrowingContinuation { continuation in
-      DispatchQueue.global(qos: .userInitiated).async {
-        do {
-          let encodedData = try encoder.encode(model)
-          continuation.resume(returning: encodedData)
-        } catch {
-          continuation.resume(throwing: error)
-        }
-      }
-    }
+    let encodedData = try? encoder.encode(model)
+    return encodedData
   }
   
   public func decodeModel<T: Decodable>(
     _ type: T.Type,
     from data: Data
-  ) async throws -> T {
+  ) async throws -> T? {
     let decoder = JSONDecoder()
-    return try await withCheckedThrowingContinuation { continuation in
-      DispatchQueue.global(qos: .userInitiated).async {
-        do {
-          let decodedObject = try decoder.decode(type, from: data)
-          continuation.resume(returning: decodedObject)
-        } catch {
-          continuation.resume(throwing: error)
-        }
-      }
-    }
+    let decodedObject = try? decoder.decode(type, from: data)
+    return decodedObject
   }
 }

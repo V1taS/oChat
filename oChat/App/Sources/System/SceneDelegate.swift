@@ -56,7 +56,9 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
   
   func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
     if let url = URLContexts.first?.url {
-      services.userInterfaceAndExperienceService.deepLinkService.saveDeepLinkURL(url, completion: {})
+      Task {
+        await services.userInterfaceAndExperienceService.deepLinkService.saveDeepLinkURL(url)
+      }
     }
   }
 }

@@ -12,7 +12,7 @@ public protocol IDataMappingService {
   /// Преобразует модель в данные
   /// - Parameter model: Модель для преобразования.
   /// - Returns: Возвращает `Data` представление модели.
-  func encodeModel<T: Encodable>(_ model: T) async throws -> Data
+  func encodeModel<T: Encodable>(_ model: T) async throws -> Data?
   
   /// Преобразует данные обратно в модель
   /// - Parameters:
@@ -22,5 +22,5 @@ public protocol IDataMappingService {
   func decodeModel<T: Decodable>(
     _ type: T.Type,
     from data: Data
-  ) async throws -> T
+  ) async throws -> T?
 }

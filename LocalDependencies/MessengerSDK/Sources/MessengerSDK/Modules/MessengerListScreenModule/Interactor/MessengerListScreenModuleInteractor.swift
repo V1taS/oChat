@@ -74,12 +74,12 @@ protocol MessengerListScreenModuleInteractorInput {
   /// Удаляет модель контакта `ContactModel` асинхронно.
   /// - Parameters:
   ///   - contactModel: Модель `ContactModel`, которая будет удалена.
-  ///   - completion: Опциональный блок завершения, который вызывается после завершения операции удаления. Может быть `nil`.
-  func removeContactModels(_ contactModel: ContactModel, completion: (() -> Void)?)
+  ///   - return: Завершение, которое вызывается после завершения операции удаления
+  func removeContactModels(_ contactModel: ContactModel) async -> Bool
   
   /// Получает адрес глубокой ссылки.
-  /// - Parameter completion: Блок выполнения с адресом в виде строки или nil, если адрес не найден.
-  func getDeepLinkAdress(completion: ((_ adress: String?) -> Void)?)
+  /// - Parameter return: Результат в виде строки или nil, если адрес не найден.
+  func getDeepLinkAdress() async -> String?
   
   /// Удаляет URL глубокой ссылки.
   func deleteDeepLinkURL()
@@ -97,31 +97,29 @@ protocol MessengerListScreenModuleInteractorInput {
   /// - Parameters:
   ///   - toxPublicKey: Публичный ключ контакта, который находится в контактах
   ///   - messengerRequest: Данные запроса в виде `MessengerNetworkRequest`, содержащие информацию для отправки.
-  ///   - completion: Блок завершения, который возвращает `Result<Void, Error>` указывающий успешность операции.
+  ///   - return: Message ID
   func sendMessage(
     toxPublicKey: String,
-    messengerRequest: MessengerNetworkRequestModel?,
-    completion: @escaping (Result<Int32, Error>) -> Void
-  )
+    messengerRequest: MessengerNetworkRequestModel?
+  ) async -> Int32?
   
   /// Запрос на переписку по указанному адресу.
   /// - Parameters:
   ///   - senderAddress: Адрес контакта
   ///   - messengerRequest: Данные запроса в виде `MessengerNetworkRequest`, содержащие информацию для начала переписки.
-  ///   - completion: Блок завершения, который возвращает `Result<Void, Error>` указывающий успешность операции.
+  ///   - return: Возвращает контакт ИД
   func initialChat(
     senderAddress: String,
-    messengerRequest: MessengerNetworkRequestModel?,
-    completion: @escaping (Result<Int32?, Error>) -> Void
-  )
+    messengerRequest: MessengerNetworkRequestModel?
+  ) async -> Int32?
   
   /// Получает адрес onion-сервиса.
   /// - Returns: Адрес сервиса или ошибка.
-  func getToxAddress(completion: ((Result<String, TorServiceError>) -> Void)?)
+  func getToxAddress() async -> String?
   
   /// Метод для получения публичного ключа.
   /// - Returns: Публичный ключ в виде строки в шестнадцатеричном формате.
-  func getToxPublicKey(completion: @escaping (String?) -> Void)
+  func getToxPublicKey() async -> String?
   
   /// Получить контакт по адресу
   func getContactModelsFrom(
@@ -139,11 +137,8 @@ protocol MessengerListScreenModuleInteractorInput {
   /// Этот метод принимает публичный ключ друга и добавляет его в список друзей без отправки дополнительного сообщения.
   /// - Parameters:
   ///   - publicKey: Строка, представляющая публичный ключ друга. Этот ключ используется для идентификации пользователя в сети Tox.
-  ///   - completion: Замыкание, вызываемое после завершения операции. Возвращает результат выполнения в виде:
-  func confirmFriendRequest(
-    with publicToxKey: String,
-    completion: @escaping (Result<String, Error>) -> Void
-  )
+  ///   - return: Возвращает результат выполнения в виде:
+  func confirmFriendRequest(with publicToxKey: String) async -> String?
   
   /// Устанавливает, является ли контакт онлайн
   /// - Parameters:
@@ -163,8 +158,8 @@ protocol MessengerListScreenModuleInteractorInput {
   /// Проверяем установлен ли пароль на телефоне, это необходимо для шифрования данных
   func passcodeNotSetInSystemIOSheck()
   
-  /// Запуск TOR + TOX сервисы
-  func stratTORxService()
+  /// Запуск TOX сервисы
+  func stratTOXService() async
   
   /// Установить красную точку на таб баре
   func setRedDotToTabBar(value: String?)
@@ -173,15 +168,11 @@ protocol MessengerListScreenModuleInteractorInput {
   /// - Parameters:
   ///   - isTyping: Статус "печатает" (true, если пользователь печатает).
   ///   - toxPublicKey: Публичный ключ друга
-  ///   - completion: Замыкание, вызываемое по завершении операции, с результатом успешного выполнения или ошибкой.
-  func setUserIsTyping(
-    _ isTyping: Bool,
-    to toxPublicKey: String,
-    completion: @escaping (Result<Void, Error>) -> Void
-  )
+  ///   - return: Результат успешного выполнения или ошибки.
+  func setUserIsTyping(_ isTyping: Bool, to toxPublicKey: String) async -> Result<Void, Error>
   
   /// Метод для установки статуса пользователя.
-  func setSelfStatus(isOnline: Bool)
+  func setSelfStatus(isOnline: Bool) async
   
   /// Переводит всех контактов в состояние Не Печатают
   func setAllContactsNoTyping(completion: (() -> Void)?)
@@ -199,17 +190,17 @@ protocol MessengerListScreenModuleInteractorInput {
   
   /// Запрос доступа к Уведомлениям
   /// - Parameter granted: Булево значение, указывающее, было ли предоставлено разрешение
-  func requestNotification(completion: @escaping (_ granted: Bool) -> Void)
+  func requestNotification() async -> Bool
   
   /// Метод для проверки, включены ли уведомления
   /// - Parameter enabled: Булево значение, указывающее, было ли включено уведомление
-  func isNotificationsEnabled(completion: @escaping (_ enabled: Bool) -> Void)
+  func isNotificationsEnabled() async -> Bool
   
   /// Метод для отправки push-уведомлений
-  func sendPushNotification(contact: ContactModel)
+  func sendPushNotification(contact: ContactModel) async
   
   /// Запускает таймер для периодического вызова getFriendsStatus каждые 2 секунды.
-  func startPeriodicFriendStatusCheck(completion: (() -> Void)?)
+  func startPeriodicFriendStatusCheck(completion: (() -> Void)?) async
   
   /// Очищает все временные ИДишники
   func clearAllMessengeTempID(completion: (() -> Void)?)
@@ -232,7 +223,7 @@ protocol MessengerListScreenModuleInteractorInput {
     recordModel: MessengeRecordingModel?,
     messengerRequest: MessengerNetworkRequestModel,
     files: [URL]
-  )
+  ) async
   
   /// Делаем маленькое изображение
   func resizeThumbnailImageWithFrame(data: Data) -> Data?
@@ -484,8 +475,8 @@ extension MessengerListScreenModuleInteractor: MessengerListScreenModuleInteract
     }
   }
   
-  func startPeriodicFriendStatusCheck(completion: (() -> Void)?) {
-    p2pChatManager.startPeriodicFriendStatusCheck { [weak self] friendStatus in
+  func startPeriodicFriendStatusCheck(completion: (() -> Void)?) async {
+    await p2pChatManager.startPeriodicFriendStatusCheck { [weak self] friendStatus in
       guard let self else { return }
       if cacheFriendStatus != friendStatus {
         cacheFriendStatus = friendStatus
@@ -514,7 +505,7 @@ extension MessengerListScreenModuleInteractor: MessengerListScreenModuleInteract
     }
   }
   
-  func sendPushNotification(contact: ContactModel) {
+  func sendPushNotification(contact: ContactModel) async {
     guard let pushNotificationToken = contact.pushNotificationToken else {
       DispatchQueue.main.async { [weak self] in
         self?.notificationService.showNotification(.negative(title: "Нет токена для отправки уведомления"))
@@ -522,31 +513,26 @@ extension MessengerListScreenModuleInteractor: MessengerListScreenModuleInteract
       return
     }
     
-    DispatchQueue.global().async { [weak self] in
-      guard let self else { return }
-      p2pChatManager.getToxAddress { [weak self] result in
-        guard let self,
-              let myToxAddress = try? result.get() else {
-          return
-        }
-        
-        let mame: String = myToxAddress.formatString(minTextLength: 10)
-        pushNotificationService.sendPushNotification(
-          title: "Вас зовут в чат!",
-          body: "Ваш контакт \(mame) хочет с вами пообщаться. Пожалуйста, зайдите в чат.",
-          customData: ["toxAddress": contact.toxAddress],
-          deviceToken: pushNotificationToken
-        )
-      }
+    let myToxAddress = await p2pChatManager.getToxAddress()
+    guard let myToxAddress else {
+      return
     }
+    
+    let mame: String = myToxAddress.formatString(minTextLength: 10)
+    pushNotificationService.sendPushNotification(
+      title: "Вас зовут в чат!",
+      body: "Ваш контакт \(mame) хочет с вами пообщаться. Пожалуйста, зайдите в чат.",
+      customData: ["toxAddress": contact.toxAddress],
+      deviceToken: pushNotificationToken
+    )
   }
   
-  func requestNotification(completion: @escaping (Bool) -> Void) {
-    permissionService.requestNotification(completion: completion)
+  func requestNotification() async -> Bool {
+    await permissionService.requestNotification()
   }
   
-  func isNotificationsEnabled(completion: @escaping (Bool) -> Void) {
-    permissionService.isNotificationsEnabled(completion: completion)
+  func isNotificationsEnabled() async -> Bool {
+    await permissionService.isNotificationsEnabled()
   }
   
   func saveMyPushNotificationToken(_ token: String, completion: (() -> Void)?) {
@@ -589,29 +575,12 @@ extension MessengerListScreenModuleInteractor: MessengerListScreenModuleInteract
     }
   }
   
-  func setSelfStatus(isOnline: Bool) {
-    DispatchQueue.global().async { [weak self] in
-      self?.p2pChatManager.setSelfStatus(isOnline: isOnline)
-    }
+  func setSelfStatus(isOnline: Bool) async {
+    await p2pChatManager.setSelfStatus(isOnline: isOnline)
   }
   
-  func setUserIsTyping(
-    _ isTyping: Bool,
-    to toxPublicKey: String,
-    completion: @escaping (Result<Void, any Error>) -> Void
-  ) {
-    DispatchQueue.global().async { [weak self] in
-      self?.p2pChatManager.setUserIsTyping(isTyping, to: toxPublicKey) { result in
-        DispatchQueue.main.async { [weak self] in
-          switch result {
-          case .success:
-            completion(.success(()))
-          case let .failure(error):
-            completion(.failure(error))
-          }
-        }
-      }
-    }
+  func setUserIsTyping(_ isTyping: Bool, to toxPublicKey: String) async -> Result<Void, Error> {
+    await p2pChatManager.setUserIsTyping(isTyping, to: toxPublicKey)
   }
   
   func setRedDotToTabBar(value: String?) {
@@ -624,29 +593,23 @@ extension MessengerListScreenModuleInteractor: MessengerListScreenModuleInteract
     tabBarController.tabBar.items?[.zero].badgeColor = SKStyleAsset.constantRuby.color
   }
   
-  func stratTORxService() {
+  func stratTOXService() async {
     DispatchQueue.global().async { [weak self] in
       guard let self else { return }
       modelHandlerService.getMessengerModel { [weak self] messengerModel in
         guard let self else { return }
         let toxStateAsString = messengerModel.toxStateAsString
-        
-        p2pChatManager.start(
-          saveDataString: toxStateAsString) { [weak self] result in
-            guard let self else { return }
-            switch result {
-            case .success:
-              if toxStateAsString == nil {
-                p2pChatManager.toxStateAsString { [weak self] stateAsString in
-                  guard let self else { return }
-                  modelSettingsManager
-                    .setToxStateAsString(stateAsString, completion: {})
-                }
-              }
-            case .failure:
-              break
+        Task { [weak self] in
+          guard let self else { return }
+          do {
+            await try? self.p2pChatManager.start(saveDataString: toxStateAsString)
+            
+            if toxStateAsString == nil {
+              let stateAsString = await self.p2pChatManager.toxStateAsString()
+              modelSettingsManager.setToxStateAsString(stateAsString, completion: nil)
             }
           }
+        }
       }
     }
   }
@@ -689,17 +652,8 @@ extension MessengerListScreenModuleInteractor: MessengerListScreenModuleInteract
     }
   }
   
-  func confirmFriendRequest(
-    with publicToxKey: String,
-    completion: @escaping (Result<String, Error>) -> Void
-  ) {
-    DispatchQueue.global().async { [weak self] in
-      self?.p2pChatManager.confirmFriendRequest(with: publicToxKey) { [weak self] result in
-        DispatchQueue.main.async {
-          completion(result)
-        }
-      }
-    }
+  func confirmFriendRequest(with publicToxKey: String) async -> String? {
+    await p2pChatManager.confirmFriendRequest(with: publicToxKey)
   }
   
   func getContactModelsFrom(
@@ -735,27 +689,24 @@ extension MessengerListScreenModuleInteractor: MessengerListScreenModuleInteract
   
   func initialChat(
     senderAddress: String,
-    messengerRequest: MessengerNetworkRequestModel?,
-    completion: @escaping (Result<Int32?, Error>) -> Void) {
-      guard let messengerRequest else {
-        return
-      }
-      
-      DispatchQueue.global().async { [weak self] in
-        let dto = messengerRequest.mapToDTO()
-        guard let json = self?.createJSONString(from: dto) else {
-          return
-        }
-        
-        self?.p2pChatManager.addFriend(address: senderAddress, message: json, completion: { contactID in
-          DispatchQueue.main.async { [weak self] in
-            print("✅ Запрос отправлен")
-            completion(.success(contactID))
-            self?.saveToxState()
-          }
-        })
-      }
+    messengerRequest: MessengerNetworkRequestModel?
+  ) async -> Int32? {
+    guard let messengerRequest else {
+      return nil
     }
+    
+    let dto = messengerRequest.mapToDTO()
+    guard let json = createJSONString(from: dto) else {
+      return nil
+    }
+    
+    guard let contactID = await p2pChatManager.addFriend(address: senderAddress, message: json) else {
+      return nil
+    }
+    await saveToxState()
+    print("✅ Запрос отправлен")
+    return contactID
+  }
   
   func sendFile(
     toxPublicKey: String,
@@ -763,48 +714,34 @@ extension MessengerListScreenModuleInteractor: MessengerListScreenModuleInteract
     recordModel: MessengeRecordingModel?,
     messengerRequest: MessengerNetworkRequestModel,
     files: [URL]
-  ) {
-    DispatchQueue.global().async { [weak self] in
-      guard let self else { return }
-      p2pChatManager.sendFile(
-        toxPublicKey: toxPublicKey, 
-        recipientPublicKey: recipientPublicKey,
-        model: messengerRequest.mapToDTO(),
-        recordModel: recordModel,
-        files: files
-      )
-    }
+  ) async {
+    await p2pChatManager.sendFile(
+      toxPublicKey: toxPublicKey,
+      recipientPublicKey: recipientPublicKey,
+      model: messengerRequest.mapToDTO(),
+      recordModel: recordModel,
+      files: files
+    )
   }
   
   func sendMessage(
     toxPublicKey: String,
-    messengerRequest: MessengerNetworkRequestModel?,
-    completion: @escaping (Result<Int32, Error>) -> Void) {
-      guard let messengerRequest else {
-        return
-      }
-      
-      DispatchQueue.global().async { [weak self] in
-        let dto = messengerRequest.mapToDTO()
-        guard let json = self?.createJSONString(from: dto) else {
-          return
-        }
-        
-        self?.p2pChatManager.sendMessage(
-          to: toxPublicKey,
-          message: json,
-          messageType: .normal) { [weak self] result in
-            DispatchQueue.main.async {
-              switch result {
-              case let .success(messageId):
-                completion(.success(messageId))
-              case let .failure(error):
-                completion(.failure(error))
-              }
-              self?.saveToxState()
-            }
-          }
-      }
+    messengerRequest: MessengerNetworkRequestModel?
+  ) async -> Int32? {
+    guard let messengerRequest else {
+      return nil
+    }
+    let dto = messengerRequest.mapToDTO()
+    guard let json = createJSONString(from: dto) else {
+      return nil
+    }
+    
+    let messageID = await try? p2pChatManager.sendMessage(to: toxPublicKey, message: json, messageType: .normal)
+    guard let messageID else {
+      return nil
+    }
+    await saveToxState()
+    return messageID
     }
   
   func getContactModels(completion: @escaping ([ContactModel]) -> Void) {
@@ -853,29 +790,12 @@ extension MessengerListScreenModuleInteractor: MessengerListScreenModuleInteract
     }
   }
   
-  func getToxAddress(completion: ((Result<String, TorServiceError>) -> Void)?) {
-    DispatchQueue.global().async { [weak self] in
-      self?.p2pChatManager.getToxAddress(completion: { result in
-        DispatchQueue.main.async {
-          switch result {
-          case let .success(toxAddress):
-            completion?(.success(toxAddress))
-          case .failure(_):
-            completion?(.failure(.onionAddressForTorHiddenServiceCouldNotBeLoaded))
-          }
-        }
-      })
-    }
+  func getToxAddress() async -> String? {
+    await p2pChatManager.getToxAddress()
   }
   
-  func getToxPublicKey(completion: @escaping (String?) -> Void) {
-    DispatchQueue.global().async { [weak self] in
-      self?.p2pChatManager.getToxPublicKey(completion: { toxPublicKey in
-        DispatchQueue.main.async {
-          completion(toxPublicKey)
-        }
-      })
-    }
+  func getToxPublicKey() async -> String? {
+    await p2pChatManager.getToxPublicKey()
   }
   
   func publicKey(from privateKey: String) -> String? {
@@ -890,21 +810,10 @@ extension MessengerListScreenModuleInteractor: MessengerListScreenModuleInteract
     systemService.getDeviceIdentifier()
   }
   
-  func removeContactModels(_ contactModel: ContactModel, completion: (() -> Void)?) {
-    DispatchQueue.global().async { [weak self] in
-      self?.p2pChatManager.deleteFriend(
-        toxPublicKey: contactModel.toxPublicKey ?? "",
-        completion: { [weak self] _ in
-          guard let self else { return }
-          modelHandlerService.removeContactModels(contactModel, completion: {
-            DispatchQueue.main.async {
-              completion?()
-            }
-          })
-          saveToxState()
-        }
-      )
-    }
+  func removeContactModels(_ contactModel: ContactModel) async -> Bool {
+    modelHandlerService.removeContactModels(contactModel, completion: {})
+    await saveToxState()
+    return await p2pChatManager.deleteFriend(toxPublicKey: contactModel.toxPublicKey ?? "")
   }
   
   func saveContactModel(_ model: ContactModel, completion: (() -> Void)?) {
@@ -912,7 +821,9 @@ extension MessengerListScreenModuleInteractor: MessengerListScreenModuleInteract
       self?.modelHandlerService.saveContactModel(model, completion: { [weak self] in
         DispatchQueue.main.async {
           completion?()
-          self?.saveToxState()
+          Task { [weak self] in
+            await self?.saveToxState()
+          }
         }
       })
     }
@@ -939,13 +850,9 @@ extension MessengerListScreenModuleInteractor: MessengerListScreenModuleInteract
       self?.deepLinkService.deleteDeepLinkURL()
     }
   }
-  
-  func getDeepLinkAdress(completion: ((String?) -> Void)?) {
-    deepLinkService.getMessengerAdress { adress in
-      DispatchQueue.main.async {
-        completion?(adress)
-      }
-    }
+
+  func getDeepLinkAdress() async -> String? {
+    await deepLinkService.getMessengerAddress()
   }
 }
 
@@ -968,10 +875,9 @@ private extension MessengerListScreenModuleInteractor {
     }
   }
   
-  func saveToxState() {
-    p2pChatManager.toxStateAsString { [weak self] stateAsString in
-      self?.modelSettingsManager.setToxStateAsString(stateAsString, completion: {})
-    }
+  func saveToxState() async {
+    let stateAsString = await p2pChatManager.toxStateAsString()
+    modelSettingsManager.setToxStateAsString(stateAsString, completion: {})
   }
 }
 

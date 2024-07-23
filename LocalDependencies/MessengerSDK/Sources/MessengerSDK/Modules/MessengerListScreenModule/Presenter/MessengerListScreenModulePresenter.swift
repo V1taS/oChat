@@ -109,8 +109,8 @@ final class MessengerListScreenModulePresenter: ObservableObject {
   }
   
   func requestNotification() {
-    interactor.requestNotification { [weak self] granted in
-      self?.stateIsNotificationsEnabled = granted
+    Task { [weak self] in
+      self?.stateIsNotificationsEnabled = await interactor.requestNotification()
     }
   }
 }
@@ -119,7 +119,9 @@ final class MessengerListScreenModulePresenter: ObservableObject {
 
 extension MessengerListScreenModulePresenter: MessengerListScreenModuleModuleInput {
   func sendPushNotification(contact: ContactModel) {
-    interactor.sendPushNotification(contact: contact)
+    Task {
+      await interactor.sendPushNotification(contact: contact)
+    }
   }
   
   func setUserIsTyping(
@@ -127,7 +129,10 @@ extension MessengerListScreenModulePresenter: MessengerListScreenModuleModuleInp
     to toxPublicKey: String,
     completion: @escaping (Result<Void, any Error>) -> Void
   ) {
-    interactor.setUserIsTyping(isTyping, to: toxPublicKey, completion: completion)
+    Task {
+      let result = await interactor.setUserIsTyping(isTyping, to: toxPublicKey)
+      completion(result)
+    }
   }
   
   func saveContactModel(_ model: SKAbstractions.ContactModel) {
@@ -154,10 +159,8 @@ extension MessengerListScreenModulePresenter: MessengerListScreenModuleModuleInp
       return
     }
     
-    interactor.confirmFriendRequest(with: toxPublicKey) { [weak self] result in
-      guard let self else { return }
-      switch result {
-      case let .success(toxPublicKey):
+    Task {
+      if let toxPublicKey = await interactor.confirmFriendRequest(with: toxPublicKey) {
         var updatedContactModel = contactModel
         updatedContactModel.status = .online
         interactor.saveContactModel(updatedContactModel) { [weak self] in
@@ -165,13 +168,11 @@ extension MessengerListScreenModulePresenter: MessengerListScreenModuleModuleInp
           moduleOutput?.dataModelHasBeenUpdated()
           updateListContacts()
         }
-      case .failure:
+      } else {
         interactor.showNotification(.negative(title: "Ошибка добавления контакта"))
-        interactor.removeContactModels(contactModel) { [weak self] in
-          guard let self else { return }
-          moduleOutput?.dataModelHasBeenUpdated()
-          updateListContacts()
-        }
+        await interactor.removeContactModels(contactModel)
+        moduleOutput?.dataModelHasBeenUpdated()
+        updateListContacts()
       }
     }
   }
@@ -255,8 +256,8 @@ extension MessengerListScreenModulePresenter: MessengerListScreenModuleModuleInp
   }
   
   func removeContactModels(_ contactModel: ContactModel, completion: (() -> Void)?) {
-    interactor.removeContactModels(contactModel) { [weak self]in
-      guard let self else { return }
+    Task {
+      await interactor.removeContactModels(contactModel)
       updateListContacts(completion: completion)
     }
   }
@@ -316,8 +317,8 @@ extension MessengerListScreenModulePresenter: SceneViewModel {
 
 private extension MessengerListScreenModulePresenter {
   func updateIsNotificationsEnabled() {
-    interactor.isNotificationsEnabled { [weak self] enabled in
-      self?.stateIsNotificationsEnabled = enabled
+    Task {
+      stateIsNotificationsEnabled = await interactor.isNotificationsEnabled()
     }
   }
   
@@ -326,15 +327,18 @@ private extension MessengerListScreenModulePresenter {
     UIApplication.shared.isIdleTimerDisabled = true
     
     interactor.clearAllMessengeTempID(completion: {})
-    interactor.startPeriodicFriendStatusCheck { [weak self] in
-      guard let self else { return }
-      updateListContacts()
-      moduleOutput?.dataModelHasBeenUpdated()
+    
+    Task {
+      await interactor.startPeriodicFriendStatusCheck { [weak self] in
+        guard let self else { return }
+        updateListContacts()
+        moduleOutput?.dataModelHasBeenUpdated()
+      }
+      await interactor.setSelfStatus(isOnline: true)
+      await interactor.stratTOXService()
     }
     
     updateIsNotificationsEnabled()
-    
-    interactor.setSelfStatus(isOnline: true)
     interactor.getContactModels { [weak self] contactModels in
       guard let self else {
         return
@@ -342,7 +346,7 @@ private extension MessengerListScreenModulePresenter {
       
       stateWidgetModels = factory.createDialogWidgetModels(messengerDialogModels: contactModels)
     }
-    interactor.stratTORxService()
+    
     interactor.passcodeNotSetInSystemIOSheck()
     
     interactor.setAllContactsIsOffline { [weak self] in
@@ -571,22 +575,24 @@ private extension MessengerListScreenModulePresenter {
             senderPushNotificationTokenForSend = pushNotificationTokenEncrypt
           }
           
-          interactor.getToxAddress { [weak self] result in
-            guard let self, let toxAddress = try? result.get() else { return }
-            interactor.getToxPublicKey { [weak self] toxPublicKey in
-              guard let self, let toxPublicKey else { return }
-              createRequestModel(
-                message: messageForSend, 
-                messageID: messageID,
-                replyMessageText: replyMessageText,
-                senderAddress: toxAddress,
-                senderLocalMeshAddress: nil,
-                senderPublicKey: senderPublicKey,
-                senderToxPublicKey: toxPublicKey,
-                senderPushNotificationToken: senderPushNotificationTokenForSend,
-                completion: completion
-              )
+          Task { [weak self, messageForSend, messageID, replyMessageText, senderPushNotificationTokenForSend] in
+            guard let self,
+                  let toxAddress = await interactor.getToxAddress(),
+                  let toxPublicKey = await interactor.getToxPublicKey() else {
+              return
             }
+            
+            createRequestModel(
+              message: messageForSend,
+              messageID: messageID,
+              replyMessageText: replyMessageText,
+              senderAddress: toxAddress,
+              senderLocalMeshAddress: nil,
+              senderPublicKey: senderPublicKey,
+              senderToxPublicKey: toxPublicKey,
+              senderPushNotificationToken: senderPushNotificationTokenForSend,
+              completion: completion
+            )
           }
         }
       )
@@ -601,17 +607,17 @@ private extension MessengerListScreenModulePresenter {
       contact: contact
     ) { [weak self] senderAddress, requestModel in
       guard let self, let toxAddress = contact.toxAddress else { return }
-      interactor.initialChat(
-        senderAddress: toxAddress,
-        messengerRequest: requestModel) { [weak self] result in
-          guard let self else { return }
-          switch result {
-          case .success:
-            completion?(.success(()))
-          case let .failure(error):
-            completion?(.failure(error))
-          }
+      
+      Task { [weak self] in
+        if let contactID = await self?.interactor.initialChat(
+          senderAddress: toxAddress,
+          messengerRequest: requestModel
+        ) {
+          completion?(.success(()))
+        } else {
+          completion?(.failure(URLError(.unknown)))
         }
+      }
     }
   }
   
@@ -640,35 +646,36 @@ private extension MessengerListScreenModulePresenter {
         contact.messenges[messengeIndex].videos.forEach { files.append($0.full) }
         contact.messenges[messengeIndex].images.forEach { files.append($0.full) }
         
-        interactor.sendFile(
-          toxPublicKey: toxPublicKey, 
-          recipientPublicKey: encryptionPublicKey,
-          recordModel: contact.messenges[messengeIndex].recording,
-          messengerRequest: requestModel,
-          files: files.compactMap({ $0 })
-        )
-        
+        Task { [weak self, files] in
+          await interactor.sendFile(
+            toxPublicKey: toxPublicKey,
+            recipientPublicKey: encryptionPublicKey,
+            recordModel: contact.messenges[messengeIndex].recording,
+            messengerRequest: requestModel,
+            files: files.compactMap({ $0 })
+          )
+        }
         return
       }
       
       if let messageText = requestModel.messageText, messageText.count > 300 {
-        interactor.sendFile(
-          toxPublicKey: toxPublicKey,
-          recipientPublicKey: encryptionPublicKey,
-          recordModel: nil,
-          messengerRequest: requestModel,
-          files: []
-        )
+        Task { [weak self] in
+          await interactor.sendFile(
+            toxPublicKey: toxPublicKey,
+            recipientPublicKey: encryptionPublicKey,
+            recordModel: nil,
+            messengerRequest: requestModel,
+            files: []
+          )
+        }
         return
       }
       
-      interactor.sendMessage(
-        toxPublicKey: toxPublicKey,
-        messengerRequest: requestModel
-      ) { [weak self] result in
-        guard let self else { return }
-        switch result {
-        case let .success(messageId):
+      Task { [weak self] in
+        if let messageID = await interactor.sendMessage(
+          toxPublicKey: toxPublicKey,
+          messengerRequest: requestModel
+        ) {
           var updatedContact = contact
           if let messengeIndex {
             var updatedMessenge = updatedContact.messenges[messengeIndex]
@@ -677,10 +684,10 @@ private extension MessengerListScreenModulePresenter {
           }
           
           interactor.saveContactModel(updatedContact) {
-            completion?(.success((messageId)))
+            completion?(.success((messageID)))
           }
-        case let .failure(error):
-          completion?(.failure(error))
+        } else {
+          completion?(.failure(URLError(.unknown)))
         }
       }
     }
@@ -716,22 +723,23 @@ private extension MessengerListScreenModulePresenter {
 private extension MessengerListScreenModulePresenter {
   @objc
   func appDidBecomeActive() {
-    interactor.clearAllMessengeTempID(completion: {})
-    interactor.setSelfStatus(isOnline: true)
-    interactor.passcodeNotSetInSystemIOSheck()
-    
     Timer.scheduledTimer(withTimeInterval: 0.5, repeats: false) { [weak self] _ in
       guard let self else { return }
       
-      interactor.getDeepLinkAdress { [weak self] contactAdress in
-        guard let self, let contactAdress else {
-          return
+      Task { [weak self] in
+        if let deepLinkAdress = await interactor.getDeepLinkAdress() {
+          moduleOutput?.openNewMessengeScreen(contactAdress: deepLinkAdress)
+          interactor.deleteDeepLinkURL()
         }
-        
-        moduleOutput?.openNewMessengeScreen(contactAdress: contactAdress)
-        interactor.deleteDeepLinkURL()
       }
     }
+    
+    Task {
+      await interactor.setSelfStatus(isOnline: true)
+    }
+    
+    interactor.clearAllMessengeTempID(completion: {})
+    interactor.passcodeNotSetInSystemIOSheck()
     
     interactor.getPushNotificationToken { [weak self] token in
       guard token == nil else {

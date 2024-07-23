@@ -69,7 +69,11 @@ public protocol IP2PChatManager {
   ///   - message: Сообщение для отправки.
   ///   - messageType: Тип сообщения.
   /// - Returns: ID отправленного сообщения.
-  func sendMessage(to toxPublicKey: String, message: String, messageType: ToxSendMessageType) async throws -> Int32?
+  func sendMessage(
+    to toxPublicKey: String,
+    message: String,
+    messageType: ToxSendMessageType
+  ) async throws -> Int32?
   
   /// Метод для установки статуса "печатает" для друга.
   /// - Parameters:
@@ -92,5 +96,11 @@ public protocol IP2PChatManager {
   ///   - model: Модель сообщения.
   ///   - recordModel: Модель записи (если имеется).
   ///   - files: Список URL файлов для отправки.
-  func sendFile(toxPublicKey: String, recipientPublicKey: String, model: MessengerNetworkRequestDTO, recordModel: MessengeRecordingModel?, files: [URL]) async
+  func sendFile(
+    toxPublicKey: String,
+    recipientPublicKey: String,
+    model: MessengerNetworkRequestDTO,
+    recordModel: MessengeRecordingModel?,
+    files: [URL]
+  ) async
 }
