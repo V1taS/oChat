@@ -9,21 +9,22 @@ import Foundation
 
 /// Протокол управления чатом P2P через Tor.
 public protocol IP2PChatManager {
-  func start(
-    saveDataString: String?,
-    completion: ((Result<Void, Error>) -> Void)?
-  )
+  /// Запускает менеджер чата с возможностью передачи данных о состоянии.
+  /// - Parameter saveDataString: Строка с сохранёнными данными, если таковые имеются.
+  /// - Returns: Результат выполнения операции.
+  func start(saveDataString: String?) async throws
   
-  /// Строка, содержащая сохранённое состояние Tox в формате Base64
-  func toxStateAsString(completion: ((_ stateAsString: String?) -> Void)?)
+  /// Получить строку состояния Tox.
+  /// - Returns: Строка с сохранённым состоянием Tox в формате Base64.
+  func toxStateAsString() async -> String?
   
-  /// Получить адрес Tox и возвращает результат через завершение.
-  /// - Parameter completion: Блок завершения, который возвращает результат генерации адреса.
-  func getToxAddress(completion: @escaping (Result<String, Error>) -> Void)
+  /// Получить адрес Tox.
+  /// - Returns: Адрес Tox в виде строки.
+  func getToxAddress() async -> String?
   
   /// Метод для получения публичного ключа.
-  /// - Returns: Публичный ключ в виде строки в шестнадцатеричном формате.
-  func getToxPublicKey(completion: @escaping (String?) -> Void)
+  /// - Returns: Публичный ключ в виде строки.
+  func getToxPublicKey() async -> String?
   
   /// Извлекает публичный ключ из адреса Tox.
   /// - Параметр address: Адрес Tox в виде строки (76 символов).
@@ -35,74 +36,61 @@ public protocol IP2PChatManager {
   ///   - address: Адрес друга в сети Tox.
   ///   - message: Приветственное сообщение.
   /// - Returns: Номер друга, если добавление прошло успешно, иначе nil.
-  func addFriend(address: String, message: String, completion: ((_ contactID: Int32?) -> Void)?)
+  func addFriend(address: String, message: String) async -> Int32?
   
-  /// Метод для удаления друга по его номеру.
+  /// Метод для удаления друга по его публичному ключу.
   /// - Parameters:
-  ///   - toxPublicKey: Публичный ключ друга
+  ///   - toxPublicKey: Публичный ключ друга.
   /// - Returns: true, если удаление прошло успешно, иначе false.
-  func deleteFriend(toxPublicKey: String, completion: ((Bool) -> Void)?)
+  func deleteFriend(toxPublicKey: String) async -> Bool
   
   /// Метод для получения номера друга по его публичному ключу.
   /// - Parameters:
   ///   - publicToxKey: Публичный ключ друга в сети Tox.
   /// - Returns: Номер друга, если он найден, иначе nil.
-  func friendNumber(publicToxKey: String, completion: ((_ contactID: Int32?) -> Void)?)
+  func friendNumber(publicToxKey: String) async -> Int32?
   
-  /// Метод для получения статуса подключения друга по его номеру.
+  /// Метод для получения статуса подключения друга по его публичному ключу.
   /// - Parameters:
-  ///   - toxPublicKey: Публичный ключ друга
+  ///   - toxPublicKey: Публичный ключ друга.
   /// - Returns: Статус подключения друга в виде значения перечисления `ConnectionToxStatus`, если он доступен, иначе nil.
-  func friendConnectionStatus(toxPublicKey: String, completion: ((ConnectionToxStatus?) -> Void)?)
+  func friendConnectionStatus(toxPublicKey: String) async -> ConnectionToxStatus?
   
   /// Используя метод confirmFriendRequest, вы подтверждаете запрос на добавление в друзья, зная публичный ключ отправителя.
   /// Этот метод принимает публичный ключ друга и добавляет его в список друзей без отправки дополнительного сообщения.
   /// - Parameters:
   ///   - publicKey: Строка, представляющая публичный ключ друга. Этот ключ используется для идентификации пользователя в сети Tox.
-  ///   - completion: Замыкание, вызываемое после завершения операции. Возвращает результат выполнения в виде:
-  ///   - publicToxKey: Публичный ключ друга в сети Tox.
-  ///   - ToxError: Ошибка, если запрос не удалось подтвердить.
-  func confirmFriendRequest(
-    with publicToxKey: String,
-    completion: @escaping (Result<String, Error>) -> Void
-  )
+  /// - Returns: Публичный ключ друга в сети Tox.
+  func confirmFriendRequest(with publicToxKey: String) async -> String?
   
   /// Метод для отправки сообщения другу.
   /// - Parameters:
-  ///   - toxPublicKey: Публичный ключ друга
+  ///   - toxPublicKey: Публичный ключ друга.
   ///   - message: Сообщение для отправки.
   ///   - messageType: Тип сообщения.
-  ///   - completion: Замыкание, вызываемое по завершении операции, с результатом успешной отправки или ошибкой.
-  func sendMessage(
-    to toxPublicKey: String,
-    message: String,
-    messageType: ToxSendMessageType,
-    completion: @escaping (Result<Int32, Error>) -> Void
-  )
+  /// - Returns: ID отправленного сообщения.
+  func sendMessage(to toxPublicKey: String, message: String, messageType: ToxSendMessageType) async throws -> Int32?
   
   /// Метод для установки статуса "печатает" для друга.
   /// - Parameters:
   ///   - isTyping: Статус "печатает" (true, если пользователь печатает).
-  ///   - toxPublicKey: Публичный ключ друга
-  ///   - completion: Замыкание, вызываемое по завершении операции, с результатом успешного выполнения или ошибкой.
-  func setUserIsTyping(
-    _ isTyping: Bool,
-    to toxPublicKey: String,
-    completion: @escaping (Result<Void, Error>) -> Void
-  )
+  ///   - toxPublicKey: Публичный ключ друга.
+  /// - Returns: Результат выполнения операции.
+  func setUserIsTyping(_ isTyping: Bool, to toxPublicKey: String) async -> Result<Void, Error>
   
   /// Метод для установки статуса пользователя.
-  func setSelfStatus(isOnline: Bool)
+  func setSelfStatus(isOnline: Bool) async
   
   /// Запускает таймер для периодического вызова getFriendsStatus каждые 2 секунды.
-  func startPeriodicFriendStatusCheck(completion: (([String: Bool]) -> Void)?)
+  /// - Parameter completion: Замыкание, вызываемое с результатом получения статуса друзей.
+  func startPeriodicFriendStatusCheck(completion: @escaping ([String: Bool]) -> Void) async
   
-  /// Отправить файл с сообщением
-  func sendFile(
-    toxPublicKey: String,
-    recipientPublicKey: String,
-    model: MessengerNetworkRequestDTO,
-    recordModel: MessengeRecordingModel?,
-    files: [URL]
-  )
+  /// Отправить файл с сообщением.
+  /// - Parameters:
+  ///   - toxPublicKey: Публичный ключ друга.
+  ///   - recipientPublicKey: Публичный ключ получателя.
+  ///   - model: Модель сообщения.
+  ///   - recordModel: Модель записи (если имеется).
+  ///   - files: Список URL файлов для отправки.
+  func sendFile(toxPublicKey: String, recipientPublicKey: String, model: MessengerNetworkRequestDTO, recordModel: MessengeRecordingModel?, files: [URL]) async
 }

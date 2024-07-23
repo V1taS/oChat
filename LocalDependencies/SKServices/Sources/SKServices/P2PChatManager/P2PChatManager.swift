@@ -11,7 +11,7 @@ import ToxCore
 
 @available(iOS 16.0, *)
 public final class P2PChatManager: IP2PChatManager {
-
+  
   // MARK: - Public properties
   
   public static let shared = P2PChatManager()
@@ -42,15 +42,12 @@ public final class P2PChatManager: IP2PChatManager {
   // MARK: - Public funcs
   
   public func start(
-    saveDataString: String?,
-    completion: ((Result<Void, Error>) -> Void)?
-  ) {
-    getConfigurationValue(forKey: Constants.nodesKeys) { [weak self] nodesJSON in
-      guard let self else { return }
-      
-      configurationCallback()
-      createNewTox(saveDataString: saveDataString, nodesJSON: nodesJSON, completion: completion)
-    }
+    saveDataString: String?
+  ) async throws {
+    let nodesJSON: String = try await getConfigurationValue(forKey: Constants.nodesKeys)
+    
+    await configurationCallback()
+    try await createNewTox(saveDataString: saveDataString, nodesJSON: nodesJSON)
   }
 }
 
@@ -64,9 +61,9 @@ public extension P2PChatManager {
 // MARK: - TOX
 
 @available(iOS 16.0, *)
-public extension P2PChatManager {
+extension P2PChatManager {
   /// Запускает таймер для периодического вызова getFriendsStatus каждые 2 секунды.
-  func startPeriodicFriendStatusCheck(completion: (([String: Bool]) -> Void)?) {
+  public func startPeriodicFriendStatusCheck(completion: @escaping ([String : Bool]) -> Void) async {
     let queue = DispatchQueue.global(qos: .background)
     queue.async { [weak self] in
       guard let self = self else { return }
@@ -74,104 +71,84 @@ public extension P2PChatManager {
       self.periodicFriendStatusChecktimer = DispatchSource.makeTimerSource(queue: queue)
       self.periodicFriendStatusChecktimer?.schedule(deadline: .now(), repeating: 5.0)
       self.periodicFriendStatusChecktimer?.setEventHandler { [weak self] in
-        self?.getFriendsStatus(completion: completion)
+        Task { [weak self] in
+          guard let self else { return }
+          let friendsStatus = await self.getFriendsStatus()
+          completion(friendsStatus)
+        }
       }
       self.periodicFriendStatusChecktimer?.resume()
     }
   }
   
-  public func toxStateAsString(completion: ((_ stateAsString: String?) -> Void)?) {
-    completion?(toxCore.saveToxStateAsString())
+  public func toxStateAsString() async -> String? {
+    await toxCore.saveToxStateAsString()
   }
   
-  public func getToxAddress(completion: @escaping (Result<String, any Error>) -> Void) {
-    completion(.success(toxCore.getToxAddress() ?? ""))
+  
+  public func getToxAddress() async -> String? {
+    await toxCore.getToxAddress()
   }
   
-  func addFriend(address: String, message: String, completion: ((_ contactID: Int32?) -> Void)?) {
-    completion?(toxCore.addFriend(address: address, message: message))
+  public func addFriend(address: String, message: String) async -> Int32? {
+    await toxCore.addFriend(address: address, message: message)
   }
   
-  func deleteFriend(toxPublicKey: String, completion: ((Bool) -> Void)?) {
-    guard let friendNumber = toxCore.friendNumber(publicKey: toxPublicKey) else {
-      completion?(false)
-      return
+  public func deleteFriend(toxPublicKey: String) async -> Bool {
+    guard let friendNumber = await toxCore.friendNumber(publicKey: toxPublicKey) else {
+      return false
     }
     
-    let result = toxCore.deleteFriend(friendNumber: friendNumber)
-    completion?(result)
+    let result = await toxCore.deleteFriend(friendNumber: friendNumber)
+    return result
   }
   
-  func setUserIsTyping(
-    _ isTyping: Bool,
-    to toxPublicKey: String,
-    completion: @escaping (Result<Void, Error>) -> Void
-  ) {
-    guard let friendNumber = toxCore.friendNumber(publicKey: toxPublicKey) else {
-      completion(.failure(ToxError.friendNotFound))
-      return
+  public func setUserIsTyping(_ isTyping: Bool, to toxPublicKey: String) async -> Result<Void, Error> {
+    guard let friendNumber = await toxCore.friendNumber(publicKey: toxPublicKey) else {
+      return .failure(ToxError.friendNotFound)
     }
-    toxCore.setUserIsTyping(isTyping, forFriendNumber: friendNumber) { result in
-      switch result {
-      case .success():
-        completion(.success(()))
-      case let .failure(error):
-        completion(.failure(error))
-      }
+    
+    do {
+      try await toxCore.setUserIsTyping(isTyping, forFriendNumber: friendNumber)
+      return .success(())
+    } catch {
+      return .failure(error)
     }
   }
   
-  func confirmFriendRequest(
-    with publicToxKey: String,
-    completion: @escaping (Result<String, Error>) -> Void
-  ) {
-    toxCore.confirmFriendRequest(with: publicToxKey) { [weak self] result in
-      guard let self else { return }
-      switch result {
-      case let .success(friendID):
-        guard let publicKey = toxCore.publicKeyFromFriendNumber(friendNumber: friendID) else {
-          DispatchQueue.main.async {
-            completion(.failure(ToxError.friendNotFound))
-          }
-          return
-        }
-        
-        completion(.success(publicKey))
-      case let .failure(error):
-        completion(.failure(error))
-      }
+  public func confirmFriendRequest(with publicToxKey: String) async -> String? {
+    let result = try await toxCore.confirmFriendRequest(with: publicToxKey)
+    guard let friendID = try? result.get(),
+          let publicKey = await toxCore.publicKeyFromFriendNumber(friendNumber: friendID) else {
+      return nil
     }
+    return publicKey
   }
   
-  func sendMessage(
+  public func sendMessage(
     to toxPublicKey: String,
     message: String,
-    messageType: ToxSendMessageType,
-    completion: @escaping (Result<Int32, Error>) -> Void
-  ) {
-    guard let friendNumber = toxCore.friendNumber(publicKey: toxPublicKey) else {
-      completion(.failure(ToxError.friendNotFound))
-      return
+    messageType: ToxSendMessageType
+  ) async throws -> Int32? {
+    guard let friendNumber = await toxCore.friendNumber(publicKey: toxPublicKey) else {
+      throw ToxError.friendNotFound
     }
     
-    toxCore.sendMessage(
+    let result = try await toxCore.sendMessage(
       to: friendNumber,
       message: message,
-      messageType: messageType.mapTo()) { result in
-        switch result {
-        case let .success(messageId):
-          completion(.success(messageId))
-        case let .failure(error):
-          completion(.failure(error))
-        }
-      }
+      messageType: messageType.mapTo()
+    )
+    
+    return try? result.get()
   }
   
-  func getToxPublicKey(completion: @escaping (String?) -> Void) {
-    completion(toxCore.getPublicKey())
+  
+  public func getToxPublicKey() async -> String? {
+    await toxCore.getPublicKey()
   }
   
-  func getToxPublicKey(from address: String) -> String? {
+  public func getToxPublicKey(from address: String) -> String? {
     // Адрес должен быть длиной 76 символов
     guard address.count == 76 else {
       print("❌ Неправильный формат адреса")
@@ -183,33 +160,30 @@ public extension P2PChatManager {
     return publicKey
   }
   
-  func friendConnectionStatus(toxPublicKey: String, completion: ((ConnectionToxStatus?) -> Void)?) {
-    guard let friendNumber = toxCore.friendNumber(publicKey: toxPublicKey) else {
-      completion?(nil)
-      return
+  public func friendConnectionStatus(toxPublicKey: String) async -> ConnectionToxStatus? {
+    guard let friendNumber = await toxCore.friendNumber(publicKey: toxPublicKey) else {
+      return nil
     }
     
-    DispatchQueue.main.async { [weak self] in
-      let toxStatus = self?.toxCore.friendConnectionStatus(friendNumber: friendNumber)
-      completion?(toxStatus?.mapTo())
-    }
+    let toxStatus = await toxCore.friendConnectionStatus(friendNumber: friendNumber)
+    return toxStatus?.mapTo()
   }
   
-  func friendNumber(publicToxKey: String, completion: ((_ contactID: Int32?) -> Void)?) {
-    completion?(toxCore.friendNumber(publicKey: publicToxKey))
+  public func friendNumber(publicToxKey: String) async -> Int32? {
+    await toxCore.friendNumber(publicKey: publicToxKey)
   }
   
-  func setSelfStatus(isOnline: Bool) {
-    toxCore.setSelfStatus(isOnline ? .online : .away)
+  public func setSelfStatus(isOnline: Bool) async {
+    await toxCore.setSelfStatus(isOnline ? .online : .away)
   }
   
-  func sendFile(
+  public func sendFile(
     toxPublicKey: String,
     recipientPublicKey: String,
     model: MessengerNetworkRequestDTO,
     recordModel: MessengeRecordingModel?,
     files: [URL]
-  ) {
+  ) async {
     dataManagerService.clearTemporaryDirectory()
     var recordDTO: MessengeRecordingDTO?
     
@@ -222,7 +196,7 @@ public extension P2PChatManager {
         data: data
       )
     }
-
+    
     cacheMessengerModel = model
     let encoder = JSONEncoder()
     
@@ -275,13 +249,13 @@ public extension P2PChatManager {
       self.fileData = fileData
       
       // Получение номера друга по публичному ключу
-      guard let friendNumber = toxCore.friendNumber(publicKey: toxPublicKey) else {
+      guard let friendNumber = await toxCore.friendNumber(publicKey: toxPublicKey) else {
         print("Не удалось получить номер друга по публичному ключу.")
         return
       }
       
       // Проверка существования друга
-      guard toxCore.friendExists(friendNumber: friendNumber) else {
+      guard await toxCore.friendExists(friendNumber: friendNumber) else {
         print("Друг не найден для friendNumber: \(friendNumber)")
         return
       }
@@ -289,16 +263,11 @@ public extension P2PChatManager {
       let fileName = archiveURL.lastPathComponent
       let fileSize = UInt64(fileData.count)
       
-      // Инициализация отправки файла
-      toxCore.sendFile(to: friendNumber, fileName: fileName, fileSize: fileSize) { [weak self] result in
-        guard let self = self else { return }
-        switch result {
-        case let .success(fileId):
-          print("✅ Файл инициализирован, fileId: \(fileId)")
-          
-        case let .failure(error):
-          print("❌ Ошибка при инициализации отправки файла: \(error.localizedDescription)")
-        }
+      switch await toxCore.sendFile(to: friendNumber, fileName: fileName, fileSize: fileSize) {
+      case let .success(fileId):
+        print("✅ Файл инициализирован, fileId: \(fileId)")
+      case let .failure(error):
+        print("❌ Ошибка при инициализации отправки файла: \(error.localizedDescription)")
       }
     } catch {
       print("❌ Ошибка при сохранении или архивировании файлов: \(error.localizedDescription)")
@@ -331,7 +300,7 @@ extension P2PChatManager {
     position: UInt64,
     length: size_t,
     completion: ((Result<Double, Error>) -> Void)?
-  ) {
+  ) async {
     guard let fileData else {
       print("Ошибка: данные файла не найдены")
       completion?(.failure(URLError(.unknown)))
@@ -349,69 +318,72 @@ extension P2PChatManager {
     let chunk = fileData.subdata(in: Int(position)..<Int(end))
     let progress = Double(position + UInt64(length)) / Double(fileData.count) * 100
     
-    toxCore.sendFileChunk(to: friendNumber, fileId: fileId, position: position, data: chunk) { result in
-      switch result {
-      case .success:
-        print("Чанк отправлен, позиция: \(position), длина: \(length) байт")
-        // Проверка завершения передачи файла
-        if position + UInt64(length) >= UInt64(fileData.count) {
-          print("Передача файла завершена")
-        }
-        completion?(.success(progress))
-      case let .failure(error):
-        if progress < 100 {
-          completion?(.failure(error))
-          print("❌ Ошибка при отправке чанка: \(error.localizedDescription)")
-        }
+    switch await toxCore.sendFileChunk(to: friendNumber, fileId: fileId, position: position, data: chunk) {
+    case .success:
+      print("Чанк отправлен, позиция: \(position), длина: \(length) байт")
+      // Проверка завершения передачи файла
+      if position + UInt64(length) >= UInt64(fileData.count) {
+        print("Передача файла завершена")
+      }
+      completion?(.success(progress))
+    case let .failure(error):
+      if progress < 100 {
+        completion?(.failure(error))
+        print("❌ Ошибка при отправке чанка: \(error.localizedDescription)")
       }
     }
   }
   
-  func getFriendsStatus(completion: (([String: Bool]) -> Void)?) {
+  func getFriendsStatus() async -> [String: Bool] {
     var friendDictionaryStatus: [String: Bool] = [:]
     
-    toxCore.getFriendList { [weak self] result in
-      guard let self else { return }
-      switch result {
-      case let .success(friendList):
-        for friendID in friendList {
-          let result = toxCore.friendConnectionStatus(friendNumber: Int32(friendID)) ?? .none
-          let isOnline: Bool
-          switch result {
-          case .none:
-            isOnline = false
-          case .tcp, .udp:
-            isOnline = true
-          }
-          
-          if let publicKey = toxCore.publicKeyFromFriendNumber(friendNumber: Int32(friendID)) {
-            friendDictionaryStatus.updateValue(isOnline, forKey: publicKey)
-          }
+    switch await toxCore.getFriendList() {
+    case let .success(friendList):
+      for friendID in friendList {
+        let result = await toxCore.friendConnectionStatus(friendNumber: Int32(friendID)) ?? .none
+        let isOnline: Bool
+        switch result {
+        case .none:
+          isOnline = false
+        case .tcp, .udp:
+          isOnline = true
         }
-        completion?(friendDictionaryStatus)
-      case .failure: break
+        
+        if let publicKey = await toxCore.publicKeyFromFriendNumber(friendNumber: Int32(friendID)) {
+          friendDictionaryStatus.updateValue(isOnline, forKey: publicKey)
+        }
       }
+      return friendDictionaryStatus
+    case .failure:
+      return [:]
     }
   }
   
-  func getConfigurationValue(forKey key: String, completion: @escaping (String) -> Void) {
+  public func getConfigurationValue(forKey key: String) async throws -> String {
+    // Попытка получить значение из secureDataManagerService
     if let value = secureDataManagerService.getString(for: key) {
-      completion(value)
+      return value
     }
     
-    cloudKitService.getConfigurationValue(from: key) { [weak self] (value: String?) in
-      if let value {
-        completion(value)
-        self?.secureDataManagerService.saveString(value, key: key)
+    // Получение значения из cloudKitService
+    do {
+      let cloudKitValue: String? = try await cloudKitService.getConfigurationValue(from: key)
+      if let cloudKitValue = cloudKitValue {
+        // Сохранение полученного значения в secureDataManagerService
+        secureDataManagerService.saveString(cloudKitValue, key: key)
+        return cloudKitValue
+      } else {
+        throw URLError(.unknown)
       }
+    } catch {
+      throw error
     }
   }
   
   func createNewTox(
     saveDataString: String?,
-    nodesJSON: String,
-    completion: ((Result<Void, Error>) -> Void)?
-  ) {
+    nodesJSON: String
+  ) async throws {
     var options = ToxOptions()
     options.ipv6Enabled = true
     options.udpEnabled = false
@@ -420,18 +392,11 @@ extension P2PChatManager {
     options.tcpPort = 0
     options.useTorProxy = false
     
-    toxCore.createNewTox(
+    try await toxCore.createNewTox(
       with: options,
       savedDataString: saveDataString,
       toxNodesJsonString: nodesJSON
-    ) { [self] resulr in
-      switch resulr {
-      case .success:
-        completion?(.success(()))
-      case let .failure(error):
-        completion?(.failure(error))
-      }
-    }
+    )
   }
 }
 

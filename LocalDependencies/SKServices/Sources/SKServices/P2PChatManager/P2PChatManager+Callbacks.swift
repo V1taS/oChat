@@ -13,16 +13,16 @@ import ToxCore
 
 @available(iOS 16.0, *)
 extension P2PChatManager {
-  func configurationCallback() {
+  func configurationCallback() async {
     setConnectionStatusCallback()
     setFriendRequestCallback()
     setMessageCallback()
-    setFriendStatusCallback()
+    await setFriendStatusCallback()
     setLogCallback()
-    setFriendStatusOnlineCallback()
-    setFriendTypingCallback()
-    setFriendReadReceiptCallback()
-    setupFileReceiveCallbacks()
+    await setFriendStatusOnlineCallback()
+    await setFriendTypingCallback()
+    await setFriendReadReceiptCallback()
+    await setupFileReceiveCallbacks()
   }
 }
 
@@ -30,7 +30,7 @@ extension P2PChatManager {
 
 @available(iOS 16.0, *)
 private extension P2PChatManager {
-  func setupFileReceiveCallbacks() {
+  func setupFileReceiveCallbacks() async {
     toxCore.setFileReceiveCallback { [weak self] friendNumber, fileId, fileName, fileSize in
       guard let self else { return }
       print("Получен запрос на файл от друга \(friendNumber), fileId: \(fileId), fileName: \(fileName), fileSize: \(fileSize) байт")
@@ -71,12 +71,14 @@ private extension P2PChatManager {
                 print("Ошибка: не удалось прочитать данные из файла")
               }
             }
-            
-            updateFileReceiveCallback(
-              progress: progress,
-              friendId: friendNumber,
-              filePath: fileURL
-            )
+            Task { [weak self] in
+              guard let self else { return }
+              await updateFileReceiveCallback(
+                progress: progress,
+                friendId: friendNumber,
+                filePath: fileURL
+              )
+            }
           case .failure:
             print("❌ Что-то пошло не так")
             // TODO: - Очищаем хранилище куда получали файлик
@@ -89,24 +91,28 @@ private extension P2PChatManager {
     toxCore.setFileControlCallback { friendNumber, fileId, control in }
     
     toxCore.setFileChunkRequestCallback { [weak self] friendNumber, fileId, position, length in
-      guard let self else { return }
-      sendChunk(
-        to: friendNumber,
-        fileId: fileId,
-        position: position,
-        length: length,
-        completion: { [weak self] result in
-          guard let self else { return }
-          switch result {
-          case let .success(progress):
-            updateFileSenderCallback(progress: progress, friendId: friendNumber)
-            dataManagerService.clearTemporaryDirectory()
-          case .failure:
-            dataManagerService.clearTemporaryDirectory()
-            updateFileSenderErrorCallback(friendId: friendNumber)
+      Task { [weak self] in
+        guard let self else { return }
+        await self.sendChunk(
+          to: friendNumber,
+          fileId: fileId,
+          position: position,
+          length: length,
+          completion: { [weak self] result in
+            Task { [weak self] in
+              guard let self else { return }
+              switch result {
+              case let .success(progress):
+                await updateFileSenderCallback(progress: progress, friendId: friendNumber)
+                dataManagerService.clearTemporaryDirectory()
+              case .failure:
+                dataManagerService.clearTemporaryDirectory()
+                await updateFileSenderErrorCallback(friendId: friendNumber)
+              }
+            }
           }
-        }
-      )
+        )
+      }
     }
   }
   
@@ -154,36 +160,44 @@ private extension P2PChatManager {
 
 @available(iOS 16.0, *)
 private extension P2PChatManager {
-  func setFriendReadReceiptCallback() {
+  func setFriendReadReceiptCallback() async {
     toxCore.setFriendReadReceiptCallback { [weak self] friendId, messageId in
-      self?.updateFriendReadReceiptCallback(friendId, messageId)
-    }
-  }
-  
-  func setFriendTypingCallback() {
-    toxCore.setFriendTypingCallback { [weak self] friendId, isTyping in
-      self?.updateFriendTyping(friendId, isTyping)
-    }
-  }
-  
-  func setFriendStatusOnlineCallback() {
-    toxCore.setFriendStatusOnlineCallback { [weak self] friendId, status in
-      self?.updateFriendStatusOnline(friendId: friendId, status: status)
-    }
-  }
-  
-  func setFriendStatusCallback() {
-    toxCore.setFriendStatusCallback { [weak self] friendId, connectionStatus in
-      let status: UserStatus
-      switch connectionStatus {
-      case .none:
-        status = .away
-      case .tcp:
-        status = .online
-      case .udp:
-        status = .online
+      Task { [weak self] in
+        await self?.updateFriendReadReceiptCallback(friendId, messageId)
       }
-      self?.updateFriendStatusOnline(friendId: friendId, status: status)
+    }
+  }
+  
+  func setFriendTypingCallback() async {
+    toxCore.setFriendTypingCallback { [weak self] friendId, isTyping in
+      Task { [weak self] in
+        await self?.updateFriendTyping(friendId, isTyping)
+      }
+    }
+  }
+  
+  func setFriendStatusOnlineCallback() async {
+    toxCore.setFriendStatusOnlineCallback { [weak self] friendId, status in
+      Task { [weak self] in
+        await self?.updateFriendStatusOnline(friendId: friendId, status: status)
+      }
+    }
+  }
+  
+  func setFriendStatusCallback() async {
+    toxCore.setFriendStatusCallback { [weak self] friendId, connectionStatus in
+      Task { [weak self] in
+        let status: UserStatus
+        switch connectionStatus {
+        case .none:
+          status = .away
+        case .tcp:
+          status = .online
+        case .udp:
+          status = .online
+        }
+        await self?.updateFriendStatusOnline(friendId: friendId, status: status)
+      }
     }
   }
   
@@ -239,8 +253,8 @@ private extension P2PChatManager {
 
 @available(iOS 16.0, *)
 private extension P2PChatManager {
-  func updateFileSenderErrorCallback(friendId: Int32) {
-    guard let publicKey = toxCore.publicKeyFromFriendNumber(friendNumber: Int32(friendId)) else {
+  func updateFileSenderErrorCallback(friendId: Int32) async {
+    guard let publicKey = await toxCore.publicKeyFromFriendNumber(friendNumber: Int32(friendId)) else {
       return
     }
     
@@ -258,8 +272,8 @@ private extension P2PChatManager {
     }
   }
   
-  func updateFileSenderCallback(progress: Double, friendId: Int32) {
-    guard let publicKey = toxCore.publicKeyFromFriendNumber(friendNumber: Int32(friendId)) else {
+  func updateFileSenderCallback(progress: Double, friendId: Int32) async {
+    guard let publicKey = await toxCore.publicKeyFromFriendNumber(friendNumber: Int32(friendId)) else {
       return
     }
     
@@ -278,8 +292,8 @@ private extension P2PChatManager {
     }
   }
   
-  func updateFileReceiveCallback(progress: Double, friendId: Int32, filePath: URL?) {
-    guard let publicKey = toxCore.publicKeyFromFriendNumber(friendNumber: Int32(friendId)) else {
+  func updateFileReceiveCallback(progress: Double, friendId: Int32, filePath: URL?) async {
+    guard let publicKey = await toxCore.publicKeyFromFriendNumber(friendNumber: Int32(friendId)) else {
       return
     }
     
@@ -297,8 +311,8 @@ private extension P2PChatManager {
     }
   }
   
-  func updateFriendReadReceiptCallback(_ friendId: UInt32, _ messageId: UInt32) {
-    guard let publicKey = toxCore.publicKeyFromFriendNumber(friendNumber: Int32(friendId)) else {
+  func updateFriendReadReceiptCallback(_ friendId: UInt32, _ messageId: UInt32) async {
+    guard let publicKey = await toxCore.publicKeyFromFriendNumber(friendNumber: Int32(friendId)) else {
       return
     }
     
@@ -315,8 +329,8 @@ private extension P2PChatManager {
     }
   }
   
-  func updateFriendTyping(_ friendId: Int32, _ isTyping: Bool) {
-    guard let publicKey = toxCore.publicKeyFromFriendNumber(friendNumber: friendId) else {
+  func updateFriendTyping(_ friendId: Int32, _ isTyping: Bool) async {
+    guard let publicKey = await toxCore.publicKeyFromFriendNumber(friendNumber: friendId) else {
       return
     }
     
@@ -333,8 +347,8 @@ private extension P2PChatManager {
     }
   }
   
-  func updateFriendStatusOnline(friendId: Int32, status: UserStatus) {
-    guard let publicKey = toxCore.publicKeyFromFriendNumber(friendNumber: friendId) else {
+  func updateFriendStatusOnline(friendId: Int32, status: UserStatus) async {
+    guard let publicKey = await toxCore.publicKeyFromFriendNumber(friendNumber: friendId) else {
       return
     }
     
