@@ -17,67 +17,66 @@ import LocalAuthentication
 public final class PermissionService: IPermissionService {
   public init() {}
   
-  public func requestNotification(completion: @escaping (_ granted: Bool) -> Void) {
-    UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { granted, _ in
-      DispatchQueue.main.async {
-        completion(granted)
+  @discardableResult
+  public func requestNotification() async -> Bool {
+    await withCheckedContinuation { continuation in
+      UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { granted, _ in
+        continuation.resume(returning: granted)
         guard granted else { return }
-        DispatchQueue.main.async {
-          UIApplication.shared.registerForRemoteNotifications()
+        UIApplication.shared.registerForRemoteNotifications()
+      }
+    }
+  }
+  
+  @discardableResult
+  public func isNotificationsEnabled() async -> Bool {
+    await withCheckedContinuation { continuation in
+      UNUserNotificationCenter.current().getNotificationSettings { settings in
+        continuation.resume(returning: settings.authorizationStatus == .authorized)
+      }
+    }
+  }
+  
+  @discardableResult
+  public func requestCamera() async -> Bool {
+    await withCheckedContinuation { continuation in
+      AVCaptureDevice.requestAccess(for: .video) { granted in
+        continuation.resume(returning: granted)
+      }
+    }
+  }
+  
+  @discardableResult
+  public func requestGallery() async -> Bool {
+    await withCheckedContinuation { continuation in
+      if #available(iOS 14, *) {
+        PHPhotoLibrary.requestAuthorization(for: .readWrite) { status in
+          continuation.resume(returning: status == .authorized || status == .limited)
+        }
+      } else {
+        PHPhotoLibrary.requestAuthorization { status in
+          continuation.resume(returning: status == .authorized)
         }
       }
     }
   }
   
-  public func isNotificationsEnabled(completion: @escaping (_ enabled: Bool) -> Void) {
-    UNUserNotificationCenter.current().getNotificationSettings { settings in
-      DispatchQueue.main.async {
-        completion(settings.authorizationStatus == .authorized)
+  @discardableResult
+  public func requestFaceID() async -> Bool {
+    await withCheckedContinuation { continuation in
+      let context = LAContext()
+      var error: NSError?
+      
+      guard context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &error) else {
+        continuation.resume(returning: false)
+        return
       }
-    }
-  }
-  
-  public func requestCamera(completion: @escaping (_ granted: Bool) -> Void) {
-    AVCaptureDevice.requestAccess(for: .video) { granted in
-      DispatchQueue.main.async {
-        completion(granted)
-      }
-    }
-  }
-  
-  public func requestGallery(completion: @escaping (_ granted: Bool) -> Void) {
-    if #available(iOS 14, *) {
-      PHPhotoLibrary.requestAuthorization(for: .readWrite) { status in
-        DispatchQueue.main.async {
-          completion(status == .authorized || status == .limited)
-        }
-      }
-    } else {
-      PHPhotoLibrary.requestAuthorization { status in
-        DispatchQueue.main.async {
-          completion(status == .authorized)
-        }
-      }
-    }
-  }
-  
-  public func requestFaceID(completion: @escaping (_ granted: Bool) -> Void) {
-    let context = LAContext()
-    var error: NSError?
-    
-    guard context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &error) else {
-      DispatchQueue.main.async {
-        completion(false)
-      }
-      return
-    }
-    
-    context.evaluatePolicy(
-      .deviceOwnerAuthenticationWithBiometrics,
-      localizedReason: "Для доступа к приложению требуется аутентификация"
-    ) { success, error in
-      DispatchQueue.main.async {
-        completion(success)
+      
+      context.evaluatePolicy(
+        .deviceOwnerAuthenticationWithBiometrics,
+        localizedReason: "Для доступа к приложению требуется аутентификация"
+      ) { success, _ in
+        continuation.resume(returning: success)
       }
     }
   }
