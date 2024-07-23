@@ -466,9 +466,9 @@ private extension MessengerListScreenModulePresenter {
       .init(
         leftImage: nil,
         centerText: nil,
-        rightImage: UIImage(systemName: "chevron.down")?
-          .withTintColor(SKStyleAsset.ghost.color, renderingMode: .alwaysTemplate),
-        isEnabled: true,
+        rightImage: nil, // UIImage(systemName: "chevron.down")?
+        // .withTintColor(SKStyleAsset.ghost.color, renderingMode: .alwaysTemplate),
+        isEnabled: false,
         action: { [weak self] in
           self?.moduleOutput?.openPanelConnection()
         }

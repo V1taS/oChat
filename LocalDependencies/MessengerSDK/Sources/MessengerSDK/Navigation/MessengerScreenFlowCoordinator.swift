@@ -20,7 +20,6 @@ public final class MessengerScreenFlowCoordinator: Coordinator<Void, MessengerSc
   private let services: IApplicationServices
   private var messengerListScreenModuleModule: MessengerListScreenModuleModule?
   private var messengerDialogModule: MessengerDialogScreenModule?
-  private var torConnectScreenModule: TorConnectScreenModule?
   
   // MARK: - Initialization
   
@@ -58,7 +57,7 @@ extension MessengerScreenFlowCoordinator: MessengerListScreenModuleOutput {
   }
   
   public func openPanelConnection() {
-    openTorConnectScreenModule()
+    // TODO: - 🟡
   }
   
   public func openNewMessengeScreen(contactAdress: String?) {
@@ -127,26 +126,6 @@ extension MessengerScreenFlowCoordinator: MessengerDialogScreenModuleOutput {
   }
 }
 
-// MARK: - TorConnectScreenModuleOutput
-
-extension MessengerScreenFlowCoordinator: TorConnectScreenModuleOutput {
-  public func refreshTorConnectService() {
-//    updateOnlineStatus(status: .offline)
-//    p2pChatManager.stop { [weak self] _ in
-//      self?.p2pChatManager.start(completion: { _ in })
-//    }
-  }
-  
-  public func torServiceConnected() {
-    torConnectScreenModule?.viewController.dismiss(animated: true)
-    torConnectScreenModule = nil
-  }
-  
-  public func stratTorConnectService() {
-    
-  }
-}
-
 // MARK: - Open modules
 
 private extension MessengerScreenFlowCoordinator {
@@ -161,13 +140,6 @@ private extension MessengerScreenFlowCoordinator {
     
     messengerDialogModule.viewController.hidesBottomBarWhenPushed = true
     navigationController?.pushViewController(messengerDialogModule.viewController, animated: true)
-  }
-  
-  func openTorConnectScreenModule() {
-    var torConnectScreenModule = TorConnectScreenAssembly().createModule(services: services)
-    self.torConnectScreenModule = torConnectScreenModule
-    torConnectScreenModule.input.moduleOutput = self
-    UIViewController.topController?.present(torConnectScreenModule.viewController, animated: true)
   }
 }
 
