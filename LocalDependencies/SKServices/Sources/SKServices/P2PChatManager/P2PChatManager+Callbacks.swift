@@ -86,7 +86,6 @@ private extension P2PChatManager {
       )
     }
     
-    // MARK: - Получение подтверждения запроса на передачу файла (Просто уведомление)
     toxCore.setFileControlCallback { friendNumber, fileId, control in }
     
     toxCore.setFileChunkRequestCallback { [weak self] friendNumber, fileId, position, length in
