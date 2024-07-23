@@ -18,7 +18,12 @@ public struct PushNotificationService: IPushNotificationService {
   
   // MARK: - Methods
   
-  public func sendPushNotification(title: String, body: String, customData: [String: Any], deviceToken: String) {
+  public func sendPushNotification(
+    title: String,
+    body: String,
+    customData: [String: Any],
+    deviceToken: String
+  ) {
 #if DEBUG
     let urlString = "\(Secrets.ushNotificationTestURL)\(deviceToken)"
 #else

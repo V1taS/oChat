@@ -12,13 +12,12 @@ public protocol IDeepLinkService {
   /// Сохраняет URL глубокой ссылки.
   /// - Parameters:
   ///   - url: URL, который необходимо сохранить.
-  ///   - completion: Блок выполнения, вызываемый по завершению.
-  func saveDeepLinkURL(_ url: URL, completion: (() -> Void)?)
+  func saveDeepLinkURL(_ url: URL) async
   
   /// Удаляет URL глубокой ссылки.
   func deleteDeepLinkURL()
   
   /// Получает адрес глубокой ссылки.
   /// - Parameter completion: Блок выполнения с адресом в виде строки или nil, если адрес не найден.
-  func getMessengerAdress(completion: ((_ adress: String?) -> Void)?)
+  func getMessengerAddress() async -> String?
 }

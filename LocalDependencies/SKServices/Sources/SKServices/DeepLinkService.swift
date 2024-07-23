@@ -19,31 +19,34 @@ public class DeepLinkService: IDeepLinkService {
   
   public init() {}
   
-  public func saveDeepLinkURL(_ url: URL, completion: (() -> Void)?) {
-    secureDataManagerService.saveModel(url, for: Constants.deepLinkServiceKey)
-    completion?()
+  public func saveDeepLinkURL(_ url: URL) async {
+    await withCheckedContinuation { continuation in
+      secureDataManagerService.saveModel(url, for: Constants.deepLinkServiceKey)
+      continuation.resume()
+    }
   }
   
   public func deleteDeepLinkURL() {
     secureDataManagerService.deleteData(for: Constants.deepLinkServiceKey)
   }
   
-  public func getMessengerAdress(completion: ((_ adress: String?) -> Void)?) {
-    guard let deepLinkURL: URL = secureDataManagerService.getModel(for: Constants.deepLinkServiceKey),
-          let adress = getAdressFrom(url: deepLinkURL.absoluteString) else {
-      completion?(nil)
-      return
+  public func getMessengerAddress() async -> String? {
+    await withCheckedContinuation { continuation in
+      guard let deepLinkURL: URL = secureDataManagerService.getModel(for: Constants.deepLinkServiceKey),
+            let address = getAddressFrom(url: deepLinkURL.absoluteString) else {
+        continuation.resume(returning: nil)
+        return
+      }
+      
+      continuation.resume(returning: address)
     }
-    
-    
-    completion?(adress)
   }
 }
 
 // MARK: - Private
 
 private extension DeepLinkService {
-  func getAdressFrom(url: String) -> String? {
+  func getAddressFrom(url: String) -> String? {
     guard url.hasPrefix(Constants.basePart) else {
       return nil
     }
