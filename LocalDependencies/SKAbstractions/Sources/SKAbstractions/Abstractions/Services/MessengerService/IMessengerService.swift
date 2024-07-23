@@ -9,8 +9,6 @@ import Foundation
 
 /// Протокол для управления сервисами, связанными с мессенджером
 public protocol IMessengerService {
-  /// Возвращает сервис обмена сообщениями.
-  func messagesEncryptionService(privateKey: String) -> IMessagesService
   
   /// Управляет чатом P2P через Tor.
   var p2pChatManager: IP2PChatManager { get }

@@ -15,11 +15,6 @@ public final class MessengerService: IMessengerService {
   
   private init() {}
   
-  /// Возвращает сервис обмена сообщениями.
-  public func messagesEncryptionService(privateKey: String) -> IMessagesService {
-    MessagesService(privateKey: privateKey)
-  }
-  
   public var p2pChatManager: any IP2PChatManager {
     P2PChatManager.shared
   }
