@@ -10,11 +10,9 @@ import Foundation
 /// Сервис для работы с системными службами
 public protocol ISystemService {
   /// Открывает системные настройки.
-  /// - Parameter Error: Ошибка `SystemServiceError`, если не удается открыть настройки.
-  func openSettings(completion: @escaping (Result<Void, SystemServiceError>) -> Void)
-  
-  /// Открывает системные настройки.
-  func openSettings()
+  /// - Parameter return: Результат открытия настроек
+  @discardableResult
+  func openSettings() async -> Result<Void, SystemServiceError>
   
   /// Копирует текст в буфер обмена.
   /// - Parameters:

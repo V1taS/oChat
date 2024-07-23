@@ -16,10 +16,6 @@ import LocalAuthentication
 public final class SystemService: ISystemService {
   public init() {}
   
-  public func openSettings() {
-    openSettings(completion: { _ in })
-  }
-  
   public func isFirstLaunch() -> Bool {
     let isFirstLaunchKey = "first_launch_key"
     let isFirstLaunch = !UserDefaults.standard.bool(forKey: isFirstLaunchKey)
@@ -31,22 +27,19 @@ public final class SystemService: ISystemService {
     return isFirstLaunch
   }
   
-  public func openSettings(completion: @escaping (Result<Void, SystemServiceError>) -> Void) {
-    guard let settingsURL = URL(string: UIApplication.openSettingsURLString) else {
-      DispatchQueue.main.async {
-        completion(.failure(.unableToCreateURL))
+  @discardableResult
+  public func openSettings() async -> Result<Void, SystemServiceError> {
+    await withCheckedContinuation { continuation in
+      guard let settingsURL = URL(string: UIApplication.openSettingsURLString) else {
+        continuation.resume(returning: .failure(.unableToCreateURL))
+        return
       }
-      return
-    }
-    
-    UIApplication.shared.open(settingsURL) { success in
-      if success {
-        DispatchQueue.main.async {
-          completion(.success(()))
-        }
-      } else {
-        DispatchQueue.main.async {
-          completion(.failure(.failedToOpenURL))
+      
+      UIApplication.shared.open(settingsURL) { success in
+        if success {
+          continuation.resume(returning: .success(()))
+        } else {
+          continuation.resume(returning: .failure(.failedToOpenURL))
         }
       }
     }
@@ -58,12 +51,10 @@ public final class SystemService: ISystemService {
   
   public func copyToClipboard(text: String, completion: @escaping (Result<Void, SystemServiceError>) -> Void) {
     UIPasteboard.general.string = text
-    DispatchQueue.main.async {
-      if UIPasteboard.general.string == text {
-        completion(.success(()))
-      } else {
-        completion(.failure(.failedToCopyToClipboard))
-      }
+    if UIPasteboard.general.string == text {
+      completion(.success(()))
+    } else {
+      completion(.failure(.failedToCopyToClipboard))
     }
   }
   
@@ -72,24 +63,18 @@ public final class SystemService: ISystemService {
     completion: @escaping (Result<Void, SKAbstractions.SystemServiceError>
     ) -> Void) {
     guard let url = URL(string: urlString) else {
-      DispatchQueue.main.async {
-        completion(.failure(.unableToCreateURL))
-      }
+      completion(.failure(.unableToCreateURL))
       return
     }
     
     let safariViewController = SFSafariViewController(url: url)
     
     if let topController = UIViewController.topController {
-      DispatchQueue.main.async {
-        topController.present(safariViewController, animated: true) {
-          completion(.success(()))
-        }
+      topController.present(safariViewController, animated: true) {
+        completion(.success(()))
       }
     } else {
-      DispatchQueue.main.async {
-        completion(.failure(.failedToOpenURL))
-      }
+      completion(.failure(.failedToOpenURL))
     }
   }
   
