@@ -126,18 +126,26 @@ private extension RootCoordinator {
   }
   
   func setupLaunchScreen() {
-    guard !isFirstLaunchScreen() else {
-      return
-    }
-    
-    services.messengerService.modelHandlerService.getMessengerModel { [weak self] model in
+    services.messengerService.modelHandlerService.getMessengerModel { [weak self] messengerModel in
+      guard let self else { return }
       DispatchQueue.main.async { [weak self] in
         guard let self else { return }
         
-        if model.appSettingsModel.appPassword != nil {
-          openAuthenticationFlowCoordinator(.loginPasscode(.loginFaceID))
+        /// В модельке нет сохраненных данных
+        if messengerModel.toxStateAsString == nil {
+          openInitialFlowCoordinator(isPresentScreenAnimated: true)
         } else {
-          openMainFlowCoordinator(isPresentScreenAnimated: true)
+          services.messengerService.modelHandlerService.getMessengerModel { [weak self] model in
+            DispatchQueue.main.async { [weak self] in
+              guard let self else { return }
+              
+              if model.appSettingsModel.appPassword != nil {
+                openAuthenticationFlowCoordinator(.loginPasscode(.loginFaceID))
+              } else {
+                openMainFlowCoordinator(isPresentScreenAnimated: true)
+              }
+            }
+          }
         }
       }
     }
@@ -152,20 +160,6 @@ private extension RootCoordinator {
         }
       }
     }
-  }
-  
-  func isFirstLaunchScreen() -> Bool {
-    let defaults = UserDefaults.standard
-    let hasLaunchedKey = "HasLaunchedInitialFlow"
-    
-    // Проверяем, была ли функция уже выполнена
-    if !defaults.bool(forKey: hasLaunchedKey) {
-      openInitialFlowCoordinator(isPresentScreenAnimated: true)
-      // Сохраняем, что функция была выполнена
-      defaults.set(true, forKey: hasLaunchedKey)
-      return true
-    }
-    return false
   }
   
   @objc

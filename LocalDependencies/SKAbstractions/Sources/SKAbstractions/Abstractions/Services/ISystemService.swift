@@ -73,4 +73,7 @@ public protocol ISystemService {
   ///  Если пароль установлен, возвращает `.success`.
   ///  В противном случае возвращает `.failure` с ошибкой `SystemServiceError.passcodeNotSet`.
   func checkIfPasscodeIsSet(completion: ((Result<Void, SystemServiceError>) -> Void)?)
+  
+  /// Определяет, первый ли это запуск приложения
+  func isFirstLaunch() -> Bool
 }

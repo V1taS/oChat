@@ -44,7 +44,6 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     window = TouchWindow(windowScene: windowScene)
     window?.makeKeyAndVisible()
 
-    clearDataOnFirstLaunch()
     configurators().configure()
     rootCoordinator = RootCoordinator(services)
     rootCoordinator?.start()
@@ -67,22 +66,10 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 private extension SceneDelegate {
   func configurators() -> [Configurator] {
     return [
+      FirstLaunchConfigurator(services: services),
       AppearanceConfigurator(services: services),
       ConfigurationValueConfigurator(services: services),
       BanScreenshotConfigurator(window: window)
     ]
-  }
-  
-  func clearDataOnFirstLaunch() {
-    let isFirstLaunchKey = "first_launch_key"
-    
-    guard !UserDefaults.standard.bool(forKey: isFirstLaunchKey) else {
-      return
-    }
-    services.messengerService.modelHandlerService.deleteAllData()
-    
-    /// Первый запуск приложения
-    UserDefaults.standard.set(true, forKey: isFirstLaunchKey)
-    return
   }
 }

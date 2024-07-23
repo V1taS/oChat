@@ -7,15 +7,15 @@
 
 // MARK: - Stories
 
-"Stories.Title.First" = "Welcome to oChat";
-"Stories.Title.Second" = "Be invisible, stay anonymous";
-"Stories.Title.Third" = "Direct connections, maximum freedom";
-"Stories.Title.Fourth" = "Your privacy is securely protected";
-"Stories.Title.Fifth" = "One more thing...";
+"Stories.Title.First" = "Introducing oChat";
+"Stories.Title.Second" = "Be Invisible, Stay Anonymous";
+"Stories.Title.Third" = "Direct Connection, Complete Freedom";
+"Stories.Title.Fourth" = "Your Privacy Under Strong Protection";
+"Stories.Title.Fifth" = "This is Just the Beginning...";
 
-"Stories.Subtitle.First" = "Anonymity, P2P, Encryption";
-"Stories.Subtitle.Second" = "We use TOR.\nDefend yourself against tracking and surveillance";
-"Stories.Subtitle.Third" = "Peer-to-peer (P2P) technology facilitates direct communication users without the need for central servers";
-"Stories.Subtitle.Fourth" = "Encryption is a powerful security technique that converts data into an unreadable format, protecting it from unauthorized access";
+"Stories.Subtitle.First" = "Anonymity, Direct Connection, Multi-layer Encryption";
+"Stories.Subtitle.Second" = "With oChat, you are always safe. Our unique protection system preserves your anonymity";
+"Stories.Subtitle.Third" = "Our Peer-to-Peer (P2P) technology ensures direct communication, bypassing central servers, for complete freedom and speed";
+"Stories.Subtitle.Fourth" = "Powerful multi-layer encryption turns your data into an unreadable format, protecting it from unauthorized access";
 "Stories.Subtitle.Fifth" = "";
 "Stories.Button.title" = "Continue";

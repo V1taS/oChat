@@ -20,6 +20,17 @@ public final class SystemService: ISystemService {
     openSettings(completion: { _ in })
   }
   
+  public func isFirstLaunch() -> Bool {
+    let isFirstLaunchKey = "first_launch_key"
+    let isFirstLaunch = !UserDefaults.standard.bool(forKey: isFirstLaunchKey)
+    
+    if isFirstLaunch {
+      UserDefaults.standard.set(true, forKey: isFirstLaunchKey)
+    }
+    
+    return isFirstLaunch
+  }
+  
   public func openSettings(completion: @escaping (Result<Void, SystemServiceError>) -> Void) {
     guard let settingsURL = URL(string: UIApplication.openSettingsURLString) else {
       DispatchQueue.main.async {
