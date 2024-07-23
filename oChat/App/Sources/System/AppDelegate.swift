@@ -8,13 +8,9 @@
 
 import UIKit
 import SKServices
-import AVFAudio
 
 @main
 final class AppDelegate: UIResponder, UIApplicationDelegate {
-  
-  private var backgroundTask: UIBackgroundTaskIdentifier = .invalid
-  private var audioPlayer: AVAudioPlayer?
   
   func application(
     _ application: UIApplication,
@@ -24,28 +20,6 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     // Проверка, был ли запуск из-за нажатия на уведомление
     if let notificationOption = launchOptions?[.remoteNotification] as? [String: AnyObject] {
       handleNotification(notificationOption)
-    }
-    
-    // FIXME: - Делаем приложение постоянно активным (Аппл не пропустит такой хак, надо будет подумать)
-    // Настройка аудиосессии для работы в фоне
-    let audioSession = AVAudioSession.sharedInstance()
-    do {
-      try audioSession.setCategory(.playback, mode: .default)
-      try audioSession.setActive(true)
-    } catch {
-      print("Failed to set up audio session")
-    }
-    
-    // Запуск пустого аудиоплеера для работы в фоне
-    if let audioFilePath = Bundle.main.path(forResource: "silence", ofType: "mp3") {
-      let audioFileURL = URL(fileURLWithPath: audioFilePath)
-      do {
-        audioPlayer = try AVAudioPlayer(contentsOf: audioFileURL)
-        audioPlayer?.numberOfLoops = -1 // Бесконечный цикл
-        audioPlayer?.play()
-      } catch {
-        print("Failed to play audio")
-      }
     }
     return true
   }
@@ -161,29 +135,5 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
         }
       }
     }
-  }
-}
-
-// MARK: - Endless cycle in background
-
-extension AppDelegate {
-  func applicationDidEnterBackground(_ application: UIApplication) {
-    startBackgroundTask()
-  }
-  
-  func applicationWillEnterForeground(_ application: UIApplication) {
-    endBackgroundTask()
-  }
-  
-  func startBackgroundTask() {
-    backgroundTask = UIApplication.shared.beginBackgroundTask {
-      self.endBackgroundTask()
-    }
-    assert(backgroundTask != .invalid)
-  }
-  
-  func endBackgroundTask() {
-    UIApplication.shared.endBackgroundTask(backgroundTask)
-    backgroundTask = .invalid
   }
 }
