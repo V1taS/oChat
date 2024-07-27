@@ -70,7 +70,8 @@ final class MessengerListScreenModulePresenter: ObservableObject {
           .init(
             messageType: .systemSuccess,
             messageStatus: .sent,
-            message: "Вы успешно очистили всю историю переписки",
+            message: MessengerSDKStrings.MessengerListScreenModuleLocalization
+              .messageSuccessfullyClearedAllChatTitle,
             replyMessageText: nil,
             images: [],
             videos: [],
@@ -137,7 +138,12 @@ extension MessengerListScreenModulePresenter: MessengerListScreenModuleModuleInp
   
   func confirmRequestForDialog(contactModel: ContactModel) async {
     guard let toxPublicKey = contactModel.toxPublicKey else {
-      interactor.showNotification(.negative(title: "Нет публичного ключа: toxPublicKey"))
+      interactor.showNotification(
+        .negative(
+          title: MessengerSDKStrings.MessengerListScreenModuleLocalization
+            .notificationPublicKeyMissingTitle
+        )
+      )
       return
     }
     
@@ -148,7 +154,12 @@ extension MessengerListScreenModulePresenter: MessengerListScreenModuleModuleInp
       moduleOutput?.dataModelHasBeenUpdated()
       await updateListContacts()
     } else {
-      interactor.showNotification(.negative(title: "Ошибка добавления контакта"))
+      interactor.showNotification(
+        .negative(
+          title: MessengerSDKStrings.MessengerListScreenModuleLocalization
+            .notificationErrorAddingContactTitle
+        )
+      )
       await interactor.removeContactModels(contactModel)
       moduleOutput?.dataModelHasBeenUpdated()
       await updateListContacts()
@@ -157,17 +168,32 @@ extension MessengerListScreenModulePresenter: MessengerListScreenModuleModuleInp
   
   func cancelRequestForDialog(contactModel: ContactModel) async {
     await removeContactModels(contactModel)
-    interactor.showNotification(.positive(title: "Контакт был удален"))
+    interactor.showNotification(
+      .positive(
+        title: MessengerSDKStrings.MessengerListScreenModuleLocalization
+          .notificationContactHasBeenDeletedTitle
+      )
+    )
   }
   
   func sendMessage(contact: ContactModel) async {
     guard contact.status == .online else {
-      interactor.showNotification(.negative(title: "Контакт не в сети"))
+      interactor.showNotification(
+        .negative(
+          title: MessengerSDKStrings.MessengerListScreenModuleLocalization
+            .notificationContactIsOfflineTitle
+        )
+      )
       return
     }
     
     guard let updatedContactModel = await checkingContactPublicKey(contact: contact) else {
-      interactor.showNotification(.negative(title: "Отсутствует публичный ключ"))
+      interactor.showNotification(
+        .negative(
+          title: MessengerSDKStrings.MessengerListScreenModuleLocalization
+            .notificationPublicKeyMissingTitle
+        )
+      )
       return
     }
     
@@ -437,7 +463,12 @@ private extension MessengerListScreenModulePresenter {
     senderPushNotificationToken: String?
   ) async -> (recipientTorAddress: String, requestModel: MessengerNetworkRequestModel)? {
     guard let senderAddress else {
-      interactor.showNotification(.negative(title: "Нет адреса получателя!"))
+      interactor.showNotification(
+        .negative(
+          title: MessengerSDKStrings.MessengerListScreenModuleLocalization
+            .notificationNoRecipientAddressTitle
+        )
+      )
       return nil
     }
     
@@ -456,7 +487,12 @@ private extension MessengerListScreenModulePresenter {
   
   func checkingContactPublicKey(contact: ContactModel) async -> ContactModel? {
     guard let toxAddress = contact.toxAddress else {
-      interactor.showNotification(.negative(title: "Неправильный адрес контакта"))
+      interactor.showNotification(
+        .negative(
+          title: MessengerSDKStrings.MessengerListScreenModuleLocalization
+            .notificationIncorrectContactAddressTitle
+        )
+      )
       return nil
     }
     
@@ -472,7 +508,12 @@ private extension MessengerListScreenModulePresenter {
     contact: ContactModel
   ) async -> (recipientTorAddress: String, requestModel: MessengerNetworkRequestModel)? {
     guard let senderPublicKey = interactor.publicKey(from: interactor.getDeviceIdentifier()) else {
-      interactor.showNotification(.negative(title: "Не получилось создать Публичный ключ для шифрования"))
+      interactor.showNotification(
+        .negative(
+          title: MessengerSDKStrings.MessengerListScreenModuleLocalization
+            .notificationFailedCreatePublicKeyTitle
+        )
+      )
       return nil
     }
     
@@ -603,8 +644,8 @@ private extension MessengerListScreenModulePresenter {
   func sendLocalNotification(contactModel: ContactModel) {
     let address: String = "\(contactModel.toxAddress?.formatString(minTextLength: 10) ?? "unknown")"
     let content = UNMutableNotificationContent()
-    content.title = "Новое сообщение"
-    content.body = "У вас есть новое сообщение в чате от \(address)."
+    content.title = MessengerSDKStrings.MessengerListScreenModuleLocalization.localNotificationTitle
+    content.body = "\(MessengerSDKStrings.MessengerListScreenModuleLocalization.localNotificationBody) \(address)."
     content.sound = UNNotificationSound.default
     
     let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)

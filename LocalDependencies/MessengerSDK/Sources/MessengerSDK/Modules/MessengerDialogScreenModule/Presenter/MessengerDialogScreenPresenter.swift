@@ -125,9 +125,17 @@ final class MessengerDialogScreenPresenter: ObservableObject {
     interactor.saveImageToGallery(imageURL) { [weak self] isSuccess in
       guard let self else { return }
       if isSuccess {
-        interactor.showNotification(.positive(title: "Изображение сохранено в галерее"))
+        interactor.showNotification(
+          .positive(
+            title: MessengerSDKStrings.MessengerDialogScreenLocalization.imageSavedToGalleryTitle
+          )
+        )
       } else {
-        interactor.showNotification(.negative(title: "Ошибка сохранения"))
+        interactor.showNotification(
+          .negative(
+            title: MessengerSDKStrings.MessengerDialogScreenLocalization.savingErrorTitle
+          )
+        )
       }
     }
   }
@@ -136,9 +144,17 @@ final class MessengerDialogScreenPresenter: ObservableObject {
     interactor.saveVideoToGallery(imageURL) { [weak self] isSuccess in
       guard let self else { return }
       if isSuccess {
-        interactor.showNotification(.positive(title: "Видео сохранено в галерее"))
+        interactor.showNotification(
+          .positive(
+            title: MessengerSDKStrings.MessengerDialogScreenLocalization.videoSavedToGalleryTitle
+          )
+        )
       } else {
-        interactor.showNotification(.negative(title: "Ошибка сохранения"))
+        interactor.showNotification(
+          .negative(
+            title: MessengerSDKStrings.MessengerDialogScreenLocalization.savingErrorTitle
+          )
+        )
       }
     }
     await impactFeedback.impactOccurred()
@@ -385,8 +401,15 @@ final class MessengerDialogScreenPresenter: ObservableObject {
     impactFeedback.impactOccurred()
     Timer.scheduledTimer(withTimeInterval: 0.4, repeats: false) { [weak self] _ in
       guard let self else { return }
+      let textCopiedTitle = MessengerSDKStrings.MessengerDialogScreenLocalization
+        .textCopiedTitle
+      
       interactor.copyToClipboard(text: text)
-      interactor.showNotification(.positive(title: "Текст скопирован"))
+      interactor.showNotification(
+        .positive(
+          title: textCopiedTitle
+        )
+      )
     }
   }
   
@@ -402,16 +425,25 @@ final class MessengerDialogScreenPresenter: ObservableObject {
   
   func sendPushNotification() async {
     guard stateContactModel.pushNotificationToken != nil else {
-      interactor.showNotification(.negative(title: "Контакт не включил уведомления на устройстве!"))
+      let contactDidNotEnableNotificationsTitle = MessengerSDKStrings.MessengerDialogScreenLocalization
+        .contactDidNotEnableNotificationsTitle
+      
+      interactor.showNotification(
+        .negative(
+          title: "\(contactDidNotEnableNotificationsTitle)!"
+        )
+      )
       return
     }
     
+    let youNotifiedContactTitle = MessengerSDKStrings.MessengerDialogScreenLocalization
+      .youNotifiedContactTitle
     var updatedContactModel = stateContactModel
     updatedContactModel.messenges.append(
       .init(
         messageType: .systemSuccess,
         messageStatus: .sent,
-        message: "Вы уведомили вашего контакта, что вы хотите пообщаться. Ожидайте его появления в чате.",
+        message: youNotifiedContactTitle,
         replyMessageText: nil,
         images: [],
         videos: [],
@@ -441,7 +473,10 @@ extension MessengerDialogScreenPresenter: MessengerDialogScreenModuleInput {
       updateCenterBarButtonView()
       return
     }
-    updateCenterBarButtonView(descriptionForSendFile: "Передача файла: \(progress)%")
+    
+    let fileTransferTitle = MessengerSDKStrings.MessengerDialogScreenLocalization
+      .fileTransferTitle
+    updateCenterBarButtonView(descriptionForSendFile: "\(fileTransferTitle): \(progress)%")
   }
   
   func handleFileReceive(progress: Int, publicToxKey: String) {
@@ -453,7 +488,9 @@ extension MessengerDialogScreenPresenter: MessengerDialogScreenModuleInput {
       updateCenterBarButtonView()
       return
     }
-    updateCenterBarButtonView(descriptionForSendFile: "Получение файла: \(progress)%")
+    let receivingFileTitle = MessengerSDKStrings.MessengerDialogScreenLocalization
+      .receivingFileTitle
+    updateCenterBarButtonView(descriptionForSendFile: "\(receivingFileTitle): \(progress)%")
   }
   
   func updateDialog() {
@@ -566,7 +603,8 @@ private extension MessengerDialogScreenPresenter {
         title = toxAddress
       }
       
-      var descriptionView = stateContactModel.isTyping ? "Печатает..." : stateContactModel.status.title
+      let typingTitle = MessengerSDKStrings.MessengerDialogScreenLocalization.typingTitle
+      var descriptionView = stateContactModel.isTyping ? "\(typingTitle)..." : stateContactModel.status.title
       if let descriptionForSendFile {
         descriptionView = descriptionForSendFile
       }
@@ -582,8 +620,8 @@ private extension MessengerDialogScreenPresenter {
     var contactUpdated = contactModel
     let publicKeyIsEmpty = (stateContactModel.encryptionPublicKey ?? "").isEmpty
     
-    let sender = "Поздравляем! Вас успешно добавили в контакты. Теперь дождитесь, когда ваш новый контакт вам напишет"
-    let receiver = "Поздравляем! Вы успешно добавили контакт. Пожалуйста, отправьте сообщение первым, чтобы начать общение"
+    let sender = MessengerSDKStrings.MessengerDialogScreenLocalization.messageWelcomeSender
+    let receiver = MessengerSDKStrings.MessengerDialogScreenLocalization.messageWelcomeReceiver
     
     contactUpdated.messenges.append(
       .init(

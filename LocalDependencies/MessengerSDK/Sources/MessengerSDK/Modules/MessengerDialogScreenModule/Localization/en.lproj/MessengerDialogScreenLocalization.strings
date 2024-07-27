@@ -8,31 +8,39 @@
 // MARK: - State
 
 "State.Notification.MessageFailure" = "Something went wrong";
-
-"Messenger.Initial.Header.Title" = "Start an anonymous dialogue";
-"Messenger.Initial.Header.Description" = "Use the capabilities of Tox and TOR for maximum security and anonymity of communication. Only you and your interlocutor see messages.";
-"Messenger.Initial.Button.Title" = "Send a correspondence request";
-"Messenger.Initial.One.Title" = "Simplicity and innovation";
-"Messenger.Initial.One.Description" = "Simply add a user and each message will be encrypted multiple times and transmitted directly through secure channels.";
-"Messenger.Initial.Two.Title" = "Impeccable security";
-"Messenger.Initial.Two.Description" = "The unique combination of Tox and TOR ensures that your data is transmitted directly and remains anonymous, providing unrivaled protection against interception.";
-"Messenger.Initial.Three.Title" = "Absolute confidentiality";
-"Messenger.Initial.Three.Description" = "Messages are not stored on servers for even a second. Direct p2p connection via Tox and TOR encryption ensure that no one except you and your interlocutor can read your messages.";
-"Messenger.Initial.Note" = "The request was sent successfully. We can't tell if a contact is online until they confirm a message request. If a contact is offline, they won't receive an invitation. You can resend later.";
+"Messenger.Initial.Header.Title" = "Start an Anonymous Chat";
+"Messenger.Initial.Header.Description" = "Use our features for maximum security and anonymity in communication. Only you and your contact can see the messages.";
+"Messenger.Initial.Button.Title" = "Send Chat Request";
+"Messenger.Initial.One.Title" = "Simplicity and Innovation";
+"Messenger.Initial.One.Description" = "Add a user, and every message will be encrypted multiple times and transmitted directly through secure channels.";
+"Messenger.Initial.Two.Title" = "Flawless Security";
+"Messenger.Initial.Two.Description" = "Our technologies ensure that your data is transmitted directly and remains anonymous, providing protection against interception.";
+"Messenger.Initial.Three.Title" = "Absolute Confidentiality";
+"Messenger.Initial.Three.Description" = "Messages are not stored on servers for even a second. Direct p2p connection guarantees that no one but you and your contact can read them.";
+"Messenger.Initial.Note" = "Request sent successfully. We cannot know if the contact is online until they confirm the chat request. If the contact is offline, they will not receive the invitation. You can resend it later.";
 "Messenger.Initial.Request" = "Enter recipient's address";
-"Messenger.Initial.Message" = "Enter your message";
-
-"Messenger.Request.Header.Title" = "Request for anonymous dialogue";
-"Messenger.Request.Header.Description" = "You have received a request to communicate via Tox and TOR. Only you and the sender will see your messages.";
-"Messenger.Request.Button.Title" = "Accept request";
-"Messenger.Request.Button.Cancel.Title" = "Reject request";
-"Messenger.Request.One.Title" = "Simplicity and protection";
-"Messenger.Request.One.Description" = "Once you accept the request, you can begin secure communication. Every message is encrypted and transmitted directly through secure channels.";
-"Messenger.Request.Two.Title" = "Guaranteed safety";
-"Messenger.Request.Two.Description" = "Tox and TOR enable data transfer directly and anonymously, protecting your communications from interception.";
-"Messenger.Request.Three.Title" = "Complete confidentiality";
-"Messenger.Request.Three.Description" = "Your messages will not be stored on servers. Direct p2p connection via Tox and TOR encryption ensure that no one but you and the sender can read your messages.";
-
-"Messenger.Message.SendRequest" = "Send request";
-"Messenger.Message.SendRequestIn" = "Send request in";
+"Messenger.Initial.Message" = "Enter message";
+"Messenger.Request.Header.Title" = "Anonymous Chat Request";
+"Messenger.Request.Header.Description" = "You have received a chat request. Only you and the sender will see the messages.";
+"Messenger.Request.Button.Title" = "Accept Request";
+"Messenger.Request.Button.Cancel.Title" = "Decline Request";
+"Messenger.Request.One.Title" = "Simplicity and Protection";
+"Messenger.Request.One.Description" = "By accepting the request, you can start secure communication. Each message is encrypted and transmitted directly through secure channels.";
+"Messenger.Request.Two.Title" = "Guaranteed Security";
+"Messenger.Request.Two.Description" = "Our technologies ensure that your data is transmitted directly and anonymously, protecting your messages from interception.";
+"Messenger.Request.Three.Title" = "Complete Confidentiality";
+"Messenger.Request.Three.Description" = "Your messages will not be stored on servers. Direct p2p connection guarantees that no one but you and the sender can read them.";
+"Messenger.Message.SendRequest" = "Send Request";
+"Messenger.Message.SendRequestIn" = "Send Request in";
 "Messenger.Message.seconds" = "sec.";
+"Messenger.Message.Welcome.Sender" = "Congratulations! You have been successfully added to the contacts. Now wait for your new contact to message you.";
+"Messenger.Message.Welcome.Receiver" = "Congratulations! You have successfully added the contact. Please send a message first to start the chat.";
+"Messenger.Typing.Title" = "Typing";
+"Messenger.ReceivingFile.Title" = "Receiving File";
+"Messenger.FileTransfer.Title" = "File Transfer";
+"Message.YouNotifiedContact.Title" = "You have notified your contact that you want to chat. Wait for them to appear in the chat.";
+"Messenger.ContactDidNotEnableNotifications.Title" = "Contact did not enable notifications on the device";
+"Messenger.TextCopied.Title" = "Text Copied";
+"Messenger.SavingError.Title" = "Saving Error";
+"Messenger.VideoSavedToGallery.Title" = "Video Saved to Gallery";
+"Messenger.ImageSavedToGallery.Title" = "Image Saved to Gallery";

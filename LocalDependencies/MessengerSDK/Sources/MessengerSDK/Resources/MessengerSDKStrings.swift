@@ -16,6 +16,46 @@ public enum MessengerSDKStrings {
       "MessengerListScreenModuleLocalization",
       "State.Banner.PushNotification.Title"
     )
+    public static let localNotificationTitle = MessengerSDKStrings.tr(
+      "MessengerListScreenModuleLocalization",
+      "LocalNotification.Title"
+    )
+    public static let localNotificationBody = MessengerSDKStrings.tr(
+      "MessengerListScreenModuleLocalization",
+      "LocalNotification.Body"
+    )
+    public static let notificationFailedCreatePublicKeyTitle = MessengerSDKStrings.tr(
+      "MessengerListScreenModuleLocalization",
+      "Notification.FailedCreatePublicKey.Title"
+    )
+    public static let notificationIncorrectContactAddressTitle = MessengerSDKStrings.tr(
+      "MessengerListScreenModuleLocalization",
+      "Notification.IncorrectContactAddress.Title"
+    )
+    public static let notificationNoRecipientAddressTitle = MessengerSDKStrings.tr(
+      "MessengerListScreenModuleLocalization",
+      "Notification.NoRecipientAddress.Title"
+    )
+    public static let notificationPublicKeyMissingTitle = MessengerSDKStrings.tr(
+      "MessengerListScreenModuleLocalization",
+      "Notification.PublicKeyMissing.Title"
+    )
+    public static let notificationContactIsOfflineTitle = MessengerSDKStrings.tr(
+      "MessengerListScreenModuleLocalization",
+      "Notification.ContactIsOffline.Title"
+    )
+    public static let notificationContactHasBeenDeletedTitle = MessengerSDKStrings.tr(
+      "MessengerListScreenModuleLocalization",
+      "Notification.ContactHasBeenDeleted.Title"
+    )
+    public static let notificationErrorAddingContactTitle = MessengerSDKStrings.tr(
+      "MessengerListScreenModuleLocalization",
+      "Notification.ErrorAddingContact.Title"
+    )
+    public static let messageSuccessfullyClearedAllChatTitle = MessengerSDKStrings.tr(
+      "MessengerListScreenModuleLocalization",
+      "Message.SuccessfullyClearedAllChat.Title"
+    )
   }
   public enum MessengerDialogScreenLocalization {
     public static let stateNotificationFailureTitle = MessengerSDKStrings.tr(
@@ -110,7 +150,7 @@ public enum MessengerSDKStrings {
     public static let messageText = MessengerSDKStrings.tr(
       "MessengerDialogScreenLocalization",
       "Messenger.Initial.Message"
-    ) 
+    )
     public static let seconds = MessengerSDKStrings.tr(
       "MessengerDialogScreenLocalization",
       "Messenger.Message.seconds"
@@ -123,6 +163,50 @@ public enum MessengerSDKStrings {
       "MessengerDialogScreenLocalization",
       "Messenger.Message.SendRequestIn"
     )
+    public static let messageWelcomeSender = MessengerSDKStrings.tr(
+      "MessengerDialogScreenLocalization",
+      "Messenger.Message.Welcome.Sender"
+    )
+    public static let messageWelcomeReceiver = MessengerSDKStrings.tr(
+      "MessengerDialogScreenLocalization",
+      "Messenger.Message.Welcome.Receiver"
+    )
+    public static let typingTitle = MessengerSDKStrings.tr(
+      "MessengerDialogScreenLocalization",
+      "Messenger.Typing.Title"
+    )
+    public static let receivingFileTitle = MessengerSDKStrings.tr(
+      "MessengerDialogScreenLocalization",
+      "Messenger.ReceivingFile.Title"
+    )
+    public static let fileTransferTitle = MessengerSDKStrings.tr(
+      "MessengerDialogScreenLocalization",
+      "Messenger.FileTransfer.Title"
+    )
+    public static let youNotifiedContactTitle = MessengerSDKStrings.tr(
+      "MessengerDialogScreenLocalization",
+      "Message.YouNotifiedContact.Title"
+    )
+    public static let contactDidNotEnableNotificationsTitle = MessengerSDKStrings.tr(
+      "MessengerDialogScreenLocalization",
+      "Messenger.ContactDidNotEnableNotifications.Title"
+    )
+    public static let textCopiedTitle = MessengerSDKStrings.tr(
+      "MessengerDialogScreenLocalization",
+      "Messenger.TextCopied.Title"
+    )
+    public static let savingErrorTitle = MessengerSDKStrings.tr(
+      "MessengerDialogScreenLocalization",
+      "Messenger.SavingError.Title"
+    )
+    public static let videoSavedToGalleryTitle = MessengerSDKStrings.tr(
+      "MessengerDialogScreenLocalization",
+      "Messenger.VideoSavedToGallery.Title"
+    )
+    public static let imageSavedToGalleryTitle = MessengerSDKStrings.tr(
+      "MessengerDialogScreenLocalization",
+      "Messenger.ImageSavedToGallery.Title"
+    )
   }
   public enum MessengerProfile {
     public static let copyButtonTitle = MessengerSDKStrings.tr(
@@ -132,16 +216,6 @@ public enum MessengerSDKStrings {
     public static let description = MessengerSDKStrings.tr(
       "MessengerProfileModuleLocalization",
       "Messenger.Profile.Description"
-    )
-  }
-  public enum TorConnectScreen {
-    public static let toxStatus = MessengerSDKStrings.tr(
-      "TorConnectScreenLocalization",
-      "TorConnectScreen.TOXStatus"
-    )
-    public static let torStatus = MessengerSDKStrings.tr(
-      "TorConnectScreenLocalization",
-      "TorConnectScreen.TORStatus"
     )
   }
 }

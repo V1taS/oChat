@@ -8,31 +8,39 @@
 // MARK: - State
 
 "State.Notification.MessageFailure" = "Что-то пошло не так";
-
 "Messenger.Initial.Header.Title" = "Начните анонимный диалог";
-"Messenger.Initial.Header.Description" = "Используйте возможности Tox и TOR для максимальной безопасности и анонимности общения. Только вы и ваш собеседник видите сообщения.";
+"Messenger.Initial.Header.Description" = "Используйте наши возможности для максимальной безопасности и анонимности общения. Только вы и ваш собеседник видите сообщения.";
 "Messenger.Initial.Button.Title" = "Отправить запрос на переписку";
 "Messenger.Initial.One.Title" = "Простота и инновации";
-"Messenger.Initial.One.Description" = "Просто добавьте пользователя, и каждое сообщение будет многократно шифроваться и передаваться напрямую через безопасные каналы.";
+"Messenger.Initial.One.Description" = "Добавьте пользователя, и каждое сообщение будет многократно шифроваться и передаваться напрямую через защищённые каналы.";
 "Messenger.Initial.Two.Title" = "Безупречная безопасность";
-"Messenger.Initial.Two.Description" = "Уникальное сочетание Tox и TOR гарантирует, что ваши данные передаются напрямую и остаются анонимными, обеспечивая непревзойденную защиту от перехвата.";
+"Messenger.Initial.Two.Description" = "Наши технологии гарантируют, что ваши данные передаются напрямую и остаются анонимными, обеспечивая защиту от перехвата.";
 "Messenger.Initial.Three.Title" = "Абсолютная конфиденциальность";
-"Messenger.Initial.Three.Description" = "Сообщения не хранятся на серверах ни на секунду. Прямое p2p соединение через Tox и шифрование TOR гарантируют, что никто, кроме вас и вашего собеседника, не сможет прочитать ваши сообщения.";
+"Messenger.Initial.Three.Description" = "Сообщения не хранятся на серверах ни на секунду. Прямое p2p соединение гарантирует, что никто, кроме вас и вашего собеседника, не сможет их прочитать.";
 "Messenger.Initial.Note" = "Запрос отправлен успешно. Мы не можем узнать, в сети ли контакт, пока он не подтвердит запрос на переписку. Если контакт не в сети, он не получит приглашение. Вы сможете повторить отправку позже.";
 "Messenger.Initial.Request" = "Введите адрес получателя";
 "Messenger.Initial.Message" = "Введите сообщение";
-
 "Messenger.Request.Header.Title" = "Запрос на анонимный диалог";
-"Messenger.Request.Header.Description" = "Вы получили запрос на общение через Tox и TOR. Ваши сообщения будут видеть только вы и отправитель.";
+"Messenger.Request.Header.Description" = "Вы получили запрос на общение. Ваши сообщения будут видеть только вы и отправитель.";
 "Messenger.Request.Button.Title" = "Принять запрос";
 "Messenger.Request.Button.Cancel.Title" = "Отклонить запрос";
 "Messenger.Request.One.Title" = "Простота и защита";
-"Messenger.Request.One.Description" = "Приняв запрос, вы можете начать безопасное общение. Каждое сообщение шифруется и передается напрямую через защищенные каналы.";
+"Messenger.Request.One.Description" = "Приняв запрос, вы можете начать безопасное общение. Каждое сообщение шифруется и передаётся напрямую через защищённые каналы.";
 "Messenger.Request.Two.Title" = "Гарантированная безопасность";
-"Messenger.Request.Two.Description" = "Tox и TOR обеспечивают передачу данных напрямую и анонимно, защищая ваши сообщения от перехвата.";
+"Messenger.Request.Two.Description" = "Наши технологии обеспечивают передачу данных напрямую и анонимно, защищая ваши сообщения от перехвата.";
 "Messenger.Request.Three.Title" = "Полная конфиденциальность";
-"Messenger.Request.Three.Description" = "Ваши сообщения не будут храниться на серверах. Прямое p2p соединение через Tox и шифрование TOR гарантируют, что никто, кроме вас и отправителя, не сможет прочитать ваши сообщения.";
-
+"Messenger.Request.Three.Description" = "Ваши сообщения не будут храниться на серверах. Прямое p2p соединение гарантирует, что никто, кроме вас и отправителя, не сможет их прочитать.";
 "Messenger.Message.SendRequest" = "Отправить запрос";
 "Messenger.Message.SendRequestIn" = "Отправить запрос через";
 "Messenger.Message.seconds" = "сек.";
+"Messenger.Message.Welcome.Sender" = "Поздравляем! Вас успешно добавили в контакты. Теперь дождитесь, когда ваш новый контакт вам напишет";
+"Messenger.Message.Welcome.Receiver" = "Поздравляем! Вы успешно добавили контакт. Пожалуйста, отправьте сообщение первым, чтобы начать общение";
+"Messenger.Typing.Title" = "Печатает";
+"Messenger.ReceivingFile.Title" = "Получение файла";
+"Messenger.FileTransfer.Title" = "Передача файла";
+"Message.YouNotifiedContact.Title" = "Вы уведомили вашего контакта, что вы хотите пообщаться. Ожидайте его появления в чате.";
+"Messenger.ContactDidNotEnableNotifications.Title" = "Контакт не включил уведомления на устройстве";
+"Messenger.TextCopied.Title" = "Текст скопирован";
+"Messenger.SavingError.Title" = "Ошибка сохранения";
+"Messenger.VideoSavedToGallery.Title" = "Видео сохранено в галерее";
+"Messenger.ImageSavedToGallery.Title" = "Изображение сохранено в галерее";

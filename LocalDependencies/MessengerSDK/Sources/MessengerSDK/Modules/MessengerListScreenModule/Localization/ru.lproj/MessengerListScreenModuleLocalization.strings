@@ -10,3 +10,13 @@
 "State.Header.Title" = "oChat!";
 "State.Notification.PasscodeNotSet.Title" = "Пароль на устройстве не установлен. Шифрование данных невозможно!";
 "State.Banner.PushNotification.Title" = "Когда вы офлайн, сообщения не могут быть доставлены. Однако, с функцией 'Позвать контакт' ваши друзья смогут уведомить вас о желании пообщаться. Для активации этой функции, пожалуйста, разрешите Push-уведомления.";
+"LocalNotification.Title" = "Новое сообщение";
+"LocalNotification.Body" = "У вас есть новое сообщение в чате от";
+"Notification.FailedCreatePublicKey.Title" = "Не получилось создать Публичный ключ для шифрования";
+"Notification.IncorrectContactAddress.Title" = "Неправильный адрес контакта";
+"Notification.NoRecipientAddress.Title" = "Нет адреса получателя";
+"Notification.PublicKeyMissing.Title" = "Отсутствует публичный ключ";
+"Notification.ContactIsOffline.Title" = "Контакт не в сети";
+"Notification.ContactHasBeenDeleted.Title" = "Контакт был удален";
+"Notification.ErrorAddingContact.Title" = "Ошибка добавления контакта";
+"Message.SuccessfullyClearedAllChat.Title" = "Вы успешно очистили всю историю переписки";

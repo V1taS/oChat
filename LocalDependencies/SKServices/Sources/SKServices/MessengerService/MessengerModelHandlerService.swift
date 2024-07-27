@@ -97,7 +97,13 @@ public final class MessengerModelHandlerService: IMessengerModelHandlerService {
 
 extension MessengerModelHandlerService {
   public func saveMessengerModel(_ model: MessengerModel) async {
-    secureDataManagerService.saveModel(model, for: Constants.messengerModelKey)
+    await withCheckedContinuation { continuation in
+      queue.async { [weak self] in
+        guard let self else { return }
+        self.secureDataManagerService.saveModel(model, for: Constants.messengerModelKey)
+        continuation.resume()
+      }
+    }
   }
 }
 
