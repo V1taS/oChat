@@ -92,13 +92,18 @@ extension SettingsScreenFlowCoordinator: NotificationsSettingsScreenModuleOutput
 extension SettingsScreenFlowCoordinator: PasscodeSettingsScreenModuleOutput {
   func openAuthorizationPasswordDisable() {
     openAuthenticationFlow(state: .loginPasscode(.loginFaceID)) { [weak self] in
-      self?.passcodeSettingsScreenModule?.input.successAuthorizationPasswordDisable()
+      Task { [weak self] in
+        await self?.passcodeSettingsScreenModule?.input.successAuthorizationPasswordDisable()
+      }
     }
   }
   
   func openNewAccessCode() {
     openAuthenticationFlow(state: .createPasscode(.enterPasscode)) { [weak self] in
-      self?.passcodeSettingsScreenModule?.input.updateScreen()
+      Task { [weak self] in
+        await self?.passcodeSettingsScreenModule?.input.updateScreen()
+      }
+      
       Timer.scheduledTimer(withTimeInterval: 1, repeats: false) { [weak self] _ in
         self?.services.userInterfaceAndExperienceService.notificationService.showNotification(
           .positive(
@@ -112,7 +117,10 @@ extension SettingsScreenFlowCoordinator: PasscodeSettingsScreenModuleOutput {
   
   func openChangeAccessCode() {
     openAuthenticationFlow(state: .changePasscode(.enterOldPasscode)) { [weak self] in
-      self?.passcodeSettingsScreenModule?.input.updateScreen()
+      Task { [weak self] in
+        await self?.passcodeSettingsScreenModule?.input.updateScreen()
+      }
+      
       Timer.scheduledTimer(withTimeInterval: 1, repeats: false) { [weak self] _ in
         self?.services.userInterfaceAndExperienceService.notificationService.showNotification(
           .positive(
@@ -249,28 +257,36 @@ private extension SettingsScreenFlowCoordinator {
     let activityViewController = UIActivityViewController(activityItems: [imageFile],
                                                           applicationActivities: nil)
     activityViewController.popoverPresentationController?.sourceView = messengerProfileModule?.viewController.view
-    activityViewController.excludedActivityTypes = [UIActivity.ActivityType.airDrop,
-                                                    UIActivity.ActivityType.postToFacebook,
-                                                    UIActivity.ActivityType.message,
-                                                    UIActivity.ActivityType.addToReadingList,
-                                                    UIActivity.ActivityType.assignToContact,
-                                                    UIActivity.ActivityType.copyToPasteboard,
-                                                    UIActivity.ActivityType.markupAsPDF,
-                                                    UIActivity.ActivityType.openInIBooks,
-                                                    UIActivity.ActivityType.postToFlickr,
-                                                    UIActivity.ActivityType.postToTencentWeibo,
-                                                    UIActivity.ActivityType.postToTwitter,
-                                                    UIActivity.ActivityType.postToVimeo,
-                                                    UIActivity.ActivityType.postToWeibo,
-                                                    UIActivity.ActivityType.print]
+    activityViewController.excludedActivityTypes = [
+      UIActivity.ActivityType.airDrop,
+      UIActivity.ActivityType.postToFacebook,
+      UIActivity.ActivityType.message,
+      UIActivity.ActivityType.addToReadingList,
+      UIActivity.ActivityType.assignToContact,
+      UIActivity.ActivityType.copyToPasteboard,
+      UIActivity.ActivityType.markupAsPDF,
+      UIActivity.ActivityType.openInIBooks,
+      UIActivity.ActivityType.postToFlickr,
+      UIActivity.ActivityType.postToTencentWeibo,
+      UIActivity.ActivityType.postToTwitter,
+      UIActivity.ActivityType.postToVimeo,
+      UIActivity.ActivityType.postToWeibo,
+      UIActivity.ActivityType.print
+    ]
     
     if UIDevice.current.userInterfaceIdiom == .pad {
       if let popup = activityViewController.popoverPresentationController {
         popup.sourceView = messengerProfileModule?.viewController.view
-        popup.sourceRect = CGRect(x: (messengerProfileModule?.viewController.view.frame.size.width ?? .zero) / 2,
-                                  y: (messengerProfileModule?.viewController.view.frame.size.height ?? .zero) / 4,
-                                  width: .zero,
-                                  height: .zero)
+        popup.sourceRect = CGRect(
+          x: (
+            messengerProfileModule?.viewController.view.frame.size.width ?? .zero
+          ) / 2,
+          y: (
+            messengerProfileModule?.viewController.view.frame.size.height ?? .zero
+          ) / 4,
+          width: .zero,
+          height: .zero
+        )
       }
     }
     
@@ -279,7 +295,7 @@ private extension SettingsScreenFlowCoordinator {
       animated: true,
       completion: {
         [weak self] in
-        Timer.scheduledTimer(withTimeInterval: 10, repeats: false) { [weak self] _ in
+        Timer.scheduledTimer(withTimeInterval: 20, repeats: false) { [weak self] _ in
           self?.services.dataManagementService.dataManagerService.deleteObjectWith(
             fileURL: imageFile,
             isRemoved: {
