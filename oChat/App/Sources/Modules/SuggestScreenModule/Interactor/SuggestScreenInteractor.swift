@@ -15,26 +15,26 @@ protocol SuggestScreenInteractorOutput: AnyObject {}
 protocol SuggestScreenInteractorInput {
   /// Запрос доступа к Уведомлениям
   /// - Parameter granted: Булево значение, указывающее, было ли предоставлено разрешение
-  func requestNotification(completion: @escaping (_ granted: Bool) -> Void)
+  func requestNotification() async -> Bool
+  
   /// Метод для проверки, включены ли уведомления
-  /// - Parameter enabled: Булево значение, указывающее, было ли включено уведомление
-  func isNotificationsEnabled(completion: @escaping (_ enabled: Bool) -> Void)
+  func isNotificationsEnabled() async -> Bool
+  
   /// Запрос доступа к Face ID для аутентификации
-  /// - Parameter granted: Булево значение, указывающее, было ли предоставлено разрешение
-  func requestFaceID(completion: @escaping (_ granted: Bool) -> Void)
+  func requestFaceID() async -> Bool
+  
   /// Получает модель настроек приложения `AppSettingsModel` асинхронно.
-  /// - Parameter completion: Блок завершения, который вызывается с `AppSettingsModel` после завершения операции.
-  func getAppSettingsModel(completion: @escaping (AppSettingsModel) -> Void)
+  func getAppSettingsModel() async -> AppSettingsModel
+  
   /// Включает или отключает аутентификацию по Face ID.
   /// - Parameters:
   ///   - value: Значение, указывающее, следует ли включить аутентификацию по Face ID.
-  ///   - completion: Опциональный блок завершения, вызываемый после сохранения изменений.
-  func setIsEnabledFaceID(_ value: Bool, completion: (() -> Void)?)
+  func setIsEnabledFaceID(_ value: Bool) async
+  
   /// Включает или отключает уведомления в приложении.
   /// - Parameters:
   ///   - value: Значение, указывающее, следует ли включить уведомления.
-  ///   - completion: Опциональный блок завершения, вызываемый после сохранения изменений.
-  func setIsEnabledNotifications(_ value: Bool, completion: (() -> Void)?)
+  func setIsEnabledNotifications(_ value: Bool) async
 }
 
 /// Интерактор
@@ -62,37 +62,28 @@ final class SuggestScreenInteractor {
 // MARK: - SuggestScreenInteractorInput
 
 extension SuggestScreenInteractor: SuggestScreenInteractorInput {
-  func isNotificationsEnabled(completion: @escaping (Bool) -> Void) {
-    Task {
-      let isNotificationsEnabled = await permissionService.isNotificationsEnabled()
-      completion(isNotificationsEnabled)
-    }
+  func isNotificationsEnabled() async -> Bool {
+    await permissionService.isNotificationsEnabled()
   }
   
-  func requestNotification(completion: @escaping (Bool) -> Void) {
-    Task {
-      let granted = await permissionService.requestNotification()
-      completion(granted)
-    }
+  func requestNotification() async -> Bool {
+    await permissionService.requestNotification()
   }
   
-  func requestFaceID(completion: @escaping (Bool) -> Void) {
-    Task {
-      let granted = await permissionService.requestFaceID()
-      completion(granted)
-    }
+  func requestFaceID() async -> Bool {
+    await permissionService.requestFaceID()
   }
   
-  func getAppSettingsModel(completion: @escaping (SKAbstractions.AppSettingsModel) -> Void) {
-    modelHandlerService.getAppSettingsModel(completion: completion)
+  func getAppSettingsModel() async -> AppSettingsModel {
+    await modelHandlerService.getAppSettingsModel()
   }
   
-  func setIsEnabledFaceID(_ value: Bool, completion: (() -> Void)?) {
-    appSettingsManager.setIsEnabledFaceID(value, completion: completion)
+  func setIsEnabledFaceID(_ value: Bool) async {
+    await appSettingsManager.setIsEnabledFaceID(value)
   }
   
-  func setIsEnabledNotifications(_ value: Bool, completion: (() -> Void)?) {
-    appSettingsManager.setIsEnabledNotifications(value, completion: completion)
+  func setIsEnabledNotifications(_ value: Bool) async {
+    await appSettingsManager.setIsEnabledNotifications(value)
   }
 }
 

@@ -11,44 +11,42 @@ import SKAbstractions
 /// События которые отправляем из `MessengerDialogScreenModule` в `Coordinator`
 public protocol MessengerDialogScreenModuleOutput: AnyObject {
   /// Экран диалога был закрыт
-  func messengerDialogWillDisappear()
+  func messengerDialogWillDisappear() async
   
   /// Пользователь отправил сообщение
-  func sendMessage(contact: ContactModel)
+  func sendMessage(contact: ContactModel) async
   
   /// Запросить переписку повторно
-  func sendInitiateChatFromDialog(contactModel: ContactModel)
+  func sendInitiateChatFromDialog(contactModel: ContactModel) async
   
   /// Подтвердить запрос на переписку
-  func confirmRequestForDialog(contactModel: ContactModel)
+  func confirmRequestForDialog(contactModel: ContactModel) async
   
   /// Отклонить запрос на переписку
-  func cancelRequestForDialog(contactModel: ContactModel)
+  func cancelRequestForDialog(contactModel: ContactModel) async
   
   /// Удалить сообщение
-  func removeMessage(id: String, contact: ContactModel)
+  func removeMessage(id: String, contact: ContactModel) async
   
   /// Сохраняет `ContactModel` асинхронно.
   /// - Parameters:
   ///   - model: Модель `ContactModel`, которая будутет сохранена.
-  func saveContactModel(_ model: ContactModel)
+  func saveContactModel(_ model: ContactModel) async
   
   /// Закрыть экран диалогов
-  func closeMessengerDialog()
+  func closeMessengerDialog() async
   
   /// Метод для установки статуса "печатает" для друга.
   /// - Parameters:
   ///   - isTyping: Статус "печатает" (true, если пользователь печатает).
   ///   - toxPublicKey: Публичный ключ друга
-  ///   - completion: Замыкание, вызываемое по завершении операции, с результатом успешного выполнения или ошибкой.
   func setUserIsTyping(
     _ isTyping: Bool,
-    to toxPublicKey: String,
-    completion: @escaping (Result<Void, Error>) -> Void
-  )
+    to toxPublicKey: String
+  ) async -> Result<Void, any Error>
   
   /// Метод для отправки push-уведомлений
-  func sendPushNotification(contact: ContactModel)
+  func sendPushNotification(contact: ContactModel) async
 }
 
 /// События которые отправляем из `Coordinator` в `MessengerDialogScreenModule`

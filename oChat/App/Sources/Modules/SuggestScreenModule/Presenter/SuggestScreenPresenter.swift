@@ -48,43 +48,19 @@ final class SuggestScreenPresenter: ObservableObject {
     factory.createSuggestModel(stateSuggestScreen)
   }
   
-  func suggestScreenConfirmButtonTapped() {
+  func suggestScreenConfirmButtonTapped() async {
     switch stateSuggestScreen {
     case .setAccessCode:
       moduleOutput?.suggestAccessCodeScreenConfirmButtonTapped()
     case .setFaceID:
-      interactor.requestFaceID { [weak self] granted in
-        guard let self else {
-          return
-        }
-        
-        interactor.setIsEnabledFaceID(granted) { [weak self] in
-          guard let self else {
-            return
-          }
-          
-          interactor.isNotificationsEnabled { [weak self] isEnabled in
-            guard let self else {
-              return
-            }
-            
-            moduleOutput?.suggestFaceIDScreenConfirmButtonTapped(isEnabled)
-          }
-        }
-      }
+      let granted = await interactor.requestFaceID()
+      await interactor.setIsEnabledFaceID(granted)
+      let isEnabled = await interactor.isNotificationsEnabled()
+      moduleOutput?.suggestFaceIDScreenConfirmButtonTapped(isEnabled)
     case .setNotifications:
-      interactor.requestNotification { [weak self] isNotification in
-        guard let self else {
-          return
-        }
-        interactor.setIsEnabledNotifications(isNotification) { [weak self] in
-          guard let self else {
-            return
-          }
-          
-          moduleOutput?.suggestNotificationScreenConfirmButtonTapped()
-        }
-      }
+      let isNotification = await interactor.requestNotification()
+      await interactor.setIsEnabledNotifications(isNotification)
+      moduleOutput?.suggestNotificationScreenConfirmButtonTapped()
     }
   }
 }
@@ -108,21 +84,16 @@ extension SuggestScreenPresenter: SceneViewModel {
     return .init(
       .text(
         OChatStrings.SuggestScreenLocalization.State.RightBarButton.title,
-        action: { [weak self] in
-          guard let self else {
-            return
-          }
-          
-          switch stateSuggestScreen {
-          case .setAccessCode, .setFaceID:
-            interactor.isNotificationsEnabled { [weak self] isEnabled in
-              guard let self else {
-                return
-              }
+        action: {
+          Task { [weak self] in
+            guard let self else { return }
+            switch stateSuggestScreen {
+            case .setAccessCode, .setFaceID:
+              let isEnabled = await interactor.isNotificationsEnabled()
               moduleOutput?.skipSuggestAccessCodeScreenButtonTapped(isEnabled)
+            case .setNotifications:
+              moduleOutput?.skipSuggestNotificationsScreenButtonTapped()
             }
-          case .setNotifications:
-            moduleOutput?.skipSuggestNotificationsScreenButtonTapped()
           }
         }
       )

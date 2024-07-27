@@ -56,9 +56,11 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
     _ application: UIApplication,
     didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data
   ) {
-    let tokenParts = deviceToken.map { data in String(format: "%02.2hhx", data) }
-    let token = tokenParts.joined()
-    MessengerService.shared.modelSettingsManager.saveMyPushNotificationToken(token, completion: {})
+    Task {
+      let tokenParts = deviceToken.map { data in String(format: "%02.2hhx", data) }
+      let token = tokenParts.joined()
+      await MessengerService.shared.modelSettingsManager.saveMyPushNotificationToken(token)
+    }
   }
   
   /// Этот метод вызывается, если регистрация устройства для удалённых уведомлений не удалась.
@@ -104,33 +106,29 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
   /// Обработка данных уведомления
   /// - Parameter userInfo: Данные, полученные из уведомления
   func handleNotification(_ userInfo: [AnyHashable: Any]) {
-    if let toxAddress = userInfo["toxAddress"] as? String {
-      MessengerService.shared.appSettingsManager.setIsNewMessagesAvailable(
-        true,
-        toxAddress: toxAddress,
-        completion: {}
-      )
-      
-      DispatchQueue.global().async {
-        MessengerService.shared.modelHandlerService.getContactModels { contactModels in
-          DispatchQueue.main.async {
-            if let contactIndex = contactModels.firstIndex(where: { $0.toxAddress == toxAddress }) {
-              var updatedContact = contactModels[contactIndex]
-              if updatedContact.messenges.last?.messageType != .systemSuccess {
-                updatedContact.messenges.append(
-                  .init(
-                    messageType: .systemSuccess,
-                    messageStatus: .sent,
-                    message: "Вы получили приглашение на общение. Присоединитесь и начните общение.",
-                    replyMessageText: nil,
-                    images: [],
-                    videos: [],
-                    recording: nil
-                  )
-                )
-                MessengerService.shared.modelHandlerService.saveContactModel(updatedContact, completion: {})
-              }
-            }
+    Task {
+      if let toxAddress = userInfo["toxAddress"] as? String {
+        await MessengerService.shared.appSettingsManager.setIsNewMessagesAvailable(
+          true,
+          toxAddress: toxAddress
+        )
+        
+        let contactModels = await MessengerService.shared.modelHandlerService.getContactModels()
+        if let contactIndex = contactModels.firstIndex(where: { $0.toxAddress == toxAddress }) {
+          var updatedContact = contactModels[contactIndex]
+          if updatedContact.messenges.last?.messageType != .systemSuccess {
+            updatedContact.messenges.append(
+              .init(
+                messageType: .systemSuccess,
+                messageStatus: .sent,
+                message: "Вы получили приглашение на общение. Присоединитесь и начните общение.",
+                replyMessageText: nil,
+                images: [],
+                videos: [],
+                recording: nil
+              )
+            )
+            await MessengerService.shared.modelHandlerService.saveContactModel(updatedContact)
           }
         }
       }

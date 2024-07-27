@@ -20,9 +20,9 @@ public protocol PasscodeSettingsScreenModuleOutput: AnyObject {
 /// События которые отправляем из `Coordinator` в `PasscodeSettingsScreenModule`
 public protocol PasscodeSettingsScreenModuleInput {
   /// Отключить пароль
-  func successAuthorizationPasswordDisable()
+  func successAuthorizationPasswordDisable() async
   /// Обновить экран
-  func updateScreen()
+  func updateScreen() async
 
   /// События которые отправляем из `PasscodeSettingsScreenModule` в `Coordinator`
   var moduleOutput: PasscodeSettingsScreenModuleOutput? { get set }

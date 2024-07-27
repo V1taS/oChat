@@ -11,27 +11,20 @@ import Foundation
 /// Определяет функции для изменения настроек безопасности, валюты и уведомлений.
 public protocol IAppSettingsManager {
   /// Включает или отключает аутентификацию по Face ID.
-  /// - Parameters:
-  ///   - value: Значение, указывающее, следует ли включить аутентификацию по Face ID.
-  ///   - completion: Опциональный блок завершения, вызываемый после сохранения изменений.
-  func setIsEnabledFaceID(_ value: Bool, completion: (() -> Void)?)
+  /// - Parameter value: Значение, указывающее, следует ли включить аутентификацию по Face ID.
+  func setIsEnabledFaceID(_ value: Bool) async
   
   /// Устанавливает пароль приложения.
-  /// - Parameters:
-  ///   - value: Новый пароль для приложения.
-  ///   - completion: Опциональный блок завершения, вызываемый после сохранения изменений.
-  func setAppPassword(_ value: String?, completion: (() -> Void)?)
+  /// - Parameter value: Новый пароль для приложения.
+  func setAppPassword(_ value: String?) async
   
   /// Включает или отключает уведомления в приложении.
-  /// - Parameters:
-  ///   - value: Значение, указывающее, следует ли включить уведомления.
-  ///   - completion: Опциональный блок завершения, вызываемый после сохранения изменений.
-  func setIsEnabledNotifications(_ value: Bool, completion: (() -> Void)?)
+  /// - Parameter value: Значение, указывающее, следует ли включить уведомления.
+  func setIsEnabledNotifications(_ value: Bool) async
   
   /// Устанавливает прочитанное или не прочитанное сообщение у контакта
-  func setIsNewMessagesAvailable(
-    _ value: Bool,
-    toxAddress: String,
-    completion: (() -> Void)?
-  )
+  /// - Parameters:
+  ///   - value: Значение, указывающее, прочитано ли сообщение.
+  ///   - toxAddress: Адрес контакта в Tox.
+  func setIsNewMessagesAvailable(_ value: Bool, toxAddress: String) async
 }

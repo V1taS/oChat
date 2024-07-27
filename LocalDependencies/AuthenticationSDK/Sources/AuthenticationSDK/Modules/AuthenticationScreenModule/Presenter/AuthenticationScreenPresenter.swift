@@ -51,8 +51,11 @@ final class AuthenticationScreenPresenter: ObservableObject {
       return
     }
     getPasscodeTitle()
-    loginFaceID()
-    getOldAccessCodeForchangePasscodeAndloginPasscode()
+    
+    Task { [weak self] in
+      await loginFaceID()
+      await getOldAccessCodeForchangePasscodeAndloginPasscode()
+    }
   }
   
   // MARK: - Internal func
@@ -84,16 +87,12 @@ final class AuthenticationScreenPresenter: ObservableObject {
     stateCurrentStateScreen = state
   }
   
-  func authenticationSuccess() {
+  func authenticationSuccess() async {
     if stateValidationPasscode.isValidation {
       switch stateCurrentStateScreen {
       case .createPasscode, .changePasscode:
-        interactor.setAccessCode(stateConfirmAccessCode) { [weak self] in
-          guard let self else {
-            return
-          }
-          moduleOutput?.authenticationSuccess()
-        }
+        await interactor.setAppPassword(stateConfirmAccessCode)
+        moduleOutput?.authenticationSuccess()
       case .loginPasscode:
         moduleOutput?.authenticationSuccess()
       }
@@ -120,33 +119,25 @@ extension AuthenticationScreenPresenter: SceneViewModel {}
 // MARK: - Private
 
 private extension AuthenticationScreenPresenter {
-  func loginFaceID() {
+  @MainActor
+  func loginFaceID() async {
     if case let .loginPasscode(result) = stateCurrentStateScreen, case .loginFaceID = result {
-      interactor.getIsFaceIDEnabled { [weak self] isFaceIDEnabled in
-        guard let self,
-              isFaceIDEnabled else {
-          self?.stateCurrentStateScreen = .loginPasscode(.enterPasscode)
-          return
+      if await interactor.getIsFaceIDEnabled() {
+        switch await interactor.authenticationWithFaceID() {
+        case true:
+          moduleOutput?.authenticationSuccess()
+        case false:
+          stateCurrentStateScreen = .loginPasscode(.enterPasscode)
         }
-        
-        interactor.authenticationWithFaceID { [weak self] granted in
-          if granted {
-            self?.moduleOutput?.authenticationSuccess()
-          } else {
-            self?.stateCurrentStateScreen = .loginPasscode(.enterPasscode)
-          }
-        }
+      } else {
+        stateCurrentStateScreen = .loginPasscode(.enterPasscode)
       }
     }
   }
   
-  func getOldAccessCodeForchangePasscodeAndloginPasscode() {
-    interactor.getOldAccessCode { [weak self] code in
-      guard let self else {
-        return
-      }
-      stateOldAccessCode = code
-    }
+  @MainActor
+  func getOldAccessCodeForchangePasscodeAndloginPasscode() async {
+    stateOldAccessCode = await interactor.getOldAccessCode()
   }
 }
 

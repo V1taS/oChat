@@ -13,17 +13,15 @@ protocol AuthenticationScreenInteractorOutput: AnyObject {}
 
 /// События которые отправляем от Presenter к Interactor
 protocol AuthenticationScreenInteractorInput {
-  /// Запрос аутентификации через Face ID 
-  func authenticationWithFaceID(completion: @escaping (_ granted: Bool) -> Void)
+  /// Запрос аутентификации через Face ID
+  func authenticationWithFaceID() async -> Bool
   /// Получить старый код пароль, который был установлен пользователем
-  func getOldAccessCode(completion: ((_ code: String?) -> Void)?)
+  func getOldAccessCode() async -> String?
   /// Указывает, включена ли разблокировка по FaceID.
-  func getIsFaceIDEnabled(completion: ((Bool) -> Void)?)
-  /// Устанавливает код доступа для всего приложения
-  /// - Parameters:
-  ///   - code: Код доступа, который необходимо установить.
-  ///   - completion: Замыкающее выражение, которое будет выполнено после установки кода доступа. Может быть `nil`.
-  func setAccessCode(_ code: String, completion: (() -> Void)?)
+  func getIsFaceIDEnabled() async -> Bool
+  /// Устанавливает пароль приложения.
+  /// - Parameter value: Новый пароль для приложения.
+  func setAppPassword(_ value: String?) async
 }
 
 /// Интерактор
@@ -53,31 +51,20 @@ final class AuthenticationScreenInteractor {
 // MARK: - AuthenticationScreenInteractorInput
 
 extension AuthenticationScreenInteractor: AuthenticationScreenInteractorInput {
-  func setAccessCode(_ code: String, completion: (() -> Void)?) {
-    appSettingsManager.setAppPassword(code, completion: completion)
-    appSettingsManager.setAppPassword(code, completion: completion)
+  func setAppPassword(_ code: String?) async {
+    await appSettingsManager.setAppPassword(code)
   }
   
-  func getIsFaceIDEnabled(completion: ((Bool) -> Void)?) {
-    modelHandlerService.getAppSettingsModel { appSettingsModel in
-      completion?(appSettingsModel.isFaceIDEnabled)
-    }
+  func getIsFaceIDEnabled() async -> Bool {
+    await modelHandlerService.getAppSettingsModel().isFaceIDEnabled
   }
   
-  func getOldAccessCode(completion: ((String?) -> Void)?) {
-    modelHandlerService.getAppSettingsModel { [weak self] _ in
-      guard let self else { return }
-      modelHandlerService.getAppSettingsModel { appSettingsModel in
-        completion?(appSettingsModel.appPassword)
-      }
-    }
+  func getOldAccessCode() async -> String? {
+    await modelHandlerService.getAppSettingsModel().appPassword
   }
   
-  func authenticationWithFaceID(completion: @escaping (_ granted: Bool) -> Void) {
-    Task {
-      let granted = await permissionService.requestFaceID()
-      completion(granted)
-    }
+  func authenticationWithFaceID() async -> Bool {
+    await permissionService.requestFaceID()
   }
 }
 

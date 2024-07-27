@@ -20,8 +20,7 @@ protocol SettingsScreenInteractorInput {
   func getCurrentLanguage() -> AppLanguageType
   
   /// Возвращает статус включения кода доступа.
-  /// - Parameter completion: Замыкание, которое принимает значение `true`, если код доступа включен, и `false`, если отключен.
-  func getIsAccessCodeEnabled(completion: ((_ isEnabled: Bool) -> Void)?)
+  func getIsAccessCodeEnabled() async -> Bool
   
   /// Возвращает текущую версию приложения.
   /// - Returns: Строка с версией приложения, например, "1.0".
@@ -87,10 +86,8 @@ extension SettingsScreenInteractor: SettingsScreenInteractorInput {
     systemService.getAppVersion()
   }
   
-  func getIsAccessCodeEnabled(completion: ((_ isEnabled: Bool) -> Void)?) {
-    modelHandlerService.getAppSettingsModel { appSettingsModel in
-      completion?(appSettingsModel.appPassword != nil)
-    }
+  func getIsAccessCodeEnabled() async -> Bool {
+    await modelHandlerService.getAppSettingsModel().appPassword != nil
   }
   
   func getCurrentLanguage() -> AppLanguageType {

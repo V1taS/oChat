@@ -16,6 +16,10 @@ public final class ApplicationServicesStub: IApplicationServices, IDataManagerSe
                                             ICloudKitService, IAppSettingsManager, IDataManagementService,
                                             IAccessAndSecurityManagementService, IUserInterfaceAndExperienceService,
                                             IDeepLinkService, IPushNotificationService, IZipArchiveService {
+  public func setIsEnabledFaceID(_ value: Bool) async {}
+  public func setAppPassword(_ value: String?) async {}
+  public func setIsEnabledNotifications(_ value: Bool) async {}
+  public func setIsNewMessagesAvailable(_ value: Bool, toxAddress: String) async {}
   public func encodeModel<T>(_ model: T) async throws -> Data? where T : Encodable { nil }
   public func decodeModel<T>(_ type: T.Type, from data: Data) async throws -> T? where T : Decodable { nil }
   public func requestNotification() async -> Bool { false}
@@ -194,6 +198,29 @@ public final class ApplicationServicesStub: IApplicationServices, IDataManagerSe
 
 public final class MessengerServiceStub: IMessengerModelSettingsManager, IMessengerModelHandlerService,
                                          IMessagesService, IMessengerService, IP2PChatManager, IAppSettingsManager {
+  public func setToxStateAsString(_ toxStateAsString: String?) async {}
+  public func setStatus(_ model: ContactModel, _ status: ContactModel.Status) async {}
+  public func setNameContact(_ model: ContactModel, _ name: String) async -> ContactModel? { nil }
+  public func setToxAddress(_ model: ContactModel, _ address: String) async -> ContactModel? { nil }
+  public func clearAllMessengeTempID() async {}
+  public func setMeshAddress(_ model: ContactModel, _ meshAddress: String) async -> ContactModel? { nil }
+  public func addMessenge(_ model: ContactModel, _ messengeModel: MessengeModel) async -> ContactModel? { nil }
+  public func setEncryptionPublicKey(_ model: ContactModel, _ publicKey: String) async -> ContactModel? { nil }
+  public func saveMyPushNotificationToken(_ token: String) async {}
+  public func deleteContact(_ model: ContactModel) async {}
+  public func setAllContactsIsOffline() async {}
+  public func setAllContactsNoTyping() async {}
+  public func getMessengerModel() async -> MessengerModel { .setDefaultValues() }
+  public func getAppSettingsModel() async -> AppSettingsModel { .setDefaultValues() }
+  public func saveAppSettingsModel(_ model: AppSettingsModel) async {}
+  public func getContactModels() async -> [ContactModel] { [] }
+  public func saveContactModel(_ model: ContactModel) async {}
+  public func saveContactModels(_ models: [ContactModel]) async {}
+  public func removeContactModels(_ contactModel: ContactModel) async {}
+  public func setIsEnabledFaceID(_ value: Bool) async {}
+  public func setAppPassword(_ value: String?) async {}
+  public func setIsEnabledNotifications(_ value: Bool) async {}
+  public func setIsNewMessagesAvailable(_ value: Bool, toxAddress: String) async {}
   public func start(saveDataString: String?) async throws {}
   public func getToxAddress() async -> String? { nil }
   public func getToxPublicKey() async -> String? { nil }

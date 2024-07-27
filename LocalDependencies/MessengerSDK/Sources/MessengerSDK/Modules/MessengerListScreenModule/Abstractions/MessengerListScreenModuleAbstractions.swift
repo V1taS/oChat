@@ -22,9 +22,6 @@ public protocol MessengerListScreenModuleOutput: AnyObject {
   /// Открыть панель подключения
   func openPanelConnection()
   
-  /// Был сделан скриншот
-  func userDidScreenshot()
-  
   /// Пользователь отправляет файл
   func handleFileSender(progress: Int, publicToxKey: String)
   
@@ -35,52 +32,49 @@ public protocol MessengerListScreenModuleOutput: AnyObject {
 /// События которые отправляем из `Coordinator` в `MessengerListScreenModuleModule`
 public protocol MessengerListScreenModuleModuleInput {
   /// Удалить сообщение
-  func removeMessage(id: String, contact: ContactModel)
+  func removeMessage(id: String, contact: ContactModel) async
   
   /// Удаляет модель контакта `ContactModel` асинхронно.
   /// - Parameters:
   ///   - contactModel: Модель `ContactModel`, которая будет удалена.
-  ///   - completion: Опциональный блок завершения, который вызывается после завершения операции удаления. Может быть `nil`.
-  func removeContactModels(_ contactModel: ContactModel, completion: (() -> Void)?)
+  func removeContactModels(_ contactModel: ContactModel) async
   
   /// Обновить список контактов
-  func updateListContacts(completion: (() -> Void)?)
+  func updateListContacts() async
   
   /// Отправить запрос на переписку
-  func sendInitiateChat(contactModel: ContactModel)
+  func sendInitiateChat(contactModel: ContactModel) async
   
   /// Отправить сообщение контакту
-  func sendMessage(contact: ContactModel, completion: (() -> Void)?)
+  func sendMessage(contact: ContactModel) async
   
   /// Подтвердить запрос на переписку
-  func confirmRequestForDialog(contactModel: ContactModel)
+  func confirmRequestForDialog(contactModel: ContactModel) async
   
   /// Отклонить запрос на переписку
-  func cancelRequestForDialog(contactModel: ContactModel)
+  func cancelRequestForDialog(contactModel: ContactModel) async
   
   /// Сохраняет `ContactModel` асинхронно.
   /// - Parameters:
   ///   - model: Модель `ContactModel`, которая будутет сохранена.
-  func saveContactModel(_ model: ContactModel)
+  func saveContactModel(_ model: ContactModel) async
   
   /// Метод для установки статуса "печатает" для друга.
   /// - Parameters:
   ///   - isTyping: Статус "печатает" (true, если пользователь печатает).
   ///   - toxPublicKey: Публичный ключ друга
-  ///   - completion: Замыкание, вызываемое по завершении операции, с результатом успешного выполнения или ошибкой.
   func setUserIsTyping(
     _ isTyping: Bool,
-    to toxPublicKey: String,
-    completion: @escaping (Result<Void, Error>) -> Void
-  )
+    to toxPublicKey: String
+  ) async -> Result<Void, any Error>
   
   /// События которые отправляем из `MessengerListScreenModuleModule` в `Coordinator`
   var moduleOutput: MessengerListScreenModuleOutput? { get set }
   
   /// Метод для отправки push-уведомлений
-  func sendPushNotification(contact: ContactModel)
+  func sendPushNotification(contact: ContactModel) async
 }
 
 /// Готовый модуль `MessengerListScreenModuleModule`
-public typealias MessengerListScreenModuleModule = (viewController: UIViewController, 
+public typealias MessengerListScreenModuleModule = (viewController: UIViewController,
                                                     input: MessengerListScreenModuleModuleInput)

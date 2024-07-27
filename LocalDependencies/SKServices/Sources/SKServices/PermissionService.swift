@@ -17,19 +17,19 @@ import LocalAuthentication
 public final class PermissionService: IPermissionService {
   public init() {}
   
-  @MainActor
   @discardableResult
   public func requestNotification() async -> Bool {
     await withCheckedContinuation { continuation in
       UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { granted, _ in
         continuation.resume(returning: granted)
         guard granted else { return }
-        UIApplication.shared.registerForRemoteNotifications()
+        DispatchQueue.main.async {
+          UIApplication.shared.registerForRemoteNotifications()
+        }
       }
     }
   }
   
-  @MainActor
   @discardableResult
   public func isNotificationsEnabled() async -> Bool {
     await withCheckedContinuation { continuation in
@@ -39,7 +39,6 @@ public final class PermissionService: IPermissionService {
     }
   }
   
-  @MainActor
   @discardableResult
   public func requestCamera() async -> Bool {
     await withCheckedContinuation { continuation in
@@ -49,7 +48,6 @@ public final class PermissionService: IPermissionService {
     }
   }
   
-  @MainActor
   @discardableResult
   public func requestGallery() async -> Bool {
     await withCheckedContinuation { continuation in
@@ -65,7 +63,6 @@ public final class PermissionService: IPermissionService {
     }
   }
   
-  @MainActor
   @discardableResult
   public func requestFaceID() async -> Bool {
     await withCheckedContinuation { continuation in

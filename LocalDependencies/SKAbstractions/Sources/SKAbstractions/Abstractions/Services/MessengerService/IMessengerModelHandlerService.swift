@@ -12,42 +12,31 @@ import Foundation
 /// такими как получение и сохранение настроек приложения, контактов и других связанных с ними данных.
 public protocol IMessengerModelHandlerService {
   /// Получает модель `MessengerModel` асинхронно.
-  /// - Parameter completion: Блок завершения, который вызывается с `MessengerModel` после завершения операции.
-  func getMessengerModel(completion: @escaping (MessengerModel) -> Void)
+  func getMessengerModel() async -> MessengerModel
   
   /// Удалить все данные из основной модели
   @discardableResult
   func deleteAllData() -> Bool
   
   /// Получает модель настроек приложения `AppSettingsModel` асинхронно.
-  /// - Parameter completion: Блок завершения, который вызывается с `AppSettingsModel` после завершения операции.
-  func getAppSettingsModel(completion: @escaping (AppSettingsModel) -> Void)
+  func getAppSettingsModel() async -> AppSettingsModel
   
   /// Сохраняет модель настроек приложения `AppSettingsModel` асинхронно.
-  /// - Parameters:
-  ///   - model: Модель `AppSettingsModel`, которая будет сохранена.
-  ///   - completion: Опциональный блок завершения, который вызывается после завершения операции сохранения.
-  func saveAppSettingsModel(_ model: AppSettingsModel, completion: (() -> Void)?)
+  /// - Parameter model: Модель `AppSettingsModel`, которая будет сохранена.
+  func saveAppSettingsModel(_ model: AppSettingsModel) async
   
   /// Получает массив моделей контактов `ContactModel` асинхронно.
-  /// - Parameter completion: Блок завершения, который вызывается с массивом `ContactModel` после завершения операции.
-  func getContactModels(completion: @escaping ([ContactModel]) -> Void)
+  func getContactModels() async -> [ContactModel]
   
   /// Сохраняет `ContactModel` асинхронно.
-  /// - Parameters:
-  ///   - model: Модель `ContactModel`, которая будутет сохранена.
-  ///   - completion: Опциональный блок завершения, который вызывается после завершения операции сохранения.
-  func saveContactModel(_ model: ContactModel, completion: (() -> Void)?)
+  /// - Parameter model: Модель `ContactModel`, которая будет сохранена.
+  func saveContactModel(_ model: ContactModel) async
   
   /// Сохраняет массив моделей контактов `ContactModel` асинхронно.
-  /// - Parameters:
-  ///   - models: Массив моделей `ContactModel`, которые будут сохранены.
-  ///   - completion: Опциональный блок завершения, который вызывается после завершения операции сохранения. Может быть `nil`.
-  func saveContactModels(_ models: [ContactModel], completion: (() -> Void)?)
+  /// - Parameter models: Массив моделей `ContactModel`, которые будут сохранены.
+  func saveContactModels(_ models: [ContactModel]) async
   
   /// Удаляет модель контакта `ContactModel` асинхронно.
-  /// - Parameters:
-  ///   - contactModel: Модель `ContactModel`, которая будет удалена.
-  ///   - completion: Опциональный блок завершения, который вызывается после завершения операции удаления. Может быть `nil`.
-  func removeContactModels(_ contactModel: ContactModel, completion: (() -> Void)?)
+  /// - Parameter contactModel: Модель `ContactModel`, которая будет удалена.
+  func removeContactModels(_ contactModel: ContactModel) async
 }

@@ -19,8 +19,7 @@ protocol MessengerListScreenModuleInteractorInput {
   /// - Parameters:
   ///   - encryptedText: Зашифрованные данные.
   /// - Returns: Расшифрованные данные.
-  /// - Throws: Ошибка расшифровки данных.
-  func decrypt(_ encryptedText: String?, completion: ((String?) -> Void)?)
+  func decrypt(_ encryptedText: String?) async -> String?
   
   /// Шифрует данные, используя публичный ключ.
   /// - Parameters:
@@ -35,8 +34,7 @@ protocol MessengerListScreenModuleInteractorInput {
   ///   - encryptedData: Зашифрованные данные.
   /// - privateKey: Приватный ключ.
   /// - Returns: Расшифрованные данные в виде объекта Data.
-  /// - Throws: Ошибка расшифровки данных.
-  func decrypt(_ encryptedData: Data?, completion: ((Data?) -> Void)?)
+  func decrypt(_ encryptedData: Data?) async -> Data?
   
   /// Шифрует данные, используя публичный ключ.
   /// - Parameters:
@@ -62,14 +60,12 @@ protocol MessengerListScreenModuleInteractorInput {
   func getDeviceIdentifier() -> String
   
   /// Получает массив моделей контактов `ContactModel` асинхронно.
-  /// - Parameter completion: Блок завершения, который вызывается с массивом `ContactModel` после завершения операции.
-  func getContactModels(completion: @escaping ([ContactModel]) -> Void)
+  func getContactModels() async -> [ContactModel]
   
   /// Сохраняет `ContactModel` асинхронно.
   /// - Parameters:
   ///   - model: Модель `ContactModel`, которая будутет сохранена.
-  ///   - completion: Опциональный блок завершения, который вызывается после завершения операции сохранения.
-  func saveContactModel(_ model: ContactModel, completion: (() -> Void)?)
+  func saveContactModel(_ model: ContactModel) async
   
   /// Удаляет модель контакта `ContactModel` асинхронно.
   /// - Parameters:
@@ -85,8 +81,7 @@ protocol MessengerListScreenModuleInteractorInput {
   func deleteDeepLinkURL()
   
   /// Получает модель `MessengerModel` асинхронно.
-  /// - Parameter completion: Блок завершения, который вызывается с `MessengerModel` после завершения операции.
-  func getMessengerModel(completion: @escaping (MessengerModel) -> Void)
+  func getMessengerModel() async -> MessengerModel
   
   /// Показать уведомление
   /// - Parameters:
@@ -122,16 +117,10 @@ protocol MessengerListScreenModuleInteractorInput {
   func getToxPublicKey() async -> String?
   
   /// Получить контакт по адресу
-  func getContactModelsFrom(
-    toxAddress: String,
-    completion: ((ContactModel?) -> Void)?
-  )
+  func getContactModelsFrom(toxAddress: String) async -> ContactModel?
   
   /// Получить контакт по публичному ключу
-  func getContactModelsFrom(
-    toxPublicKey: String,
-    completion: ((ContactModel?) -> Void)?
-  )
+  func getContactModelsFrom(toxPublicKey: String) async -> ContactModel?
   
   /// Используя метод confirmFriendRequest, вы подтверждаете запрос на добавление в друзья, зная публичный ключ отправителя.
   /// Этот метод принимает публичный ключ друга и добавляет его в список друзей без отправки дополнительного сообщения.
@@ -144,16 +133,10 @@ protocol MessengerListScreenModuleInteractorInput {
   /// - Parameters:
   ///   - model: Модель контакта `ContactModel`.
   ///   - status: Значение, указывающее, является ли контакт онлайн
-  ///   - completion: Опциональный блок завершения, который вызывается после завершения операции. Может быть `nil`.
-  func setStatus(
-    _ model: ContactModel,
-    _ status: ContactModel.Status,
-    completion: (() -> Void)?
-  )
+  func setStatus(_ model: ContactModel, _ status: ContactModel.Status) async
   
   /// Переводит всех контактов в состояние оффлайн.
-  /// - Parameter completion: Опциональный блок завершения, вызываемый после того, как все контакты будут переведены в оффлайн.
-  func setAllContactsIsOffline(completion: (() -> Void)?)
+  func setAllContactsIsOffline() async
   
   /// Проверяем установлен ли пароль на телефоне, это необходимо для шифрования данных
   func passcodeNotSetInSystemIOSheck()
@@ -175,18 +158,15 @@ protocol MessengerListScreenModuleInteractorInput {
   func setSelfStatus(isOnline: Bool) async
   
   /// Переводит всех контактов в состояние Не Печатают
-  func setAllContactsNoTyping(completion: (() -> Void)?)
+  func setAllContactsNoTyping() async
   
   /// Получить токен для пушей
-  func getPushNotificationToken(completion: ((String?) -> Void)?)
+  func getPushNotificationToken() async -> String?
   
   /// Сохраняет токен для пуш сообщений
   /// - Parameters:
   ///   - token: Токен для пуш сообщений
-  func saveMyPushNotificationToken(
-    _ token: String,
-    completion: (() -> Void)?
-  )
+  func saveMyPushNotificationToken(_ token: String) async
   
   /// Запрос доступа к Уведомлениям
   /// - Parameter granted: Булево значение, указывающее, было ли предоставлено разрешение
@@ -203,18 +183,13 @@ protocol MessengerListScreenModuleInteractorInput {
   func startPeriodicFriendStatusCheck(completion: (() -> Void)?) async
   
   /// Очищает все временные ИДишники
-  func clearAllMessengeTempID(completion: (() -> Void)?)
+  func clearAllMessengeTempID() async
   
   /// Метод для разархивирования файлов
   func receiveAndUnzipFile(
     zipFileURL: URL,
-    password: String,
-    completion: @escaping (Result<(
-      model: MessengerNetworkRequestModel,
-      recordingDTO: MessengeRecordingDTO?,
-      files: [URL]
-    ), Error>) -> Void
-  )
+    password: String
+  ) async throws -> (model: MessengerNetworkRequestModel, recordingDTO: MessengeRecordingDTO?, files: [URL])
   
   /// Отправить файл с сообщением
   func sendFile(
@@ -401,76 +376,70 @@ extension MessengerListScreenModuleInteractor: MessengerListScreenModuleInteract
   
   func receiveAndUnzipFile(
     zipFileURL: URL,
-    password: String,
-    completion: @escaping (Result<(
-      model: MessengerNetworkRequestModel,
-      recordingDTO: MessengeRecordingDTO?,
-      files: [URL]
-    ), Error>) -> Void
-  ) {
-    DispatchQueue.global().async { [weak self] in
-      guard let self else { return }
-      // Для получения директории Documents
-      guard let documentDirectory = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first else {
-        print("Ошибка: не удалось получить путь к директории Documents")
-        return
-      }
-      let destinationURL = documentDirectory.appendingPathComponent(UUID().uuidString)
-      
-      var model: MessengerNetworkRequestModel?
-      var recordingModel: MessengeRecordingDTO?
-      var fileURLs: [URL] = []
-      
-      try? zipArchiveService.unzipFile(
-        atPath: zipFileURL,
-        toDestination: destinationURL,
-        overwrite: true,
-        password: password,
-        progress: nil
-      ) { [weak self] unzippedFile in
+    password: String
+  ) async throws -> (model: MessengerNetworkRequestModel, recordingDTO: MessengeRecordingDTO?, files: [URL]) {
+    return try await withCheckedThrowingContinuation { continuation in
+      DispatchQueue.global().async { [weak self] in
         guard let self else { return }
-        print("Unzipped file: \(unzippedFile)")
+        // Для получения директории Documents
+        guard let documentDirectory = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first else {
+          print("Ошибка: не удалось получить путь к директории Documents")
+          continuation.resume(throwing: URLError(.cannotFindHost)) // Используем подходящий URLError
+          return
+        }
+        let destinationURL = documentDirectory.appendingPathComponent(UUID().uuidString)
         
-        if unzippedFile.pathExtension == "model" {
-          if let modelData = FileManager.default.contents(atPath: unzippedFile.path()) {
-            let decoder = JSONDecoder()
-            guard let dto = try? decoder.decode(MessengerNetworkRequestDTO.self, from: modelData) else {
-              DispatchQueue.main.async {
-                completion(.failure(URLError(.unknown)))
+        var model: MessengerNetworkRequestModel?
+        var recordingModel: MessengeRecordingDTO?
+        var fileURLs: [URL] = []
+        
+        do {
+          try zipArchiveService.unzipFile(
+            atPath: zipFileURL,
+            toDestination: destinationURL,
+            overwrite: true,
+            password: password,
+            progress: nil
+          ) { [weak self] unzippedFile in
+            guard let self else { return }
+            print("Unzipped file: \(unzippedFile)")
+            
+            if unzippedFile.pathExtension == "model" {
+              if let modelData = FileManager.default.contents(atPath: unzippedFile.path()) {
+                let decoder = JSONDecoder()
+                guard let dto = try? decoder.decode(MessengerNetworkRequestDTO.self, from: modelData) else {
+                  continuation.resume(throwing: URLError(.cannotDecodeContentData))
+                  return
+                }
+                model = dto.mapToModel()
+              } else {
+                print("Не удалось прочитать данные из файла")
               }
-              return
-            }
-            model = dto.mapToModel()
-          } else {
-            print("Не удалось прочитать данные из файла")
-          }
-        } else if unzippedFile.pathExtension == "record" {
-          if let modelData = FileManager.default.contents(atPath: unzippedFile.path()) {
-            let decoder = JSONDecoder()
-            guard let model = try? decoder.decode(MessengeRecordingDTO.self, from: modelData) else {
-              DispatchQueue.main.async {
-                completion(.failure(URLError(.unknown)))
+            } else if unzippedFile.pathExtension == "record" {
+              if let modelData = FileManager.default.contents(atPath: unzippedFile.path()) {
+                let decoder = JSONDecoder()
+                guard let model = try? decoder.decode(MessengeRecordingDTO.self, from: modelData) else {
+                  continuation.resume(throwing: URLError(.cannotDecodeContentData))
+                  return
+                }
+                recordingModel = model
+              } else {
+                print("Не удалось прочитать данные из файла")
               }
-              return
+            } else {
+              fileURLs.append(unzippedFile)
             }
-            recordingModel = model
-          } else {
-            print("Не удалось прочитать данные из файла")
           }
-        } else {
-          fileURLs.append(unzippedFile)
+          
+          guard let model else {
+            continuation.resume(throwing: URLError(.unknown))
+            return
+          }
+          
+          continuation.resume(returning: (model, recordingModel, fileURLs))
+        } catch {
+          continuation.resume(throwing: error)
         }
-      }
-      
-      guard let model else {
-        DispatchQueue.main.async {
-          completion(.failure(URLError(.unknown)))
-        }
-        return
-      }
-      
-      DispatchQueue.main.async {
-        completion(.success((model, recordingModel, fileURLs)))
       }
     }
   }
@@ -481,8 +450,9 @@ extension MessengerListScreenModuleInteractor: MessengerListScreenModuleInteract
       if cacheFriendStatus != friendStatus {
         cacheFriendStatus = friendStatus
         for (publicKey, isOnline) in friendStatus {
-          getContactModelsFrom(toxPublicKey: publicKey) { [weak self] contactModel in
+          Task { [weak self] in
             guard let self else { return }
+            let contactModel = await getContactModelsFrom(toxPublicKey: publicKey)
             var updateContact = contactModel
             if updateContact?.status != .initialChat || updateContact?.status != .requestChat {
               updateContact?.status = isOnline ? .online : .offline
@@ -492,12 +462,12 @@ extension MessengerListScreenModuleInteractor: MessengerListScreenModuleInteract
             }
             
             if let updateContact {
-              modelHandlerService.saveContactModel(updateContact, completion: { [weak self] in
-                DispatchQueue.main.async {
-                  completion?()
-                  print("Friend \(publicKey) is \(isOnline ? "🟢🟢🟢 online" : "🔴🔴🔴 offline")")
-                }
-              })
+              await modelHandlerService.saveContactModel(updateContact)
+              
+              DispatchQueue.main.async {
+                completion?()
+                print("Friend \(publicKey) is \(isOnline ? "🟢🟢🟢 online" : "🔴🔴🔴 offline")")
+              }
             }
           }
         }
@@ -535,44 +505,20 @@ extension MessengerListScreenModuleInteractor: MessengerListScreenModuleInteract
     await permissionService.isNotificationsEnabled()
   }
   
-  func saveMyPushNotificationToken(_ token: String, completion: (() -> Void)?) {
-    DispatchQueue.global().async { [weak self] in
-      self?.modelSettingsManager.saveMyPushNotificationToken(token) {
-        DispatchQueue.main.async {
-          completion?()
-        }
-      }
-    }
+  func saveMyPushNotificationToken(_ token: String) async {
+    await modelSettingsManager.saveMyPushNotificationToken(token)
   }
   
-  func getPushNotificationToken(completion: ((String?) -> Void)?) {
-    DispatchQueue.global().async { [weak self] in
-      self?.modelHandlerService.getMessengerModel { messengerModel in
-        DispatchQueue.main.async {
-          completion?(messengerModel.pushNotificationToken)
-        }
-      }
-    }
+  func getPushNotificationToken() async -> String? {
+    await modelHandlerService.getMessengerModel().pushNotificationToken
   }
   
-  func clearAllMessengeTempID(completion: (() -> Void)?) {
-    DispatchQueue.global().async { [weak self] in
-      self?.modelSettingsManager.clearAllMessengeTempID(completion: {
-        DispatchQueue.main.async {
-          completion?()
-        }
-      })
-    }
+  func clearAllMessengeTempID() async {
+    await modelSettingsManager.clearAllMessengeTempID()
   }
   
-  func setAllContactsNoTyping(completion: (() -> Void)?) {
-    DispatchQueue.global().async { [weak self] in
-      self?.modelSettingsManager.setAllContactsNoTyping(completion: {
-        DispatchQueue.main.async {
-          completion?()
-        }
-      })
-    }
+  func setAllContactsNoTyping() async {
+    await modelSettingsManager.setAllContactsNoTyping()
   }
   
   func setSelfStatus(isOnline: Bool) async {
@@ -584,32 +530,27 @@ extension MessengerListScreenModuleInteractor: MessengerListScreenModuleInteract
   }
   
   func setRedDotToTabBar(value: String?) {
-    guard let tabBarController = UIApplication.currentWindow?.rootViewController as? UITabBarController,
-          (tabBarController.tabBar.items?.count ?? .zero) > .zero else {
-      return
+    DispatchQueue.main.async {
+      guard let tabBarController = UIApplication.currentWindow?.rootViewController as? UITabBarController,
+            (tabBarController.tabBar.items?.count ?? .zero) > .zero else {
+        return
+      }
+      
+      tabBarController.tabBar.items?[.zero].badgeValue = value
+      tabBarController.tabBar.items?[.zero].badgeColor = SKStyleAsset.constantRuby.color
     }
-    
-    tabBarController.tabBar.items?[.zero].badgeValue = value
-    tabBarController.tabBar.items?[.zero].badgeColor = SKStyleAsset.constantRuby.color
   }
   
   func stratTOXService() async {
-    DispatchQueue.global().async { [weak self] in
-      guard let self else { return }
-      modelHandlerService.getMessengerModel { [weak self] messengerModel in
-        guard let self else { return }
-        let toxStateAsString = messengerModel.toxStateAsString
-        Task { [weak self] in
-          guard let self else { return }
-          do {
-            await try? self.p2pChatManager.start(saveDataString: toxStateAsString)
-            
-            if toxStateAsString == nil {
-              let stateAsString = await self.p2pChatManager.toxStateAsString()
-              modelSettingsManager.setToxStateAsString(stateAsString, completion: nil)
-            }
-          }
-        }
+    let messengerModel = await modelHandlerService.getMessengerModel()
+    let toxStateAsString = messengerModel.toxStateAsString
+    
+    do {
+      await try? self.p2pChatManager.start(saveDataString: toxStateAsString)
+      
+      if toxStateAsString == nil {
+        let stateAsString = await self.p2pChatManager.toxStateAsString()
+        await modelSettingsManager.setToxStateAsString(stateAsString)
       }
     }
   }
@@ -632,59 +573,32 @@ extension MessengerListScreenModuleInteractor: MessengerListScreenModuleInteract
     }
   }
   
-  func setAllContactsIsOffline(completion: (() -> Void)?) {
-    DispatchQueue.global().async { [weak self] in
-      self?.modelSettingsManager.setAllContactsIsOffline {
-        DispatchQueue.main.async {
-          completion?()
-        }
-      }
-    }
+  func setAllContactsIsOffline() async {
+    await modelSettingsManager.setAllContactsIsOffline()
   }
   
-  func setStatus(_ model: ContactModel, _ status: ContactModel.Status, completion: (() -> Void)?) {
-    DispatchQueue.global().async { [weak self] in
-      self?.modelSettingsManager.setStatus(model, status, completion: {
-        DispatchQueue.main.async {
-          completion?()
-        }
-      })
-    }
+  func setStatus(_ model: ContactModel, _ status: ContactModel.Status) async {
+    await modelSettingsManager.setStatus(model, status)
   }
   
   func confirmFriendRequest(with publicToxKey: String) async -> String? {
     await p2pChatManager.confirmFriendRequest(with: publicToxKey)
   }
   
-  func getContactModelsFrom(
-    toxPublicKey: String,
-    completion: ((ContactModel?) -> Void)?
-  ) {
-    DispatchQueue.global().async { [weak self] in
-      self?.modelHandlerService.getContactModels { contactModels in
-        DispatchQueue.main.async { [weak self] in
-          if let contactIndex = contactModels.firstIndex(where: { $0.toxPublicKey == toxPublicKey }) {
-            completion?(contactModels[contactIndex])
-          } else {
-            completion?(nil)
-          }
-        }
-      }
+  func getContactModelsFrom(toxPublicKey: String) async -> ContactModel? {
+    let contactModels = await modelHandlerService.getContactModels()
+    if let contactIndex = contactModels.firstIndex(where: { $0.toxPublicKey == toxPublicKey }) {
+      return contactModels[contactIndex]
     }
+    return nil
   }
   
-  func getContactModelsFrom(toxAddress: String, completion: ((ContactModel?) -> Void)?) {
-    DispatchQueue.global().async { [weak self] in
-      self?.modelHandlerService.getContactModels { contactModels in
-        DispatchQueue.main.async { [weak self] in
-          if let contactIndex = contactModels.firstIndex(where: { $0.toxAddress == toxAddress }) {
-            completion?(contactModels[contactIndex])
-          } else {
-            completion?(nil)
-          }
-        }
-      }
+  func getContactModelsFrom(toxAddress: String) async -> ContactModel? {
+    let contactModels = await modelHandlerService.getContactModels()
+    if let contactIndex = contactModels.firstIndex(where: { $0.toxAddress == toxAddress }) {
+      return contactModels[contactIndex]
     }
+    return nil
   }
   
   func initialChat(
@@ -744,28 +658,16 @@ extension MessengerListScreenModuleInteractor: MessengerListScreenModuleInteract
     return messageID
     }
   
-  func getContactModels(completion: @escaping ([ContactModel]) -> Void) {
-    DispatchQueue.global().async { [weak self] in
-      self?.modelHandlerService.getContactModels(completion: { contactModel in
-        DispatchQueue.main.async {
-          completion(contactModel)
-        }
-      })
-    }
+  func getContactModels() async -> [ContactModel] {
+    await modelHandlerService.getContactModels()
   }
   
-  func decrypt(_ encryptedData: Data?, completion: ((Data?) -> Void)?) {
-    DispatchQueue.global(qos: .userInteractive).async { [weak self] in
-      guard let self else { return }
-      let data = cryptoService.decrypt(
-        encryptedData,
-        privateKey: systemService.getDeviceIdentifier()
-      )
-      
-      DispatchQueue.main.async {
-        completion?(data)
-      }
-    }
+  func decrypt(_ encryptedData: Data?) async -> Data? {
+    let data = cryptoService.decrypt(
+      encryptedData,
+      privateKey: systemService.getDeviceIdentifier()
+    )
+    return data
   }
   
   func encrypt(_ data: Data?, publicKey: String) -> Data? {
@@ -776,18 +678,12 @@ extension MessengerListScreenModuleInteractor: MessengerListScreenModuleInteract
     cryptoService.encrypt(text, publicKey: publicKey)
   }
   
-  func decrypt(_ encryptedText: String?, completion: ((String?) -> Void)?) {
-    DispatchQueue.global(qos: .userInteractive).async { [weak self] in
-      guard let self else { return }
-      let messenge = cryptoService.decrypt(
-        encryptedText,
-        privateKey: systemService.getDeviceIdentifier()
-      )
-      
-      DispatchQueue.main.async {
-        completion?(messenge)
-      }
-    }
+  func decrypt(_ encryptedText: String?) async -> String? {
+    let messenge = cryptoService.decrypt(
+      encryptedText,
+      privateKey: systemService.getDeviceIdentifier()
+    )
+    return messenge
   }
   
   func getToxAddress() async -> String? {
@@ -811,22 +707,14 @@ extension MessengerListScreenModuleInteractor: MessengerListScreenModuleInteract
   }
   
   func removeContactModels(_ contactModel: ContactModel) async -> Bool {
-    modelHandlerService.removeContactModels(contactModel, completion: {})
+    await modelHandlerService.removeContactModels(contactModel)
     await saveToxState()
     return await p2pChatManager.deleteFriend(toxPublicKey: contactModel.toxPublicKey ?? "")
   }
   
-  func saveContactModel(_ model: ContactModel, completion: (() -> Void)?) {
-    DispatchQueue.global().async { [weak self] in
-      self?.modelHandlerService.saveContactModel(model, completion: { [weak self] in
-        DispatchQueue.main.async {
-          completion?()
-          Task { [weak self] in
-            await self?.saveToxState()
-          }
-        }
-      })
-    }
+  func saveContactModel(_ model: ContactModel) async {
+    await modelHandlerService.saveContactModel(model)
+    await saveToxState()
   }
   
   func showNotification(_ type: SKAbstractions.NotificationServiceType) {
@@ -835,14 +723,8 @@ extension MessengerListScreenModuleInteractor: MessengerListScreenModuleInteract
     }
   }
   
-  func getMessengerModel(completion: @escaping (MessengerModel) -> Void) {
-    DispatchQueue.global().async { [weak self] in
-      self?.modelHandlerService.getMessengerModel(completion: { messengerModel in
-        DispatchQueue.main.async {
-          completion(messengerModel)
-        }
-      })
-    }
+  func getMessengerModel() async -> MessengerModel {
+    await modelHandlerService.getMessengerModel()
   }
   
   func deleteDeepLinkURL() {
@@ -877,7 +759,7 @@ private extension MessengerListScreenModuleInteractor {
   
   func saveToxState() async {
     let stateAsString = await p2pChatManager.toxStateAsString()
-    modelSettingsManager.setToxStateAsString(stateAsString, completion: {})
+    await modelSettingsManager.setToxStateAsString(stateAsString)
   }
 }
 

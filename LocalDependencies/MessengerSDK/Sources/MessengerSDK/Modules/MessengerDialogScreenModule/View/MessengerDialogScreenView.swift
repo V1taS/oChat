@@ -97,7 +97,9 @@ private extension MessengerDialogScreenView {
             isEnabled: presenter.stateIsCanResendInitialRequest,
             style: .primary,
             action: {
-              presenter.sendInitiateChatFromDialog(toxAddress: nil)
+              Task {
+                await presenter.sendInitiateChatFromDialog(toxAddress: nil)
+              }
               presenter.startScheduleResendInitialRequest()
             }
           )
@@ -115,7 +117,9 @@ private extension MessengerDialogScreenView {
             isEnabled: presenter.stateIsAskToComeContact,
             style: .primary,
             action: {
-              presenter.sendPushNotification()
+              Task {
+                await presenter.sendPushNotification()
+              }
               presenter.startAskToComeContactTimer()
             }
           )
@@ -139,7 +143,9 @@ private extension MessengerDialogScreenView {
       placeholder: presenter.getMainPlaceholder(),
       isDownloadAvailability: presenter.stateIsDownloadAvailability,
       onChange: { newValue in
-        presenter.setUserIsTyping(text: newValue)
+        Task {
+          await presenter.setUserIsTyping(text: newValue)
+        }
       },
       didSendMessage: { draft in
         Task {
@@ -159,10 +165,14 @@ private extension MessengerDialogScreenView {
         }
       },
       onImageSave: { url in
-        presenter.saveImageToGallery(url)
+        Task {
+          await presenter.saveImageToGallery(url)
+        }
       },
       onVideoSave: { url in
-        presenter.saveVideoToGallery(url)
+        Task {
+          await presenter.saveVideoToGallery(url)
+        }
       },
       inputViewBuilder: createInputViewBuilder()
     )
@@ -182,7 +192,9 @@ private extension MessengerDialogScreenView {
     .showNetworkConnectionProblem(true)
     .assetsPickerLimit(assetsPickerLimit: 10)
     .enableLoadMore(offset: presenter.stateShowMessengeMaxCount) { message in
-      presenter.loadMoreMessage(before: message)
+      Task {
+        await presenter.loadMoreMessage(before: message)
+      }
     }
     .messageUseMarkdown(messageUseMarkdown: true)
     .mediaPickerTheme()
@@ -221,10 +233,10 @@ private extension MessengerDialogScreenView {
           size: .standart,
           style: .custom(color: SKStyleAsset.constantAzure.swiftUIColor),
           action: {
-            DispatchQueue.main.async {
-              presenter.sendInitiateChatFromDialog(toxAddress: presenter.stateContactAdress)
-              presenter.startScheduleResendInitialRequest()
+            Task {
+              await presenter.sendInitiateChatFromDialog(toxAddress: presenter.stateContactAdress)
             }
+            presenter.startScheduleResendInitialRequest()
           }
         )
         
@@ -268,13 +280,17 @@ private extension MessengerDialogScreenView {
           MainButtonView(
             text: model.buttonTitle,
             style: .primary) {
-              presenter.confirmRequestForDialog()
+              Task {
+                await presenter.confirmRequestForDialog()
+              }
             }
           
           MainButtonView(
             text: presenter.getRequestButtonCancelTitle(),
             style: .critical) {
-              presenter.cancelRequestForDialog()
+              Task {
+                await presenter.cancelRequestForDialog()
+              }
             }
         }
         .padding(.horizontal, .s4)

@@ -27,7 +27,9 @@ struct SuggestScreenView: View {
       MainButtonView(
         text: presenter.getSuggestModel().buttonTitle,
         action: {
-          presenter.suggestScreenConfirmButtonTapped()
+          Task {
+            await presenter.suggestScreenConfirmButtonTapped()
+          }
         }
       )
       .padding(.bottom, .s4)

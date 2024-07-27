@@ -56,7 +56,9 @@ final class SettingsScreenPresenter: ObservableObject {
   }
   
   lazy var viewWillAppear: (() -> Void)? = { [weak self] in
-    self?.updateValue()
+    Task { [weak self] in
+      await self?.updateValue()
+    }
   }
   
   // MARK: - Internal func
@@ -116,11 +118,9 @@ extension SettingsScreenPresenter: SceneViewModel {
 // MARK: - Private
 
 private extension SettingsScreenPresenter {
-  func updateValue() {
-    interactor.getIsAccessCodeEnabled { [weak self] isEnabled in
-      self?.statePasscodeAndFaceIDValue = isEnabled
-    }
-    
+  @MainActor
+  func updateValue() async {
+    statePasscodeAndFaceIDValue = await interactor.getIsAccessCodeEnabled()
     stateCurrentLanguage = interactor.getCurrentLanguage()
   }
   

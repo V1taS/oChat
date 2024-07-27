@@ -46,7 +46,9 @@ private extension AuthenticationScreenView {
                 }
               case .reEnterPasscode:
                 if presenter.stateValidationPasscode.isValidation {
-                  presenter.authenticationSuccess()
+                  Task {
+                    await presenter.authenticationSuccess()
+                  }
                 } else {
                   presenter.setConfirmAccessCode("")
                 }
@@ -54,7 +56,9 @@ private extension AuthenticationScreenView {
             case let .loginPasscode(result):
               switch result {
               case .enterPasscode:
-                presenter.authenticationSuccess()
+                Task {
+                  await presenter.authenticationSuccess()
+                }
               case .loginFaceID:
                 break
               }
@@ -74,7 +78,9 @@ private extension AuthenticationScreenView {
                 }
               case .reEnterNewPasscode:
                 if presenter.stateValidationPasscode.isValidation {
-                  presenter.authenticationSuccess()
+                  Task {
+                    await presenter.authenticationSuccess()
+                  }
                 } else {
                   presenter.setConfirmAccessCode("")
                 }

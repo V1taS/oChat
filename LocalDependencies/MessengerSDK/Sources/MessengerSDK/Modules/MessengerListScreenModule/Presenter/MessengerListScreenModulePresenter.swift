@@ -61,49 +61,40 @@ final class MessengerListScreenModulePresenter: ObservableObject {
   // MARK: - Internal func
   
   func clearContact(index: Int) {
-    Timer.scheduledTimer(withTimeInterval: 0.3, repeats: false) { [weak self] _ in
-      guard let self else { return }
-      DispatchQueue.global().async { [weak self] in
+    Timer.scheduledTimer(withTimeInterval: 0.3, repeats: false) { _ in
+      Task { [weak self] in
         guard let self else { return }
-        interactor.getContactModels { [weak self] contactModels in
-          guard let self else { return }
-          var updatedContactModel = contactModels[index]
-          updatedContactModel.messenges = [
-            .init(
-              messageType: .systemSuccess,
-              messageStatus: .sent,
-              message: "Вы успешно очистили всю историю переписки",
-              replyMessageText: nil,
-              images: [],
-              videos: [],
-              recording: nil
-            )
-          ]
-          interactor.saveContactModel(updatedContactModel) { [weak self] in
-            guard let self else { return }
-            moduleOutput?.dataModelHasBeenUpdated()
-            updateListContacts()
-          }
-        }
+        let contactModels = await interactor.getContactModels()
+        var updatedContactModel = contactModels[index]
+        updatedContactModel.messenges = [
+          .init(
+            messageType: .systemSuccess,
+            messageStatus: .sent,
+            message: "Вы успешно очистили всю историю переписки",
+            replyMessageText: nil,
+            images: [],
+            videos: [],
+            recording: nil
+          )
+        ]
+        
+        await interactor.saveContactModel(updatedContactModel)
+        moduleOutput?.dataModelHasBeenUpdated()
+        await updateListContacts()
       }
     }
   }
   
   func removeContact(index: Int) {
-    Timer.scheduledTimer(withTimeInterval: 0.3, repeats: false) { [weak self] _ in
-      guard let self else { return }
-      stateWidgetModels.remove(at: index)
-      DispatchQueue.global().async { [weak self] in
+    Timer.scheduledTimer(withTimeInterval: 0.3, repeats: false) { _ in
+      Task { [weak self] in
         guard let self else { return }
-        interactor.getContactModels { [weak self] contactModels in
-          guard let self else { return }
-          let contactModel = contactModels[index]
-          removeContactModels(contactModel, completion: { [weak self] in
-            guard let self else { return }
-            moduleOutput?.dataModelHasBeenUpdated()
-            updateListContacts()
-          })
-        }
+        stateWidgetModels.remove(at: index)
+        let contactModels = await interactor.getContactModels()
+        let contactModel = contactModels[index]
+        await removeContactModels(contactModel)
+        moduleOutput?.dataModelHasBeenUpdated()
+        await updateListContacts()
       }
     }
   }
@@ -118,164 +109,134 @@ final class MessengerListScreenModulePresenter: ObservableObject {
 // MARK: - MessengerListScreenModuleModuleInput
 
 extension MessengerListScreenModulePresenter: MessengerListScreenModuleModuleInput {
-  func sendPushNotification(contact: ContactModel) {
-    Task {
-      await interactor.sendPushNotification(contact: contact)
-    }
+  func sendPushNotification(contact: ContactModel) async {
+    await interactor.sendPushNotification(contact: contact)
   }
   
   func setUserIsTyping(
     _ isTyping: Bool,
-    to toxPublicKey: String,
-    completion: @escaping (Result<Void, any Error>) -> Void
-  ) {
-    Task {
-      let result = await interactor.setUserIsTyping(isTyping, to: toxPublicKey)
-      completion(result)
-    }
+    to toxPublicKey: String
+  ) async -> Result<Void, any Error> {
+    await interactor.setUserIsTyping(isTyping, to: toxPublicKey)
   }
   
-  func saveContactModel(_ model: SKAbstractions.ContactModel) {
-    interactor.saveContactModel(model) { [weak self] in
-      guard let self else { return }
-      updateListContacts()
-    }
+  func saveContactModel(_ model: SKAbstractions.ContactModel) async {
+    await interactor.saveContactModel(model)
+    await updateListContacts()
   }
   
-  func sendInitiateChat(contactModel: ContactModel) {
-    checkingContactPublicKey(contact: contactModel) { [weak self] updatedContactModel in
-      guard let self else { return }
-      sendInitiateChatNetworkRequest(contact: updatedContactModel) { [weak self] _ in
-        guard let self else { return }
-        moduleOutput?.dataModelHasBeenUpdated()
-        updateListContacts()
-      }
+  func sendInitiateChat(contactModel: ContactModel) async {
+    guard let updatedContactModel = await checkingContactPublicKey(contact: contactModel) else {
+      return
     }
+    
+    await sendInitiateChatNetworkRequest(contact: updatedContactModel)
+    moduleOutput?.dataModelHasBeenUpdated()
+    await updateListContacts()
   }
   
-  func confirmRequestForDialog(contactModel: ContactModel) {
+  func confirmRequestForDialog(contactModel: ContactModel) async {
     guard let toxPublicKey = contactModel.toxPublicKey else {
       interactor.showNotification(.negative(title: "Нет публичного ключа: toxPublicKey"))
       return
     }
     
-    Task {
-      if let toxPublicKey = await interactor.confirmFriendRequest(with: toxPublicKey) {
-        var updatedContactModel = contactModel
-        updatedContactModel.status = .online
-        interactor.saveContactModel(updatedContactModel) { [weak self] in
-          guard let self else { return }
-          moduleOutput?.dataModelHasBeenUpdated()
-          updateListContacts()
-        }
-      } else {
-        interactor.showNotification(.negative(title: "Ошибка добавления контакта"))
-        await interactor.removeContactModels(contactModel)
-        moduleOutput?.dataModelHasBeenUpdated()
-        updateListContacts()
-      }
+    if let toxPublicKey = await interactor.confirmFriendRequest(with: toxPublicKey) {
+      var updatedContactModel = contactModel
+      updatedContactModel.status = .online
+      await interactor.saveContactModel(updatedContactModel)
+      moduleOutput?.dataModelHasBeenUpdated()
+      await updateListContacts()
+    } else {
+      interactor.showNotification(.negative(title: "Ошибка добавления контакта"))
+      await interactor.removeContactModels(contactModel)
+      moduleOutput?.dataModelHasBeenUpdated()
+      await updateListContacts()
     }
   }
   
-  func cancelRequestForDialog(contactModel: ContactModel) {
-    removeContactModels(contactModel) { [weak self] in
-      guard let self else { return }
-      interactor.showNotification(.positive(title: "Контакт был удален"))
-    }
+  func cancelRequestForDialog(contactModel: ContactModel) async {
+    await removeContactModels(contactModel)
+    interactor.showNotification(.positive(title: "Контакт был удален"))
   }
   
-  func sendMessage(contact: ContactModel, completion: (() -> Void)?) {
+  func sendMessage(contact: ContactModel) async {
     guard contact.status == .online else {
       interactor.showNotification(.negative(title: "Контакт не в сети"))
       return
     }
     
-    checkingContactPublicKey(contact: contact) { [weak self] updatedContactModel in
-      guard let self else { return }
-      sendMessageNetworkRequest(contact: updatedContactModel) { [weak self] result in
-        guard let self else { return }
-        switch result {
-        case let .success(messageId):
-          updateContactStatus(
-            contact: contact,
-            status: .sending,
-            messageId: UInt32(messageId)
-          ) { [weak self] in
+    guard let updatedContactModel = await checkingContactPublicKey(contact: contact) else {
+      interactor.showNotification(.negative(title: "Отсутствует публичный ключ"))
+      return
+    }
+    
+    switch await sendMessageNetworkRequest(contact: updatedContactModel) {
+    case let .success(messageId):
+      if let messageId {
+        await updateContactStatus(
+          contact: contact,
+          status: .sending,
+          messageId: UInt32(messageId)
+        )
+        
+        Timer.scheduledTimer(withTimeInterval: 10, repeats: false) { [weak self] _ in
+          Task { [weak self] in
             guard let self else { return }
-            moduleOutput?.dataModelHasBeenUpdated()
-            updateListContacts()
-            completion?()
-          }
-          
-          Timer.scheduledTimer(withTimeInterval: 10, repeats: false) { [weak self] _ in
-            guard let self else { return }
-            interactor.getContactModelsFrom(toxAddress: contact.toxAddress ?? "") { [weak self] contactModel in
-              guard let self, let contactModel else { return }
-              var updatedContactModel = contactModel
-              var updatedMessenges = updatedContactModel.messenges
-              let messageId = UInt32(messageId)
+            let contactModel = await interactor.getContactModelsFrom(toxAddress: contact.toxAddress ?? "")
+            
+            guard let contactModel else { return }
+            var updatedContactModel = contactModel
+            var updatedMessenges = updatedContactModel.messenges
+            let messageId = UInt32(messageId)
+            
+            if let messengesIndex = updatedMessenges.firstIndex(where: { $0.tempMessageID == messageId }) {
+              updatedMessenges[messengesIndex].messageStatus = .failed
+              updatedMessenges[messengesIndex].tempMessageID = nil
               
-              if let messengesIndex = updatedMessenges.firstIndex(where: { $0.tempMessageID == messageId }) {
-                updatedMessenges[messengesIndex].messageStatus = .failed
-                updatedMessenges[messengesIndex].tempMessageID = nil
-                
-                updatedContactModel.messenges = updatedMessenges
-                
-                interactor.saveContactModel(updatedContactModel) { [weak self] in
-                  guard let self else { return }
-                  updateListContacts()
-                  moduleOutput?.dataModelHasBeenUpdated()
-                }
-              }
+              updatedContactModel.messenges = updatedMessenges
+              
+              await interactor.saveContactModel(updatedContactModel)
+              await updateListContacts()
+              moduleOutput?.dataModelHasBeenUpdated()
             }
-          }
-        case let .failure(error):
-          updateContactStatus(contact: contact, status: .failed, messageId: nil) { [weak self] in
-            guard let self else { return }
-            moduleOutput?.dataModelHasBeenUpdated()
-            updateListContacts()
-            completion?()
           }
         }
       }
-    }
-  }
-  
-  func getContactModelsFrom(toxAddress: String, completion: ((ContactModel?) -> Void)?) {
-    interactor.getContactModelsFrom(toxAddress: toxAddress, completion: completion)
-  }
-  
-  func removeMessage(id: String, contact: ContactModel) {
-    var updatedContact = factory.removeMessageToContact(id: id, contactModel: contact)
-    interactor.saveContactModel(updatedContact) { [weak self] in
-      guard let self else { return }
-      
       moduleOutput?.dataModelHasBeenUpdated()
-      updateListContacts()
+      await updateListContacts()
+    case .failure:
+      await updateContactStatus(contact: contact, status: .failed, messageId: nil)
+      moduleOutput?.dataModelHasBeenUpdated()
+      await updateListContacts()
     }
   }
   
-  func removeContactModels(_ contactModel: ContactModel, completion: (() -> Void)?) {
-    Task {
-      await interactor.removeContactModels(contactModel)
-      updateListContacts(completion: completion)
-    }
+  func getContactModelsFrom(toxAddress: String) async -> ContactModel? {
+    await interactor.getContactModelsFrom(toxAddress: toxAddress)
   }
   
-  func updateListContacts(completion: (() -> Void)? = nil) {
+  func removeMessage(id: String, contact: ContactModel) async {
+    var updatedContact = factory.removeMessageToContact(id: id, contactModel: contact)
+    await interactor.saveContactModel(updatedContact)
+    moduleOutput?.dataModelHasBeenUpdated()
+    await updateListContacts()
+  }
+  
+  func removeContactModels(_ contactModel: ContactModel) async {
+    await interactor.removeContactModels(contactModel)
+    await updateListContacts()
+  }
+  
+  @MainActor
+  func updateListContacts() async {
     updateIsNotificationsEnabled()
-    interactor.getContactModels { [weak self] contactModels in
-      guard let self else {
-        return
-      }
-      
-      updateRedDotToTabBar(contactModels: contactModels)
-      
-      stateWidgetModels = factory.createDialogWidgetModels(
-        messengerDialogModels: contactModels
-      )
-      completion?()
-    }
+    let contactModels = await interactor.getContactModels()
+    updateRedDotToTabBar(contactModels: contactModels)
+    
+    stateWidgetModels = factory.createDialogWidgetModels(
+      messengerDialogModels: contactModels
+    )
   }
 }
 
@@ -326,47 +287,33 @@ private extension MessengerListScreenModulePresenter {
     // Отключаем таймер простоя
     UIApplication.shared.isIdleTimerDisabled = true
     
-    interactor.clearAllMessengeTempID(completion: {})
-    
     Task {
-      await interactor.startPeriodicFriendStatusCheck { [weak self] in
-        guard let self else { return }
-        updateListContacts()
-        moduleOutput?.dataModelHasBeenUpdated()
+      await interactor.clearAllMessengeTempID()
+      await interactor.startPeriodicFriendStatusCheck {
+        Task { [weak self] in
+          guard let self else { return }
+          await updateListContacts()
+          moduleOutput?.dataModelHasBeenUpdated()
+        }
       }
       await interactor.setSelfStatus(isOnline: true)
       await interactor.stratTOXService()
+      let contactModels = await interactor.getContactModels()
+      stateWidgetModels = factory.createDialogWidgetModels(messengerDialogModels: contactModels)
+      
+      await interactor.setAllContactsIsOffline()
+      await interactor.setAllContactsNoTyping()
+      let token = await interactor.getPushNotificationToken()
+      if token == nil {
+        await UIApplication.shared.registerForRemoteNotifications()
+      }
+      
+      await updateListContacts()
+      moduleOutput?.dataModelHasBeenUpdated()
     }
     
     updateIsNotificationsEnabled()
-    interactor.getContactModels { [weak self] contactModels in
-      guard let self else {
-        return
-      }
-      
-      stateWidgetModels = factory.createDialogWidgetModels(messengerDialogModels: contactModels)
-    }
-    
     interactor.passcodeNotSetInSystemIOSheck()
-    
-    interactor.setAllContactsIsOffline { [weak self] in
-      guard let self else { return }
-      interactor.setAllContactsNoTyping { [weak self] in
-        guard let self else { return }
-        
-        updateListContacts()
-        moduleOutput?.dataModelHasBeenUpdated()
-      }
-    }
-    
-    interactor.getPushNotificationToken { [weak self] token in
-      guard token == nil else {
-        return
-      }
-      DispatchQueue.main.async {
-        UIApplication.shared.registerForRemoteNotifications()
-      }
-    }
     
     NotificationCenter.default.addObserver(
       self,
@@ -396,12 +343,6 @@ private extension MessengerListScreenModulePresenter {
       self,
       selector: #selector(handleFriendOnlineStatus(_:)),
       name: Notification.Name(NotificationConstants.didUpdateFriendOnlineStatus.rawValue),
-      object: nil
-    )
-    NotificationCenter.default.addObserver(
-      self,
-      selector: #selector(userDidScreenshot),
-      name: UIApplication.userDidTakeScreenshotNotification,
       object: nil
     )
     NotificationCenter.default.addObserver(
@@ -439,9 +380,8 @@ private extension MessengerListScreenModulePresenter {
   func updateContactStatus(
     contact: ContactModel,
     status: MessengeModel.MessageStatus,
-    messageId: UInt32?,
-    completion: @escaping () -> Void
-  ) {
+    messageId: UInt32?
+  ) async {
     guard var updatedLastMessage = contact.messenges.last else { return }
     updatedLastMessage.messageStatus = status
     
@@ -452,11 +392,7 @@ private extension MessengerListScreenModulePresenter {
     if let messageId {
       updatedContact.messenges[updatedContact.messenges.count - 1].tempMessageID = messageId
     }
-    
-    interactor.saveContactModel(updatedContact) { [weak self] in
-      guard let self else { return }
-      completion()
-    }
+    await interactor.saveContactModel(updatedContact)
   }
   
   func updateRedDotToTabBar(contactModels: [ContactModel]) {
@@ -479,13 +415,14 @@ private extension MessengerListScreenModulePresenter {
       )
     )
     
-    interactor.getMessengerModel { [ weak self] messengerModel in
-      guard let self else {
-        return
-      }
+    Task { [weak self] in
+      guard let self else { return }
+      let messengerModel = await interactor.getMessengerModel()
       
-      barButtonView?.iconLeftView.image = messengerModel.myStatus.imageStatus
-      barButtonView?.labelView.text = messengerModel.myStatus.title
+      await MainActor.run {
+        barButtonView?.iconLeftView.image = messengerModel.myStatus.imageStatus
+        barButtonView?.labelView.text = messengerModel.myStatus.title
+      }
     }
   }
   
@@ -497,13 +434,11 @@ private extension MessengerListScreenModulePresenter {
     senderLocalMeshAddress: String?,
     senderPublicKey: String?,
     senderToxPublicKey: String?,
-    senderPushNotificationToken: String?,
-    completion: ((_ recipientTorAddress: String,
-                  _ requestModel: MessengerNetworkRequestModel) -> Void)?
-  ) {
+    senderPushNotificationToken: String?
+  ) async -> (recipientTorAddress: String, requestModel: MessengerNetworkRequestModel)? {
     guard let senderAddress else {
       interactor.showNotification(.negative(title: "Нет адреса получателя!"))
-      return
+      return nil
     }
     
     let requestModel = MessengerNetworkRequestModel(
@@ -513,16 +448,16 @@ private extension MessengerListScreenModulePresenter {
       senderAddress: senderAddress,
       senderLocalMeshAddress: senderLocalMeshAddress ?? "",
       senderPublicKey: senderPublicKey,
-      senderToxPublicKey: senderToxPublicKey, 
+      senderToxPublicKey: senderToxPublicKey,
       senderPushNotificationToken: senderPushNotificationToken
     )
-    completion?(senderAddress, requestModel)
+    return (senderAddress, requestModel)
   }
   
-  func checkingContactPublicKey(contact: ContactModel, completion: ((ContactModel) -> Void)?) {
+  func checkingContactPublicKey(contact: ContactModel) async -> ContactModel? {
     guard let toxAddress = contact.toxAddress else {
       interactor.showNotification(.negative(title: "Неправильный адрес контакта"))
-      return
+      return nil
     }
     
     var updatedContactModel = contact
@@ -530,17 +465,15 @@ private extension MessengerListScreenModulePresenter {
       let toxPublicKey = interactor.getToxPublicKey(from: toxAddress)
       updatedContactModel.toxPublicKey = toxPublicKey
     }
-    completion?(updatedContactModel)
+    return updatedContactModel
   }
   
   func prepareAndEncryptDataForNetworkRequest(
-    contact: ContactModel,
-    completion: ((_ recipientTorAddress: String,
-                  _ requestModel: MessengerNetworkRequestModel) -> Void)?
-  ) {
+    contact: ContactModel
+  ) async -> (recipientTorAddress: String, requestModel: MessengerNetworkRequestModel)? {
     guard let senderPublicKey = interactor.publicKey(from: interactor.getDeviceIdentifier()) else {
       interactor.showNotification(.negative(title: "Не получилось создать Публичный ключ для шифрования"))
-      return
+      return nil
     }
     
     var message = ""
@@ -553,150 +486,117 @@ private extension MessengerListScreenModulePresenter {
       replyMessageText = messengeModel.replyMessageText
     }
     
-    interactor.getPushNotificationToken { [weak self] pushNotificationToken in
-      guard let self else { return }
-      interactor.saveContactModel(
-        contact,
-        completion: { [weak self] in
-          guard let self else { return }
-          var messageForSend = ""
-          var senderPushNotificationTokenForSend: String?
-          
-          if let encryptionPublicKey = contact.encryptionPublicKey {
-            let messageEncrypt = interactor.encrypt(message, publicKey: encryptionPublicKey)
-            messageForSend = messageEncrypt ?? ""
-          }
-          
-          if let pushNotificationToken, let encryptionPublicKey = contact.encryptionPublicKey {
-            let pushNotificationTokenEncrypt = interactor.encrypt(
-              pushNotificationToken,
-              publicKey: encryptionPublicKey
-            )
-            senderPushNotificationTokenForSend = pushNotificationTokenEncrypt
-          }
-          
-          Task { [weak self, messageForSend, messageID, replyMessageText, senderPushNotificationTokenForSend] in
-            guard let self,
-                  let toxAddress = await interactor.getToxAddress(),
-                  let toxPublicKey = await interactor.getToxPublicKey() else {
-              return
-            }
-            
-            createRequestModel(
-              message: messageForSend,
-              messageID: messageID,
-              replyMessageText: replyMessageText,
-              senderAddress: toxAddress,
-              senderLocalMeshAddress: nil,
-              senderPublicKey: senderPublicKey,
-              senderToxPublicKey: toxPublicKey,
-              senderPushNotificationToken: senderPushNotificationTokenForSend,
-              completion: completion
-            )
-          }
-        }
+    let pushNotificationToken = await interactor.getPushNotificationToken()
+    await interactor.saveContactModel(contact)
+    var messageForSend = ""
+    var senderPushNotificationTokenForSend: String?
+    
+    if let encryptionPublicKey = contact.encryptionPublicKey {
+      let messageEncrypt = interactor.encrypt(message, publicKey: encryptionPublicKey)
+      messageForSend = messageEncrypt ?? ""
+    }
+    
+    if let pushNotificationToken, let encryptionPublicKey = contact.encryptionPublicKey {
+      let pushNotificationTokenEncrypt = interactor.encrypt(
+        pushNotificationToken,
+        publicKey: encryptionPublicKey
       )
+      senderPushNotificationTokenForSend = pushNotificationTokenEncrypt
     }
+    
+    let toxAddress = await interactor.getToxAddress()
+    let toxPublicKey = await interactor.getToxPublicKey()
+    return await createRequestModel(
+      message: messageForSend,
+      messageID: messageID,
+      replyMessageText: replyMessageText,
+      senderAddress: toxAddress,
+      senderLocalMeshAddress: nil,
+      senderPublicKey: senderPublicKey,
+      senderToxPublicKey: toxPublicKey,
+      senderPushNotificationToken: senderPushNotificationTokenForSend
+    )
   }
   
-  func sendInitiateChatNetworkRequest(
-    contact: ContactModel,
-    completion: ((Result<Void, Error>) -> Void)?
-  ) {
-    prepareAndEncryptDataForNetworkRequest(
-      contact: contact
-    ) { [weak self] senderAddress, requestModel in
-      guard let self, let toxAddress = contact.toxAddress else { return }
+  func sendInitiateChatNetworkRequest(contact: ContactModel) async -> Result<Void, Error> {
+    guard let networkRequest = await prepareAndEncryptDataForNetworkRequest(contact: contact) else {
+      return .failure(URLError(.unknown))
+    }
+    let (senderAddress, requestModel) = networkRequest
+    guard let toxAddress = contact.toxAddress else {
+      return .failure(URLError(.unknown))
+    }
+    
+    if let contactID = await interactor.initialChat(senderAddress: toxAddress, messengerRequest: requestModel) {
+      return .success(())
+    }
+    return .failure(URLError(.unknown))
+  }
+  
+  func sendMessageNetworkRequest(contact: ContactModel) async -> Result<Int32?, Error> {
+    guard let toxPublicKey = contact.toxPublicKey,
+          let networkRequest = await prepareAndEncryptDataForNetworkRequest(contact: contact),
+          let encryptionPublicKey = contact.encryptionPublicKey else {
+      return .failure(URLError(.unknown))
+    }
+    let (recipientTorAddress, requestModel) = networkRequest
+    let messengeIndex = contact.messenges.firstIndex(where: {
+      $0.id == contact.messenges.last?.id
+    })
+    
+    if let messengeIndex,
+       !contact.messenges[messengeIndex].videos.isEmpty ||
+        !contact.messenges[messengeIndex].images.isEmpty ||
+        contact.messenges[messengeIndex].recording != nil {
+      var files: [URL?] = []
       
-      Task { [weak self] in
-        if let contactID = await self?.interactor.initialChat(
-          senderAddress: toxAddress,
-          messengerRequest: requestModel
-        ) {
-          completion?(.success(()))
-        } else {
-          completion?(.failure(URLError(.unknown)))
-        }
-      }
+      contact.messenges[messengeIndex].videos.forEach { files.append($0.full) }
+      contact.messenges[messengeIndex].images.forEach { files.append($0.full) }
+      
+      await interactor.sendFile(
+        toxPublicKey: toxPublicKey,
+        recipientPublicKey: encryptionPublicKey,
+        recordModel: contact.messenges[messengeIndex].recording,
+        messengerRequest: requestModel,
+        files: files.compactMap({ $0 })
+      )
+      return .success(nil)
     }
-  }
-  
-  func sendMessageNetworkRequest(
-    contact: ContactModel,
-    completion: ((Result<Int32, Error>) -> Void)?
-  ) {
-    guard let toxPublicKey = contact.toxPublicKey else {
-      return
+    
+    if let messageText = requestModel.messageText, messageText.count > 300 {
+      await interactor.sendFile(
+        toxPublicKey: toxPublicKey,
+        recipientPublicKey: encryptionPublicKey,
+        recordModel: nil,
+        messengerRequest: requestModel,
+        files: []
+      )
+      return .success(nil)
     }
-    prepareAndEncryptDataForNetworkRequest(
-      contact: contact
+    
+    if let messageID = await interactor.sendMessage(
+      toxPublicKey: toxPublicKey,
+      messengerRequest: requestModel
     ) {
-      [weak self] recipientTorAddress, requestModel in
-      guard let self, let encryptionPublicKey = contact.encryptionPublicKey else { return }
-      let messengeIndex = contact.messenges.firstIndex(where: {
-        $0.id == contact.messenges.last?.id
-      })
-      
-      if let messengeIndex,
-         !contact.messenges[messengeIndex].videos.isEmpty ||
-         !contact.messenges[messengeIndex].images.isEmpty ||
-         contact.messenges[messengeIndex].recording != nil {
-        var files: [URL?] = []
-        
-        contact.messenges[messengeIndex].videos.forEach { files.append($0.full) }
-        contact.messenges[messengeIndex].images.forEach { files.append($0.full) }
-        
-        Task { [weak self, files] in
-          await interactor.sendFile(
-            toxPublicKey: toxPublicKey,
-            recipientPublicKey: encryptionPublicKey,
-            recordModel: contact.messenges[messengeIndex].recording,
-            messengerRequest: requestModel,
-            files: files.compactMap({ $0 })
-          )
-        }
-        return
+      var updatedContact = contact
+      if let messengeIndex {
+        var updatedMessenge = updatedContact.messenges[messengeIndex]
+        updatedMessenge.messageStatus = .sent
+        updatedContact.messenges[messengeIndex] = updatedMessenge
       }
       
-      if let messageText = requestModel.messageText, messageText.count > 300 {
-        Task { [weak self] in
-          await interactor.sendFile(
-            toxPublicKey: toxPublicKey,
-            recipientPublicKey: encryptionPublicKey,
-            recordModel: nil,
-            messengerRequest: requestModel,
-            files: []
-          )
-        }
-        return
-      }
-      
-      Task { [weak self] in
-        if let messageID = await interactor.sendMessage(
-          toxPublicKey: toxPublicKey,
-          messengerRequest: requestModel
-        ) {
-          var updatedContact = contact
-          if let messengeIndex {
-            var updatedMessenge = updatedContact.messenges[messengeIndex]
-            updatedMessenge.messageStatus = .sent
-            updatedContact.messenges[messengeIndex] = updatedMessenge
-          }
-          
-          interactor.saveContactModel(updatedContact) {
-            completion?(.success((messageID)))
-          }
-        } else {
-          completion?(.failure(URLError(.unknown)))
-        }
-      }
+      await interactor.saveContactModel(updatedContact)
+      return .success(messageID)
     }
+    return .failure(URLError(.unknown))
   }
   
   func sendLocalNotificationIfNeeded(contactModel: ContactModel) {
     // Проверка, находится ли приложение в фоне
-    if UIApplication.shared.applicationState == .background {
-      sendLocalNotification(contactModel: contactModel)
+    DispatchQueue.main.async { [weak self] in
+      if UIApplication.shared.applicationState == .background {
+        self?.sendLocalNotification(contactModel: contactModel)
+      }
     }
   }
   
@@ -727,6 +627,7 @@ private extension MessengerListScreenModulePresenter {
       guard let self else { return }
       
       Task { [weak self] in
+        guard let self else { return }
         if let deepLinkAdress = await interactor.getDeepLinkAdress() {
           moduleOutput?.openNewMessengeScreen(contactAdress: deepLinkAdress)
           interactor.deleteDeepLinkURL()
@@ -734,26 +635,26 @@ private extension MessengerListScreenModulePresenter {
       }
     }
     
-    Task {
+    Task { [weak self] in
+      guard let self else { return }
       await interactor.setSelfStatus(isOnline: true)
+      await interactor.clearAllMessengeTempID()
+      
+      if await interactor.getPushNotificationToken() == nil {
+        await UIApplication.shared.registerForRemoteNotifications()
+      }
     }
     
-    interactor.clearAllMessengeTempID(completion: {})
     interactor.passcodeNotSetInSystemIOSheck()
-    
-    interactor.getPushNotificationToken { [weak self] token in
-      guard token == nil else {
-        return
-      }
-      DispatchQueue.main.async {
-        UIApplication.shared.registerForRemoteNotifications()
-      }
-    }
   }
   
   @objc
   func handleMyOnlineStatus(_ notification: Notification) {
-    if let status = notification.userInfo?["onlineStatus"] as? MessengerModel.Status {
+    Task { @MainActor [weak self] in
+      guard let self,
+            let status = notification.userInfo?["onlineStatus"] as? MessengerModel.Status else {
+        return
+      }
       barButtonView?.iconLeftView.image = status.imageStatus
       barButtonView?.labelView.text = status.title
     }
@@ -761,402 +662,385 @@ private extension MessengerListScreenModulePresenter {
   
   @objc
   func handleFriendOnlineStatus(_ notification: Notification) {
-    if let toxPublicKey = notification.userInfo?["publicKey"] as? String,
-       let status = notification.userInfo?["status"] as? ContactModel.Status {
-      interactor.getContactModelsFrom(toxPublicKey: toxPublicKey) { [weak self] contactModel in
-        guard let self, let contactModel else { return }
-        
-        var updatebleContactModel = contactModel
-        if status == .offline {
-          updatebleContactModel.isTyping = false
-        }
-        
-        interactor.saveContactModel(updatebleContactModel) { [weak self] in
-          guard let self else { return }
-          interactor.setStatus(updatebleContactModel, status) { [weak self] in
-            guard let self else { return }
-            updateListContacts()
-            moduleOutput?.dataModelHasBeenUpdated()
-          }
-        }
+    Task { [weak self] in
+      guard let self,
+            let toxPublicKey = notification.userInfo?["publicKey"] as? String,
+            let status = notification.userInfo?["status"] as? ContactModel.Status else {
+        return
       }
+      let contactModel = await interactor.getContactModelsFrom(toxPublicKey: toxPublicKey)
+      guard let contactModel else { return }
+      
+      var updatebleContactModel = contactModel
+      if status == .offline {
+        updatebleContactModel.isTyping = false
+      }
+      
+      await interactor.saveContactModel(updatebleContactModel)
+      await interactor.setStatus(updatebleContactModel, status)
+      await updateListContacts()
+      moduleOutput?.dataModelHasBeenUpdated()
     }
   }
   
   @objc
   func handleIsTypingFriend(_ notification: Notification) {
-    if let toxPublicKey = notification.userInfo?["publicKey"] as? String,
-       let isTyping = notification.userInfo?["isTyping"] as? Bool {
-      interactor.getContactModelsFrom(toxPublicKey: toxPublicKey) { [weak self] contactModel in
-        guard let self, let contactModel else { return }
-        var updatedContactModel = contactModel
-        updatedContactModel.isTyping = isTyping
-        updatedContactModel.status = .online
-        interactor.saveContactModel(updatedContactModel) { [weak self] in
-          guard let self else { return }
-          updateListContacts()
-          moduleOutput?.dataModelHasBeenUpdated()
-        }
+    Task { [weak self] in
+      guard let self,
+            let toxPublicKey = notification.userInfo?["publicKey"] as? String,
+            let isTyping = notification.userInfo?["isTyping"] as? Bool else {
+        return
       }
+      
+      let contactModel = await interactor.getContactModelsFrom(toxPublicKey: toxPublicKey)
+      guard let contactModel else { return }
+      var updatedContactModel = contactModel
+      updatedContactModel.isTyping = isTyping
+      updatedContactModel.status = .online
+      await interactor.saveContactModel(updatedContactModel)
+      await updateListContacts()
+      moduleOutput?.dataModelHasBeenUpdated()
     }
   }
   
   @objc
   func handleFileErrorSender(_ notification: Notification) {
-    if let toxPublicKey = notification.userInfo?["publicKey"] as? String,
-       let messageID = notification.userInfo?["messageID"] as? String {
-      
-      interactor.getContactModelsFrom(toxPublicKey: toxPublicKey) { [weak self] contactModel in
-        guard let self, let contactModel else { return }
-        var updatedContactModel = contactModel
-        var updatedMessenges = updatedContactModel.messenges
-        updatedContactModel.status = .online
-        
-        if let messengesIndex = updatedMessenges.firstIndex(where: { $0.id == messageID }) {
-          updatedMessenges[messengesIndex].messageStatus = .failed
-        }
-        updatedContactModel.messenges = updatedMessenges
-        
-        interactor.saveContactModel(updatedContactModel) { [weak self] in
-          guard let self else { return }
-          updateListContacts()
-          moduleOutput?.dataModelHasBeenUpdated()
-        }
+    Task { [weak self] in
+      guard let self,
+            let toxPublicKey = notification.userInfo?["publicKey"] as? String,
+            let messageID = notification.userInfo?["messageID"] as? String else {
+        return
       }
+      
+      let contactModel = await interactor.getContactModelsFrom(toxPublicKey: toxPublicKey)
+      guard let contactModel else { return }
+      var updatedContactModel = contactModel
+      var updatedMessenges = updatedContactModel.messenges
+      updatedContactModel.status = .online
+      
+      if let messengesIndex = updatedMessenges.firstIndex(where: { $0.id == messageID }) {
+        updatedMessenges[messengesIndex].messageStatus = .failed
+      }
+      updatedContactModel.messenges = updatedMessenges
+      
+      await interactor.saveContactModel(updatedContactModel)
+      await updateListContacts()
+      moduleOutput?.dataModelHasBeenUpdated()
     }
   }
   
   @objc
   func handleFileSender(_ notification: Notification) {
-    if let toxPublicKey = notification.userInfo?["publicKey"] as? String,
-       let progress = notification.userInfo?["progress"] as? Double,
-       let messageID = notification.userInfo?["messageID"] as? String {
+    Task { [weak self] in
+      guard let self,
+            let toxPublicKey = notification.userInfo?["publicKey"] as? String,
+            let progress = notification.userInfo?["progress"] as? Double,
+            let messageID = notification.userInfo?["messageID"] as? String else {
+        return
+        
+      }
       
       moduleOutput?.handleFileSender(progress: Int(progress), publicToxKey: toxPublicKey)
       if progress < 100 { return }
       
-      interactor.getContactModelsFrom(toxPublicKey: toxPublicKey) { [weak self] contactModel in
-        guard let self, let contactModel else { return }
-        var updatedContactModel = contactModel
-        var updatedMessenges = updatedContactModel.messenges
-        updatedContactModel.status = .online
-        
-        if let messengesIndex = updatedMessenges.firstIndex(where: { $0.id == messageID }) {
-          updatedMessenges[messengesIndex].messageStatus = .sent
-        }
-        updatedContactModel.messenges = updatedMessenges
-        
-        interactor.saveContactModel(updatedContactModel) { [weak self] in
-          guard let self else { return }
-          updateListContacts()
-          moduleOutput?.dataModelHasBeenUpdated()
-        }
+      let contactModel = await interactor.getContactModelsFrom(toxPublicKey: toxPublicKey)
+      guard let contactModel else { return }
+      var updatedContactModel = contactModel
+      var updatedMessenges = updatedContactModel.messenges
+      updatedContactModel.status = .online
+      
+      if let messengesIndex = updatedMessenges.firstIndex(where: { $0.id == messageID }) {
+        updatedMessenges[messengesIndex].messageStatus = .sent
       }
+      updatedContactModel.messenges = updatedMessenges
+      
+      await interactor.saveContactModel(updatedContactModel)
+      await updateListContacts()
+      moduleOutput?.dataModelHasBeenUpdated()
     }
   }
   
   @objc
   func handleFileReceive(_ notification: Notification) {
-    if let publicToxKey = notification.userInfo?["publicKey"] as? String,
-       let filePath = notification.userInfo?["filePath"] as? URL,
-       let progress = notification.userInfo?["progress"] as? Double {
+    Task { [weak self] in
+      guard let self,
+            let publicToxKey = notification.userInfo?["publicKey"] as? String,
+            let filePath = notification.userInfo?["filePath"] as? URL,
+            let progress = notification.userInfo?["progress"] as? Double else {
+        return
+      }
       
       moduleOutput?.handleFileReceive(progress: Int(progress), publicToxKey: publicToxKey)
       if progress < 100 { return }
       
-      interactor.getContactModels { [weak self] contactModels in
-        guard let self else { return }
+      let contactModels = await interactor.getContactModels()
+      
+      let passwordEncodedString = interactor.getFileNameWithoutExtension(from: filePath)
+      guard let decodedPasswordEncrypt = passwordEncodedString.removingPercentEncoding else {
+        return
+      }
+      
+      let password = await interactor.decrypt(decodedPasswordEncrypt)
+      guard let password, let receiveAndUnzipFile = try? await interactor.receiveAndUnzipFile(
+        zipFileURL: filePath,
+        password: password
+      ) else {
+        return
+      }
+      let (messageModel, recordingDTO, files) = receiveAndUnzipFile
+      
+      updateRedDotToTabBar(contactModels: contactModels)
+      let messageText = await interactor.decrypt(messageModel.messageText)
+      let pushNotificationToken = await interactor.decrypt(messageModel.senderPushNotificationToken)
+      var images: [MessengeImageModel] = []
+      var videos: [MessengeVideoModel] = []
+      
+      for fileTempURL in files {
         
-        let passwordEncodedString = interactor.getFileNameWithoutExtension(from: filePath)
-        guard let decodedPasswordEncrypt = passwordEncodedString.removingPercentEncoding else {
-          return
-        }
-        
-        interactor.decrypt(decodedPasswordEncrypt) { [weak self] password in
-          guard let self, let password else { return }
-          interactor.receiveAndUnzipFile(
-            zipFileURL: filePath,
-            password: password
-          ) { [weak self] result in
-            guard let self, let result = try? result.get() else {
-              return
-            }
-            let messageModel = result.model
-            updateRedDotToTabBar(contactModels: contactModels)
-            
-            interactor.decrypt(messageModel.messageText) { [weak self] messageText in
-              guard let self else { return }
-              interactor.decrypt(messageModel.senderPushNotificationToken) { [weak self] pushNotificationToken in
-                guard let self else { return }
-                var images: [MessengeImageModel] = []
-                var videos: [MessengeVideoModel] = []
-                
-                for fileTempURL in result.files {
-                  
-                  if fileTempURL.isImageFile() {
-                    let imageFile = interactor.readObjectWith(fileURL: fileTempURL) ?? Data()
-                    let fileExtension = fileTempURL.pathExtension
-                    let thumbnailData = interactor.resizeThumbnailImageWithFrame(data: imageFile) ?? Data()
-                    let thumbnailURL = interactor.saveObjectWith(
-                      fileName: UUID().uuidString,
-                      fileExtension: fileExtension,
-                      data: thumbnailData
-                    )
-                    
-                    guard let thumbnailURL,
-                          let fullImage = interactor.saveObjectWith(tempURL: fileTempURL),
-                          let thumbnailName = interactor.getFileName(from: thumbnailURL),
-                          let fullImageName = interactor.getFileName(from: fullImage) else {
-                      continue
-                    }
-                    
-                    images.append(
-                      .init(
-                        id: UUID().uuidString,
-                        thumbnailName: thumbnailName,
-                        fullName: fullImageName
-                      )
-                    )
-                    continue
-                  }
-                  
-                  if fileTempURL.isVideoFile() {
-                    guard let videoFileURL = interactor.saveObjectWith(tempURL: fileTempURL),
-                          let videoFileName = interactor.getFileName(from: videoFileURL),
-                          let firstFrameData = interactor.getFirstFrame(from: videoFileURL),
-                          let thumbnailResizeData = interactor.resizeThumbnailImageWithFrame(data: firstFrameData),
-                          let thumbnailURL = interactor.saveObjectWith(
-                            fileName: UUID().uuidString,
-                            fileExtension: "jpg",
-                            data: thumbnailResizeData
-                          ),
-                          let thumbnailName = interactor.getFileName(from: thumbnailURL) else {
-                      continue
-                    }
-                    
-                    videos.append(
-                      .init(
-                        id: UUID().uuidString,
-                        thumbnailName: thumbnailName,
-                        fullName: videoFileName
-                      )
-                    )
-                    continue
-                  }
-                }
-                
-                var recordingModel: MessengeRecordingModel?
-                
-                if let recordingDTO = result.recordingDTO,
-                   let recordingURL = interactor.saveObjectWith(
-                    fileName: UUID().uuidString,
-                    fileExtension: "aac",
-                    data: recordingDTO.data
-                   ),
-                   let recordingName = interactor.getFileName(from: recordingURL) {
-                  recordingModel = .init(
-                    duration: recordingDTO.duration,
-                    waveformSamples: recordingDTO.waveformSamples,
-                    name: recordingName
-                  )
-                }
-                
-                if let contact = factory.searchContact(
-                  contactModels: contactModels,
-                  torAddress: messageModel.senderAddress
-                ) {
-                  var updatedContact = contact
-                  updatedContact = factory.addMessageToContact(
-                    message: messageText,
-                    contactModel: updatedContact,
-                    messageType: .received,
-                    replyMessageText: messageModel.replyMessageText,
-                    images: images,
-                    videos: videos,
-                    recording: recordingModel
-                  )
-                  updatedContact.status = .online
-                  if let senderPushNotificationToken = pushNotificationToken {
-                    updatedContact.pushNotificationToken = senderPushNotificationToken
-                  }
-                  updatedContact.toxAddress = messageModel.senderAddress
-                  updatedContact.isNewMessagesAvailable = true
-                  updatedContact.encryptionPublicKey = messageModel.senderPublicKey
-                  interactor.saveContactModel(updatedContact, completion: { [weak self] in
-                    guard let self else { return }
-                    updateListContacts()
-                    moduleOutput?.dataModelHasBeenUpdated()
-                    interactor.clearTemporaryDirectory()
-                    impactFeedback.impactOccurred()
-                    sendLocalNotificationIfNeeded(contactModel: contact)
-                  })
-                } else {
-                  let contact = ContactModel(
-                    name: nil,
-                    toxAddress: messageModel.senderAddress,
-                    meshAddress: messageModel.senderLocalMeshAddress,
-                    messenges: [],
-                    status: .online,
-                    encryptionPublicKey: messageModel.senderPublicKey,
-                    toxPublicKey: nil,
-                    pushNotificationToken: pushNotificationToken,
-                    isNewMessagesAvailable: true,
-                    isTyping: false
-                  )
-                  interactor.saveContactModel(contact, completion: { [weak self] in
-                    guard let self else { return }
-                    updateListContacts()
-                    moduleOutput?.dataModelHasBeenUpdated()
-                    interactor.clearTemporaryDirectory()
-                    impactFeedback.impactOccurred()
-                    sendLocalNotificationIfNeeded(contactModel: contact)
-                  })
-                }
-              }
-            }
+        if fileTempURL.isImageFile() {
+          let imageFile = interactor.readObjectWith(fileURL: fileTempURL) ?? Data()
+          let fileExtension = fileTempURL.pathExtension
+          let thumbnailData = interactor.resizeThumbnailImageWithFrame(data: imageFile) ?? Data()
+          let thumbnailURL = interactor.saveObjectWith(
+            fileName: UUID().uuidString,
+            fileExtension: fileExtension,
+            data: thumbnailData
+          )
+          
+          guard let thumbnailURL,
+                let fullImage = interactor.saveObjectWith(tempURL: fileTempURL),
+                let thumbnailName = interactor.getFileName(from: thumbnailURL),
+                let fullImageName = interactor.getFileName(from: fullImage) else {
+            continue
           }
+          
+          images.append(
+            .init(
+              id: UUID().uuidString,
+              thumbnailName: thumbnailName,
+              fullName: fullImageName
+            )
+          )
+          continue
         }
+        
+        if fileTempURL.isVideoFile() {
+          guard let videoFileURL = interactor.saveObjectWith(tempURL: fileTempURL),
+                let videoFileName = interactor.getFileName(from: videoFileURL),
+                let firstFrameData = interactor.getFirstFrame(from: videoFileURL),
+                let thumbnailResizeData = interactor.resizeThumbnailImageWithFrame(data: firstFrameData),
+                let thumbnailURL = interactor.saveObjectWith(
+                  fileName: UUID().uuidString,
+                  fileExtension: "jpg",
+                  data: thumbnailResizeData
+                ),
+                let thumbnailName = interactor.getFileName(from: thumbnailURL) else {
+            continue
+          }
+          
+          videos.append(
+            .init(
+              id: UUID().uuidString,
+              thumbnailName: thumbnailName,
+              fullName: videoFileName
+            )
+          )
+          continue
+        }
+      }
+      
+      var recordingModel: MessengeRecordingModel?
+      
+      if let recordingDTO,
+         let recordingURL = interactor.saveObjectWith(
+          fileName: UUID().uuidString,
+          fileExtension: "aac",
+          data: recordingDTO.data
+         ),
+         let recordingName = interactor.getFileName(from: recordingURL) {
+        recordingModel = .init(
+          duration: recordingDTO.duration,
+          waveformSamples: recordingDTO.waveformSamples,
+          name: recordingName
+        )
+      }
+      
+      if let contact = factory.searchContact(
+        contactModels: contactModels,
+        torAddress: messageModel.senderAddress
+      ) {
+        var updatedContact = contact
+        updatedContact = factory.addMessageToContact(
+          message: messageText,
+          contactModel: updatedContact,
+          messageType: .received,
+          replyMessageText: messageModel.replyMessageText,
+          images: images,
+          videos: videos,
+          recording: recordingModel
+        )
+        updatedContact.status = .online
+        if let senderPushNotificationToken = pushNotificationToken {
+          updatedContact.pushNotificationToken = senderPushNotificationToken
+        }
+        updatedContact.toxAddress = messageModel.senderAddress
+        updatedContact.isNewMessagesAvailable = true
+        updatedContact.encryptionPublicKey = messageModel.senderPublicKey
+        
+        await interactor.saveContactModel(updatedContact)
+        await updateListContacts()
+        moduleOutput?.dataModelHasBeenUpdated()
+        interactor.clearTemporaryDirectory()
+        await impactFeedback.impactOccurred()
+        sendLocalNotificationIfNeeded(contactModel: contact)
+      } else {
+        let contact = ContactModel(
+          name: nil,
+          toxAddress: messageModel.senderAddress,
+          meshAddress: messageModel.senderLocalMeshAddress,
+          messenges: [],
+          status: .online,
+          encryptionPublicKey: messageModel.senderPublicKey,
+          toxPublicKey: nil,
+          pushNotificationToken: pushNotificationToken,
+          isNewMessagesAvailable: true,
+          isTyping: false
+        )
+        await interactor.saveContactModel(contact)
+        await updateListContacts()
+        moduleOutput?.dataModelHasBeenUpdated()
+        interactor.clearTemporaryDirectory()
+        await impactFeedback.impactOccurred()
+        sendLocalNotificationIfNeeded(contactModel: contact)
       }
     }
   }
   
   @objc
   func handleFriendReadReceipt(_ notification: Notification) {
-    if let toxPublicKey = notification.userInfo?["publicKey"] as? String,
-       let messageId = notification.userInfo?["messageId"] as? UInt32 {
-      interactor.getContactModelsFrom(toxPublicKey: toxPublicKey) { [weak self] contactModel in
-        guard let self, let contactModel else { return }
-        var updatedContactModel = contactModel
-        var updatedMessenges = updatedContactModel.messenges
-        updatedContactModel.status = .online
-        
-        if let messengesIndex = updatedMessenges.firstIndex(where: { $0.tempMessageID == messageId }) {
-          updatedMessenges[messengesIndex].messageStatus = .sent
-          updatedMessenges[messengesIndex].tempMessageID = nil
-        }
-        updatedContactModel.messenges = updatedMessenges
-        
-        interactor.saveContactModel(updatedContactModel) { [weak self] in
-          guard let self else { return }
-          updateListContacts()
-          moduleOutput?.dataModelHasBeenUpdated()
-        }
+    Task { [weak self] in
+      guard let self,
+            let toxPublicKey = notification.userInfo?["publicKey"] as? String,
+            let messageId = notification.userInfo?["messageId"] as? UInt32 else {
+        return
       }
+      
+      let contactModel = await interactor.getContactModelsFrom(toxPublicKey: toxPublicKey)
+      guard let contactModel else { return }
+      var updatedContactModel = contactModel
+      var updatedMessenges = updatedContactModel.messenges
+      updatedContactModel.status = .online
+      
+      if let messengesIndex = updatedMessenges.firstIndex(where: { $0.tempMessageID == messageId }) {
+        updatedMessenges[messengesIndex].messageStatus = .sent
+        updatedMessenges[messengesIndex].tempMessageID = nil
+      }
+      updatedContactModel.messenges = updatedMessenges
+      
+      await interactor.saveContactModel(updatedContactModel)
+      await updateListContacts()
+      moduleOutput?.dataModelHasBeenUpdated()
     }
   }
   
   @objc
   func handleRequestChat(_ notification: Notification) {
-    if let messageModel = notification.userInfo?["requestChat"] as? MessengerNetworkRequestModel,
-       let toxPublicKey = notification.userInfo?["toxPublicKey"] as? String {
-      interactor.getContactModels { [weak self] contactModels in
-        guard let self,
-              !contactModels.contains(where: {
-                $0.toxAddress == messageModel.senderAddress
-              }) else {
-          return
-        }
-        
-        interactor.decrypt(messageModel.senderPushNotificationToken) { [weak self] pushNotificationToken in
-          guard let self else { return }
-          
-          updateRedDotToTabBar(contactModels: contactModels)
-          
-          let newContact = ContactModel(
-            name: nil,
-            toxAddress: messageModel.senderAddress,
-            meshAddress: messageModel.senderLocalMeshAddress,
-            messenges: [],
-            status: .requestChat,
-            encryptionPublicKey: messageModel.senderPublicKey,
-            toxPublicKey: toxPublicKey,
-            pushNotificationToken: pushNotificationToken,
-            isNewMessagesAvailable: true,
-            isTyping: false
-          )
-          interactor.saveContactModel(newContact, completion: { [weak self] in
-            guard let self else { return }
-            updateListContacts()
-            moduleOutput?.dataModelHasBeenUpdated()
-            impactFeedback.impactOccurred()
-          })
-        }
+    Task { [weak self] in
+      guard let self,
+            let messageModel = notification.userInfo?["requestChat"] as? MessengerNetworkRequestModel,
+            let toxPublicKey = notification.userInfo?["toxPublicKey"] as? String else {
+        return
       }
+      
+      let contactModels = await interactor.getContactModels()
+      guard !contactModels.contains(where: {
+        $0.toxAddress == messageModel.senderAddress
+      }) else {
+        return
+      }
+      
+      let pushNotificationToken = await interactor.decrypt(messageModel.senderPushNotificationToken)
+      updateRedDotToTabBar(contactModels: contactModels)
+      
+      let newContact = ContactModel(
+        name: nil,
+        toxAddress: messageModel.senderAddress,
+        meshAddress: messageModel.senderLocalMeshAddress,
+        messenges: [],
+        status: .requestChat,
+        encryptionPublicKey: messageModel.senderPublicKey,
+        toxPublicKey: toxPublicKey,
+        pushNotificationToken: pushNotificationToken,
+        isNewMessagesAvailable: true,
+        isTyping: false
+      )
+      await interactor.saveContactModel(newContact)
+      await updateListContacts()
+      moduleOutput?.dataModelHasBeenUpdated()
+      await impactFeedback.impactOccurred()
     }
   }
   
   @objc
   func handleMessage(_ notification: Notification) {
-    if let messageModel = notification.userInfo?["data"] as? MessengerNetworkRequestModel,
-       let toxFriendId = notification.userInfo?["toxFriendId"] as? Int32 {
-      interactor.getContactModels { [weak self] contactModels in
-        guard let self else { return }
+    Task { [weak self] in
+      guard let self,
+            let messageModel = notification.userInfo?["data"] as? MessengerNetworkRequestModel,
+            let toxFriendId = notification.userInfo?["toxFriendId"] as? Int32 else {
+        return
+      }
+      let contactModels = await interactor.getContactModels()
+      updateRedDotToTabBar(contactModels: contactModels)
+      let messageText = await interactor.decrypt(messageModel.messageText)
+      let pushNotificationToken = await interactor.decrypt(messageModel.senderPushNotificationToken)
+      
+      if let contact = factory.searchContact(
+        contactModels: contactModels,
+        torAddress: messageModel.senderAddress
+      ) {
+        var updatedContact = contact
+        updatedContact = factory.addMessageToContact(
+          message: messageText,
+          contactModel: updatedContact,
+          messageType: .received,
+          replyMessageText: messageModel.replyMessageText,
+          images: [],
+          videos: [],
+          recording: nil
+        )
         
-        updateRedDotToTabBar(contactModels: contactModels)
-        interactor.decrypt(messageModel.messageText) { [weak self] messageText in
-          guard let self else { return }
-          interactor.decrypt(messageModel.senderPushNotificationToken) { [weak self] pushNotificationToken in
-            guard let self else { return }
-            
-            if let contact = factory.searchContact(
-              contactModels: contactModels,
-              torAddress: messageModel.senderAddress
-            ) {
-              var updatedContact = contact
-              updatedContact = factory.addMessageToContact(
-                message: messageText,
-                contactModel: updatedContact,
-                messageType: .received,
-                replyMessageText: messageModel.replyMessageText,
-                images: [],
-                videos: [],
-                recording: nil
-              )
-
-              updatedContact.status = .online
-              if let senderPushNotificationToken = pushNotificationToken {
-                updatedContact.pushNotificationToken = senderPushNotificationToken
-              }
-              updatedContact.toxAddress = messageModel.senderAddress
-              updatedContact.isNewMessagesAvailable = true
-              updatedContact.encryptionPublicKey = messageModel.senderPublicKey
-              interactor.saveContactModel(updatedContact, completion: { [weak self] in
-                guard let self else { return }
-                updateListContacts()
-                moduleOutput?.dataModelHasBeenUpdated()
-                impactFeedback.impactOccurred()
-                sendLocalNotificationIfNeeded(contactModel: updatedContact)
-              })
-            } else {
-              let contact = ContactModel(
-                name: nil,
-                toxAddress: messageModel.senderAddress,
-                meshAddress: messageModel.senderLocalMeshAddress,
-                messenges: [],
-                status: .online,
-                encryptionPublicKey: messageModel.senderPublicKey,
-                toxPublicKey: nil,
-                pushNotificationToken: pushNotificationToken,
-                isNewMessagesAvailable: true,
-                isTyping: false
-              )
-              interactor.saveContactModel(contact, completion: { [weak self] in
-                guard let self else { return }
-                updateListContacts()
-                moduleOutput?.dataModelHasBeenUpdated()
-                impactFeedback.impactOccurred()
-                sendLocalNotificationIfNeeded(contactModel: contact)
-              })
-            }
-          }
+        updatedContact.status = .online
+        if let senderPushNotificationToken = pushNotificationToken {
+          updatedContact.pushNotificationToken = senderPushNotificationToken
         }
+        updatedContact.toxAddress = messageModel.senderAddress
+        updatedContact.isNewMessagesAvailable = true
+        updatedContact.encryptionPublicKey = messageModel.senderPublicKey
+        await interactor.saveContactModel(updatedContact)
+        await updateListContacts()
+        moduleOutput?.dataModelHasBeenUpdated()
+        await impactFeedback.impactOccurred()
+        sendLocalNotificationIfNeeded(contactModel: updatedContact)
+      } else {
+        let contact = ContactModel(
+          name: nil,
+          toxAddress: messageModel.senderAddress,
+          meshAddress: messageModel.senderLocalMeshAddress,
+          messenges: [],
+          status: .online,
+          encryptionPublicKey: messageModel.senderPublicKey,
+          toxPublicKey: nil,
+          pushNotificationToken: pushNotificationToken,
+          isNewMessagesAvailable: true,
+          isTyping: false
+        )
+        await interactor.saveContactModel(contact)
+        await updateListContacts()
+        moduleOutput?.dataModelHasBeenUpdated()
+        await impactFeedback.impactOccurred()
+        sendLocalNotificationIfNeeded(contactModel: contact)
       }
     }
-  }
-  
-  @objc func userDidScreenshot() {
-    moduleOutput?.userDidScreenshot()
-    impactFeedback.impactOccurred()
   }
 }
 

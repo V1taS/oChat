@@ -39,11 +39,10 @@ final class PasscodeSettingsScreenPresenter: ObservableObject {
   
   lazy var viewDidLoad: (() -> Void)? = {}
   
-  lazy var viewWillAppear: (() -> Void)? = { [weak self] in
-    guard let self else {
-      return
+  lazy var viewWillAppear: (() -> Void)? = {
+    Task { [weak self] in
+      await self?.updateScreen()
     }
-    updateScreen()
   }
   
   // MARK: - Internal func
@@ -52,21 +51,16 @@ final class PasscodeSettingsScreenPresenter: ObservableObject {
 // MARK: - PasscodeSettingsScreenModuleInput
 
 extension PasscodeSettingsScreenPresenter: PasscodeSettingsScreenModuleInput {
-  func updateScreen() {
-    interactor.getInitialValue { [weak self] stateFaceID, isShowChangeAccessCode in
-      guard let self else {
-        return
-      }
-      
-      stateWidgetCryptoModels = factory.createWidgetModels(
-        stateFaceID: stateFaceID,
-        stateIsShowChangeAccessCode: isShowChangeAccessCode
-      )
-    }
+  func updateScreen() async {
+    let initialValue = await interactor.getInitialValue()
+    stateWidgetCryptoModels = factory.createWidgetModels(
+      stateFaceID: initialValue.stateFaceID,
+      stateIsShowChangeAccessCode: initialValue.isShowChangeAccessCode
+    )
   }
   
-  func successAuthorizationPasswordDisable() {
-    interactor.resetPasscode()
+  func successAuthorizationPasswordDisable() async {
+    await interactor.resetPasscode()
     stateWidgetCryptoModels = factory.createWidgetModels(
       stateFaceID: false,
       stateIsShowChangeAccessCode: false
@@ -81,49 +75,33 @@ extension PasscodeSettingsScreenPresenter: PasscodeSettingsScreenInteractorOutpu
 // MARK: - PasscodeSettingsScreenFactoryOutput
 
 extension PasscodeSettingsScreenPresenter: PasscodeSettingsScreenFactoryOutput {
-  func changeLockScreenState(_ isLockScreen: Bool) {
+  @MainActor
+  func changeLockScreenState(_ isLockScreen: Bool) async {
     if isLockScreen {
       moduleOutput?.openNewAccessCode()
     } else {
       moduleOutput?.openAuthorizationPasswordDisable()
     }
     
-    interactor.getFaceIDState { [weak self] isFaceID in
-      guard let self else {
-        return
-      }
-      
-      interactor.getIsLockScreen { [weak self] isLockScreen in
-        guard let self else {
-          return
-        }
-        
-        stateWidgetCryptoModels = factory.createWidgetModels(
-          stateFaceID: isFaceID,
-          stateIsShowChangeAccessCode: isLockScreen
-        )
-      }
-    }
+    let isFaceID = await interactor.getFaceIDState()
+    let isLockScreen = await interactor.getIsLockScreen()
+    
+    stateWidgetCryptoModels = factory.createWidgetModels(
+      stateFaceID: isFaceID,
+      stateIsShowChangeAccessCode: isLockScreen
+    )
   }
   
-  func changeFaceIDState(_ value: Bool) {
-    interactor.requestFaceID { [weak self] granted in
-      guard let self else {
-        return
-      }
-      interactor.saveFaceIDState(value)
-      
-      interactor.getIsLockScreen { [weak self] isLockScreen in
-        guard let self else {
-          return
-        }
-        
-        stateWidgetCryptoModels = factory.createWidgetModels(
-          stateFaceID: value && granted && isLockScreen,
-          stateIsShowChangeAccessCode: isLockScreen
-        )
-      }
-    }
+  @MainActor
+  func changeFaceIDState(_ value: Bool) async {
+    let granted = await interactor.requestFaceID()
+    await interactor.saveFaceIDState(value)
+    let isLockScreen = await interactor.getIsLockScreen()
+    
+    stateWidgetCryptoModels = factory.createWidgetModels(
+      stateFaceID: value && granted && isLockScreen,
+      stateIsShowChangeAccessCode: isLockScreen
+    )
   }
   
   func openChangeAccessCode() {

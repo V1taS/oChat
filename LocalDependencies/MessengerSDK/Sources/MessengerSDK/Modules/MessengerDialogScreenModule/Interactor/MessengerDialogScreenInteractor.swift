@@ -14,7 +14,7 @@ protocol MessengerDialogScreenInteractorOutput: AnyObject {}
 /// События которые отправляем от Presenter к Interactor
 protocol MessengerDialogScreenInteractorInput {
   /// Получаем обновленный контакт
-  func getNewContactModels(_ contactModel: ContactModel, completion: ((ContactModel) -> Void)?)
+  func getNewContactModels(_ contactModel: ContactModel) async -> ContactModel
   
   /// Показать уведомление
   /// - Parameters:
@@ -122,16 +122,12 @@ extension MessengerDialogScreenInteractor: MessengerDialogScreenInteractorInput 
     }
   }
   
-  func getNewContactModels(_ contactModel: ContactModel, completion: ((ContactModel) -> Void)?) {
-    modelHandlerService.getContactModels { contactModels in
-      DispatchQueue.main.async {
-        if let contactIndex = contactModels.firstIndex(where: { $0.toxAddress == contactModel.toxAddress }) {
-          completion?(contactModels[contactIndex])
-        } else {
-          completion?(contactModel)
-        }
-      }
+  func getNewContactModels(_ contactModel: ContactModel) async -> ContactModel {
+    let contactModels = await modelHandlerService.getContactModels()
+    if let contactIndex = contactModels.firstIndex(where: { $0.toxAddress == contactModel.toxAddress }) {
+      return contactModels[contactIndex]
     }
+    return contactModel
   }
 }
 

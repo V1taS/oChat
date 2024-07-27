@@ -43,8 +43,11 @@ final class RootCoordinator: Coordinator<Void, Void> {
   // MARK: - Internal func
   
   override func start(parameter: Void) {
-    setupLaunchScreen()
-    setupSessionService()
+    Task { [weak self] in
+      guard let self else { return }
+      await setupLaunchScreen()
+      await setupSessionService()
+    }
   }
 }
 
@@ -100,9 +103,9 @@ private extension RootCoordinator {
 // MARK: - Private
 
 private extension RootCoordinator {
-  func setupSessionService() {
+  func setupSessionService() async {
     let notificationCenter = NotificationCenter.default
-    notificationCenter.addObserver(
+    await notificationCenter.addObserver(
       self,
       selector: #selector(appDidBecomeActive),
       name: UIApplication.didBecomeActiveNotification,
@@ -110,60 +113,45 @@ private extension RootCoordinator {
     )
     
     var sessionService = services.accessAndSecurityManagementService.sessionService
-    sessionService.sessionDidExpireAction = { [weak self] in
-      guard let self else {
-        return
-      }
-      
-      services.messengerService.modelHandlerService.getAppSettingsModel { [weak self] model in
-        DispatchQueue.main.async { [weak self] in
-          guard let self, model.appPassword != nil else { return }
-          openAuthenticationFlowCoordinator(.loginPasscode(.loginFaceID))
-          mainFlowCoordinator = nil
-        }
-      }
-    }
-  }
-  
-  func setupLaunchScreen() {
-    services.messengerService.modelHandlerService.getMessengerModel { [weak self] messengerModel in
-      guard let self else { return }
-      DispatchQueue.main.async { [weak self] in
+    sessionService.sessionDidExpireAction = {
+      Task { [weak self] in
         guard let self else { return }
-        
-        /// В модельке нет сохраненных данных
-        if messengerModel.toxStateAsString == nil {
-          openInitialFlowCoordinator(isPresentScreenAnimated: true)
-        } else {
-          services.messengerService.modelHandlerService.getMessengerModel { [weak self] model in
-            DispatchQueue.main.async { [weak self] in
-              guard let self else { return }
-              
-              if model.appSettingsModel.appPassword != nil {
-                openAuthenticationFlowCoordinator(.loginPasscode(.loginFaceID))
-              } else {
-                openMainFlowCoordinator(isPresentScreenAnimated: true)
-              }
-            }
-          }
-        }
+        let model = await services.messengerService.modelHandlerService.getAppSettingsModel()
+        guard model.appPassword != nil else { return }
+        openAuthenticationFlowCoordinator(.loginPasscode(.loginFaceID))
+        mainFlowCoordinator = nil
       }
     }
   }
   
-  func sessionCheck() {
-    services.messengerService.modelHandlerService.getAppSettingsModel { [weak self] model in
-      DispatchQueue.main.async { [weak self] in
-        guard let self, model.appPassword != nil else { return }
-        if !services.accessAndSecurityManagementService.sessionService.isSessionActive() {
-          openAuthenticationFlowCoordinator(.loginPasscode(.loginFaceID))
-        }
+  @MainActor
+  func setupLaunchScreen() async {
+    let messengerModel = await services.messengerService.modelHandlerService.getMessengerModel()
+    /// В модельке нет сохраненных данных
+    if messengerModel.toxStateAsString == nil {
+      openInitialFlowCoordinator(isPresentScreenAnimated: true)
+    } else {
+      if messengerModel.appSettingsModel.appPassword != nil {
+        openAuthenticationFlowCoordinator(.loginPasscode(.loginFaceID))
+      } else {
+        openMainFlowCoordinator(isPresentScreenAnimated: true)
       }
+    }
+  }
+  
+  @MainActor
+  func sessionCheck() async {
+    let model = await services.messengerService.modelHandlerService.getAppSettingsModel()
+    if !services.accessAndSecurityManagementService.sessionService.isSessionActive(), model.appPassword != nil {
+      openAuthenticationFlowCoordinator(.loginPasscode(.loginFaceID))
     }
   }
   
   @objc
   func appDidBecomeActive() {
-    sessionCheck()
+    Task { [weak self] in
+      guard let self else { return }
+      await sessionCheck()
+    }
   }
 }

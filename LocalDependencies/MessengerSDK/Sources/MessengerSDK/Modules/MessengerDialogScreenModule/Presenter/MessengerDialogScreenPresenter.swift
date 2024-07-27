@@ -87,26 +87,33 @@ final class MessengerDialogScreenPresenter: ObservableObject {
   }
   
   lazy var viewWillDisappear: (() -> Void)? = { [weak self] in
-    guard let self else { return }
-    moduleOutput?.messengerDialogWillDisappear()
-    setUserIsTyping(text: "")
-    markMessageAsRead(contactModel: stateContactModel)
+    Task { [weak self] in
+      guard let self else { return }
+      await moduleOutput?.messengerDialogWillDisappear()
+      await setUserIsTyping(text: "")
+      await markMessageAsRead(contactModel: stateContactModel)
+    }
   }
   
   // MARK: - Internal func
   
-  func loadMoreMessage(before: Message) {
+  func loadMoreMessage(before: Message) async {
     // TODO: - Сделать пагинацию
   }
   
-  func removeMessage(id: String) {
-    if let messageIndex = stateMessengeModels.firstIndex(where: { $0.id == id }) {
-      stateMessengeModels.remove(at: messageIndex)
+  func removeMessage(id: String) async {
+    await MainActor.run { [weak self] in
+      guard let self else { return }
+      if let messageIndex = stateMessengeModels.firstIndex(where: { $0.id == id }) {
+        stateMessengeModels.remove(at: messageIndex)
+      }
     }
     
-    Timer.scheduledTimer(withTimeInterval: 0.4, repeats: false) { [weak self] _ in
-      guard let self else { return }
-      moduleOutput?.removeMessage(id: id, contact: stateContactModel)
+    Timer.scheduledTimer(withTimeInterval: 0.4, repeats: false) { _ in
+      Task { [weak self] in
+        guard let self else { return }
+        await moduleOutput?.removeMessage(id: id, contact: stateContactModel)
+      }
     }
   }
   
@@ -114,7 +121,7 @@ final class MessengerDialogScreenPresenter: ObservableObject {
     // TODO: 🔴
   }
   
-  func saveImageToGallery(_ imageURL: URL) {
+  func saveImageToGallery(_ imageURL: URL) async {
     interactor.saveImageToGallery(imageURL) { [weak self] isSuccess in
       guard let self else { return }
       if isSuccess {
@@ -125,7 +132,7 @@ final class MessengerDialogScreenPresenter: ObservableObject {
     }
   }
   
-  func saveVideoToGallery(_ imageURL: URL) {
+  func saveVideoToGallery(_ imageURL: URL) async {
     interactor.saveVideoToGallery(imageURL) { [weak self] isSuccess in
       guard let self else { return }
       if isSuccess {
@@ -134,14 +141,14 @@ final class MessengerDialogScreenPresenter: ObservableObject {
         interactor.showNotification(.negative(title: "Ошибка сохранения"))
       }
     }
-    impactFeedback.impactOccurred()
+    await impactFeedback.impactOccurred()
   }
   
   func sendMessage(
     messenge: String,
     replyMessageText: String?
-  ) {
-    impactFeedback.impactOccurred()
+  ) async {
+    await impactFeedback.impactOccurred()
     var updatedContactModel = stateContactModel
     
     let messengeModel = MessengeModel(
@@ -155,27 +162,25 @@ final class MessengerDialogScreenPresenter: ObservableObject {
     )
     
     updatedContactModel.messenges.append(messengeModel)
-    stateContactModel = updatedContactModel
     
-    stateMessengeModels = factory.createMessageModels(
-      models: updatedContactModel.messenges,
-      contactModel: stateContactModel
-    )
-    
-    DispatchQueue.global().async { [weak self] in
+    await MainActor.run { [weak self, updatedContactModel] in
       guard let self else { return }
-      moduleOutput?.sendMessage(contact: updatedContactModel)
+      stateContactModel = updatedContactModel
+      stateMessengeModels = factory.createMessageModels(
+        models: updatedContactModel.messenges,
+        contactModel: stateContactModel
+      )
     }
+    await moduleOutput?.sendMessage(contact: updatedContactModel)
   }
   
-  @MainActor
   func sendMessage(
     messenge: String,
     medias: [Media],
     recording: ExyteChat.Recording?,
     replyMessageText: String?
   ) async {
-    impactFeedback.impactOccurred()
+    await impactFeedback.impactOccurred()
     var updatedContactModel = stateContactModel
     var recordingModel: MessengeRecordingModel?
     
@@ -265,41 +270,43 @@ final class MessengerDialogScreenPresenter: ObservableObject {
       videos: videos,
       recording: recordingModel
     )
-    
     updatedContactModel.messenges.append(messengeModel)
-    stateContactModel = updatedContactModel
     
-    stateMessengeModels = factory.createMessageModels(
-      models: updatedContactModel.messenges,
-      contactModel: stateContactModel
-    )
-    
-    DispatchQueue.global().async { [weak self] in
+    await MainActor.run { [weak self, updatedContactModel] in
       guard let self else { return }
-      moduleOutput?.sendMessage(contact: updatedContactModel)
+      stateContactModel = updatedContactModel
+      
+      stateMessengeModels = factory.createMessageModels(
+        models: updatedContactModel.messenges,
+        contactModel: stateContactModel
+      )
     }
+    
+    await moduleOutput?.sendMessage(contact: updatedContactModel)
   }
   
-  func sendInitiateChatFromDialog(toxAddress: String?) {
-    impactFeedback.impactOccurred()
+  func sendInitiateChatFromDialog(toxAddress: String?) async {
+    await impactFeedback.impactOccurred()
     var updatedModel = stateContactModel
     updatedModel.toxAddress = toxAddress ?? stateContactAdress
-    stateContactModel = updatedModel
     
-    DispatchQueue.global().async { [weak self] in
-      self?.moduleOutput?.sendInitiateChatFromDialog(contactModel: updatedModel)
+    await MainActor.run { [weak self, updatedModel] in
+      guard let self else { return }
+      stateContactModel = updatedModel
     }
+    
+    await moduleOutput?.sendInitiateChatFromDialog(contactModel: updatedModel)
     
     updateCenterBarButtonView(isHidden: false)
   }
   
-  func confirmRequestForDialog() {
-    moduleOutput?.confirmRequestForDialog(contactModel: stateContactModel)
+  func confirmRequestForDialog() async {
+    await moduleOutput?.confirmRequestForDialog(contactModel: stateContactModel)
   }
   
-  func cancelRequestForDialog() {
-    moduleOutput?.cancelRequestForDialog(contactModel: stateContactModel)
-    moduleOutput?.closeMessengerDialog()
+  func cancelRequestForDialog() async {
+    await moduleOutput?.cancelRequestForDialog(contactModel: stateContactModel)
+    await moduleOutput?.closeMessengerDialog()
   }
   
   func isInitialChatValidation() -> Bool {
@@ -366,14 +373,12 @@ final class MessengerDialogScreenPresenter: ObservableObject {
     }
   }
   
-  func setUserIsTyping(text: String) {
+  func setUserIsTyping(text: String) async {
     guard let toxPublicKey = stateContactModel.toxPublicKey else {
       return
     }
     
-    DispatchQueue.global().async { [weak self] in
-      self?.moduleOutput?.setUserIsTyping(!text.isEmpty, to: toxPublicKey, completion: { _ in })
-    }
+    await moduleOutput?.setUserIsTyping(!text.isEmpty, to: toxPublicKey)
   }
   
   func copyToClipboard(text: String) {
@@ -395,7 +400,7 @@ final class MessengerDialogScreenPresenter: ObservableObject {
     }
   }
   
-  func sendPushNotification() {
+  func sendPushNotification() async {
     guard stateContactModel.pushNotificationToken != nil else {
       interactor.showNotification(.negative(title: "Контакт не включил уведомления на устройстве!"))
       return
@@ -414,13 +419,13 @@ final class MessengerDialogScreenPresenter: ObservableObject {
       )
     )
     
-    stateContactModel = updatedContactModel
-    
-    DispatchQueue.global().async { [weak self] in
+    await MainActor.run { [updatedContactModel, weak self] in
       guard let self else { return }
-      moduleOutput?.saveContactModel(updatedContactModel)
-      moduleOutput?.sendPushNotification(contact: updatedContactModel)
+      stateContactModel = updatedContactModel
     }
+    
+    await moduleOutput?.saveContactModel(updatedContactModel)
+    await moduleOutput?.sendPushNotification(contact: updatedContactModel)
   }
 }
 
@@ -452,11 +457,11 @@ extension MessengerDialogScreenPresenter: MessengerDialogScreenModuleInput {
   }
   
   func updateDialog() {
-    interactor.getNewContactModels(stateContactModel) { [weak self] contactModel in
+    Task { @MainActor [weak self] in
       guard let self else { return }
-      
+      let contactModel = await interactor.getNewContactModels(stateContactModel)
       if isWelcomeMessageAllowed(contactModel: contactModel) {
-        addWelcomeMessage(contactModel: contactModel)
+        await addWelcomeMessage(contactModel: contactModel)
         return
       }
       
@@ -483,7 +488,9 @@ extension MessengerDialogScreenPresenter: MessengerDialogScreenFactoryOutput {
   }
   
   func userSelectDeleteAction(_ model: SKAbstractions.MessengeModel) {
-    removeMessage(id: model.id)
+    Task {
+      await removeMessage(id: model.id)
+    }
   }
   
   func userSelectCopyAction(_ model: SKAbstractions.MessengeModel) {
@@ -503,8 +510,6 @@ extension MessengerDialogScreenPresenter: SceneViewModel {
 
 private extension MessengerDialogScreenPresenter {
   func initialSetup() {
-    markMessageAsRead(contactModel: stateContactModel)
-    
     barButtonView = SKChatBarButtonView(
       .init(
         leftImage: nil,
@@ -514,6 +519,11 @@ private extension MessengerDialogScreenPresenter {
         action: {}
       )
     )
+    
+    Task { [weak self] in
+      guard let self else { return }
+      await markMessageAsRead(contactModel: stateContactModel)
+    }
     
     updateCenterBarButtonView(isHidden: isInitialAddressEntryState() || isRequestChatState())
     if isInitialWaitConfirmState() {
@@ -533,7 +543,7 @@ private extension MessengerDialogScreenPresenter {
     }
   }
   
-  func markMessageAsRead(contactModel: ContactModel) {
+  func markMessageAsRead(contactModel: ContactModel) async {
     guard contactModel.status != .initialChat else {
       return
     }
@@ -542,32 +552,33 @@ private extension MessengerDialogScreenPresenter {
       contactUpdated.isNewMessagesAvailable = false
     }
     
-    DispatchQueue.global().async { [weak self] in
-      self?.moduleOutput?.saveContactModel(contactUpdated)
-    }
+    await moduleOutput?.saveContactModel(contactUpdated)
   }
   
   func updateCenterBarButtonView(
     isHidden: Bool = false,
     descriptionForSendFile: String? = nil
   ) {
-    var title = stateContactAdress
-    if let toxAddress = stateContactModel.toxAddress, !toxAddress.isEmpty {
-      title = toxAddress
+    DispatchQueue.main.async { [weak self] in
+      guard let self else { return }
+      var title = stateContactAdress
+      if let toxAddress = stateContactModel.toxAddress, !toxAddress.isEmpty {
+        title = toxAddress
+      }
+      
+      var descriptionView = stateContactModel.isTyping ? "Печатает..." : stateContactModel.status.title
+      if let descriptionForSendFile {
+        descriptionView = descriptionForSendFile
+      }
+      
+      barButtonView?.titleView.text = factory.createHeaderTitleFrom(title)
+      barButtonView?.descriptionView.text = descriptionView
+      barButtonView?.isHidden = isHidden
+      barButtonView?.iconLeftView.image = stateContactModel.status.imageStatus
     }
-    
-    var descriptionView = stateContactModel.isTyping ? "Печатает..." : stateContactModel.status.title
-    if let descriptionForSendFile {
-      descriptionView = descriptionForSendFile
-    }
-    
-    barButtonView?.titleView.text = factory.createHeaderTitleFrom(title)
-    barButtonView?.descriptionView.text = descriptionView
-    barButtonView?.isHidden = isHidden
-    barButtonView?.iconLeftView.image = stateContactModel.status.imageStatus
   }
   
-  func addWelcomeMessage(contactModel: ContactModel) {
+  func addWelcomeMessage(contactModel: ContactModel) async {
     var contactUpdated = contactModel
     let publicKeyIsEmpty = (stateContactModel.encryptionPublicKey ?? "").isEmpty
     
@@ -586,9 +597,7 @@ private extension MessengerDialogScreenPresenter {
       )
     )
     
-    DispatchQueue.global().async { [weak self] in
-      self?.moduleOutput?.saveContactModel(contactUpdated)
-    }
+    await moduleOutput?.saveContactModel(contactUpdated)
   }
   
   func isWelcomeMessageAllowed(contactModel: ContactModel) -> Bool {

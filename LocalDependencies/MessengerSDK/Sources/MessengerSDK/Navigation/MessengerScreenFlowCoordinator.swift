@@ -52,10 +52,6 @@ extension MessengerScreenFlowCoordinator: MessengerListScreenModuleOutput {
     messengerDialogModule?.input.handleFileReceive(progress: progress, publicToxKey: publicToxKey)
   }
   
-  public func userDidScreenshot() {
-    // TODO: - 🟡
-  }
-  
   public func openPanelConnection() {
     // TODO: - 🟡
   }
@@ -76,19 +72,24 @@ extension MessengerScreenFlowCoordinator: MessengerListScreenModuleOutput {
 // MARK: - MessengerDialogScreenModuleOutput
 
 extension MessengerScreenFlowCoordinator: MessengerDialogScreenModuleOutput {
-  public func sendPushNotification(contact: ContactModel) {
-    messengerListScreenModuleModule?.input.sendPushNotification(contact: contact)
+  public func sendPushNotification(contact: ContactModel) async {
+    guard let module = messengerListScreenModuleModule?.input else {
+      return
+    }
+    
+    await module.sendPushNotification(contact: contact)
   }
   
   public func setUserIsTyping(
     _ isTyping: Bool,
-    to toxPublicKey: String,
-    completion: @escaping (Result<Void, any Error>) -> Void
-  ) {
-    messengerListScreenModuleModule?.input.setUserIsTyping(
+    to toxPublicKey: String
+  ) async -> Result<Void, any Error> {
+    guard let module = messengerListScreenModuleModule?.input else {
+      return .failure(URLError(.unknown))
+    }
+    return await module.setUserIsTyping(
       isTyping,
-      to: toxPublicKey,
-      completion: completion
+      to: toxPublicKey
     )
   }
   
@@ -97,32 +98,60 @@ extension MessengerScreenFlowCoordinator: MessengerDialogScreenModuleOutput {
     messengerDialogModule = nil
   }
   
-  public func saveContactModel(_ model: ContactModel) {
-    messengerListScreenModuleModule?.input.saveContactModel(model)
+  public func saveContactModel(_ model: ContactModel) async {
+    guard let module = messengerListScreenModuleModule?.input else {
+      return
+    }
+    
+    await module.saveContactModel(model)
   }
   
-  public func removeMessage(id: String, contact: ContactModel) {
-    messengerListScreenModuleModule?.input.removeMessage(id: id, contact: contact)
+  public func removeMessage(id: String, contact: ContactModel) async {
+    guard let module = messengerListScreenModuleModule?.input else {
+      return
+    }
+    
+    await module.removeMessage(id: id, contact: contact)
   }
   
-  public func confirmRequestForDialog(contactModel: ContactModel) {
-    messengerListScreenModuleModule?.input.confirmRequestForDialog(contactModel: contactModel)
+  public func confirmRequestForDialog(contactModel: ContactModel) async {
+    guard let module = messengerListScreenModuleModule?.input else {
+      return
+    }
+    
+    await module.confirmRequestForDialog(contactModel: contactModel)
   }
   
-  public func cancelRequestForDialog(contactModel: ContactModel) {
-    messengerListScreenModuleModule?.input.cancelRequestForDialog(contactModel: contactModel)
+  public func cancelRequestForDialog(contactModel: ContactModel) async {
+    guard let module = messengerListScreenModuleModule?.input else {
+      return
+    }
+    
+    await module.cancelRequestForDialog(contactModel: contactModel)
   }
   
-  public func sendInitiateChatFromDialog(contactModel: ContactModel) {
-    messengerListScreenModuleModule?.input.sendInitiateChat(contactModel: contactModel)
+  public func sendInitiateChatFromDialog(contactModel: ContactModel) async {
+    guard let module = messengerListScreenModuleModule?.input else {
+      return
+    }
+    
+    await module.sendInitiateChat(contactModel: contactModel)
   }
   
-  public func sendMessage(contact: ContactModel) {
-    messengerListScreenModuleModule?.input.sendMessage(contact: contact, completion: nil)
+  public func sendMessage(contact: ContactModel) async {
+    guard let module = messengerListScreenModuleModule?.input else {
+      return
+    }
+    
+    await module.sendMessage(contact: contact)
   }
   
-  public func messengerDialogWillDisappear() {
-    messengerListScreenModuleModule?.input.updateListContacts(completion: {})
+  public func messengerDialogWillDisappear() async {
+    guard let module = messengerListScreenModuleModule?.input else {
+      return
+    }
+    
+    await module.updateListContacts()
   }
 }
 

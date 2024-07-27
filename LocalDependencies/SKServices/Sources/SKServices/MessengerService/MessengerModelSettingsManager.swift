@@ -12,235 +12,141 @@ import SKStyle
 // MARK: - MessengerModelSettingsManager
 
 extension MessengerModelHandlerService: IMessengerModelSettingsManager {
-  public func saveMyPushNotificationToken(_ token: String, completion: (() -> Void)?) {
-    getMessengerModel { [weak self] model in
-      guard let self else { return }
-      var updatedModel = model
-      updatedModel.pushNotificationToken = token
-      saveMessengerModel(updatedModel, completion: completion)
-    }
+  public func saveMyPushNotificationToken(_ token: String) async {
+    var model = await getMessengerModel()
+    model.pushNotificationToken = token
+    await saveMessengerModel(model)
   }
   
-  public func setToxStateAsString(
-    _ toxStateAsString: String?,
-    completion: (() -> Void)?
-  ) {
-    getMessengerModel { [weak self] model in
-      guard let self else { return }
-      var updatedModel = model
-      updatedModel.toxStateAsString = toxStateAsString
-      saveMessengerModel(updatedModel, completion: completion)
-    }
+  public func setToxStateAsString(_ toxStateAsString: String?) async {
+    var model = await getMessengerModel()
+    model.toxStateAsString = toxStateAsString
+    await saveMessengerModel(model)
   }
   
-  public func setStatus(
-    _ contactModel: ContactModel,
-    _ status: ContactModel.Status,
-    completion: (() -> Void)?
-  ) {
-    getMessengerModel { [weak self] model in
-      guard let self else { return }
-      var updatedModel = model
-      if let contactIndex = updatedModel.contacts.firstIndex(of: contactModel) {
-        updatedModel.contacts[contactIndex].status = status
-      }
-      
-      saveMessengerModel(updatedModel, completion: completion)
+  public func setStatus(_ contactModel: ContactModel, _ status: ContactModel.Status) async {
+    var model = await getMessengerModel()
+    if let contactIndex = model.contacts.firstIndex(of: contactModel) {
+      model.contacts[contactIndex].status = status
     }
+    await saveMessengerModel(model)
   }
   
-  public func setAllContactsIsOffline(completion: (() -> Void)?) {
-    getMessengerModel { [weak self] model in
-      guard let self else {
-        return
+  public func setAllContactsIsOffline() async {
+    var model = await getMessengerModel()
+    var updatedContacts = model.contacts.map { contact -> ContactModel in
+      var updatedContact = contact
+      if contact.status == .online {
+        updatedContact.status = .offline
       }
-      var updatedModel = model
-      var updatedContacts = model.contacts.compactMap { model in
-        var updatedModel = model
-        if model.status == .online {
-          updatedModel.status = .offline
-        }
-        return updatedModel
-      }
-      updatedModel.contacts = updatedContacts
-      saveMessengerModel(updatedModel, completion: completion)
+      return updatedContact
     }
+    model.contacts = updatedContacts
+    await saveMessengerModel(model)
   }
   
-  public func setAllContactsNoTyping(completion: (() -> Void)?) {
-    getMessengerModel { [weak self] model in
-      guard let self else {
-        return
+  public func setAllContactsNoTyping() async {
+    var model = await getMessengerModel()
+    var updatedContacts = model.contacts.map { contact -> ContactModel in
+      var updatedContact = contact
+      if contact.isTyping {
+        updatedContact.isTyping = false
       }
-      var updatedModel = model
-      var updatedContacts = model.contacts.compactMap { model in
-        var updatedModel = model
-        if model.isTyping {
-          updatedModel.isTyping = false
-        }
-        return updatedModel
-      }
-      updatedModel.contacts = updatedContacts
-      saveMessengerModel(updatedModel, completion: completion)
+      return updatedContact
     }
+    model.contacts = updatedContacts
+    await saveMessengerModel(model)
   }
   
-  public func clearAllMessengeTempID(completion: (() -> Void)?) {
-    getMessengerModel { [weak self] model in
-      guard let self else {
-        return
+  public func clearAllMessengeTempID() async {
+    var model = await getMessengerModel()
+    var updatedContacts = model.contacts.map { contact -> ContactModel in
+      var updatedContact = contact
+      updatedContact.messenges = contact.messenges.map { messenge in
+        var updatedMessenge = messenge
+        updatedMessenge.tempMessageID = nil
+        return updatedMessenge
       }
-      var updatedModel = model
-      var updatedContacts = model.contacts.compactMap { contact in
-        var updatedContact = contact
-        var updatedMessenges = updatedContact.messenges.compactMap { messenge in
-          var updatedMessenge = messenge
-          updatedMessenge.tempMessageID = nil
-          return updatedMessenge
-        }
-        updatedContact.messenges = updatedMessenges
-        return updatedContact
-      }
-      updatedModel.contacts = updatedContacts
-      saveMessengerModel(updatedModel, completion: completion)
+      return updatedContact
     }
+    model.contacts = updatedContacts
+    await saveMessengerModel(model)
   }
   
-  public func setNameContact(
-    _ contactModel: ContactModel,
-    _ name: String,
-    completion: ((ContactModel?) -> Void)?
-  ) {
-    getMessengerModel { [weak self] model in
-      guard let self else { return }
-      var updatedModel = model
-      var updatedContactModel = contactModel
-      updatedContactModel.name = name
-      
-      if let contactIndex = updatedModel.contacts.firstIndex(of: contactModel) {
-        updatedModel.contacts[contactIndex].name = name
-      }
-      
-      saveMessengerModel(
-        updatedModel,
-        completion: {
-          completion?(updatedContactModel)
-        }
-      )
+  public func setNameContact(_ contactModel: ContactModel, _ name: String) async -> ContactModel? {
+    var model = await getMessengerModel()
+    var updatedContactModel = contactModel
+    updatedContactModel.name = name
+    
+    if let contactIndex = model.contacts.firstIndex(of: contactModel) {
+      model.contacts[contactIndex].name = name
     }
+    
+    await saveMessengerModel(model)
+    return updatedContactModel
   }
   
-  public func setToxAddress(
-    _ contactModel: ContactModel,
-    _ address: String,
-    completion: ((ContactModel?) -> Void)?
-  ) {
-    getMessengerModel { [weak self] model in
-      guard let self else { return }
-      var updatedModel = model
-      var updatedContactModel = contactModel
-      updatedContactModel.toxAddress = address
-      
-      if let contactIndex = updatedModel.contacts.firstIndex(of: contactModel) {
-        updatedModel.contacts[contactIndex].toxAddress = address
-      }
-      
-      saveMessengerModel(
-        updatedModel,
-        completion: {
-          completion?(updatedContactModel)
-        }
-      )
+  public func setToxAddress(_ contactModel: ContactModel, _ address: String) async -> ContactModel? {
+    var model = await getMessengerModel()
+    var updatedContactModel = contactModel
+    updatedContactModel.toxAddress = address
+    
+    if let contactIndex = model.contacts.firstIndex(of: contactModel) {
+      model.contacts[contactIndex].toxAddress = address
     }
+    
+    await saveMessengerModel(model)
+    return updatedContactModel
   }
   
-  public func setMeshAddress(
-    _ contactModel: ContactModel,
-    _ meshAddress: String,
-    completion: ((ContactModel?) -> Void)?
-  ) {
-    getMessengerModel { [weak self] model in
-      guard let self else { return }
-      var updatedModel = model
-      var updatedContactModel = contactModel
-      updatedContactModel.meshAddress = meshAddress
-      
-      if let contactIndex = updatedModel.contacts.firstIndex(of: contactModel) {
-        updatedModel.contacts[contactIndex].meshAddress = meshAddress
-      }
-      
-      saveMessengerModel(
-        updatedModel,
-        completion: {
-          completion?(updatedContactModel)
-        }
-      )
+  public func setMeshAddress(_ contactModel: ContactModel, _ meshAddress: String) async -> ContactModel? {
+    var model = await getMessengerModel()
+    var updatedContactModel = contactModel
+    updatedContactModel.meshAddress = meshAddress
+    
+    if let contactIndex = model.contacts.firstIndex(of: contactModel) {
+      model.contacts[contactIndex].meshAddress = meshAddress
     }
+    
+    await saveMessengerModel(model)
+    return updatedContactModel
   }
   
-  public func addMessenge(
-    _ contactModel: ContactModel,
-    _ messengeModel: MessengeModel,
-    completion: ((ContactModel?) -> Void)?
-  ) {
-    getMessengerModel { [weak self] model in
-      guard let self else { return }
-      var updatedModel = model
-      var updatedContactModel: ContactModel?
-      
-      if let contactIndex = updatedModel.contacts.firstIndex(of: contactModel) {
-        var contactModelTemp = contactModel
-        contactModelTemp.messenges.append(messengeModel)
-        updatedContactModel = contactModelTemp
-        updatedModel.contacts[contactIndex].messenges.append(messengeModel)
-      }
-      
-      saveMessengerModel(
-        updatedModel,
-        completion: {
-          completion?(updatedContactModel)
-        }
-      )
+  public func addMessenge(_ contactModel: ContactModel, _ messengeModel: MessengeModel) async -> ContactModel? {
+    var model = await getMessengerModel()
+    var updatedContactModel: ContactModel?
+    
+    if let contactIndex = model.contacts.firstIndex(of: contactModel) {
+      var contactModelTemp = contactModel
+      contactModelTemp.messenges.append(messengeModel)
+      updatedContactModel = contactModelTemp
+      model.contacts[contactIndex].messenges.append(messengeModel)
     }
+    
+    await saveMessengerModel(model)
+    return updatedContactModel
   }
   
-  public func setEncryptionPublicKey(
-    _ contactModel: ContactModel,
-    _ publicKey: String,
-    completion: ((ContactModel?) -> Void)?
-  ) {
-    getMessengerModel { [weak self] model in
-      guard let self else { return }
-      var updatedModel = model
-      var updatedContactModel = contactModel
-      updatedContactModel.encryptionPublicKey = publicKey
-      
-      if let contactIndex = updatedModel.contacts.firstIndex(of: contactModel) {
-        updatedModel.contacts[contactIndex].encryptionPublicKey = publicKey
-      }
-      
-      saveMessengerModel(
-        updatedModel,
-        completion: {
-          completion?(updatedContactModel)
-        }
-      )
+  public func setEncryptionPublicKey(_ contactModel: ContactModel, _ publicKey: String) async -> ContactModel? {
+    var model = await getMessengerModel()
+    var updatedContactModel = contactModel
+    updatedContactModel.encryptionPublicKey = publicKey
+    
+    if let contactIndex = model.contacts.firstIndex(of: contactModel) {
+      model.contacts[contactIndex].encryptionPublicKey = publicKey
     }
+    
+    await saveMessengerModel(model)
+    return updatedContactModel
   }
   
-  public func deleteContact(
-    _ contactModel: ContactModel,
-    completion: (() -> Void)?
-  ) {
-    getMessengerModel { [weak self] model in
-      guard let self else { return }
-      var updatedModel = model
-      
-      if let contactIndex = updatedModel.contacts.firstIndex(of: contactModel) {
-        updatedModel.contacts.remove(at: contactIndex)
-      }
-      
-      saveMessengerModel(updatedModel, completion: completion)
+  public func deleteContact(_ contactModel: ContactModel) async {
+    var model = await getMessengerModel()
+    
+    if let contactIndex = model.contacts.firstIndex(of: contactModel) {
+      model.contacts.remove(at: contactIndex)
     }
+    
+    await saveMessengerModel(model)
   }
 }

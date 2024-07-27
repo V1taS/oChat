@@ -13,9 +13,9 @@ protocol PasscodeSettingsScreenFactoryOutput: AnyObject {
   /// Открыть экран изменения пароля
   func openChangeAccessCode()
   /// Включить или выключить Face ID
-  func changeFaceIDState(_ value: Bool)
+  func changeFaceIDState(_ value: Bool) async
   /// Включить или выключить экран блокировки
-  func changeLockScreenState(_ value: Bool)
+  func changeLockScreenState(_ isLockScreen: Bool) async
 }
 
 /// Cобытия которые отправляем от Presenter к Factory
@@ -64,7 +64,9 @@ extension PasscodeSettingsScreenFactory: PasscodeSettingsScreenFactoryInput {
         guard let self else {
           return
         }
-        output?.changeFaceIDState(newValue)
+        Task { [weak self] in
+          await self?.output?.changeFaceIDState(newValue)
+        }
       }
     )
     models.append(faceIDModel)
@@ -77,7 +79,9 @@ extension PasscodeSettingsScreenFactory: PasscodeSettingsScreenFactoryInput {
         guard let self else {
           return
         }
-        output?.changeLockScreenState(newValue)
+        Task { [weak self] in
+          await self?.output?.changeLockScreenState(newValue)
+        }
       }
     )
     models.append(passcodeModel)

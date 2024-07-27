@@ -15,20 +15,20 @@ protocol PasscodeSettingsScreenInteractorOutput: AnyObject {}
 protocol PasscodeSettingsScreenInteractorInput {
   /// Запрос доступа к Face ID для аутентификации
   /// - Parameter granted: Булево значение, указывающее, было ли предоставлено разрешение
-  func requestFaceID(completion: @escaping (_ granted: Bool) -> Void)
+  func requestFaceID() async -> Bool
   /// Сохранить состояние FaceID
-  func saveFaceIDState(_ value: Bool)
+  func saveFaceIDState(_ value: Bool) async
   /// Получить состояние FaceID
-  func getFaceIDState(completion: ((_ value: Bool) -> Void)?)
+  func getFaceIDState() async -> Bool
   /// Возвращает статус экрана блокировки.
-  func getIsLockScreen(completion: ((_ value: Bool) -> Void)?)
+  func getIsLockScreen() async -> Bool
   /// Сбрасывает текущий код доступа до значения по умолчанию.
-  func resetPasscode()
+  func resetPasscode() async
   /// Возвращает начальные значения для состояния FaceID и показа изменения кода доступа.
-  /// - Parameter completion: Замыкание, которое принимает два значения:
-  ///   - `stateFaceID`: Булево значение, указывающее, включен ли FaceID.
-  ///   - `isShowChangeAccessCode`: Булево значение, указывающее, показывать ли изменение кода доступа.
-  func getInitialValue(completion: ((_ stateFaceID: Bool, _ isShowChangeAccessCode: Bool) -> Void)?)
+  /// - Parameters:
+  ///  - `stateFaceID`: Булево значение, указывающее, включен ли FaceID.
+  ///  - `isShowChangeAccessCode`: Булево значение, указывающее, показывать ли изменение кода доступа.
+  func getInitialValue() async -> (stateFaceID: Bool, isShowChangeAccessCode: Bool)
 }
 
 /// Интерактор
@@ -58,39 +58,30 @@ final class PasscodeSettingsScreenInteractor {
 // MARK: - PasscodeSettingsScreenInteractorInput
 
 extension PasscodeSettingsScreenInteractor: PasscodeSettingsScreenInteractorInput {
-  func getInitialValue(completion: ((_ stateFaceID: Bool, _ isShowChangeAccessCode: Bool) -> Void)?) {
-    modelHandlerService.getAppSettingsModel { appSettingsModel in
-      completion?(appSettingsModel.isFaceIDEnabled, appSettingsModel.appPassword != nil)
-    }
+  func getInitialValue() async -> (stateFaceID: Bool, isShowChangeAccessCode: Bool) {
+    let appSettingsModel = await modelHandlerService.getAppSettingsModel()
+    return (appSettingsModel.isFaceIDEnabled, appSettingsModel.appPassword != nil)
   }
   
-  func resetPasscode() {
-    appSettingsManager.setAppPassword(nil, completion: { [weak self] in
-      self?.appSettingsManager.setIsEnabledFaceID(false, completion: nil)
-    })
+  func resetPasscode() async {
+    await appSettingsManager.setAppPassword(nil)
+    await appSettingsManager.setIsEnabledFaceID(false)
   }
   
-  func getIsLockScreen(completion: ((_ value: Bool) -> Void)?) {
-    modelHandlerService.getAppSettingsModel { appSettingsModel in
-      completion?(appSettingsModel.appPassword != nil)
-    }
+  func getIsLockScreen() async -> Bool {
+    await modelHandlerService.getAppSettingsModel().appPassword != nil
   }
   
-  func saveFaceIDState(_ value: Bool) {
-    appSettingsManager.setIsEnabledFaceID(value, completion: nil)
+  func saveFaceIDState(_ value: Bool) async {
+    await appSettingsManager.setIsEnabledFaceID(value)
   }
   
-  func getFaceIDState(completion: ((_ value: Bool) -> Void)?) {
-    modelHandlerService.getAppSettingsModel { appSettingsModel in
-      completion?(appSettingsModel.isFaceIDEnabled)
-    }
+  func getFaceIDState() async -> Bool {
+    await modelHandlerService.getAppSettingsModel().isFaceIDEnabled
   }
   
-  func requestFaceID(completion: @escaping (Bool) -> Void) {
-    Task {
-      let granted = await permissionService.requestFaceID()
-      completion(granted)
-    }
+  func requestFaceID() async -> Bool {
+    await permissionService.requestFaceID()
   }
 }
 
