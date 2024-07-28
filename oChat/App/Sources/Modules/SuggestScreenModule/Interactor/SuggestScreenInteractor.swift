@@ -20,16 +20,8 @@ protocol SuggestScreenInteractorInput {
   /// Метод для проверки, включены ли уведомления
   func isNotificationsEnabled() async -> Bool
   
-  /// Запрос доступа к Face ID для аутентификации
-  func requestFaceID() async -> Bool
-  
   /// Получает модель настроек приложения `AppSettingsModel` асинхронно.
   func getAppSettingsModel() async -> AppSettingsModel
-  
-  /// Включает или отключает аутентификацию по Face ID.
-  /// - Parameters:
-  ///   - value: Значение, указывающее, следует ли включить аутентификацию по Face ID.
-  func setIsEnabledFaceID(_ value: Bool) async
   
   /// Включает или отключает уведомления в приложении.
   /// - Parameters:
@@ -70,16 +62,8 @@ extension SuggestScreenInteractor: SuggestScreenInteractorInput {
     await permissionService.requestNotification()
   }
   
-  func requestFaceID() async -> Bool {
-    await permissionService.requestFaceID()
-  }
-  
   func getAppSettingsModel() async -> AppSettingsModel {
     await modelHandlerService.getAppSettingsModel()
-  }
-  
-  func setIsEnabledFaceID(_ value: Bool) async {
-    await appSettingsManager.setIsEnabledFaceID(value)
   }
   
   func setIsEnabledNotifications(_ value: Bool) async {

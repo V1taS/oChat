@@ -52,17 +52,15 @@ final class PasscodeSettingsScreenPresenter: ObservableObject {
 
 extension PasscodeSettingsScreenPresenter: PasscodeSettingsScreenModuleInput {
   func updateScreen() async {
-    let initialValue = await interactor.getInitialValue()
+    let isAppPassword = await interactor.isAppPassword()
     stateWidgetCryptoModels = factory.createWidgetModels(
-      stateFaceID: initialValue.stateFaceID,
-      stateIsShowChangeAccessCode: initialValue.isShowChangeAccessCode
+      stateIsShowChangeAccessCode: isAppPassword
     )
   }
   
   func successAuthorizationPasswordDisable() async {
     await interactor.resetPasscode()
     stateWidgetCryptoModels = factory.createWidgetModels(
-      stateFaceID: false,
       stateIsShowChangeAccessCode: false
     )
   }
@@ -83,23 +81,9 @@ extension PasscodeSettingsScreenPresenter: PasscodeSettingsScreenFactoryOutput {
       moduleOutput?.openAuthorizationPasswordDisable()
     }
     
-    let isFaceID = await interactor.getFaceIDState()
     let isLockScreen = await interactor.getIsLockScreen()
     
     stateWidgetCryptoModels = factory.createWidgetModels(
-      stateFaceID: isFaceID,
-      stateIsShowChangeAccessCode: isLockScreen
-    )
-  }
-  
-  @MainActor
-  func changeFaceIDState(_ value: Bool) async {
-    let granted = await interactor.requestFaceID()
-    await interactor.saveFaceIDState(value)
-    let isLockScreen = await interactor.getIsLockScreen()
-    
-    stateWidgetCryptoModels = factory.createWidgetModels(
-      stateFaceID: value && granted && isLockScreen,
       stateIsShowChangeAccessCode: isLockScreen
     )
   }

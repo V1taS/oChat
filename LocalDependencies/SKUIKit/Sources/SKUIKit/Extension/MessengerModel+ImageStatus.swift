@@ -11,7 +11,7 @@ import SKAbstractions
 
 // MARK: - Status
 
-extension MessengerModel.Status {
+extension AppSettingsModel.Status {
   /// Изображения по статусам
   public var imageStatus: UIImage? {
     switch self {

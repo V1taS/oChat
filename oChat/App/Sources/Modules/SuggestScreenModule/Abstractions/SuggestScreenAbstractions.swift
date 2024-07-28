@@ -20,10 +20,6 @@ public protocol SuggestScreenModuleOutput: AnyObject {
   /// Вызывается при нажатии на кнопку подтверждения экрана предложения кода доступа.
   func suggestAccessCodeScreenConfirmButtonTapped()
   
-  /// Вызывается при нажатии на кнопку подтверждения экрана предложения FaceID.
-  /// - Parameter isEnabledNotifications: Указывает, включены ли уведомления.
-  func suggestFaceIDScreenConfirmButtonTapped(_ isEnabledNotifications: Bool)
-  
   /// Вызывается при нажатии на кнопку подтверждения экрана предложения уведомлений.
   func suggestNotificationScreenConfirmButtonTapped()
 }

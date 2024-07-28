@@ -510,7 +510,7 @@ extension MessengerListScreenModuleInteractor: MessengerListScreenModuleInteract
   }
   
   func getPushNotificationToken() async -> String? {
-    await modelHandlerService.getMessengerModel().pushNotificationToken
+    await modelHandlerService.getMessengerModel().appSettingsModel.pushNotificationToken
   }
   
   func clearAllMessengeTempID() async {
@@ -543,7 +543,7 @@ extension MessengerListScreenModuleInteractor: MessengerListScreenModuleInteract
   
   func stratTOXService() async {
     let messengerModel = await modelHandlerService.getMessengerModel()
-    let toxStateAsString = messengerModel.toxStateAsString
+    let toxStateAsString = messengerModel.appSettingsModel.toxStateAsString
     
     do {
       await try? self.p2pChatManager.start(saveDataString: toxStateAsString)

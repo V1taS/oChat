@@ -128,7 +128,7 @@ private extension RootCoordinator {
   func setupLaunchScreen() async {
     let messengerModel = await services.messengerService.modelHandlerService.getMessengerModel()
     /// В модельке нет сохраненных данных
-    if messengerModel.toxStateAsString == nil {
+    if messengerModel.appSettingsModel.toxStateAsString == nil {
       openInitialFlowCoordinator(isPresentScreenAnimated: true)
     } else {
       if messengerModel.appSettingsModel.appPassword != nil {

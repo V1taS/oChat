@@ -12,8 +12,6 @@ import SKUIKit
 protocol PasscodeSettingsScreenFactoryOutput: AnyObject {
   /// Открыть экран изменения пароля
   func openChangeAccessCode()
-  /// Включить или выключить Face ID
-  func changeFaceIDState(_ value: Bool) async
   /// Включить или выключить экран блокировки
   func changeLockScreenState(_ isLockScreen: Bool) async
 }
@@ -23,7 +21,7 @@ protocol PasscodeSettingsScreenFactoryInput {
   /// Создать заголовок для экрана
   func createHeaderTitle() -> String
   /// Создать виджет модельки для отображения
-  func createWidgetModels(stateFaceID: Bool, stateIsShowChangeAccessCode: Bool) -> [SKUIKit.WidgetCryptoView.Model]
+  func createWidgetModels(stateIsShowChangeAccessCode: Bool) -> [SKUIKit.WidgetCryptoView.Model]
 }
 
 /// Фабрика
@@ -42,7 +40,7 @@ extension PasscodeSettingsScreenFactory: PasscodeSettingsScreenFactoryInput {
       .State.Header.title
   }
   
-  func createWidgetModels(stateFaceID: Bool, stateIsShowChangeAccessCode: Bool) -> [SKUIKit.WidgetCryptoView.Model] {
+  func createWidgetModels(stateIsShowChangeAccessCode: Bool) -> [SKUIKit.WidgetCryptoView.Model] {
     var models: [WidgetCryptoView.Model] = []
     
     if stateIsShowChangeAccessCode {
@@ -55,21 +53,6 @@ extension PasscodeSettingsScreenFactory: PasscodeSettingsScreenFactoryInput {
       )
       models.append(accessCodeModel)
     }
-    
-    let faceIDModel = createWidgetModel(
-      title: OChatStrings.PasscodeSettingsScreenLocalization
-        .State.FaceID.title,
-      initialState: stateFaceID,
-      action: { [weak self] newValue in
-        guard let self else {
-          return
-        }
-        Task { [weak self] in
-          await self?.output?.changeFaceIDState(newValue)
-        }
-      }
-    )
-    models.append(faceIDModel)
     
     let passcodeModel = createWidgetModel(
       title: OChatStrings.PasscodeSettingsScreenLocalization
@@ -95,15 +78,27 @@ private extension PasscodeSettingsScreenFactory {
   func createWidgetModel(
     title: String,
     initialState: Bool,
-    action: ((Bool) -> Void)?
+    description: String? = nil,
+    action: ((Bool) -> Void)? = nil
   ) -> WidgetCryptoView.Model {
+    var descriptionModel: WidgetCryptoView.TextModel?
+    
+    if let description {
+      descriptionModel = .init(
+        text: description,
+        lineLimit: 2,
+        textStyle: .netural
+      )
+    }
+
     return .init(
       leftSide: .init(
         titleModel: .init(
           text: title,
           lineLimit: 1,
           textStyle: .standart
-        )
+        ),
+        descriptionModel: descriptionModel
       ),
       rightSide: .init(
         itemModel: .switcher(

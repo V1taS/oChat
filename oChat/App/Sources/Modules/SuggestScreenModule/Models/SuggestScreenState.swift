@@ -13,8 +13,6 @@ import Foundation
 public enum SuggestScreenState: Equatable {
   /// Предложить установить код доступа
   case setAccessCode
-  /// Предложить установить FaceID
-  case setFaceID
   /// Предложить включить уведомления
   case setNotifications
 }

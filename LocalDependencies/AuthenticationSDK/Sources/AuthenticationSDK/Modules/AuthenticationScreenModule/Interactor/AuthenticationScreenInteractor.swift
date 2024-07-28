@@ -17,8 +17,6 @@ protocol AuthenticationScreenInteractorInput {
   func authenticationWithFaceID() async -> Bool
   /// Получить старый код пароль, который был установлен пользователем
   func getOldAccessCode() async -> String?
-  /// Указывает, включена ли разблокировка по FaceID.
-  func getIsFaceIDEnabled() async -> Bool
   /// Устанавливает пароль приложения.
   /// - Parameter value: Новый пароль для приложения.
   func setAppPassword(_ value: String?) async
@@ -53,10 +51,6 @@ final class AuthenticationScreenInteractor {
 extension AuthenticationScreenInteractor: AuthenticationScreenInteractorInput {
   func setAppPassword(_ code: String?) async {
     await appSettingsManager.setAppPassword(code)
-  }
-  
-  func getIsFaceIDEnabled() async -> Bool {
-    await modelHandlerService.getAppSettingsModel().isFaceIDEnabled
   }
   
   func getOldAccessCode() async -> String? {

@@ -18,15 +18,6 @@ public struct MessengerModel {
 
   /// Массив моделей контактов, каждый из которых представляет отдельный контакт.
   public var contacts: [ContactModel]
-
-  /// Мой статус онлайн.
-  public var myStatus: MessengerModel.Status
-
-  /// Строка, содержащая сохранённое состояние Tox в формате Base64
-  public var toxStateAsString: String?
-  
-  /// Токен для отправки пушей
-  public var pushNotificationToken: String?
   
   // MARK: - Initializer
 
@@ -34,49 +25,12 @@ public struct MessengerModel {
   /// - Parameters:
   ///   - appSettingsModel: Модель настроек приложения.
   ///   - contacts: Массив моделей контактов, каждый из которых представляет отдельный контакт.
-  ///   - myStatus: Мой статус онлайн.
-  ///   - toxStateAsString: Строка, содержащая сохранённое состояние Tox в формате Base64
-  ///   - pushNotificationToken: Токен для отправки пушей
   public init(
     appSettingsModel: AppSettingsModel,
-    contacts: [ContactModel],
-    myStatus: MessengerModel.Status,
-    toxStateAsString: String?,
-    pushNotificationToken: String?
+    contacts: [ContactModel]
   ) {
     self.appSettingsModel = appSettingsModel
     self.contacts = contacts
-    self.myStatus = myStatus
-    self.toxStateAsString = toxStateAsString
-    self.pushNotificationToken = pushNotificationToken
-  }
-}
-
-// MARK: - Status
-
-extension MessengerModel {
-  /// Перечисление, представляющее статусы.
-  public enum Status: String {
-    /// Пользователь в сети.
-    case online
-
-    /// Пользователь не в сети.
-    case offline
-
-    /// Пользователь подключается к сети
-    case inProgress
-
-    /// Заголовок
-    public var title: String {
-      switch self {
-      case .online:
-        AbstractionsStrings.SKAbstractionsLocalization.commonStatusTitleOnline
-      case .offline:
-        AbstractionsStrings.SKAbstractionsLocalization.commonStatusTitleOffline
-      case .inProgress:
-        AbstractionsStrings.SKAbstractionsLocalization.messengerModelStatusTitleConnecting
-      }
-    }
   }
 }
 
@@ -86,10 +40,7 @@ extension MessengerModel {
   public static func setDefaultValues() -> Self {
     Self(
       appSettingsModel: .setDefaultValues(),
-      contacts: [],
-      myStatus: .inProgress,
-      toxStateAsString: nil, 
-      pushNotificationToken: nil
+      contacts: []
     )
   }
 }
@@ -97,4 +48,3 @@ extension MessengerModel {
 // MARK: - IdentifiableAndCodable
 
 extension MessengerModel: IdentifiableAndCodable {}
-extension MessengerModel.Status: IdentifiableAndCodable {}

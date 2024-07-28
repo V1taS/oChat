@@ -9,11 +9,7 @@ import Foundation
 
 /// Протокол `IAppSettingsManager` предназначен для управления настройками приложения.
 /// Определяет функции для изменения настроек безопасности, валюты и уведомлений.
-public protocol IAppSettingsManager {
-  /// Включает или отключает аутентификацию по Face ID.
-  /// - Parameter value: Значение, указывающее, следует ли включить аутентификацию по Face ID.
-  func setIsEnabledFaceID(_ value: Bool) async
-  
+public protocol IAppSettingsManager {  
   /// Устанавливает пароль приложения.
   /// - Parameter value: Новый пароль для приложения.
   func setAppPassword(_ value: String?) async

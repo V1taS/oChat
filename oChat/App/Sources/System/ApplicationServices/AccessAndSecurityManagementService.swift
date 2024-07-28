@@ -18,7 +18,7 @@ final class AccessAndSecurityManagementService: IAccessAndSecurityManagementServ
   
   /// Сервис для управления сессиями в приложении.
   var sessionService: ISessionService {
-    appSessionService
+    SessionService.shared
   }
   
   /// Возвращает сервис запроса доступов.
@@ -36,9 +36,3 @@ final class AccessAndSecurityManagementService: IAccessAndSecurityManagementServ
     CryptoService()
   }
 }
-
-// MARK: - Impl
-
-private let appSessionService = SessionService(
-  secureStore: SecureDataManagerService(.session)
-)

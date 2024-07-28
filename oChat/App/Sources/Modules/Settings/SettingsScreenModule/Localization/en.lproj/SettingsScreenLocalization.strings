@@ -9,7 +9,7 @@
 
 "State.Header.Title" = "Settings";
 "State.Profile" = "Profile";
-"State.PasscodeAndFaceID.Title" = "Passcode & Face ID";
+"State.PasscodeAndFaceID.Title" = "Privacy";
 "State.Notifications.Title" = "Notifications";
 "State.Appearance.Title" = "Appearance";
 "State.Language.Title" = "Language";

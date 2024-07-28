@@ -36,13 +36,6 @@ extension SuggestScreenFactory: SuggestScreenFactoryInput {
         description: OChatStrings.SuggestScreenLocalization.State.AccessCode.description,
         buttonTitle: OChatStrings.SuggestScreenLocalization.State.AccessCode.buttonTitle
       )
-    case .setFaceID:
-      return .init(
-        animationName: OChatAsset.newWalletScreenFaceId.name,
-        title: OChatStrings.SuggestScreenLocalization.State.FaceID.title,
-        description: "",
-        buttonTitle: OChatStrings.SuggestScreenLocalization.State.FaceID.buttonTitle
-      )
     case .setNotifications:
       return .init(
         animationName: OChatAsset.newWalletEnableNotifications.name,

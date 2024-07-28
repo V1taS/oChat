@@ -10,28 +10,68 @@ import Foundation
 /// Модель, представляющая настройки приложения.
 public struct AppSettingsModel {
   
-  /// Указывает, включена ли разблокировка по FaceID.
-  public var isFaceIDEnabled: Bool
-  
   /// Пароль для входа в приложение.
   public var appPassword: String?
   
   /// Указывает, включены ли уведомления.
   public var isNotificationsEnabled: Bool
   
+  /// Мой статус онлайн.
+  public var myStatus: AppSettingsModel.Status
+
+  /// Строка, содержащая сохранённое состояние Tox в формате Base64
+  public var toxStateAsString: String?
+  
+  /// Токен для отправки пушей
+  public var pushNotificationToken: String?
+  
   /// Инициализирует новый экземпляр `AppSettingsModel`.
   /// - Parameters:
-  ///   - isFaceIDEnabled: Булево значение, указывающее, включена ли разблокировка по FaceID.
   ///   - appPassword: Строка, представляющая пароль для входа в приложение.
   ///   - isNotificationsEnabled: Булево значение, указывающее, включены ли уведомления.
+  ///   - myStatus: Мой статус онлайн.
+  ///   - toxStateAsString: Строка, содержащая сохранённое состояние Tox в формате Base64
+  ///   - pushNotificationToken: Токен для отправки пушей
   public init(
-    isFaceIDEnabled: Bool,
     appPassword: String?,
-    isNotificationsEnabled: Bool
+    isNotificationsEnabled: Bool,
+    myStatus: AppSettingsModel.Status,
+    toxStateAsString: String?,
+    pushNotificationToken: String?
   ) {
-    self.isFaceIDEnabled = isFaceIDEnabled
     self.appPassword = appPassword
     self.isNotificationsEnabled = isNotificationsEnabled
+    self.myStatus = myStatus
+    self.toxStateAsString = toxStateAsString
+    self.pushNotificationToken = pushNotificationToken
+  }
+}
+
+// MARK: - Status
+
+extension AppSettingsModel {
+  /// Перечисление, представляющее статусы.
+  public enum Status: String {
+    /// Пользователь в сети.
+    case online
+
+    /// Пользователь не в сети.
+    case offline
+
+    /// Пользователь подключается к сети
+    case inProgress
+
+    /// Заголовок
+    public var title: String {
+      switch self {
+      case .online:
+        AbstractionsStrings.SKAbstractionsLocalization.commonStatusTitleOnline
+      case .offline:
+        AbstractionsStrings.SKAbstractionsLocalization.commonStatusTitleOffline
+      case .inProgress:
+        AbstractionsStrings.SKAbstractionsLocalization.messengerModelStatusTitleConnecting
+      }
+    }
   }
 }
 
@@ -40,9 +80,11 @@ public struct AppSettingsModel {
 extension AppSettingsModel {
   public static func setDefaultValues() -> Self {
     return .init(
-      isFaceIDEnabled: false,
       appPassword: nil,
-      isNotificationsEnabled: false
+      isNotificationsEnabled: false,
+      myStatus: .inProgress,
+      toxStateAsString: nil,
+      pushNotificationToken: nil
     )
   }
 }
@@ -50,3 +92,4 @@ extension AppSettingsModel {
 // MARK: - IdentifiableAndCodable
 
 extension AppSettingsModel: IdentifiableAndCodable {}
+extension AppSettingsModel.Status: IdentifiableAndCodable {}

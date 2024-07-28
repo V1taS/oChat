@@ -11,6 +11,10 @@ import SKAbstractions
 
 public class SessionService: ISessionService {
   
+  // MARK: - Singleton
+  
+  public static let shared = SessionService(secureStore: SecureDataManagerService(.session))
+  
   public var sessionDidExpireAction: (() -> Void)?
   
   // MARK: - Private properties
@@ -18,7 +22,7 @@ public class SessionService: ISessionService {
   private let secureStore: SecureDataManagerService
   private let lastActivityKey = Constants.sessionActivityKey
   private var sessionTimer: Timer?
-  private var touchWindow: ITouchWindow?
+  private var touchWindow: ITouchWindow? = UIApplication.currentWindow as? ITouchWindow
   private var formatter: DateFormatter {
     let formatter = DateFormatter()
     formatter.dateFormat = Constants.dateFormat
@@ -27,12 +31,11 @@ public class SessionService: ISessionService {
   
   // MARK: - Init
   
-  public init(secureStore: SecureDataManagerService) {
+  private init(secureStore: SecureDataManagerService) {
     self.secureStore = secureStore
-    self.touchWindow = UIApplication.currentWindow as? ITouchWindow
   }
   
-  // MARK: - Public properties
+  // MARK: - Public methods
   
   public func startSession() {
     let now = Date()
@@ -42,11 +45,13 @@ public class SessionService: ISessionService {
       self?.sessionDidExpire()
     }
     
-    touchWindow?.didSendEvent = { [weak self] _ in
-      guard self?.sessionTimer != nil else {
-        return
+    DispatchQueue.main.async { [weak self] in
+      self?.touchWindow?.didSendEvent = { [weak self] _ in
+        guard self?.sessionTimer != nil else {
+          return
+        }
+        self?.updateLastActivityTime()
       }
-      self?.updateLastActivityTime()
     }
   }
   
@@ -77,23 +82,17 @@ public class SessionService: ISessionService {
   }
 }
 
-// MARK: - Private
-
-private extension SessionService {}
-
 // MARK: - Constants
 
 private enum Constants {
   static let sessionActivityKey = "SessionActivityKey"
   static let dateFormat = "yyyy-MM-dd HH:mm:ss"
-  // Установка таймера на 10 минут
   static let timeInterval: CGFloat = 600
 }
 
 // MARK: - UIApplication
 
 private extension UIApplication {
-  /// Возвращает текущее активное окно приложения.
   static var currentWindow: UIWindow? {
     return UIApplication.shared.connectedScenes
       .compactMap { $0 as? UIWindowScene }

@@ -16,19 +16,14 @@ protocol PasscodeSettingsScreenInteractorInput {
   /// Запрос доступа к Face ID для аутентификации
   /// - Parameter granted: Булево значение, указывающее, было ли предоставлено разрешение
   func requestFaceID() async -> Bool
-  /// Сохранить состояние FaceID
-  func saveFaceIDState(_ value: Bool) async
-  /// Получить состояние FaceID
-  func getFaceIDState() async -> Bool
   /// Возвращает статус экрана блокировки.
   func getIsLockScreen() async -> Bool
   /// Сбрасывает текущий код доступа до значения по умолчанию.
   func resetPasscode() async
-  /// Возвращает начальные значения для состояния FaceID и показа изменения кода доступа.
+  /// Возвращает начальные значения установлен ли пароль
   /// - Parameters:
-  ///  - `stateFaceID`: Булево значение, указывающее, включен ли FaceID.
   ///  - `isShowChangeAccessCode`: Булево значение, указывающее, показывать ли изменение кода доступа.
-  func getInitialValue() async -> (stateFaceID: Bool, isShowChangeAccessCode: Bool)
+  func isAppPassword() async -> Bool
 }
 
 /// Интерактор
@@ -58,26 +53,17 @@ final class PasscodeSettingsScreenInteractor {
 // MARK: - PasscodeSettingsScreenInteractorInput
 
 extension PasscodeSettingsScreenInteractor: PasscodeSettingsScreenInteractorInput {
-  func getInitialValue() async -> (stateFaceID: Bool, isShowChangeAccessCode: Bool) {
+  func isAppPassword() async -> Bool {
     let appSettingsModel = await modelHandlerService.getAppSettingsModel()
-    return (appSettingsModel.isFaceIDEnabled, appSettingsModel.appPassword != nil)
+    return appSettingsModel.appPassword != nil
   }
   
   func resetPasscode() async {
     await appSettingsManager.setAppPassword(nil)
-    await appSettingsManager.setIsEnabledFaceID(false)
   }
   
   func getIsLockScreen() async -> Bool {
     await modelHandlerService.getAppSettingsModel().appPassword != nil
-  }
-  
-  func saveFaceIDState(_ value: Bool) async {
-    await appSettingsManager.setIsEnabledFaceID(value)
-  }
-  
-  func getFaceIDState() async -> Bool {
-    await modelHandlerService.getAppSettingsModel().isFaceIDEnabled
   }
   
   func requestFaceID() async -> Bool {

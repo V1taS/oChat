@@ -121,18 +121,7 @@ extension AuthenticationScreenPresenter: SceneViewModel {}
 private extension AuthenticationScreenPresenter {
   @MainActor
   func loginFaceID() async {
-    if case let .loginPasscode(result) = stateCurrentStateScreen, case .loginFaceID = result {
-      if await interactor.getIsFaceIDEnabled() {
-        switch await interactor.authenticationWithFaceID() {
-        case true:
-          moduleOutput?.authenticationSuccess()
-        case false:
-          stateCurrentStateScreen = .loginPasscode(.enterPasscode)
-        }
-      } else {
-        stateCurrentStateScreen = .loginPasscode(.enterPasscode)
-      }
-    }
+    stateCurrentStateScreen = .loginPasscode(.enterPasscode)
   }
   
   @MainActor

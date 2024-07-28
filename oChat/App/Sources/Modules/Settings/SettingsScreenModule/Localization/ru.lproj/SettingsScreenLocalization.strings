@@ -9,7 +9,7 @@
 
 "State.Header.Title" = "Настройки";
 "State.Profile" = "Профиль";
-"State.PasscodeAndFaceID.Title" = "Код доступа & Face ID";
+"State.PasscodeAndFaceID.Title" = "Конфиденциальность";
 "State.Notifications.Title" = "Уведомления";
 "State.Appearance.Title" = "Внешний вид";
 "State.Language.Title" = "Язык";

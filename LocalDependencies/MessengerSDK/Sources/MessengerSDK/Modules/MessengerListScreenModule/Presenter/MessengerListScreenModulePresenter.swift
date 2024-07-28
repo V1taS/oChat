@@ -445,9 +445,10 @@ private extension MessengerListScreenModulePresenter {
       guard let self else { return }
       let messengerModel = await interactor.getMessengerModel()
       
-      await MainActor.run {
-        barButtonView?.iconLeftView.image = messengerModel.myStatus.imageStatus
-        barButtonView?.labelView.text = messengerModel.myStatus.title
+      await MainActor.run { [weak self] in
+        guard let self else { return }
+        barButtonView?.iconLeftView.image = messengerModel.appSettingsModel.myStatus.imageStatus
+        barButtonView?.labelView.text = messengerModel.appSettingsModel.myStatus.title
       }
     }
   }
@@ -693,7 +694,7 @@ private extension MessengerListScreenModulePresenter {
   func handleMyOnlineStatus(_ notification: Notification) {
     Task { @MainActor [weak self] in
       guard let self,
-            let status = notification.userInfo?["onlineStatus"] as? MessengerModel.Status else {
+            let status = notification.userInfo?["onlineStatus"] as? AppSettingsModel.Status else {
         return
       }
       barButtonView?.iconLeftView.image = status.imageStatus

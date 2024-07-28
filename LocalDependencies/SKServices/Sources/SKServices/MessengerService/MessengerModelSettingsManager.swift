@@ -14,13 +14,13 @@ import SKStyle
 extension MessengerModelHandlerService: IMessengerModelSettingsManager {
   public func saveMyPushNotificationToken(_ token: String) async {
     var model = await getMessengerModel()
-    model.pushNotificationToken = token
+    model.appSettingsModel.pushNotificationToken = token
     await saveMessengerModel(model)
   }
   
   public func setToxStateAsString(_ toxStateAsString: String?) async {
     var model = await getMessengerModel()
-    model.toxStateAsString = toxStateAsString
+    model.appSettingsModel.toxStateAsString = toxStateAsString
     await saveMessengerModel(model)
   }
   

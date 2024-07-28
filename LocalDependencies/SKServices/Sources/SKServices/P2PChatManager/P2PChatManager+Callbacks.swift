@@ -365,7 +365,7 @@ private extension P2PChatManager {
     }
   }
   
-  func updateMyOnlineStatus(status: MessengerModel.Status) {
+  func updateMyOnlineStatus(status: AppSettingsModel.Status) {
     DispatchQueue.main.async {
       // Отправка уведомления об изменении статуса ОНЛАЙН/ОФФ ЛАЙН
       NotificationCenter.default.post(

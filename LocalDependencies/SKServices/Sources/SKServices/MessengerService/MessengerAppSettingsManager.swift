@@ -13,12 +13,6 @@ import SKStyle
 // MARK: - IAppSettingsManager
 
 extension MessengerModelHandlerService: IAppSettingsManager {
-  public func setIsEnabledFaceID(_ value: Bool) async {
-    var model = await getMessengerModel()
-    model.appSettingsModel.isFaceIDEnabled = value
-    await saveMessengerModel(model)
-  }
-  
   public func setAppPassword(_ value: String?) async {
     var model = await getMessengerModel()
     model.appSettingsModel.appPassword = value
