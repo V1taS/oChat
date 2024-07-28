@@ -10,4 +10,6 @@
 "NSCameraUsageDescription" = "Предоставьте доступ к своей камере, чтобы вы могли сделать фото для создания вашего Image ID.";
 "NSFaceIDUsageDescription" = "Предоставьте доступ к Face ID для быстрой и безопасной аутентификации.";
 "NSMicrophoneUsageDescription" = "Предоставьте доступ к микрофону, чтобы вы могли сделать и отправить аудиозапись контакту.";
-"BanScreenshotView.description" = "Снимок экрана недоступен";
+
+"BanScreenshotView.Description" = "Снимок экрана недоступен";
+"BrandingStubView.SceneWillResignActive.Description" = "oChat";

@@ -11,6 +11,7 @@ import SKUIKit
 import SKAbstractions
 import Wormholy
 import SKServices
+import SwiftUI
 
 final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
   
@@ -20,6 +21,11 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
   
   // MARK: - Private properties
   
+  private let brandingStubView = UIHostingController(
+    rootView: BrandingStubView(
+      text: OChatStrings.CommonStrings.BrandingStubView.SceneWillResignActive.description
+    )
+  ).view
   private let services: IApplicationServices = ApplicationServices()
   private var rootCoordinator: RootCoordinator?
   
@@ -43,7 +49,7 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     guard let windowScene = scene as? UIWindowScene else { return }
     window = TouchWindow(windowScene: windowScene)
     window?.makeKeyAndVisible()
-
+    
     configurators().configure()
     rootCoordinator = RootCoordinator(services)
     rootCoordinator?.start()
@@ -60,6 +66,26 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         await services.userInterfaceAndExperienceService.deepLinkService.saveDeepLinkURL(url)
       }
     }
+  }
+  
+  func sceneWillEnterForeground(_ scene: UIScene) {
+    brandingStubView?.removeFromSuperview()
+  }
+  
+  func sceneWillResignActive(_ scene: UIScene) {
+    guard let window,
+          let brandingStubView else {
+      return
+    }
+    
+    if !brandingStubView.isDescendant(of: window) {
+      brandingStubView.frame = window.bounds
+      window.addSubview(brandingStubView)
+    }
+  }
+  
+  func sceneDidBecomeActive(_ scene: UIScene) {
+    brandingStubView?.removeFromSuperview()
   }
 }
 
