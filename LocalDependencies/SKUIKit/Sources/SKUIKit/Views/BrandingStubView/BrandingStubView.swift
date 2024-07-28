@@ -13,13 +13,13 @@ import SKFoundation
 public struct BrandingStubView: View {
   
   // MARK: - Private properties
-  private let text: String
+  private let text: String?
   
   // MARK: - Initialization
   /// Инициализатор
   /// - Parameters:
   ///   - text: Описание, отображаемое на экране
-  public init(text: String) {
+  public init(text: String? = nil) {
     self.text = text
   }
   
@@ -35,10 +35,12 @@ public struct BrandingStubView: View {
           .aspectRatio(contentMode: .fit)
           .frame(width: .gridValue(forSteps: .s9))
         
-        Text(text)
-          .font(.fancy.text.largeTitle)
-          .foregroundStyle(SKStyleAsset.ghost.swiftUIColor)
-          .multilineTextAlignment(.center)
+        if let text {
+          Text(text)
+            .font(.fancy.text.largeTitle)
+            .foregroundStyle(SKStyleAsset.ghost.swiftUIColor)
+            .multilineTextAlignment(.center)
+        }
         
         Spacer()
         Spacer()

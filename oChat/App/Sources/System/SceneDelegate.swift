@@ -11,6 +11,7 @@ import SKUIKit
 import SKAbstractions
 import Wormholy
 import SKServices
+import SwiftUI
 
 final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
   
@@ -19,7 +20,12 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
   var window: UIWindow?
   
   // MARK: - Private properties
-  private let visualEffectView = UIVisualEffectView(effect: UIBlurEffect(style: .regular))
+  
+  private let brandingStubView = UIHostingController(
+    rootView: BrandingStubView(
+      text: OChatStrings.CommonStrings.BrandingStubView.SceneWillResignActive.description
+    )
+  ).view
   private let services: IApplicationServices = ApplicationServices()
   private var rootCoordinator: RootCoordinator?
   
@@ -43,7 +49,7 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     guard let windowScene = scene as? UIWindowScene else { return }
     window = TouchWindow(windowScene: windowScene)
     window?.makeKeyAndVisible()
-
+    
     configurators().configure()
     rootCoordinator = RootCoordinator(services)
     rootCoordinator?.start()
@@ -61,22 +67,25 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
       }
     }
   }
-
+  
   func sceneWillEnterForeground(_ scene: UIScene) {
-    visualEffectView.removeFromSuperview()
+    brandingStubView?.removeFromSuperview()
   }
-
+  
   func sceneWillResignActive(_ scene: UIScene) {
-    guard let window else { return }
-
-    if !visualEffectView.isDescendant(of: window) {
-      visualEffectView.frame = window.bounds
-      window.addSubview(visualEffectView)
+    guard let window,
+          let brandingStubView else {
+      return
+    }
+    
+    if !brandingStubView.isDescendant(of: window) {
+      brandingStubView.frame = window.bounds
+      window.addSubview(brandingStubView)
     }
   }
-
+  
   func sceneDidBecomeActive(_ scene: UIScene) {
-    visualEffectView.removeFromSuperview()
+    brandingStubView?.removeFromSuperview()
   }
 }
 
