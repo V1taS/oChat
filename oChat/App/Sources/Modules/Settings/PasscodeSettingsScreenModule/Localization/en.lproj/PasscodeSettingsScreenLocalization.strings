@@ -7,6 +7,6 @@
 
 // MARK: - State
 
-"State.Header.Title" = "Security";
+"State.Header.Title" = "Privacy";
 "State.Passcode.Title" = "Use Passcode";
 "State.ChangeAccessCode.Title" = "Change passcode";

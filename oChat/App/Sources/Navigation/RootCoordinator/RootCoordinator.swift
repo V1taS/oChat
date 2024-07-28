@@ -112,14 +112,17 @@ private extension RootCoordinator {
       object: nil
     )
     
-    var sessionService = services.accessAndSecurityManagementService.sessionService
-    sessionService.sessionDidExpireAction = {
-      Task { [weak self] in
-        guard let self else { return }
-        let model = await services.messengerService.modelHandlerService.getAppSettingsModel()
-        guard model.appPassword != nil else { return }
-        openAuthenticationFlowCoordinator(.loginPasscode(.loginFaceID))
-        mainFlowCoordinator = nil
+    await MainActor.run { [weak self] in
+      guard let self else { return }
+      var sessionService = services.accessAndSecurityManagementService.sessionService
+      sessionService.sessionDidExpireAction = {
+        Task { [weak self] in
+          guard let self else { return }
+          let model = await services.messengerService.modelHandlerService.getAppSettingsModel()
+          guard model.appPassword != nil else { return }
+          openAuthenticationFlowCoordinator(.loginPasscode(.loginFaceID))
+          mainFlowCoordinator = nil
+        }
       }
     }
   }

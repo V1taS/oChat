@@ -13,6 +13,9 @@ protocol MessengerDialogScreenInteractorOutput: AnyObject {}
 
 /// События которые отправляем от Presenter к Interactor
 protocol MessengerDialogScreenInteractorInput {
+  /// Получить модель со всеми настройками
+  func getAppSettingsModel() async -> AppSettingsModel
+  
   /// Получаем обновленный контакт
   func getNewContactModels(_ contactModel: ContactModel) async -> ContactModel
   
@@ -79,6 +82,10 @@ final class MessengerDialogScreenInteractor {
 // MARK: - MessengerDialogScreenInteractorInput
 
 extension MessengerDialogScreenInteractor: MessengerDialogScreenInteractorInput {
+  func getAppSettingsModel() async -> AppSettingsModel {
+    await modelHandlerService.getAppSettingsModel()
+  }
+  
   func getFileName(from url: URL) -> String? {
     dataManagementService.getFileName(from: url)
   }

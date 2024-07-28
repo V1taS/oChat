@@ -28,12 +28,18 @@ protocol SettingsScreenFactoryOutput: AnyObject {
 protocol SettingsScreenFactoryInput {
   /// Создать заголовок для экрана
   func createHeaderTitle() -> String
-  /// Создать среднюю секцию
-  func createSecuritySectionsModels(
-    passcodeAndFaceIDValue: Bool,
-    messengerIsEnabled: Bool,
+  
+  /// Создать верхнюю секцию
+  func createTopWidgetModels(
+    _ appSettingsModel: AppSettingsModel,
     languageValue: String
   ) -> [WidgetCryptoView.Model]
+  
+  /// Создать верхнюю секцию
+  func createBottomWidgetModels(
+    _ appSettingsModel: AppSettingsModel
+  ) -> [WidgetCryptoView.Model]
+  
   /// Создаем заголовок, какой язык выбран в приложении Русский или Английский
   func createLanguageValue(from languageType: AppLanguageType) -> String
 }
@@ -65,16 +71,11 @@ extension SettingsScreenFactory: SettingsScreenFactoryInput {
       .State.Header.title
   }
   
-  func createSecuritySectionsModels(
-    passcodeAndFaceIDValue: Bool,
-    messengerIsEnabled: Bool,
+  func createTopWidgetModels(
+    _ appSettingsModel: AppSettingsModel,
     languageValue: String
   ) -> [WidgetCryptoView.Model] {
     var models: [WidgetCryptoView.Model] = []
-    let isOnTitle = OChatStrings.SettingsScreenLocalization
-      .State.IsOn.title
-    let isOffTitle = OChatStrings.SettingsScreenLocalization
-      .State.IsOff.title
     
     let profileModel = createWidgetWithChevron(
       image: Image(systemName: "person.fill"),
@@ -85,27 +86,44 @@ extension SettingsScreenFactory: SettingsScreenFactoryInput {
         self?.output?.openMyProfileSection()
       }
     )
+    models.append(profileModel)
     
-    let securityModel = createWidgetWithChevron(
-      image: Image(systemName: "lock"),
-      backgroundColor: #colorLiteral(red: 0.4229286313, green: 0.5245543122, blue: 0.6798206568, alpha: 1),
-      title: OChatStrings.SettingsScreenLocalization
-        .State.PasscodeAndFaceID.title,
-      action: { [weak self] in
-        self?.output?.openPasscodeAndFaceIDSection()
-      }
-    )
-    
-    let notificationsModel = createWidgetWithChevron(
-      image: Image(systemName: "bell"),
-      backgroundColor: #colorLiteral(red: 0.9985736012, green: 0.2762073576, blue: 0.1756034493, alpha: 1),
-      title: OChatStrings.SettingsScreenLocalization
-        .State.Notifications.title,
-      action: { [weak self] in
-        self?.output?.openNotificationsSection()
-      }
-    )
-    
+    if !appSettingsModel.isFakeAccessEnabled {
+      let securityModel = createWidgetWithChevron(
+        image: Image(systemName: "lock"),
+        backgroundColor: #colorLiteral(red: 0.4229286313, green: 0.5245543122, blue: 0.6798206568, alpha: 1),
+        title: OChatStrings.SettingsScreenLocalization
+          .State.PasscodeAndFaceID.title,
+        action: { [weak self] in
+          self?.output?.openPasscodeAndFaceIDSection()
+        }
+      )
+      models.append(securityModel)
+      
+      let notificationsModel = createWidgetWithChevron(
+        image: Image(systemName: "bell"),
+        backgroundColor: #colorLiteral(red: 0.5843137503, green: 0.8235294223, blue: 0.4196078479, alpha: 1),
+        title: OChatStrings.SettingsScreenLocalization
+          .State.Notifications.title,
+        action: { [weak self] in
+          self?.output?.openNotificationsSection()
+        }
+      )
+      models.append(notificationsModel)
+      
+      let languageModel = createWidgetWithChevron(
+        image: Image(systemName: "globe"),
+        backgroundColor: #colorLiteral(red: 0.4229286313, green: 0.5245543122, blue: 0.6798206568, alpha: 1),
+        title: OChatStrings.SettingsScreenLocalization
+          .State.Language.title,
+        additionRightTitle: languageValue,
+        action: { [weak self] in
+          self?.output?.openLanguageSection()
+        }
+      )
+      models.append(languageModel)
+    }
+
     let appearanceModel = createWidgetWithChevron(
       image: Image(systemName: "applepencil.and.scribble"),
       backgroundColor: #colorLiteral(red: 0.9988374114, green: 0.6133651733, blue: 0.03555859998, alpha: 1),
@@ -115,24 +133,26 @@ extension SettingsScreenFactory: SettingsScreenFactoryInput {
         self?.output?.openAppearanceSection()
       }
     )
-    let languageModel = createWidgetWithChevron(
-      image: Image(systemName: "globe"),
-      backgroundColor: #colorLiteral(red: 0.4229286313, green: 0.5245543122, blue: 0.6798206568, alpha: 1),
-      title: OChatStrings.SettingsScreenLocalization
-        .State.Language.title,
-      additionRightTitle: languageValue,
+    models.append(appearanceModel)
+    return models
+  }
+  
+  func createBottomWidgetModels(
+    _ appSettingsModel: AppSettingsModel
+  ) -> [WidgetCryptoView.Model] {
+    var models: [WidgetCryptoView.Model] = []
+    
+    let profileModel = createWidgetWithChevron(
+      image: Image(systemName: "trash"),
+      backgroundColor: #colorLiteral(red: 0.9254902005, green: 0.2352941185, blue: 0.1019607857, alpha: 1),
+      title: "Удалить и выйти",
+      additionRightTitle: "",
       action: { [weak self] in
-        self?.output?.openLanguageSection()
+        // TODO: - сделать логику удаления чата
       }
     )
+    models.append(profileModel)
     
-    models = [
-      profileModel,
-      securityModel,
-      notificationsModel,
-      appearanceModel,
-      languageModel
-    ]
     return models
   }
 }

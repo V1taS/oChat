@@ -21,30 +21,61 @@ struct SettingsScreenView: View {
   
   var body: some View {
     List {
-      ForEach(Array(presenter.stateSectionsModels.enumerated()), id: \.element.id) { index, model in
-        VStack(spacing: .zero) {
-          WidgetCryptoView(model)
-            .if(index == 0) { view in
-              view
-                .clipShape(RoundedCornerShape(corners: [.topLeft, .topRight], radius: .s4))
+      Section {
+        ForEach(Array(presenter.stateTopWidgetModels.enumerated()), id: \.element.id) { index, model in
+          VStack(spacing: .zero) {
+            WidgetCryptoView(model)
+              .if(index == 0) { view in
+                view
+                  .clipShape(RoundedCornerShape(corners: [.topLeft, .topRight], radius: .s4))
+              }
+              .if(index == presenter.stateTopWidgetModels.count - 1) { view in
+                view
+                  .clipShape(RoundedCornerShape(corners: [.bottomLeft, .bottomRight], radius: .s4))
+              }
+            
+            if index < presenter.stateTopWidgetModels.count - 1 {
+              Divider()
+                .background(SKStyleAsset.constantSlate.swiftUIColor.opacity(0.3))
             }
-            .if(index == presenter.stateSectionsModels.count - 1) { view in
-              view
-                .clipShape(RoundedCornerShape(corners: [.bottomLeft, .bottomRight], radius: .s4))
-            }
-          
-          if index < presenter.stateSectionsModels.count - 1 {
-            Divider()
-              .background(SKStyleAsset.constantSlate.swiftUIColor.opacity(0.3))
           }
-          if index == presenter.stateSectionsModels.count - 1 {
-            applicationVersionView()
-              .padding(.top, .s3)
-          }
+          .listRowBackground(Color.clear)
+          .listRowInsets(.init(top: .zero, leading: .s4, bottom: .zero, trailing: .s4))
+          .listRowSeparator(.hidden)
         }
+      }
+      
+      Spacer()
+        .frame(height: .s1)
         .listRowBackground(Color.clear)
-        .listRowInsets(.init(top: .zero, leading: .s4, bottom: .zero, trailing: .s4))
         .listRowSeparator(.hidden)
+      
+      Section {
+        ForEach(Array(presenter.stateBottomWidgetModels.enumerated()), id: \.element.id) { index, model in
+          VStack(spacing: .zero) {
+            WidgetCryptoView(model)
+              .if(index == 0) { view in
+                view
+                  .clipShape(RoundedCornerShape(corners: [.topLeft, .topRight], radius: .s4))
+              }
+              .if(index == presenter.stateBottomWidgetModels.count - 1) { view in
+                view
+                  .clipShape(RoundedCornerShape(corners: [.bottomLeft, .bottomRight], radius: .s4))
+              }
+            
+            if index < presenter.stateBottomWidgetModels.count - 1 {
+              Divider()
+                .background(SKStyleAsset.constantSlate.swiftUIColor.opacity(0.3))
+            }
+            if index == presenter.stateBottomWidgetModels.count - 1 {
+              applicationVersionView()
+                .padding(.top, .s3)
+            }
+          }
+          .listRowBackground(Color.clear)
+          .listRowInsets(.init(top: .zero, leading: .s4, bottom: .zero, trailing: .s4))
+          .listRowSeparator(.hidden)
+        }
       }
     }
     .background(Color.clear)

@@ -19,9 +19,6 @@ protocol SettingsScreenInteractorInput {
   /// - Returns: Текущий язык приложения как значение перечисления `AppLanguageType`.
   func getCurrentLanguage() -> AppLanguageType
   
-  /// Возвращает статус включения кода доступа.
-  func getIsAccessCodeEnabled() async -> Bool
-  
   /// Возвращает текущую версию приложения.
   /// - Returns: Строка с версией приложения, например, "1.0".
   func getAppVersion() -> String
@@ -36,9 +33,8 @@ protocol SettingsScreenInteractorInput {
   ///   - type: Тип уведомления
   func showNotification(_ type: NotificationServiceType)
   
-  /// Получает адрес onion-сервиса.
-  /// - Returns: Адрес сервиса или ошибка.
-  func getOnionAddress(completion: ((Result<String, TorServiceError>) -> Void)?)
+  /// Получает модель `MessengerModel` асинхронно.
+  func getMessengerModel() async -> MessengerModel
 }
 
 /// Интерактор
@@ -70,8 +66,8 @@ final class SettingsScreenInteractor {
 // MARK: - SettingsScreenInteractorInput
 
 extension SettingsScreenInteractor: SettingsScreenInteractorInput {
-  func getOnionAddress(completion: ((Result<String, TorServiceError>) -> Void)?) {
-//    p2pChatManager.getOnionAddress(completion: completion)
+  func getMessengerModel() async -> MessengerModel {
+    await modelHandlerService.getMessengerModel()
   }
   
   func copyToClipboard(text: String) {
@@ -84,10 +80,6 @@ extension SettingsScreenInteractor: SettingsScreenInteractorInput {
   
   func getAppVersion() -> String {
     systemService.getAppVersion()
-  }
-  
-  func getIsAccessCodeEnabled() async -> Bool {
-    await modelHandlerService.getAppSettingsModel().appPassword != nil
   }
   
   func getCurrentLanguage() -> AppLanguageType {

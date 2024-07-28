@@ -38,8 +38,8 @@ final class MessengerDialogScreenPresenter: ObservableObject {
   @Published var stateMessengeModels: [Message] = []
   @Published var stateInputMessengeText = ""
   @Published var stateInputMessengeTextMaxLength = 1_000
-  let stateShowMessengeMaxCount = 100
-  @Published var stateIsDownloadAvailability = true
+  @Published var stateShowMessengeMaxCount = 100
+  @Published var stateIsDownloadAvailability = false
   
   // MARK: - Internal properties
   
@@ -122,6 +122,10 @@ final class MessengerDialogScreenPresenter: ObservableObject {
   }
   
   func saveImageToGallery(_ imageURL: URL) async {
+    guard await interactor.getAppSettingsModel().canSaveMedia else {
+      return
+    }
+    
     interactor.saveImageToGallery(imageURL) { [weak self] isSuccess in
       guard let self else { return }
       if isSuccess {
@@ -141,6 +145,10 @@ final class MessengerDialogScreenPresenter: ObservableObject {
   }
   
   func saveVideoToGallery(_ imageURL: URL) async {
+    guard await interactor.getAppSettingsModel().canSaveMedia else {
+      return
+    }
+    
     interactor.saveVideoToGallery(imageURL) { [weak self] isSuccess in
       guard let self else { return }
       if isSuccess {
@@ -390,7 +398,8 @@ final class MessengerDialogScreenPresenter: ObservableObject {
   }
   
   func setUserIsTyping(text: String) async {
-    guard let toxPublicKey = stateContactModel.toxPublicKey else {
+    guard let toxPublicKey = stateContactModel.toxPublicKey,
+          await interactor.getAppSettingsModel().isTypingIndicatorEnabled else {
       return
     }
     
@@ -560,6 +569,7 @@ private extension MessengerDialogScreenPresenter {
     Task { [weak self] in
       guard let self else { return }
       await markMessageAsRead(contactModel: stateContactModel)
+      stateIsDownloadAvailability = await interactor.getAppSettingsModel().canSaveMedia
     }
     
     updateCenterBarButtonView(isHidden: isInitialAddressEntryState() || isRequestChatState())

@@ -13,6 +13,15 @@ public struct AppSettingsModel {
   /// Пароль для входа в приложение.
   public var appPassword: String?
   
+  /// Фейковый доступ, можно ввести пароль и откроется пустой чат
+  public var fakeAppPassword: String?
+  
+  /// Фейковый доступ включен
+  public var isFakeAccessEnabled: Bool
+  
+  /// Токен для отправки пушей
+  public var pushNotificationToken: String?
+  
   /// Указывает, включены ли уведомления.
   public var isNotificationsEnabled: Bool
   
@@ -22,28 +31,61 @@ public struct AppSettingsModel {
   /// Строка, содержащая сохранённое состояние Tox в формате Base64
   public var toxStateAsString: String?
   
-  /// Токен для отправки пушей
-  public var pushNotificationToken: String?
+  /// Премиум режим для доступа к дополнительным функциям
+  public var isPremiumEnabled: Bool
+  
+  /// Показывает, когда я набираю сообщение
+  public var isTypingIndicatorEnabled: Bool
+  
+  /// Разрешить собеседнику сохранять отправленные вами фото и видео
+  public var canSaveMedia: Bool
+  
+  /// Разрешить собеседнику хранить историю переписки
+  public var isChatHistoryStored: Bool
+  
+  /// Измените свой голос при аудиозвонках и в аудиозаписях.
+  public var isVoiceChangerEnabled: Bool
   
   /// Инициализирует новый экземпляр `AppSettingsModel`.
   /// - Parameters:
   ///   - appPassword: Строка, представляющая пароль для входа в приложение.
+  ///   - fakeAppPassword: Фейковый доступ, можно ввести пароль и откроется пустой чат
+  ///   - isFakeAccessEnabled: Фейковый доступ включен
+  ///   - pushNotificationToken: Токен для отправки пушей
   ///   - isNotificationsEnabled: Булево значение, указывающее, включены ли уведомления.
   ///   - myStatus: Мой статус онлайн.
   ///   - toxStateAsString: Строка, содержащая сохранённое состояние Tox в формате Base64
-  ///   - pushNotificationToken: Токен для отправки пушей
+  ///   - isPremiumEnabled: Премиум режим для доступа к дополнительным функциям
+  ///   - isTypingIndicatorEnabled: Показывает, когда я набираю сообщение
+  ///   - canSaveMedia: Разрешить собеседнику сохранять отправленные вами фото и видео
+  ///   - isChatHistoryStored: Разрешить собеседнику хранить историю переписки
+  ///   - isVoiceChangerEnabled: Измените свой голос при аудиозвонках и в аудиозаписях.
   public init(
     appPassword: String?,
+    fakeAppPassword: String?,
+    isFakeAccessEnabled: Bool,
+    pushNotificationToken: String?,
     isNotificationsEnabled: Bool,
     myStatus: AppSettingsModel.Status,
     toxStateAsString: String?,
-    pushNotificationToken: String?
+    isPremiumEnabled: Bool,
+    isTypingIndicatorEnabled: Bool,
+    canSaveMedia: Bool,
+    isChatHistoryStored: Bool,
+    isVoiceChangerEnabled: Bool
   ) {
     self.appPassword = appPassword
+    self.fakeAppPassword = fakeAppPassword
+    self.isFakeAccessEnabled = isFakeAccessEnabled
+    self.pushNotificationToken = pushNotificationToken
     self.isNotificationsEnabled = isNotificationsEnabled
     self.myStatus = myStatus
     self.toxStateAsString = toxStateAsString
-    self.pushNotificationToken = pushNotificationToken
+    self.isPremiumEnabled = isPremiumEnabled
+    self.isTypingIndicatorEnabled = isTypingIndicatorEnabled
+    self.canSaveMedia = canSaveMedia
+    self.isChatHistoryStored = isChatHistoryStored
+    self.isVoiceChangerEnabled = isVoiceChangerEnabled
   }
 }
 
@@ -81,10 +123,17 @@ extension AppSettingsModel {
   public static func setDefaultValues() -> Self {
     return .init(
       appPassword: nil,
+      fakeAppPassword: nil,
+      isFakeAccessEnabled: false,
+      pushNotificationToken: nil, 
       isNotificationsEnabled: false,
       myStatus: .inProgress,
-      toxStateAsString: nil,
-      pushNotificationToken: nil
+      toxStateAsString: nil, 
+      isPremiumEnabled: false, 
+      isTypingIndicatorEnabled: true,
+      canSaveMedia: true,
+      isChatHistoryStored: true, 
+      isVoiceChangerEnabled: true
     )
   }
 }

@@ -12,8 +12,9 @@ import SwiftUI
 final class PasscodeSettingsScreenPresenter: ObservableObject {
   
   // MARK: - View state
-  
-  @Published var stateWidgetCryptoModels: [SKUIKit.WidgetCryptoView.Model] = []
+
+  @Published var statePasswordWidgetModels: [WidgetCryptoView.Model] = []
+  @Published var stateSecurityWidgetModels: [WidgetCryptoView.Model] = []
   
   // MARK: - Internal properties
   
@@ -51,18 +52,16 @@ final class PasscodeSettingsScreenPresenter: ObservableObject {
 // MARK: - PasscodeSettingsScreenModuleInput
 
 extension PasscodeSettingsScreenPresenter: PasscodeSettingsScreenModuleInput {
+  @MainActor
   func updateScreen() async {
-    let isAppPassword = await interactor.isAppPassword()
-    stateWidgetCryptoModels = factory.createWidgetModels(
-      stateIsShowChangeAccessCode: isAppPassword
-    )
+    let appSettingsModel = await interactor.getAppSettingsModel()
+    statePasswordWidgetModels = factory.createPasswordWidgetModels(appSettingsModel)
+    stateSecurityWidgetModels = factory.createSecurityWidgetModels(appSettingsModel)
   }
   
   func successAuthorizationPasswordDisable() async {
     await interactor.resetPasscode()
-    stateWidgetCryptoModels = factory.createWidgetModels(
-      stateIsShowChangeAccessCode: false
-    )
+    await updateScreen()
   }
 }
 
@@ -73,23 +72,46 @@ extension PasscodeSettingsScreenPresenter: PasscodeSettingsScreenInteractorOutpu
 // MARK: - PasscodeSettingsScreenFactoryOutput
 
 extension PasscodeSettingsScreenPresenter: PasscodeSettingsScreenFactoryOutput {
-  @MainActor
-  func changeLockScreenState(_ isLockScreen: Bool) async {
-    if isLockScreen {
+  func openSetAccessCode(_ isNewAccessCode: Bool) async {
+    if isNewAccessCode {
       moduleOutput?.openNewAccessCode()
     } else {
       moduleOutput?.openAuthorizationPasswordDisable()
     }
     
-    let isLockScreen = await interactor.getIsLockScreen()
-    
-    stateWidgetCryptoModels = factory.createWidgetModels(
-      stateIsShowChangeAccessCode: isLockScreen
-    )
+    await updateScreen()
   }
   
   func openChangeAccessCode() {
     moduleOutput?.openChangeAccessCode()
+  }
+  
+  func openFakeChangeAccessCode() async {
+    // MARK: - 🟡
+  }
+  
+  func openFakeSetAccessCode(_ code: Bool) async {
+    // MARK: - 🟡
+  }
+  
+  func setTypingIndicator(_ value: Bool) async {
+    await interactor.setIsTypingIndicatorEnabled(value)
+    await updateScreen()
+  }
+  
+  func setCanSaveMedia(_ value: Bool) async {
+    await interactor.setCanSaveMedia(value)
+    await updateScreen()
+  }
+  
+  func setChatHistoryStored(_ value: Bool) async {
+    await interactor.setIsChatHistoryStored(value)
+    await updateScreen()
+  }
+  
+  func setVoiceChanger(_ value: Bool) async {
+    await interactor.setIsVoiceChangerEnabled(value)
+    await updateScreen()
   }
 }
 

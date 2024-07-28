@@ -14,17 +14,12 @@ final class SettingsScreenPresenter: ObservableObject {
   
   // MARK: - View state
   
-  /// Включена опция или нет
-  @Published var statePasscodeAndFaceIDValue = false
-  /// Включин или выключен Мессенджер
-  @Published var stateMessengerIsEnabled = false
-  /// Язык в приложении
-  @Published var stateCurrentLanguage: AppLanguageType = .english
-  
   /// Название приложения
   @Published var stateApplicationTitle = "oChat"
-  
-  @Published var stateSectionsModels: [WidgetCryptoView.Model] = []
+  /// Язык в приложении
+  @Published var stateCurrentLanguage: AppLanguageType = .english
+  @Published var stateTopWidgetModels: [WidgetCryptoView.Model] = []
+  @Published var stateBottomWidgetModels: [WidgetCryptoView.Model] = []
   
   // MARK: - Internal properties
   
@@ -48,16 +43,11 @@ final class SettingsScreenPresenter: ObservableObject {
   
   // MARK: - The lifecycle of a UIViewController
   
-  lazy var viewDidLoad: (() -> Void)? = { [weak self] in
-    guard let self else {
-      return
-    }
-    initialSetup()
-  }
+  lazy var viewDidLoad: (() -> Void)? = {}
   
   lazy var viewWillAppear: (() -> Void)? = { [weak self] in
     Task { [weak self] in
-      await self?.updateValue()
+      await self?.updateContent()
     }
   }
   
@@ -119,18 +109,13 @@ extension SettingsScreenPresenter: SceneViewModel {
 
 private extension SettingsScreenPresenter {
   @MainActor
-  func updateValue() async {
-    statePasscodeAndFaceIDValue = await interactor.getIsAccessCodeEnabled()
+  func updateContent() async {
     stateCurrentLanguage = interactor.getCurrentLanguage()
-  }
-  
-  func initialSetup() {
+    let appSettingsModel = await interactor.getMessengerModel().appSettingsModel
     let languageValue = factory.createLanguageValue(from: stateCurrentLanguage)
-    stateSectionsModels = factory.createSecuritySectionsModels(
-      passcodeAndFaceIDValue: statePasscodeAndFaceIDValue,
-      messengerIsEnabled: stateMessengerIsEnabled,
-      languageValue: languageValue
-    )
+    
+    stateTopWidgetModels = factory.createTopWidgetModels(appSettingsModel, languageValue: languageValue)
+    stateBottomWidgetModels = factory.createBottomWidgetModels(appSettingsModel)
   }
 }
 

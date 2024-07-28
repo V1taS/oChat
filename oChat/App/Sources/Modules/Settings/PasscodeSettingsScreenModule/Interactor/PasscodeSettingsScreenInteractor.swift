@@ -13,17 +13,39 @@ protocol PasscodeSettingsScreenInteractorOutput: AnyObject {}
 
 /// События которые отправляем от Presenter к Interactor
 protocol PasscodeSettingsScreenInteractorInput {
-  /// Запрос доступа к Face ID для аутентификации
-  /// - Parameter granted: Булево значение, указывающее, было ли предоставлено разрешение
-  func requestFaceID() async -> Bool
-  /// Возвращает статус экрана блокировки.
-  func getIsLockScreen() async -> Bool
   /// Сбрасывает текущий код доступа до значения по умолчанию.
   func resetPasscode() async
-  /// Возвращает начальные значения установлен ли пароль
-  /// - Parameters:
-  ///  - `isShowChangeAccessCode`: Булево значение, указывающее, показывать ли изменение кода доступа.
-  func isAppPassword() async -> Bool
+  
+  /// Получить модель со всеми настройками
+  func getAppSettingsModel() async -> AppSettingsModel
+  
+  /// Устанавливает поддельный пароль приложения.
+  /// - Parameter value: Новый поддельный пароль для приложения.
+  func setFakeAppPassword(_ value: String?) async
+  
+  /// Включает или отключает фальшивый доступ.
+  /// - Parameter value: Значение, указывающее, следует ли включить фальшивый доступ.
+  func setIsFakeAccessEnabled(_ value: Bool) async
+  
+  /// Включает или отключает премиум доступ.
+  /// - Parameter value: Значение, указывающее, следует ли включить премиум доступ.
+  func setIsPremiumEnabled(_ value: Bool) async
+  
+  /// Включает или отключает индикатор набора текста.
+  /// - Parameter value: Значение, указывающее, следует ли включить индикатор набора текста.
+  func setIsTypingIndicatorEnabled(_ value: Bool) async
+  
+  /// Включает или отключает возможность сохранения медиафайлов.
+  /// - Parameter value: Значение, указывающее, следует ли включить возможность сохранения медиафайлов.
+  func setCanSaveMedia(_ value: Bool) async
+  
+  /// Включает или отключает сохранение истории чата.
+  /// - Parameter value: Значение, указывающее, следует ли сохранять историю чата.
+  func setIsChatHistoryStored(_ value: Bool) async
+  
+  /// Включает или отключает изменение голоса.
+  /// - Parameter value: Значение, указывающее, следует ли включить изменение голоса.
+  func setIsVoiceChangerEnabled(_ value: Bool) async
 }
 
 /// Интерактор
@@ -53,21 +75,40 @@ final class PasscodeSettingsScreenInteractor {
 // MARK: - PasscodeSettingsScreenInteractorInput
 
 extension PasscodeSettingsScreenInteractor: PasscodeSettingsScreenInteractorInput {
-  func isAppPassword() async -> Bool {
-    let appSettingsModel = await modelHandlerService.getAppSettingsModel()
-    return appSettingsModel.appPassword != nil
+  func setFakeAppPassword(_ value: String?) async {
+    await appSettingsManager.setFakeAppPassword(value)
+  }
+  
+  func setIsFakeAccessEnabled(_ value: Bool) async {
+    await appSettingsManager.setIsFakeAccessEnabled(value)
+  }
+  
+  func setIsPremiumEnabled(_ value: Bool) async {
+    await appSettingsManager.setIsPremiumEnabled(value)
+  }
+  
+  func setIsTypingIndicatorEnabled(_ value: Bool) async {
+    await appSettingsManager.setIsTypingIndicatorEnabled(value)
+  }
+  
+  func setCanSaveMedia(_ value: Bool) async {
+    await appSettingsManager.setCanSaveMedia(value)
+  }
+  
+  func setIsChatHistoryStored(_ value: Bool) async {
+    await appSettingsManager.setIsChatHistoryStored(value)
+  }
+  
+  func setIsVoiceChangerEnabled(_ value: Bool) async {
+    await appSettingsManager.setIsVoiceChangerEnabled(value)
   }
   
   func resetPasscode() async {
     await appSettingsManager.setAppPassword(nil)
   }
   
-  func getIsLockScreen() async -> Bool {
-    await modelHandlerService.getAppSettingsModel().appPassword != nil
-  }
-  
-  func requestFaceID() async -> Bool {
-    await permissionService.requestFaceID()
+  func getAppSettingsModel() async -> AppSettingsModel {
+    await modelHandlerService.getAppSettingsModel()
   }
 }
 

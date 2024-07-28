@@ -16,6 +16,13 @@ public final class ApplicationServicesStub: IApplicationServices, IDataManagerSe
                                             ICloudKitService, IAppSettingsManager, IDataManagementService,
                                             IAccessAndSecurityManagementService, IUserInterfaceAndExperienceService,
                                             IDeepLinkService, IPushNotificationService, IZipArchiveService {
+  public func setFakeAppPassword(_ value: String?) async {}
+  public func setIsFakeAccessEnabled(_ value: Bool) async {}
+  public func setIsPremiumEnabled(_ value: Bool) async {}
+  public func setIsTypingIndicatorEnabled(_ value: Bool) async {}
+  public func setCanSaveMedia(_ value: Bool) async {}
+  public func setIsChatHistoryStored(_ value: Bool) async {}
+  public func setIsVoiceChangerEnabled(_ value: Bool) async {}
   public func setIsEnabledFaceID(_ value: Bool) async {}
   public func setAppPassword(_ value: String?) async {}
   public func setIsEnabledNotifications(_ value: Bool) async {}
@@ -198,6 +205,13 @@ public final class ApplicationServicesStub: IApplicationServices, IDataManagerSe
 
 public final class MessengerServiceStub: IMessengerModelSettingsManager, IMessengerModelHandlerService,
                                          IMessagesService, IMessengerService, IP2PChatManager, IAppSettingsManager {
+  public func setFakeAppPassword(_ value: String?) async {}
+  public func setIsFakeAccessEnabled(_ value: Bool) async {}
+  public func setIsPremiumEnabled(_ value: Bool) async {}
+  public func setIsTypingIndicatorEnabled(_ value: Bool) async {}
+  public func setCanSaveMedia(_ value: Bool) async {}
+  public func setIsChatHistoryStored(_ value: Bool) async {}
+  public func setIsVoiceChangerEnabled(_ value: Bool) async {}
   public func setToxStateAsString(_ toxStateAsString: String?) async {}
   public func setStatus(_ model: ContactModel, _ status: ContactModel.Status) async {}
   public func setNameContact(_ model: ContactModel, _ name: String) async -> ContactModel? { nil }
