@@ -36,6 +36,7 @@ struct BanScreenshotConfigurator: Configurator {
 
 private extension BanScreenshotConfigurator {
   func makeBanScreenshot(window: UIWindow) {
+    // TODO: костыль, который стреляет в ногу при выборе приложения из списка неактивных
     Timer.scheduledTimer(withTimeInterval: 2, repeats: false) { _ in
       let field = UITextField()
       let view = UIView(frame: CGRect(x: 0, y: 0, width: field.frame.width, height: field.frame.height))

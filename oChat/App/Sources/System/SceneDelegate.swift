@@ -19,7 +19,7 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
   var window: UIWindow?
   
   // MARK: - Private properties
-  
+  private let visualEffectView = UIVisualEffectView(effect: UIBlurEffect(style: .regular))
   private let services: IApplicationServices = ApplicationServices()
   private var rootCoordinator: RootCoordinator?
   
@@ -60,6 +60,23 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         await services.userInterfaceAndExperienceService.deepLinkService.saveDeepLinkURL(url)
       }
     }
+  }
+
+  func sceneWillEnterForeground(_ scene: UIScene) {
+    visualEffectView.removeFromSuperview()
+  }
+
+  func sceneWillResignActive(_ scene: UIScene) {
+    guard let window else { return }
+
+    if !visualEffectView.isDescendant(of: window) {
+      visualEffectView.frame = window.bounds
+      window.addSubview(visualEffectView)
+    }
+  }
+
+  func sceneDidBecomeActive(_ scene: UIScene) {
+    visualEffectView.removeFromSuperview()
   }
 }
 
