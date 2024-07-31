@@ -176,7 +176,7 @@ private extension MessengerDialogScreenView {
       },
       inputViewBuilder: createInputViewBuilder()
     )
-    .setAvailableInput(.full)
+    .setAvailableInput(presenter.stateIsPremiumEnabled ? .full : .textOnly)
     .showMessageTimeView(false)
     .showDateHeaders(showDateHeaders: false)
     .setMediaPickerSelectionParameters(

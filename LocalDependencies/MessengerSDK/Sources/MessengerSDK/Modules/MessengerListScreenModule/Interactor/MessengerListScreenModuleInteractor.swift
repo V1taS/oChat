@@ -248,6 +248,9 @@ protocol MessengerListScreenModuleInteractorInput {
   
   /// Получить кадр первой секунлы из видео
   func getFirstFrame(from url: URL) -> Data?
+  
+  /// Получить модель со всеми настройками
+  func getAppSettingsModel() async -> AppSettingsModel
 }
 
 /// Интерактор
@@ -294,6 +297,10 @@ final class MessengerListScreenModuleInteractor {
 // MARK: - MessengerListScreenModuleInteractorInput
 
 extension MessengerListScreenModuleInteractor: MessengerListScreenModuleInteractorInput {
+  func getAppSettingsModel() async -> AppSettingsModel {
+    await modelHandlerService.getAppSettingsModel()
+  }
+  
   func getFileNameWithoutExtension(from url: URL) -> String {
     dataManagementService.getFileNameWithoutExtension(from: url)
   }

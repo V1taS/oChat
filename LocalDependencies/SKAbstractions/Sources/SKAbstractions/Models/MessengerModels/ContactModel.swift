@@ -43,6 +43,12 @@ public struct ContactModel {
   /// Пользователь печатает в данный момент
   public var isTyping: Bool
   
+  /// Разрешить собеседнику сохранять отправленные вами фото и видео
+  public var canSaveMedia: Bool
+  
+  /// Разрешить собеседнику хранить историю переписки
+  public var isChatHistoryStored: Bool
+  
   /// Инициализатор для создания нового контакта.
   /// - Parameters:
   ///   - name: Имя контакта.
@@ -55,6 +61,8 @@ public struct ContactModel {
   ///   - pushNotificationToken: Токен для отправки пушей
   ///   - isNewMessagesAvailable: Доступны новые сообщения
   ///   - isTyping: Пользователь печатает в данный момент
+  ///   - canSaveMedia: Разрешить собеседнику сохранять отправленные вами фото и видео
+  ///   - isChatHistoryStored: Разрешить собеседнику хранить историю переписки
   public init(
     name: String?,
     toxAddress: String?,
@@ -65,7 +73,9 @@ public struct ContactModel {
     toxPublicKey: String?,
     pushNotificationToken: String?,
     isNewMessagesAvailable: Bool,
-    isTyping: Bool
+    isTyping: Bool,
+    canSaveMedia: Bool,
+    isChatHistoryStored: Bool
   ) {
     self.id = UUID().uuidString
     self.name = name
@@ -78,6 +88,8 @@ public struct ContactModel {
     self.pushNotificationToken = pushNotificationToken
     self.isNewMessagesAvailable = isNewMessagesAvailable
     self.isTyping = isTyping
+    self.canSaveMedia = canSaveMedia
+    self.isChatHistoryStored = isChatHistoryStored
   }
 }
 
@@ -95,7 +107,9 @@ extension ContactModel {
       toxPublicKey: nil, 
       pushNotificationToken: nil,
       isNewMessagesAvailable: false,
-      isTyping: false
+      isTyping: false,
+      canSaveMedia: false,
+      isChatHistoryStored: false
     )
   }
 }

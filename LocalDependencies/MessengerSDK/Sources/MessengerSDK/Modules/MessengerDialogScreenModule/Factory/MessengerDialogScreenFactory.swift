@@ -244,7 +244,9 @@ extension MessengerDialogScreenFactory: MessengerDialogScreenFactoryInput {
       toxPublicKey: nil,
       pushNotificationToken: nil,
       isNewMessagesAvailable: false,
-      isTyping: false
+      isTyping: false,
+      canSaveMedia: false,
+      isChatHistoryStored: false
     )
   }
   

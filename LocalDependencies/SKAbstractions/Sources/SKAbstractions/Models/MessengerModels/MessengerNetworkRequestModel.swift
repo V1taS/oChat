@@ -34,6 +34,12 @@ public struct MessengerNetworkRequestModel {
   /// Токен для отправки пушей
   public var senderPushNotificationToken: String?
   
+  /// Разрешить собеседнику сохранять отправленные вами фото и видео
+  public var canSaveMedia: Bool
+  
+  /// Разрешить собеседнику хранить историю переписки
+  public var isChatHistoryStored: Bool
+  
   /// Инициализирует новый экземпляр сетевого запроса для мессенджера с заданными параметрами.
   /// - Parameters:
   ///   - messageText: Текст сообщения.
@@ -44,6 +50,8 @@ public struct MessengerNetworkRequestModel {
   ///   - senderPublicKey: Публичный ключ отправителя.
   ///   - senderToxPublicKey: Публичный ключ для шифрования сообщений.
   ///   - senderPushNotificationToken: Токен для отправки пушей
+  ///   - canSaveMedia: Разрешить собеседнику сохранять отправленные вами фото и видео
+  ///   - isChatHistoryStored: Разрешить собеседнику хранить историю переписки
   public init(
     messageText: String?,
     messageID: String?,
@@ -52,7 +60,9 @@ public struct MessengerNetworkRequestModel {
     senderLocalMeshAddress: String?,
     senderPublicKey: String?,
     senderToxPublicKey: String?,
-    senderPushNotificationToken: String?
+    senderPushNotificationToken: String?,
+    canSaveMedia: Bool,
+    isChatHistoryStored: Bool
   ) {
     self.messageText = messageText
     self.messageID = messageID
@@ -62,6 +72,8 @@ public struct MessengerNetworkRequestModel {
     self.senderPublicKey = senderPublicKey
     self.senderToxPublicKey = senderToxPublicKey
     self.senderPushNotificationToken = senderPushNotificationToken
+    self.canSaveMedia = canSaveMedia
+    self.isChatHistoryStored = isChatHistoryStored
   }
 }
 
@@ -78,7 +90,9 @@ extension MessengerNetworkRequestModel {
       senderLocalMeshAddress: senderLocalMeshAddress,
       senderPublicKey: senderPublicKey,
       senderToxPublicKey: senderToxPublicKey, 
-      senderPushNotificationToken: senderPushNotificationToken
+      senderPushNotificationToken: senderPushNotificationToken,
+      canSaveMedia: canSaveMedia,
+      isChatHistoryStored: isChatHistoryStored
     )
   }
 }

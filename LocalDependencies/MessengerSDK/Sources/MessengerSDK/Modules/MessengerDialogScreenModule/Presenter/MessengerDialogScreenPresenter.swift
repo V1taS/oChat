@@ -39,7 +39,10 @@ final class MessengerDialogScreenPresenter: ObservableObject {
   @Published var stateInputMessengeText = ""
   @Published var stateInputMessengeTextMaxLength = 1_000
   @Published var stateShowMessengeMaxCount = 100
+  
   @Published var stateIsDownloadAvailability = false
+  @Published var stateIsPremiumEnabled = false
+  @Published var stateIsChatHistoryStored = false
   
   // MARK: - Internal properties
   
@@ -77,6 +80,8 @@ final class MessengerDialogScreenPresenter: ObservableObject {
       models: contact.messenges,
       contactModel: contact
     )
+    stateIsDownloadAvailability = contact.canSaveMedia
+    stateIsChatHistoryStored = contact.isChatHistoryStored
   }
   
   // MARK: - The lifecycle of a UIViewController
@@ -122,7 +127,7 @@ final class MessengerDialogScreenPresenter: ObservableObject {
   }
   
   func saveImageToGallery(_ imageURL: URL) async {
-    guard await interactor.getAppSettingsModel().canSaveMedia else {
+    guard await stateContactModel.canSaveMedia else {
       return
     }
     
@@ -145,7 +150,7 @@ final class MessengerDialogScreenPresenter: ObservableObject {
   }
   
   func saveVideoToGallery(_ imageURL: URL) async {
-    guard await interactor.getAppSettingsModel().canSaveMedia else {
+    guard await stateContactModel.canSaveMedia else {
       return
     }
     
@@ -512,6 +517,8 @@ extension MessengerDialogScreenPresenter: MessengerDialogScreenModuleInput {
       }
       
       self.stateContactModel = contactModel
+      stateIsDownloadAvailability = contactModel.canSaveMedia
+      stateIsChatHistoryStored = contactModel.isChatHistoryStored
       
       stateMessengeModels = factory.createMessageModels(
         models: contactModel.messenges,
@@ -569,7 +576,7 @@ private extension MessengerDialogScreenPresenter {
     Task { [weak self] in
       guard let self else { return }
       await markMessageAsRead(contactModel: stateContactModel)
-      stateIsDownloadAvailability = await interactor.getAppSettingsModel().canSaveMedia
+      stateIsPremiumEnabled = await interactor.getAppSettingsModel().isPremiumEnabled
     }
     
     updateCenterBarButtonView(isHidden: isInitialAddressEntryState() || isRequestChatState())

@@ -472,6 +472,7 @@ private extension MessengerListScreenModulePresenter {
       )
       return nil
     }
+    let appSettingsModel = await interactor.getAppSettingsModel()
     
     let requestModel = MessengerNetworkRequestModel(
       messageText: message,
@@ -481,7 +482,9 @@ private extension MessengerListScreenModulePresenter {
       senderLocalMeshAddress: senderLocalMeshAddress ?? "",
       senderPublicKey: senderPublicKey,
       senderToxPublicKey: senderToxPublicKey,
-      senderPushNotificationToken: senderPushNotificationToken
+      senderPushNotificationToken: senderPushNotificationToken,
+      canSaveMedia: appSettingsModel.canSaveMedia,
+      isChatHistoryStored: appSettingsModel.isChatHistoryStored
     )
     return (senderAddress, requestModel)
   }
@@ -946,7 +949,9 @@ private extension MessengerListScreenModulePresenter {
           toxPublicKey: nil,
           pushNotificationToken: pushNotificationToken,
           isNewMessagesAvailable: true,
-          isTyping: false
+          isTyping: false,
+          canSaveMedia: messageModel.canSaveMedia,
+          isChatHistoryStored: messageModel.isChatHistoryStored
         )
         await interactor.saveContactModel(contact)
         await updateListContacts()
@@ -1014,7 +1019,9 @@ private extension MessengerListScreenModulePresenter {
         toxPublicKey: toxPublicKey,
         pushNotificationToken: pushNotificationToken,
         isNewMessagesAvailable: true,
-        isTyping: false
+        isTyping: false,
+        canSaveMedia: messageModel.canSaveMedia,
+        isChatHistoryStored: messageModel.isChatHistoryStored
       )
       await interactor.saveContactModel(newContact)
       await updateListContacts()
@@ -1074,7 +1081,9 @@ private extension MessengerListScreenModulePresenter {
           toxPublicKey: nil,
           pushNotificationToken: pushNotificationToken,
           isNewMessagesAvailable: true,
-          isTyping: false
+          isTyping: false,
+          canSaveMedia: messageModel.canSaveMedia,
+          isChatHistoryStored: messageModel.isChatHistoryStored
         )
         await interactor.saveContactModel(contact)
         await updateListContacts()
