@@ -10,8 +10,6 @@ import Foundation
 import SKAbstractions
 import SKStyle
 import UIKit
-import AuthenticationSDK
-import MessengerSDK
 
 final class RootCoordinator: Coordinator<Void, Void> {
   

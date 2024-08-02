@@ -47,7 +47,7 @@ opt_in_rules:
 
 file_length:
   warning: 800
-  error: 1000
+  error: 1300
 
 line_length:
   error: 160

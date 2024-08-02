@@ -8,8 +8,6 @@
 
 import SKAbstractions
 import UIKit
-import AuthenticationSDK
-import MessengerSDK
 
 final class SettingsScreenFlowCoordinator: Coordinator<Void, SettingsScreenFinishFlowType> {
   

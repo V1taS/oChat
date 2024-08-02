@@ -11,8 +11,6 @@ import PackageDescription
 let package = Package(
   name: "Package",
   dependencies: [
-    .package(path: "../../../LocalDependencies/MessengerSDK"),
-    .package(path: "../../../LocalDependencies/AuthenticationSDK"),
     .package(path: "../../../LocalDependencies/SKStoriesWidget"),
     .package(path: "../../../LocalDependencies/SKUIKit"),
     .package(path: "../../../LocalDependencies/SKServices"),

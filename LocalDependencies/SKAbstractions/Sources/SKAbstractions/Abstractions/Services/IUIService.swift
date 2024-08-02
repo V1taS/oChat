@@ -53,12 +53,14 @@ public protocol IUIService {
   /// - Parameters:
   ///   - imageData: Данные изображения в формате `Data?`. Если передается `nil`, изображение не будет сохранено.
   ///   - return: `Bool`, указывающий успешно ли было сохранение изображения.
+  @discardableResult
   func saveImageToGallery(_ imageData: Data?) async -> Bool
   
   /// Сохраняет видео в галерее устройства.
   /// - Parameters:
   ///   - video: Ссылка на видео
   ///   - return: `Bool`, указывающий успешно ли было сохранение видео.
+  @discardableResult
   func saveVideoToGallery(_ video: URL?) async -> Bool
   
   /// Получение изображения по URL.
