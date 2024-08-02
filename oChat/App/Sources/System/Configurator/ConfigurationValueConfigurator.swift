@@ -37,6 +37,7 @@ struct ConfigurationValueConfigurator: Configurator {
     getPushNotificationProdURL()
     getPushNotificationTeamID()
     getPushNotificationTestURL()
+    getSupportOChatMail()
   }
 }
 
@@ -73,6 +74,12 @@ private extension ConfigurationValueConfigurator {
     }
   }
   
+  func getSupportOChatMail() {
+    getConfigurationValue(forKey: Constants.supportOChatMail) { value in
+      Secrets.supportOChatMail = value
+    }
+  }
+  
   func getConfigurationValue(forKey key: String, completion: @escaping (String) -> Void) {
     if let value = secureDataManagerService.getString(for: key) {
       completion(value)
@@ -96,4 +103,5 @@ private enum Constants {
   static let pushNotificationProdURL = "PushNotificationProdURL"
   static let pushNotificationTeamID = "PushNotificationTeamID"
   static let ushNotificationTestURL = "PushNotificationTestURL"
+  static let supportOChatMail = "SupportOChatMail"
 }

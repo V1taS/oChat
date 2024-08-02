@@ -86,6 +86,7 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
   
   func sceneDidBecomeActive(_ scene: UIScene) {
     brandingStubView?.removeFromSuperview()
+    ConfigurationValueConfigurator(services: services).configure()
   }
 }
 
@@ -96,7 +97,6 @@ private extension SceneDelegate {
     return [
       FirstLaunchConfigurator(services: services),
       AppearanceConfigurator(services: services),
-      ConfigurationValueConfigurator(services: services),
       BanScreenshotConfigurator(window: window)
     ]
   }

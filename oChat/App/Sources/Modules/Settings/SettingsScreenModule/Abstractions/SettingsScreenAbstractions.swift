@@ -11,14 +11,21 @@ import SwiftUI
 public protocol SettingsScreenModuleOutput: AnyObject {
   /// Открыть экран настроек по безопасности
   func openPasscodeAndFaceIDSection()
+  
   /// Открыть экран настроек уведомлений
   func openNotificationsSection()
+  
   /// Открыть экран настроек внешнего вида
   func openAppearanceSection()
+  
   /// Открыть экран настроек языка
   func openLanguageSection()
+  
   /// Открыть секцию с профилем
   func openMyProfileSection()
+  
+  /// Пользователь выбрал обратную связь
+  func userSelectFeedBack()
 }
 
 /// События которые отправляем из `Coordinator` в `SettingsScreenModule`

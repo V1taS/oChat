@@ -14,14 +14,21 @@ import SKAbstractions
 protocol SettingsScreenFactoryOutput: AnyObject {
   /// Открыть экран настроек по безопасности
   func openPasscodeAndFaceIDSection()
+  
   /// Открыть экран настроек уведомлений
   func openNotificationsSection()
+  
   /// Открыть экран настроек внешнего вида
   func openAppearanceSection()
+  
   /// Открыть экран настроек языка
   func openLanguageSection()
+  
   /// Открыть секцию с профилем
   func openMyProfileSection()
+  
+  /// Пользователь выбрал обратную связь
+  func userSelectFeedBack()
 }
 
 /// Cобытия которые отправляем от Presenter к Factory
@@ -102,7 +109,7 @@ extension SettingsScreenFactory: SettingsScreenFactoryInput {
       
       let notificationsModel = createWidgetWithChevron(
         image: Image(systemName: "bell"),
-        backgroundColor: #colorLiteral(red: 0.5843137503, green: 0.8235294223, blue: 0.4196078479, alpha: 1),
+        backgroundColor: #colorLiteral(red: 0.6272388697, green: 0.4763683677, blue: 0.9005429149, alpha: 1),
         title: OChatStrings.SettingsScreenLocalization
           .State.Notifications.title,
         action: { [weak self] in
@@ -113,7 +120,7 @@ extension SettingsScreenFactory: SettingsScreenFactoryInput {
       
       let languageModel = createWidgetWithChevron(
         image: Image(systemName: "globe"),
-        backgroundColor: #colorLiteral(red: 0.4229286313, green: 0.5245543122, blue: 0.6798206568, alpha: 1),
+        backgroundColor: #colorLiteral(red: 0.02118782885, green: 0.6728788018, blue: 0.6930519938, alpha: 1),
         title: OChatStrings.SettingsScreenLocalization
           .State.Language.title,
         additionRightTitle: languageValue,
@@ -134,6 +141,16 @@ extension SettingsScreenFactory: SettingsScreenFactoryInput {
       }
     )
     models.append(appearanceModel)
+    
+    let feedbackModel = createWidgetWithChevron(
+      image: Image(systemName: "pencil"),
+      backgroundColor: #colorLiteral(red: 0.6352941176, green: 0.5176470588, blue: 0.368627451, alpha: 1),
+      title: "Feedback",
+      action: { [weak self] in
+        self?.output?.userSelectFeedBack()
+      }
+    )
+    models.append(feedbackModel)
     return models
   }
   
@@ -144,7 +161,7 @@ extension SettingsScreenFactory: SettingsScreenFactoryInput {
     
     let profileModel = createWidgetWithChevron(
       image: Image(systemName: "trash"),
-      backgroundColor: #colorLiteral(red: 0.9254902005, green: 0.2352941185, blue: 0.1019607857, alpha: 1),
+      backgroundColor: #colorLiteral(red: 0.9443466663, green: 0.3974885345, blue: 0.4782627821, alpha: 1),
       title: "Удалить и выйти",
       additionRightTitle: "",
       action: { [weak self] in
@@ -182,7 +199,6 @@ private extension SettingsScreenFactory {
                 image
                   .resizable()
                   .aspectRatio(contentMode: .fit)
-                  .fontWeight(.bold)
                   .frame(height: .s5)
                   .foregroundColor(SKStyleAsset.constantGhost.swiftUIColor)
                   .allowsHitTesting(false)

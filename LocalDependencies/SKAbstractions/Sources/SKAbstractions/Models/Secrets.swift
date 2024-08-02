@@ -13,4 +13,5 @@ public enum Secrets {
   public static var pushNotificationProdURL = ""
   public static var pushNotificationTeamID = ""
   public static var ushNotificationTestURL = ""
+  public static var supportOChatMail = ""
 }

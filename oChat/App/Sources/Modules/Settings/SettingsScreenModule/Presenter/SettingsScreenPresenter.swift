@@ -72,6 +72,10 @@ extension SettingsScreenPresenter: SettingsScreenInteractorOutput {}
 // MARK: - SettingsScreenFactoryOutput
 
 extension SettingsScreenPresenter: SettingsScreenFactoryOutput {
+  func userSelectFeedBack() {
+    moduleOutput?.userSelectFeedBack()
+  }
+  
   func openMyProfileSection() {
     moduleOutput?.openMyProfileSection()
   }

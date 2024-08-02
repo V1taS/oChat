@@ -27,6 +27,7 @@ final class SettingsScreenFlowCoordinator: Coordinator<Void, SettingsScreenFinis
   private var passcodeSettingsScreenModule: PasscodeSettingsScreenModule?
   private var authenticationFlowCoordinator: AuthenticationFlowCoordinator?
   private var messengerProfileModule: MessengerProfileModule?
+  private var mailComposeModule: MailComposeModule?
   
   // MARK: - Initialization
   
@@ -46,8 +47,12 @@ final class SettingsScreenFlowCoordinator: Coordinator<Void, SettingsScreenFinis
 // MARK: - MainScreenModuleOutput
 
 extension SettingsScreenFlowCoordinator: SettingsScreenModuleOutput {
+  func userSelectFeedBack() {
+    openMailModule()
+  }
+  
   func openMyProfileSection() {
-    openmessengerProfileModule()
+    openMessengerProfileModule()
   }
   
   func openPasscodeAndFaceIDSection() {
@@ -217,7 +222,7 @@ private extension SettingsScreenFlowCoordinator {
     authenticationFlowCoordinator.start(parameter: state)
   }
   
-  func openmessengerProfileModule() {
+  func openMessengerProfileModule() {
     var messengerProfileModule = MessengerProfileModuleAssembly().createModule(services: services)
     self.messengerProfileModule = messengerProfileModule
     messengerProfileModule.input.moduleOutput = self
@@ -227,6 +232,25 @@ private extension SettingsScreenFlowCoordinator {
       messengerProfileModule.viewController,
       animated: true
     )
+  }
+  
+  func openMailModule() {
+    let mailComposeModule = MailComposeModule(services)
+    self.mailComposeModule = mailComposeModule
+    
+    guard mailComposeModule.canSendMail() else {
+      services.userInterfaceAndExperienceService
+        .notificationService.showNotification(
+          .negative(
+            title: "Почтовый клиент не найден"
+          )
+        )
+      return
+    }
+    
+    mailComposeModule.start(completion: { [weak self] in
+      self?.mailComposeModule = nil
+    })
   }
 }
 

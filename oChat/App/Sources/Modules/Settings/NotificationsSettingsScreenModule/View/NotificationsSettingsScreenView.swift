@@ -45,7 +45,7 @@ struct NotificationsSettingsScreenView: View {
     }
     .background(Color.clear)
     .listStyle(PlainListStyle())
-    .padding(.vertical, .s4)
+    .listRowSeparator(.hidden)
   }
 }
 

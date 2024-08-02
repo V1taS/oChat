@@ -54,7 +54,7 @@ struct SettingsScreenView: View {
         ForEach(Array(presenter.stateBottomWidgetModels.enumerated()), id: \.element.id) { index, model in
           VStack(spacing: .zero) {
             WidgetCryptoView(model)
-              .if(index == 0) { view in
+              .if(index == .zero) { view in
                 view
                   .clipShape(RoundedCornerShape(corners: [.topLeft, .topRight], radius: .s4))
               }
@@ -69,7 +69,6 @@ struct SettingsScreenView: View {
             }
             if index == presenter.stateBottomWidgetModels.count - 1 {
               applicationVersionView()
-                .padding(.top, .s3)
             }
           }
           .listRowBackground(Color.clear)
@@ -80,7 +79,7 @@ struct SettingsScreenView: View {
     }
     .background(Color.clear)
     .listStyle(PlainListStyle())
-    .padding(.vertical, .s4)
+    .scrollIndicators(.hidden)
   }
 }
 
@@ -115,7 +114,7 @@ private extension SettingsScreenView {
       }
       .offset(y: -.s3)
     }
-    .padding(.top, .s10)
+    .padding(.top, .s4)
   }
 }
 
