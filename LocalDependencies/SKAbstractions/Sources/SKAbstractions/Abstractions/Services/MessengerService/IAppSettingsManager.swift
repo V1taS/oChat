@@ -28,9 +28,9 @@ public protocol IAppSettingsManager {
   /// - Parameter value: Новый поддельный пароль для приложения.
   func setFakeAppPassword(_ value: String?) async
   
-  /// Включает или отключает фальшивый доступ.
-  /// - Parameter value: Значение, указывающее, следует ли включить фальшивый доступ.
-  func setIsFakeAccessEnabled(_ value: Bool) async
+  /// Установить доступ в приложение
+  /// - Parameter accessType: Тип доступа
+  func setAccessType(_ accessType: AppSettingsModel.AccessType) async
   
   /// Включает или отключает премиум доступ.
   /// - Parameter value: Значение, указывающее, следует ли включить премиум доступ.

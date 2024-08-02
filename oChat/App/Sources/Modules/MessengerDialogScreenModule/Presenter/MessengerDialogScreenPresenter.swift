@@ -409,7 +409,8 @@ final class MessengerDialogScreenPresenter: ObservableObject {
   
   func setUserIsTyping(text: String) async {
     guard let toxPublicKey = stateContactModel.toxPublicKey,
-          await interactor.getAppSettingsModel().isTypingIndicatorEnabled else {
+          let getAppSettingsModel = await moduleOutput?.getAppSettingsModel(),
+          getAppSettingsModel.isTypingIndicatorEnabled else {
       return
     }
     
@@ -581,9 +582,12 @@ private extension MessengerDialogScreenPresenter {
     )
     
     Task { [weak self] in
-      guard let self else { return }
+      guard let self,
+            let getAppSettingsModel = await moduleOutput?.getAppSettingsModel() else {
+        return
+      }
       await markMessageAsRead(contactModel: stateContactModel)
-      stateIsPremiumEnabled = await interactor.getAppSettingsModel().isPremiumEnabled
+      stateIsPremiumEnabled = getAppSettingsModel.isPremiumEnabled
     }
     
     updateCenterBarButtonView(isHidden: isInitialAddressEntryState() || isRequestChatState())

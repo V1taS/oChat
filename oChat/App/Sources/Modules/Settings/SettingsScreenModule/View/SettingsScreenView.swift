@@ -104,7 +104,7 @@ private extension SettingsScreenView {
       .padding(.s4)
       
       VStack(spacing: .s1) {
-        Text(presenter.stateApplicationTitle)
+        Text(OChatStrings.SettingsScreenLocalization.Application.title)
           .foregroundColor(SKStyleAsset.constantSlate.swiftUIColor.opacity(0.3))
           .font(.fancy.text.regularMedium)
         

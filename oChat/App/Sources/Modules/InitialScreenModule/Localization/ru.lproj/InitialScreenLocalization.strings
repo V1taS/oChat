@@ -18,4 +18,5 @@
 "Stories.Subtitle.Third" = "Наша технология Peer-to-Peer (P2P) обеспечивает прямое общение, минуя центральные серверы, для полной свободы и скорости";
 "Stories.Subtitle.Fourth" = "Мощное многослойное шифрование превращает ваши данные в нечитаемый формат, защищая их от несанкционированного доступа";
 "Stories.Subtitle.Fifth" = "";
-"Stories.Button.title" = "Продолжить";
+"Stories.Button.Start.Title" = "Начать чат";
+"Stories.Button.Demo.Title" = "Демо";

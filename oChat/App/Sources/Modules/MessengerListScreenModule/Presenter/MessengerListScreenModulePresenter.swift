@@ -27,7 +27,9 @@ final class MessengerListScreenModulePresenter: ObservableObject {
   
   private let interactor: MessengerListScreenModuleInteractorInput
   private let factory: MessengerListScreenModuleFactoryInput
-  private var barButtonView: SKBarButtonView?
+  private var centerBarButtonView: SKBarButtonView?
+  private var rightBarLockButton: SKBarButtonItem?
+  private var rightBarWriteButton: SKBarButtonItem?
   private let impactFeedback = UIImpactFeedbackGenerator(style: .soft)
   
   // MARK: - Initialization
@@ -50,12 +52,19 @@ final class MessengerListScreenModulePresenter: ObservableObject {
   // MARK: - The lifecycle of a UIViewController
   
   lazy var viewDidLoad: (() -> Void)? = { [weak self] in
-    guard let self else {
-      return
-    }
+    guard let self else { return }
     
     setupSKBarButtonView()
     initialSetup()
+  }
+  
+  lazy var viewWillAppear: (() -> Void)? = { [weak self] in
+    guard let self else { return }
+    
+    Task { [weak self] in
+      guard let self else { return }
+      await checkAccessDemo()
+    }
   }
   
   // MARK: - Internal func
@@ -86,20 +95,6 @@ final class MessengerListScreenModulePresenter: ObservableObject {
     }
   }
   
-  func removeContact(index: Int) {
-    Timer.scheduledTimer(withTimeInterval: 0.3, repeats: false) { _ in
-      Task { [weak self] in
-        guard let self else { return }
-        stateWidgetModels.remove(at: index)
-        let contactModels = await interactor.getContactModels()
-        let contactModel = contactModels[index]
-        await removeContactModels(contactModel)
-        moduleOutput?.dataModelHasBeenUpdated()
-        await updateListContacts()
-      }
-    }
-  }
-  
   func requestNotification() {
     Task { [weak self] in
       guard let self else { return }
@@ -111,6 +106,19 @@ final class MessengerListScreenModulePresenter: ObservableObject {
 // MARK: - MessengerListScreenModuleModuleInput
 
 extension MessengerListScreenModulePresenter: MessengerListScreenModuleModuleInput {
+  func getAppSettingsModel() async -> SKAbstractions.AppSettingsModel {
+    await interactor.getAppSettingsModel()
+  }
+  
+  func removeContact(index: Int) async {
+    stateWidgetModels.remove(at: index)
+    let contactModels = await interactor.getContactModels()
+    let contactModel = contactModels[index]
+    await removeContactModels(contactModel)
+    moduleOutput?.dataModelHasBeenUpdated()
+    await updateListContacts()
+  }
+  
   func sendPushNotification(contact: ContactModel) async {
     await interactor.sendPushNotification(contact: contact)
   }
@@ -244,7 +252,7 @@ extension MessengerListScreenModulePresenter: MessengerListScreenModuleModuleInp
   }
   
   func removeMessage(id: String, contact: ContactModel) async {
-    var updatedContact = factory.removeMessageToContact(id: id, contactModel: contact)
+    let updatedContact = factory.removeMessageToContact(id: id, contactModel: contact)
     await interactor.saveContactModel(updatedContact)
     moduleOutput?.dataModelHasBeenUpdated()
     await updateListContacts()
@@ -290,14 +298,34 @@ extension MessengerListScreenModulePresenter: SceneViewModel {
     .always
   }
   
-  var rightBarButtonItem: SKBarButtonItem? {
-    .init(.write(action: { [weak self] in
-      self?.moduleOutput?.openNewMessengeScreen(contactAdress: nil)
-    }))
+  var rightBarButtonItems: [SKBarButtonItem] {
+    [
+      .init(
+        .lock(
+          action: { [weak self] in
+            // TODO: - Проверить включен ли пароль на приложение, если включен то заблокировать экран иначе предложить установить код
+          }, buttonItem: { [weak self] buttonItem in
+            self?.rightBarLockButton = buttonItem
+          }
+        )
+      ),
+      .init(
+        .write(
+          action: { [weak self] in
+            self?.moduleOutput?.openNewMessengeScreen(
+              contactAdress: nil
+            )
+          },
+          buttonItem: { [weak self] buttonItem in
+            self?.rightBarWriteButton = buttonItem
+          }
+        )
+      )
+    ]
   }
   
   var centerBarButtonItem: SKBarButtonViewType? {
-    .widgetCryptoView(barButtonView)
+    .widgetCryptoView(centerBarButtonView)
   }
 }
 
@@ -402,6 +430,12 @@ private extension MessengerListScreenModulePresenter {
       name: Notification.Name(NotificationConstants.didUpdateFileErrorSend.rawValue),
       object: nil
     )
+    NotificationCenter.default.addObserver(
+      self,
+      selector: #selector(handleScreenshot),
+      name: UIApplication.userDidTakeScreenshotNotification,
+      object: nil
+    )
   }
   
   func updateContactStatus(
@@ -429,7 +463,7 @@ private extension MessengerListScreenModulePresenter {
   }
   
   func setupSKBarButtonView() {
-    barButtonView = SKBarButtonView(
+    centerBarButtonView = SKBarButtonView(
       .init(
         leftImage: nil,
         centerText: nil,
@@ -448,8 +482,8 @@ private extension MessengerListScreenModulePresenter {
       
       await MainActor.run { [weak self] in
         guard let self else { return }
-        barButtonView?.iconLeftView.image = messengerModel.appSettingsModel.myStatus.imageStatus
-        barButtonView?.labelView.text = messengerModel.appSettingsModel.myStatus.title
+        centerBarButtonView?.iconLeftView.image = messengerModel.appSettingsModel.myStatus.imageStatus
+        centerBarButtonView?.labelView.text = messengerModel.appSettingsModel.myStatus.title
       }
     }
   }
@@ -658,10 +692,18 @@ private extension MessengerListScreenModulePresenter {
     let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
     let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: trigger)
     
-    UNUserNotificationCenter.current().add(request) { error in
-      if let error = error {
-        print("Error adding notification: \(error)")
-      }
+    UNUserNotificationCenter.current().add(request) { _ in }
+  }
+  
+  func checkAccessDemo() async {
+    guard await interactor.getAppSettingsModel().accessType == .demo else {
+      return
+    }
+    
+    await MainActor.run { [weak self] in
+      guard let self else { return }
+      rightBarLockButton?.isEnabled = false
+      rightBarWriteButton?.isEnabled = false
     }
   }
 }
@@ -703,8 +745,8 @@ private extension MessengerListScreenModulePresenter {
     }
     Task { @MainActor [weak self] in
       guard let self else { return }
-      barButtonView?.iconLeftView.image = status.imageStatus
-      barButtonView?.labelView.text = status.title
+      centerBarButtonView?.iconLeftView.image = status.imageStatus
+      centerBarButtonView?.labelView.text = status.title
     }
   }
   
@@ -848,7 +890,6 @@ private extension MessengerListScreenModulePresenter {
       var videos: [MessengeVideoModel] = []
       
       for fileTempURL in files {
-        
         if fileTempURL.isImageFile() {
           let imageFile = interactor.readObjectWith(fileURL: fileTempURL) ?? Data()
           let fileExtension = fileTempURL.pathExtension
@@ -1103,6 +1144,16 @@ private extension MessengerListScreenModulePresenter {
         sendLocalNotificationIfNeeded(contactModel: contact)
       }
     }
+  }
+  
+  @objc
+  func handleScreenshot() {
+    interactor.showNotification(
+      .negative(
+        title: OChatStrings.MessengerListScreenModuleLocalization
+          .BanScreenshot.description
+      )
+    )
   }
 }
 

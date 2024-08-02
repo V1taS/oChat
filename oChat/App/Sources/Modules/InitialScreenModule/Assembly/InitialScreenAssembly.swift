@@ -17,7 +17,7 @@ public final class InitialScreenAssembly {
   /// Собирает модуль `InitialScreen`
   /// - Returns: Cобранный модуль `InitialScreen`
   public func createModule(_ services: IApplicationServices) -> InitialScreenModule {
-    let interactor = InitialScreenInteractor()
+    let interactor = InitialScreenInteractor(services)
     let factory = InitialScreenFactory()
     let presenter = InitialScreenPresenter(
       interactor: interactor,

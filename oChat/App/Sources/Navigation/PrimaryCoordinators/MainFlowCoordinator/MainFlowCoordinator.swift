@@ -34,15 +34,19 @@ final class MainFlowCoordinator: Coordinator<Void, MainFinishFlowType> {
   // MARK: - Internal func
   
   override func start(parameter: Void) {
-    setupMessengerScreenFlowCoordinator()
-    setupSettingsScreenFlowCoordinator()
+    Task { @MainActor [weak self] in
+      guard let self else { return }
+      let accessType = await services.messengerService.modelHandlerService.getAppSettingsModel().accessType
+      setupMessengerScreenFlowCoordinator(accessType: accessType)
+      setupSettingsScreenFlowCoordinator()
 
-    tabBarController.viewControllers = [
-      createMessengerScreenTab(),
-      createSettingsScreenTab()
-    ]
-    tabBarController.presentAsRoot(animated: isPresentScreenAnimated)
-    services.accessAndSecurityManagementService.sessionService.startSession()
+      tabBarController.viewControllers = [
+        createMessengerScreenTab(),
+        createSettingsScreenTab()
+      ]
+      tabBarController.presentAsRoot(animated: isPresentScreenAnimated)
+      services.accessAndSecurityManagementService.sessionService.startSession()
+    }
   }
 }
 
@@ -61,7 +65,7 @@ private extension MainFlowCoordinator {
     return navigationController
   }
   
-  func setupMessengerScreenFlowCoordinator() {
+  func setupMessengerScreenFlowCoordinator(accessType: AppSettingsModel.AccessType) {
     let messengerScreenFlowCoordinator = MessengerScreenFlowCoordinator(services)
     self.messengerScreenFlowCoordinator = messengerScreenFlowCoordinator
     messengerScreenFlowCoordinator.finishFlow = { [weak self] state in
@@ -74,7 +78,7 @@ private extension MainFlowCoordinator {
       self?.messengerScreenFlowCoordinator = nil
     }
     
-    messengerScreenFlowCoordinator.start()
+    messengerScreenFlowCoordinator.start(parameter: accessType)
   }
 }
 

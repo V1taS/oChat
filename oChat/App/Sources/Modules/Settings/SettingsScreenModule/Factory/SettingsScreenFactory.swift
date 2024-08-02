@@ -29,6 +29,9 @@ protocol SettingsScreenFactoryOutput: AnyObject {
   
   /// Пользователь выбрал обратную связь
   func userSelectFeedBack()
+  
+  /// Пользователь намерен удалить и выйти
+  func userIntentionDeleteAndExit()
 }
 
 /// Cобытия которые отправляем от Presenter к Factory
@@ -95,7 +98,7 @@ extension SettingsScreenFactory: SettingsScreenFactoryInput {
     )
     models.append(profileModel)
     
-    if !appSettingsModel.isFakeAccessEnabled {
+    if appSettingsModel.accessType == .main {
       let securityModel = createWidgetWithChevron(
         image: Image(systemName: "lock"),
         backgroundColor: #colorLiteral(red: 0.4229286313, green: 0.5245543122, blue: 0.6798206568, alpha: 1),
@@ -145,7 +148,7 @@ extension SettingsScreenFactory: SettingsScreenFactoryInput {
     let feedbackModel = createWidgetWithChevron(
       image: Image(systemName: "pencil"),
       backgroundColor: #colorLiteral(red: 0.6352941176, green: 0.5176470588, blue: 0.368627451, alpha: 1),
-      title: "Feedback",
+      title: OChatStrings.SettingsScreenLocalization.Feedback.title,
       action: { [weak self] in
         self?.output?.userSelectFeedBack()
       }
@@ -162,10 +165,10 @@ extension SettingsScreenFactory: SettingsScreenFactoryInput {
     let profileModel = createWidgetWithChevron(
       image: Image(systemName: "trash"),
       backgroundColor: #colorLiteral(red: 0.9443466663, green: 0.3974885345, blue: 0.4782627821, alpha: 1),
-      title: "Удалить и выйти",
+      title: OChatStrings.SettingsScreenLocalization.DeleteAndExit.title,
       additionRightTitle: "",
       action: { [weak self] in
-        // TODO: - сделать логику удаления чата
+        self?.output?.userIntentionDeleteAndExit()
       }
     )
     models.append(profileModel)

@@ -45,6 +45,25 @@ final class SettingsScreenFlowCoordinator: Coordinator<Void, SettingsScreenFinis
 // MARK: - MainScreenModuleOutput
 
 extension SettingsScreenFlowCoordinator: SettingsScreenModuleOutput {
+  func userIntentionDeleteAndExit() {
+    let title = OChatStrings.SettingsScreenFlowCoordinatorLocalization
+      .Notification.IntentionDeleteAndExit.title
+    UIViewController.topController?.showAlertWithTwoButtons(
+      title: "\(title)?",
+      cancelButtonText: OChatStrings.SettingsScreenFlowCoordinatorLocalization
+        .LanguageSection.Alert.CancelButton.title,
+      customButtonText: OChatStrings.SettingsScreenFlowCoordinatorLocalization
+        .Notification.DeleteAndExit.title,
+      customButtonAction: { [weak self] in
+        Task { @MainActor [weak self] in
+          guard let self else { return }
+          await settingsScreenModule?.input.deleteAllData()
+          finishSettingsScreenFlow(.deleteOChat)
+        }
+      }
+    )
+  }
+  
   func userSelectFeedBack() {
     openMailModule()
   }
@@ -240,7 +259,8 @@ private extension SettingsScreenFlowCoordinator {
       services.userInterfaceAndExperienceService
         .notificationService.showNotification(
           .negative(
-            title: "Почтовый клиент не найден"
+            title: OChatStrings.SettingsScreenFlowCoordinatorLocalization
+              .Notification.MailClientNotFound.title
           )
         )
       return
@@ -262,6 +282,7 @@ private extension SettingsScreenFlowCoordinator {
     passcodeSettingsScreenModule = nil
     authenticationFlowCoordinator = nil
     messengerProfileModule = nil
+    mailComposeModule = nil
     finishFlow?(flowType)
   }
   

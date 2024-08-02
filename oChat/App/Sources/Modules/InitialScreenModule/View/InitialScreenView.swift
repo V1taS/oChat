@@ -23,16 +23,26 @@ struct InitialScreenView: View {
   var body: some View {
     VStack(spacing: .s4) {
       SKStoriesWidget(
-          manager: StoriesManager.self,
-          stories: InitialStoriesScreenModel.allCases
+        manager: StoriesManager.self,
+        stories: InitialStoriesScreenModel.allCases
       )
       
       Spacer()
       
       MainButtonView(
-        text: OChatStrings.InitialScreenLocalization.Stories.Button.title
+        text: OChatStrings.InitialScreenLocalization.Stories.Button.Demo.title,
+        style: .secondary
       ) {
-        presenter.moduleOutput?.continueButtonTapped()
+        Task {
+          await presenter.continueButtonTapped(.demo)
+        }
+      }
+      MainButtonView(
+        text: OChatStrings.InitialScreenLocalization.Stories.Button.Start.title
+      ) {
+        Task {
+          await presenter.continueButtonTapped(.main)
+        }
       }
     }
     .padding(.horizontal, .s4)

@@ -18,3 +18,8 @@
 "State.IsOn.Title" = "Включён";
 "State.IsOff.Title" = "Выключен";
 "State.Version.Title" = "Версия";
+"DeleteAndExit.Title" = "Удалить и выйти";
+"Feedback.Title" = "Обратная связь";
+"Application.Title" = "oChat";
+
+

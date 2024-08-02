@@ -26,10 +26,17 @@ public protocol SettingsScreenModuleOutput: AnyObject {
   
   /// Пользователь выбрал обратную связь
   func userSelectFeedBack()
+  
+  /// Пользователь намерен удалить и выйти
+  func userIntentionDeleteAndExit()
 }
 
 /// События которые отправляем из `Coordinator` в `SettingsScreenModule`
 public protocol SettingsScreenModuleInput {
+  
+  /// Удалить все данные из основной модели
+  @discardableResult
+  func deleteAllData() async -> Bool
 
   /// События которые отправляем из `SettingsScreenModule` в `Coordinator`
   var moduleOutput: SettingsScreenModuleOutput? { get set }

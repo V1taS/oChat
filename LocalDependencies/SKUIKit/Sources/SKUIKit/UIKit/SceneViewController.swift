@@ -123,8 +123,9 @@ private extension SceneViewController {
     navigationItem.title = viewModel.sceneTitle
     navigationItem.backButtonTitle = ""
     navigationItem.largeTitleDisplayMode = viewModel.largeTitleDisplayMode
-    navigationItem.rightBarButtonItem = viewModel.rightBarButtonItem
-    navigationItem.leftBarButtonItem = viewModel.leftBarButtonItem
+    
+    navigationItem.rightBarButtonItems = viewModel.rightBarButtonItems
+    navigationItem.leftBarButtonItems = viewModel.leftBarButtonItems
     navigationController?.setNavigationBarHidden(viewModel.isNavigationBarHidden, animated: false)
     
     if let centerBarButtonItem = viewModel.centerBarButtonItem {

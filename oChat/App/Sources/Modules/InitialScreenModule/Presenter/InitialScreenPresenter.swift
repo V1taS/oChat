@@ -37,6 +37,14 @@ final class InitialScreenPresenter: ObservableObject {
   // MARK: - The lifecycle of a UIViewController
   
   lazy var viewDidLoad: (() -> Void)? = {}
+  
+  // MARK: - Internal
+  
+  @MainActor
+  func continueButtonTapped(_ accessType: AppSettingsModel.AccessType) async {
+    await interactor.setAccessType(accessType)
+    moduleOutput?.continueButtonTapped()
+  }
 }
 
 // MARK: - InitialScreenModuleInput

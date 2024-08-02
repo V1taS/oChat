@@ -51,13 +51,13 @@ public protocol SceneViewModel {
   var largeTitleDisplayMode: UINavigationItem.LargeTitleDisplayMode { get }
   
   /// Левая кнопка в навигационной панели.
-  var leftBarButtonItem: SKBarButtonItem? { get }
+  var leftBarButtonItems: [SKBarButtonItem] { get }
   
   /// Центральная кнопка в навигационной панели по умолчанию отсутствует.
   var centerBarButtonItem: SKBarButtonViewType? { get }
   
   /// Правая кнопка в навигационной панели.
-  var rightBarButtonItem: SKBarButtonItem? { get }
+  var rightBarButtonItems: [SKBarButtonItem] { get }
   
   /// Предпочитаемый стиль строки состояния.
   var preferredStatusBarStyle: UIStatusBarStyle { get }
@@ -136,9 +136,9 @@ public extension SceneViewModel {
     .never
   }
   
-  /// Левая кнопка в навигационной панели по умолчанию отсутствует.
-  var leftBarButtonItem: SKBarButtonItem? {
-    .none
+  /// Кнопки слева в навигационной панели по умолчанию отсутствует.
+  var leftBarButtonItems: [SKBarButtonItem] {
+    []
   }
   
   /// Центральная кнопка в навигационной панели по умолчанию отсутствует.
@@ -146,9 +146,9 @@ public extension SceneViewModel {
     .none
   }
   
-  /// Правая кнопка в навигационной панели по умолчанию отсутствует.
-  var rightBarButtonItem: SKBarButtonItem? {
-    .none
+  /// Кнопки справа в навигационной панели по умолчанию отсутствует.
+  var rightBarButtonItems: [SKBarButtonItem] {
+    []
   }
   
   /// Предпочитаемый стиль строки состояния по умолчанию - стандартный.

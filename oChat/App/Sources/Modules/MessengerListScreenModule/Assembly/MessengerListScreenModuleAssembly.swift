@@ -30,4 +30,23 @@ public final class MessengerListScreenModuleAssembly {
     factory.output = presenter
     return (viewController: viewController, input: presenter)
   }
+  
+  /// Собирает модуль для Демо `MessengerListScreenModule`
+  /// - Returns: Cобранный модуль `MessengerListScreenModule`
+  public func createMockModule(
+    services: IApplicationServices
+  ) -> MessengerListScreenModuleModule {
+    let interactor = MessengerListScreenModuleMockInteractor(services: services)
+    let factory = MessengerListScreenModuleFactory()
+    let presenter = MessengerListScreenModulePresenter(
+      interactor: interactor,
+      factory: factory
+    )
+    let view = MessengerListScreenModuleView(presenter: presenter)
+    let viewController = SceneViewController(viewModel: presenter, content: view)
+    
+    interactor.output = presenter
+    factory.output = presenter
+    return (viewController: viewController, input: presenter)
+  }
 }

@@ -70,9 +70,7 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
   func application(
     _ application: UIApplication,
     didFailToRegisterForRemoteNotificationsWithError error: Error
-  ) {
-    print("❌ Fail to register: \(error)")
-  }
+  ) {}
   
   /// Этот метод вызывается, когда уведомление поступает и приложение находится на переднем плане.
   /// - Parameters:

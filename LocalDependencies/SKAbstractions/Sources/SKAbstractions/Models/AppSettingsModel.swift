@@ -16,8 +16,8 @@ public struct AppSettingsModel {
   /// Фейковый доступ, можно ввести пароль и откроется пустой чат
   public var fakeAppPassword: String?
   
-  /// Фейковый доступ включен
-  public var isFakeAccessEnabled: Bool
+  /// Тип доступа
+  public var accessType: AppSettingsModel.AccessType
   
   /// Токен для отправки пушей
   public var pushNotificationToken: String?
@@ -27,7 +27,7 @@ public struct AppSettingsModel {
   
   /// Мой статус онлайн.
   public var myStatus: AppSettingsModel.Status
-
+  
   /// Строка, содержащая сохранённое состояние Tox в формате Base64
   public var toxStateAsString: String?
   
@@ -50,7 +50,7 @@ public struct AppSettingsModel {
   /// - Parameters:
   ///   - appPassword: Строка, представляющая пароль для входа в приложение.
   ///   - fakeAppPassword: Фейковый доступ, можно ввести пароль и откроется пустой чат
-  ///   - isFakeAccessEnabled: Фейковый доступ включен
+  ///   - accessType: Тип доступа
   ///   - pushNotificationToken: Токен для отправки пушей
   ///   - isNotificationsEnabled: Булево значение, указывающее, включены ли уведомления.
   ///   - myStatus: Мой статус онлайн.
@@ -63,7 +63,7 @@ public struct AppSettingsModel {
   public init(
     appPassword: String?,
     fakeAppPassword: String?,
-    isFakeAccessEnabled: Bool,
+    accessType: AppSettingsModel.AccessType,
     pushNotificationToken: String?,
     isNotificationsEnabled: Bool,
     myStatus: AppSettingsModel.Status,
@@ -76,7 +76,7 @@ public struct AppSettingsModel {
   ) {
     self.appPassword = appPassword
     self.fakeAppPassword = fakeAppPassword
-    self.isFakeAccessEnabled = isFakeAccessEnabled
+    self.accessType = accessType
     self.pushNotificationToken = pushNotificationToken
     self.isNotificationsEnabled = isNotificationsEnabled
     self.myStatus = myStatus
@@ -96,13 +96,13 @@ extension AppSettingsModel {
   public enum Status: String {
     /// Пользователь в сети.
     case online
-
+    
     /// Пользователь не в сети.
     case offline
-
+    
     /// Пользователь подключается к сети
     case inProgress
-
+    
     /// Заголовок
     public var title: String {
       switch self {
@@ -117,6 +117,22 @@ extension AppSettingsModel {
   }
 }
 
+// MARK: - Status
+
+extension AppSettingsModel {
+  /// Перечисление, представляющее различные виды доступа в приложении.
+  public enum AccessType {
+    /// Демо доступ
+    case demo
+    
+    /// Фейковый доступ
+    case fake
+    
+    /// Основной доступ
+    case main
+  }
+}
+
 // MARK: - Set default values
 
 extension AppSettingsModel {
@@ -124,15 +140,15 @@ extension AppSettingsModel {
     return .init(
       appPassword: nil,
       fakeAppPassword: nil,
-      isFakeAccessEnabled: false,
-      pushNotificationToken: nil, 
+      accessType: .main,
+      pushNotificationToken: nil,
       isNotificationsEnabled: false,
       myStatus: .inProgress,
-      toxStateAsString: nil, 
-      isPremiumEnabled: false, 
+      toxStateAsString: nil,
+      isPremiumEnabled: false,
       isTypingIndicatorEnabled: true,
       canSaveMedia: true,
-      isChatHistoryStored: true, 
+      isChatHistoryStored: true,
       isVoiceChangerEnabled: true
     )
   }
@@ -142,3 +158,4 @@ extension AppSettingsModel {
 
 extension AppSettingsModel: IdentifiableAndCodable {}
 extension AppSettingsModel.Status: IdentifiableAndCodable {}
+extension AppSettingsModel.AccessType: IdentifiableAndCodable {}

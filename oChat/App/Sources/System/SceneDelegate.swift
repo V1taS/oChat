@@ -21,11 +21,7 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
   
   // MARK: - Private properties
   
-  private let brandingStubView = UIHostingController(
-    rootView: BrandingStubView(
-      text: OChatStrings.CommonStrings.BrandingStubView.SceneWillResignActive.description
-    )
-  ).view
+  private let brandingStubView = UIHostingController(rootView: BrandingStubView()).view
   private let services: IApplicationServices = ApplicationServices()
   private var rootCoordinator: RootCoordinator?
   

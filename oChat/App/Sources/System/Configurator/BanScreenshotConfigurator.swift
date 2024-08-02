@@ -41,7 +41,7 @@ private extension BanScreenshotConfigurator {
       let field = UITextField()
       let view = UIView(frame: CGRect(x: 0, y: 0, width: field.frame.width, height: field.frame.height))
       let banScreenshotView = UIHostingController(
-        rootView: BrandingStubView(text: OChatStrings.CommonStrings.BanScreenshotView.description)
+        rootView: BrandingStubView()
       )
       banScreenshotView.view.frame = CGRect(
         x: 0,

@@ -16,6 +16,7 @@ public final class ApplicationServicesStub: IApplicationServices, IDataManagerSe
                                             ICloudKitService, IAppSettingsManager, IDataManagementService,
                                             IAccessAndSecurityManagementService, IUserInterfaceAndExperienceService,
                                             IDeepLinkService, IPushNotificationService, IZipArchiveService {
+  public func setAccessType(_ accessType: AppSettingsModel.AccessType) async {}
   public func setFakeAppPassword(_ value: String?) async {}
   public func setIsFakeAccessEnabled(_ value: Bool) async {}
   public func setIsPremiumEnabled(_ value: Bool) async {}
@@ -205,6 +206,8 @@ public final class ApplicationServicesStub: IApplicationServices, IDataManagerSe
 
 public final class MessengerServiceStub: IMessengerModelSettingsManager, IMessengerModelHandlerService,
                                          IMessagesService, IMessengerService, IP2PChatManager, IAppSettingsManager {
+  public func clearAllMessenge() async {}
+  public func setAccessType(_ accessType: AppSettingsModel.AccessType) async {}
   public func setFakeAppPassword(_ value: String?) async {}
   public func setIsFakeAccessEnabled(_ value: Bool) async {}
   public func setIsPremiumEnabled(_ value: Bool) async {}

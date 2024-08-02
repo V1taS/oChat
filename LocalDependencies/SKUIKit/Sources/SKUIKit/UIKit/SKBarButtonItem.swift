@@ -29,7 +29,7 @@ final public class SKBarButtonItem: UIBarButtonItem {
     self.action = #selector(barButtonSelector)
     self.barButtonAction = buttonType.action
     self.buttonItem = buttonType.buttonItem
-    self.tintColor = SKStyleAsset.constantAzure.color
+    self.tintColor = buttonType.tintColor
     self.isEnabled = isEnabled
     buttonItem?(self)
   }
@@ -52,6 +52,27 @@ private extension SKBarButtonItem {
 
 extension SKBarButtonItem {
   public enum ButtonType {
+    var tintColor: UIColor {
+      switch self {
+      case .close:
+        return SKStyleAsset.constantAzure.color
+      case .done:
+        return SKStyleAsset.constantAzure.color
+      case .refresh:
+        return SKStyleAsset.constantAzure.color
+      case .share:
+        return SKStyleAsset.constantAzure.color
+      case .delete:
+        return SKStyleAsset.constantAzure.color
+      case .write:
+        return SKStyleAsset.constantAzure.color
+      case .lock:
+        return SKStyleAsset.constantAzure.color
+      case .text:
+        return SKStyleAsset.constantAzure.color
+      }
+    }
+    
     var buttonItem: ((SKBarButtonItem?) -> Void)? {
       switch self {
       case let .close(_, button):
@@ -65,6 +86,8 @@ extension SKBarButtonItem {
       case let .delete(_, button):
         return button
       case let .write(_, button):
+        return button
+      case let .lock(_, button):
         return button
       case let .text(_, _, button):
         return button
@@ -84,6 +107,8 @@ extension SKBarButtonItem {
       case let .delete(action, _):
         return action
       case let .write(action, _):
+        return action
+      case let .lock(action, _):
         return action
       case let .text(_, action, _):
         return action
@@ -113,6 +138,8 @@ extension SKBarButtonItem {
         return UIImage(systemName: "trash")
       case .write:
         return UIImage(systemName: "square.and.pencil")
+      case .lock:
+        return UIImage(systemName: "lock")
       case .text:
         return nil
       }
@@ -124,6 +151,7 @@ extension SKBarButtonItem {
     case share(action: (() -> Void)?, buttonItem: ((SKBarButtonItem?) -> Void)? = nil)
     case delete(action: (() -> Void)?, buttonItem: ((SKBarButtonItem?) -> Void)? = nil)
     case write(action: (() -> Void)?, buttonItem: ((SKBarButtonItem?) -> Void)? = nil)
+    case lock(action: (() -> Void)?, buttonItem: ((SKBarButtonItem?) -> Void)? = nil)
     case text(_ text: String, action: (() -> Void)?, buttonItem: ((SKBarButtonItem?) -> Void)? = nil)
   }
 }

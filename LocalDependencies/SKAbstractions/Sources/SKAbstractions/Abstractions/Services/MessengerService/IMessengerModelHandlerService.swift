@@ -18,6 +18,9 @@ public protocol IMessengerModelHandlerService {
   @discardableResult
   func deleteAllData() -> Bool
   
+  /// Очистить все переписки у всех пользователей
+  func clearAllMessenge() async
+  
   /// Получает модель настроек приложения `AppSettingsModel` асинхронно.
   func getAppSettingsModel() async -> AppSettingsModel
   

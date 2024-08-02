@@ -40,6 +40,17 @@ public final class MessengerModelHandlerService: IMessengerModelHandlerService {
     }
   }
   
+  public func clearAllMessenge() async {
+    var model = await getMessengerModel()
+    var updatedContacts = model.contacts.map { contact -> ContactModel in
+      var updatedContact = contact
+      updatedContact.messenges = []
+      return updatedContact
+    }
+    model.contacts = updatedContacts
+    await saveMessengerModel(model)
+  }
+  
   public func getContactModels() async -> [ContactModel] {
     let model = await getMessengerModel()
     return model.contacts
@@ -104,6 +115,19 @@ extension MessengerModelHandlerService {
         continuation.resume()
       }
     }
+  }
+}
+
+// MARK: - DataStorageType
+
+extension MessengerModelHandlerService {
+  /// Перечисление типов хранения данных
+  public enum DataStorageType {
+    /// Постоянное хранение данных
+    case persistent
+    
+    /// Хранение данных в пределах сессии
+    case session
   }
 }
 

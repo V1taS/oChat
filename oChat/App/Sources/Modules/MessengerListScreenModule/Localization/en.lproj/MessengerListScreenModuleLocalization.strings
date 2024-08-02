@@ -20,3 +20,6 @@
 "Notification.ContactHasBeenDeleted.Title" = "Contact has been deleted";
 "Notification.ErrorAddingContact.Title" = "Error adding contact";
 "Message.SuccessfullyClearedAllChat.Title" = "You have successfully cleared the entire chat history";
+"BanScreenshot.Description" = "Taking a screenshot is not available";
+"SwipeActions.Clear.Title" = "Clear";
+"SwipeActions.Delete.Title" = "Delete";

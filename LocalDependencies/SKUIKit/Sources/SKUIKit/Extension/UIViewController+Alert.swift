@@ -48,7 +48,7 @@ extension UIViewController {
     let cancelButton = UIAlertAction(title: cancelButtonText, style: .cancel) { _ in
       cancelButtonAction?()
     }
-    let customButton = UIAlertAction(title: customButtonText, style: .default) { _ in
+    let customButton = UIAlertAction(title: customButtonText, style: .destructive) { _ in
       customButtonAction?()
     }
     alert.addAction(cancelButton)

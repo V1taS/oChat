@@ -14,8 +14,6 @@ final class SettingsScreenPresenter: ObservableObject {
   
   // MARK: - View state
   
-  /// Название приложения
-  @Published var stateApplicationTitle = "oChat"
   /// Язык в приложении
   @Published var stateCurrentLanguage: AppLanguageType = .english
   @Published var stateTopWidgetModels: [WidgetCryptoView.Model] = []
@@ -63,7 +61,11 @@ final class SettingsScreenPresenter: ObservableObject {
 
 // MARK: - SettingsScreenModuleInput
 
-extension SettingsScreenPresenter: SettingsScreenModuleInput {}
+extension SettingsScreenPresenter: SettingsScreenModuleInput {
+  func deleteAllData() async -> Bool {
+    await interactor.deleteAllData()
+  }
+}
 
 // MARK: - SettingsScreenInteractorOutput
 
@@ -72,6 +74,10 @@ extension SettingsScreenPresenter: SettingsScreenInteractorOutput {}
 // MARK: - SettingsScreenFactoryOutput
 
 extension SettingsScreenPresenter: SettingsScreenFactoryOutput {
+  func userIntentionDeleteAndExit() {
+    moduleOutput?.userIntentionDeleteAndExit()
+  }
+  
   func userSelectFeedBack() {
     moduleOutput?.userSelectFeedBack()
   }

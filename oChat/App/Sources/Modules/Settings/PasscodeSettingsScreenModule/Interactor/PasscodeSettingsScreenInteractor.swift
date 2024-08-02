@@ -23,9 +23,9 @@ protocol PasscodeSettingsScreenInteractorInput {
   /// - Parameter value: Новый поддельный пароль для приложения.
   func setFakeAppPassword(_ value: String?) async
   
-  /// Включает или отключает фальшивый доступ.
-  /// - Parameter value: Значение, указывающее, следует ли включить фальшивый доступ.
-  func setIsFakeAccessEnabled(_ value: Bool) async
+  /// Установить доступ в приложение
+  /// - Parameter accessType: Тип доступа
+  func setAccessType(_ accessType: AppSettingsModel.AccessType) async
   
   /// Включает или отключает премиум доступ.
   /// - Parameter value: Значение, указывающее, следует ли включить премиум доступ.
@@ -79,8 +79,8 @@ extension PasscodeSettingsScreenInteractor: PasscodeSettingsScreenInteractorInpu
     await appSettingsManager.setFakeAppPassword(value)
   }
   
-  func setIsFakeAccessEnabled(_ value: Bool) async {
-    await appSettingsManager.setIsFakeAccessEnabled(value)
+  func setAccessType(_ accessType: AppSettingsModel.AccessType) async {
+    await appSettingsManager.setAccessType(accessType)
   }
   
   func setIsPremiumEnabled(_ value: Bool) async {

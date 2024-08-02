@@ -658,7 +658,7 @@ extension MessengerListScreenModuleInteractor: MessengerListScreenModuleInteract
       return nil
     }
     
-    let messageID = await try? p2pChatManager.sendMessage(to: toxPublicKey, message: json, messageType: .normal)
+    let messageID = try? await p2pChatManager.sendMessage(to: toxPublicKey, message: json, messageType: .normal)
     guard let messageID else {
       return nil
     }

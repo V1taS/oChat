@@ -27,10 +27,16 @@ public protocol MessengerListScreenModuleOutput: AnyObject {
   
   /// Пользователь получает файл
   func handleFileReceive(progress: Int, publicToxKey: String)
+  
+  /// Предложить удалить контакт
+  func suggestToRemoveContact(index: Int) async
 }
 
 /// События которые отправляем из `Coordinator` в `MessengerListScreenModuleModule`
 public protocol MessengerListScreenModuleModuleInput {
+  /// Удалить контакт
+  func removeContact(index: Int) async
+  
   /// Удалить сообщение
   func removeMessage(id: String, contact: ContactModel) async
   
@@ -73,6 +79,9 @@ public protocol MessengerListScreenModuleModuleInput {
   
   /// Метод для отправки push-уведомлений
   func sendPushNotification(contact: ContactModel) async
+  
+  /// Получить модель со всеми настройками
+  func getAppSettingsModel() async -> AppSettingsModel
 }
 
 /// Готовый модуль `MessengerListScreenModuleModule`

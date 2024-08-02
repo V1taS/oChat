@@ -13,3 +13,6 @@
 "LanguageSection.Alert.Title" = "Чтобы изменить язык приложения, перейдите в настройки устройства";
 "LanguageSection.Alert.CancelButton.Title" = "Отмена";
 "LanguageSection.Alert.CustomButton.Title" = "Настройки";
+"Notification.MailClientNotFound.Title" = "Почтовый клиент не найден";
+"Notification.IntentionDeleteAndExit.Title" = "Вы действительно хотите выйти и удалить все данные";
+"Notification.DeleteAndExit.Title" = "Выйти и удалить";

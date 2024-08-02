@@ -35,6 +35,10 @@ protocol SettingsScreenInteractorInput {
   
   /// Получает модель `MessengerModel` асинхронно.
   func getMessengerModel() async -> MessengerModel
+  
+  /// Удалить все данные из основной модели
+  @discardableResult
+  func deleteAllData() async -> Bool
 }
 
 /// Интерактор
@@ -66,6 +70,10 @@ final class SettingsScreenInteractor {
 // MARK: - SettingsScreenInteractorInput
 
 extension SettingsScreenInteractor: SettingsScreenInteractorInput {
+  func deleteAllData() async -> Bool {
+    modelHandlerService.deleteAllData()
+  }
+  
   func getMessengerModel() async -> MessengerModel {
     await modelHandlerService.getMessengerModel()
   }

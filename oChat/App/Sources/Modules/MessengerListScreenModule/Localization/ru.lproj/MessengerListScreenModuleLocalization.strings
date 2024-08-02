@@ -20,3 +20,6 @@
 "Notification.ContactHasBeenDeleted.Title" = "Контакт был удален";
 "Notification.ErrorAddingContact.Title" = "Ошибка добавления контакта";
 "Message.SuccessfullyClearedAllChat.Title" = "Вы успешно очистили всю историю переписки";
+"BanScreenshot.Description" = "Снимок экрана недоступен";
+"SwipeActions.Clear.Title" = "Очистить";
+"SwipeActions.Delete.Title" = "Удалить";

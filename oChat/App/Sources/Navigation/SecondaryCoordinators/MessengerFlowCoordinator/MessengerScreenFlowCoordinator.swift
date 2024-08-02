@@ -9,7 +9,7 @@
 import SKAbstractions
 import UIKit
 
-public final class MessengerScreenFlowCoordinator: Coordinator<Void, MessengerScreenFinishFlowType> {
+public final class MessengerScreenFlowCoordinator: Coordinator<AppSettingsModel.AccessType, MessengerScreenFinishFlowType> {
   
   // MARK: - Internal variables
   
@@ -31,19 +31,46 @@ public final class MessengerScreenFlowCoordinator: Coordinator<Void, MessengerSc
   
   // MARK: - Internal func
   
-  public override func start(parameter: Void) {
-    var messengerListScreenModuleModule = MessengerListScreenModuleAssembly().createModule(
-      services: services
-    )
-    self.messengerListScreenModuleModule = messengerListScreenModuleModule
-    messengerListScreenModuleModule.input.moduleOutput = self
-    navigationController = messengerListScreenModuleModule.viewController.wrapToNavigationController()
+  public override func start(parameter: AppSettingsModel.AccessType) {
+    if parameter == .demo {
+      var messengerListScreenModuleModule = MessengerListScreenModuleAssembly().createMockModule(
+        services: services
+      )
+      self.messengerListScreenModuleModule = messengerListScreenModuleModule
+      messengerListScreenModuleModule.input.moduleOutput = self
+      navigationController = messengerListScreenModuleModule.viewController.wrapToNavigationController()
+    } else {
+      var messengerListScreenModuleModule = MessengerListScreenModuleAssembly().createModule(
+        services: services
+      )
+      self.messengerListScreenModuleModule = messengerListScreenModuleModule
+      messengerListScreenModuleModule.input.moduleOutput = self
+      navigationController = messengerListScreenModuleModule.viewController.wrapToNavigationController()
+    }
   }
 }
 
 // MARK: - MessengerListScreenModuleModuleOutput
 
 extension MessengerScreenFlowCoordinator: MessengerListScreenModuleOutput {
+  public func suggestToRemoveContact(index: Int) async {
+    let title = OChatStrings.MessengerFlowCoordinatorLocalization
+      .Alert.IntentionDeleteContact.title
+    await UIViewController.topController?.showAlertWithTwoButtons(
+      title: "\(title)?",
+      cancelButtonText: OChatStrings.SettingsScreenFlowCoordinatorLocalization
+        .LanguageSection.Alert.CancelButton.title,
+      customButtonText: OChatStrings.MessengerFlowCoordinatorLocalization
+        .Alert.Delete.title,
+      customButtonAction: {
+        Task { @MainActor [weak self] in
+          guard let self else { return }
+          await messengerListScreenModuleModule?.input.removeContact(index: index)
+        }
+      }
+    )
+  }
+  
   public func handleFileSender(progress: Int, publicToxKey: String) {
     messengerDialogModule?.input.handleFileSender(progress: progress, publicToxKey: publicToxKey)
   }
@@ -72,6 +99,10 @@ extension MessengerScreenFlowCoordinator: MessengerListScreenModuleOutput {
 // MARK: - MessengerDialogScreenModuleOutput
 
 extension MessengerScreenFlowCoordinator: MessengerDialogScreenModuleOutput {
+  public func getAppSettingsModel() async -> SKAbstractions.AppSettingsModel? {
+    await messengerListScreenModuleModule?.input.getAppSettingsModel()
+  }
+  
   public func sendPushNotification(contact: ContactModel) async {
     guard let module = messengerListScreenModuleModule?.input else {
       return

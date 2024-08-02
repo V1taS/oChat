@@ -48,6 +48,9 @@ public protocol MessengerDialogScreenModuleOutput: AnyObject {
   
   /// Метод для отправки push-уведомлений
   func sendPushNotification(contact: ContactModel) async
+  
+  /// Получить модель со всеми настройками
+  func getAppSettingsModel() async -> AppSettingsModel?
 }
 
 /// События которые отправляем из `Coordinator` в `MessengerDialogScreenModule`

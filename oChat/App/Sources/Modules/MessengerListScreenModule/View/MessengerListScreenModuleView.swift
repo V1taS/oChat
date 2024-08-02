@@ -79,15 +79,22 @@ private extension MessengerListScreenModuleView {
           Button {
             presenter.clearContact(index: index)
           } label: {
-            Text("Очистить")
+            Text(OChatStrings.MessengerListScreenModuleLocalization
+              .SwipeActions.Clear.title)
           }
           .tint(.orange)
           
-          Button(role: .destructive) {
-            presenter.removeContact(index: index)
+          Button {
+            Timer.scheduledTimer(withTimeInterval: 0.3, repeats: false) { _ in
+              Task {
+                await presenter.moduleOutput?.suggestToRemoveContact(index: index)
+              }
+            }
           } label: {
-            Text("Удалить")
+            Text(OChatStrings.MessengerListScreenModuleLocalization
+              .SwipeActions.Delete.title)
           }
+          .tint(SKStyleAsset.constantRuby.swiftUIColor)
         }
       }
     }

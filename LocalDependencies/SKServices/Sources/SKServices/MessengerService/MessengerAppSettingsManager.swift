@@ -25,9 +25,9 @@ extension MessengerModelHandlerService: IAppSettingsManager {
     await saveMessengerModel(model)
   }
   
-  public func setIsFakeAccessEnabled(_ value: Bool) async {
+  public func setAccessType(_ accessType: AppSettingsModel.AccessType) async {
     var model = await getMessengerModel()
-    model.appSettingsModel.isFakeAccessEnabled = value
+    model.appSettingsModel.accessType = accessType
     await saveMessengerModel(model)
   }
   

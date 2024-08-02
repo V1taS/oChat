@@ -18,4 +18,5 @@
 "Stories.Subtitle.Third" = "Our Peer-to-Peer (P2P) technology ensures direct communication, bypassing central servers, for complete freedom and speed";
 "Stories.Subtitle.Fourth" = "Powerful multi-layer encryption turns your data into an unreadable format, protecting it from unauthorized access";
 "Stories.Subtitle.Fifth" = "";
-"Stories.Button.title" = "Continue";
+"Stories.Button.Start.Title" = "Start a chat";
+"Stories.Button.Demo.Title" = "Demo";

@@ -75,24 +75,26 @@ extension SuggestScreenPresenter: SuggestScreenFactoryOutput {}
 // MARK: - SceneViewModel
 
 extension SuggestScreenPresenter: SceneViewModel {
-  var rightBarButtonItem: SKBarButtonItem? {
-    return .init(
-      .text(
-        OChatStrings.SuggestScreenLocalization.State.RightBarButton.title,
-        action: {
-          Task { [weak self] in
-            guard let self else { return }
-            switch stateSuggestScreen {
-            case .setAccessCode:
-              let isEnabled = await interactor.isNotificationsEnabled()
-              moduleOutput?.skipSuggestAccessCodeScreenButtonTapped(isEnabled)
-            case .setNotifications:
-              moduleOutput?.skipSuggestNotificationsScreenButtonTapped()
+  var rightBarButtonItems: [SKBarButtonItem] {
+    [
+      .init(
+        .text(
+          OChatStrings.SuggestScreenLocalization.State.RightBarButton.title,
+          action: {
+            Task { [weak self] in
+              guard let self else { return }
+              switch stateSuggestScreen {
+              case .setAccessCode:
+                let isEnabled = await interactor.isNotificationsEnabled()
+                moduleOutput?.skipSuggestAccessCodeScreenButtonTapped(isEnabled)
+              case .setNotifications:
+                moduleOutput?.skipSuggestNotificationsScreenButtonTapped()
+              }
             }
           }
-        }
+        )
       )
-    )
+    ]
   }
 }
 
