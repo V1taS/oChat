@@ -10,14 +10,6 @@ import SKAbstractions
 import SKStyle
 import SKFoundation
 
-public protocol INotificationManager {
-  func requestNotification() async -> Bool
-  func isNotificationsEnabled() async -> Bool
-  func sendPushNotification(contact: ContactModel) async
-  func saveMyPushNotificationToken(_ token: String) async
-  func getPushNotificationToken() async -> String?
-}
-
 public final class NotificationManager: INotificationManager {
   
   // MARK: - Private properties

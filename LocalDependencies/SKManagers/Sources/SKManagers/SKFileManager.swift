@@ -1,5 +1,5 @@
 //
-//  FileManager.swift
+//  SKFileManager.swift
 //  SKManagers
 //
 //  Created by Vitalii Sosin on 03.08.2024.
@@ -10,23 +10,6 @@ import SKAbstractions
 import SKStyle
 import SKFoundation
 import AVFoundation
-
-public protocol ISKFileManager {
-  func saveObjectToCachesWith(fileName: String, fileExtension: String, data: Data) -> URL?
-  func saveObjectWith(fileName: String, fileExtension: String, data: Data) -> URL?
-  func readObjectWith(fileURL: URL) -> Data?
-  func clearTemporaryDirectory()
-  func saveObjectWith(tempURL: URL) -> URL?
-  func getFileName(from url: URL) -> String?
-  func getFileNameWithoutExtension(from url: URL) -> String
-  func getFirstFrame(from url: URL) -> Data?
-  func resizeThumbnailImageWithFrame(data: Data) -> Data?
-  func receiveAndUnzipFile(zipFileURL: URL, password: String) async throws -> (
-    model: MessengerNetworkRequestModel,
-    recordingDTO: MessengeRecordingDTO?,
-    files: [URL]
-  )
-}
 
 public final class SKFileManager: ISKFileManager {
   

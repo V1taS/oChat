@@ -9,22 +9,6 @@ import UIKit
 import SKAbstractions
 import SKStyle
 import SKFoundation
-import SKUIKit
-
-public protocol IIncomingDataManager: AnyObject {
-  var onAppDidBecomeActive: (() -> Void)? { get set }
-  var onMyOnlineStatusUpdate: ((AppSettingsModel.Status) -> Void)? { get set }
-  var onMessageReceived: ((MessengerNetworkRequestModel, Int32) -> Void)? { get set }
-  var onRequestChat: ((MessengerNetworkRequestModel, String) -> Void)? { get set }
-  var onFriendOnlineStatusUpdate: ((String, ContactModel.Status) -> Void)? { get set }
-  var onIsTypingFriendUpdate: ((String, Bool) -> Void)? { get set }
-  var onFriendReadReceipt: ((String, UInt32) -> Void)? { get set }
-  var onFileReceive: ((String, URL, Double) -> Void)? { get set }
-  var onFileSender: ((String, Double, String) -> Void)? { get set }
-  var onFileErrorSender: ((String, String) -> Void)? { get set }
-  var onScreenshotTaken: (() -> Void)? { get set }
-}
-
 
 public final class IncomingDataManager: IIncomingDataManager {
   

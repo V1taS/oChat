@@ -9,11 +9,6 @@ import UIKit
 import SKAbstractions
 import SKStyle
 import SKFoundation
-import SKUIKit
-
-public protocol IInterfaceManager {
-  func setRedDotToTabBar(value: String?)
-}
 
 public final class InterfaceManager: IInterfaceManager {
   

@@ -10,11 +10,6 @@ import SKAbstractions
 import SKStyle
 import SKFoundation
 
-public protocol ISettingsManager {
-  func getAppSettingsModel() async -> AppSettingsModel
-  func passcodeNotSetInSystemIOSCheck(errorMessage: String) async
-}
-
 public final class SettingsManager: ISettingsManager {
   
   // MARK: - Private properties

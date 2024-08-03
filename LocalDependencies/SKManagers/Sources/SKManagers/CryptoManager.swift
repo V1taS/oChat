@@ -9,14 +9,6 @@ import SwiftUI
 import SKAbstractions
 import SKStyle
 
-public protocol ICryptoManager {
-  func decrypt(_ encryptedText: String?) async -> String?
-  func encrypt(_ text: String?, publicKey: String) -> String?
-  func decrypt(_ encryptedData: Data?) async -> Data?
-  func encrypt(_ data: Data?, publicKey: String) -> Data?
-  func publicKey(from privateKey: String) -> String?
-}
-
 public final class CryptoManager: ICryptoManager {
   
   // MARK: - Private properties

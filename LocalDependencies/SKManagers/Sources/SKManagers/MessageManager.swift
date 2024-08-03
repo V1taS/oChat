@@ -10,24 +10,6 @@ import SKAbstractions
 import SKStyle
 import SKFoundation
 
-public protocol IMessageManager {
-  func sendMessage(
-    toxPublicKey: String,
-    messengerRequest: MessengerNetworkRequestModel?
-  ) async -> Int32?
-  func sendFile(
-    toxPublicKey: String,
-    recipientPublicKey: String,
-    recordModel: MessengeRecordingModel?,
-    messengerRequest: MessengerNetworkRequestModel,
-    files: [URL]
-  ) async
-  func initialChat(
-    senderAddress: String,
-    messengerRequest: MessengerNetworkRequestModel?
-  ) async -> Int32?
-}
-
 public final class MessageManager: IMessageManager {
   
   // MARK: - Private properties

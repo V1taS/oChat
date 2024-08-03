@@ -10,17 +10,6 @@ import SKAbstractions
 import SKStyle
 import SKFoundation
 
-public protocol IToxManager {
-  func startPeriodicFriendStatusCheck(completion: (() -> Void)?) async
-  func startToxService() async
-  func getToxAddress() async -> String?
-  func getToxPublicKey() async -> String?
-  func getToxPublicKey(from address: String) -> String?
-  func confirmFriendRequest(with publicToxKey: String) async -> String?
-  func setSelfStatus(isOnline: Bool) async
-  func setUserIsTyping(_ isTyping: Bool, to toxPublicKey: String) async -> Result<Void, Error>
-}
-
 public final class ToxManager: IToxManager {
   
   // MARK: - Private properties

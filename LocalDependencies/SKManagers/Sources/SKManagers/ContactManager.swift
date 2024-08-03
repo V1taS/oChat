@@ -9,18 +9,6 @@ import SwiftUI
 import SKAbstractions
 import SKStyle
 
-public protocol IContactManager {
-  func getContactModels() async -> [ContactModel]
-  func saveContactModel(_ model: ContactModel) async
-  func removeContactModel(_ contactModel: ContactModel) async -> Bool
-  func getContactModelFrom(toxAddress: String) async -> ContactModel?
-  func getContactModelFrom(toxPublicKey: String) async -> ContactModel?
-  func setStatus(_ model: ContactModel, _ status: ContactModel.Status) async
-  func setAllContactsOffline() async
-  func setAllContactsNotTyping() async
-  func clearAllMessengeTempID() async
-}
-
 public final class ContactManager: IContactManager {
   
   // MARK: - Private properties
