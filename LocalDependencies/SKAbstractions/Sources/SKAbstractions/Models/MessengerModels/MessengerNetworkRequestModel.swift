@@ -97,6 +97,26 @@ extension MessengerNetworkRequestModel {
   }
 }
 
+// MARK: - Mapping
+
+extension MessengerNetworkRequestModel {
+  /// Значение по умолчанию
+  public static func defaultValue() -> MessengerNetworkRequestDTO {
+    .init(
+      messageText: nil,
+      messageID: nil,
+      replyMessageText: nil,
+      senderAddress: "",
+      senderLocalMeshAddress: nil,
+      senderPublicKey: nil,
+      senderToxPublicKey: nil,
+      senderPushNotificationToken: nil,
+      canSaveMedia: true,
+      isChatHistoryStored: true
+    )
+  }
+}
+
 // MARK: - IdentifiableAndCodable
 
 extension MessengerNetworkRequestModel: IdentifiableAndCodable {}

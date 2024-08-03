@@ -207,6 +207,7 @@ public final class ApplicationServicesStub: IApplicationServices, IDataManagerSe
 
 public final class MessengerServiceStub: IMessengerModelSettingsManager, IMessengerModelHandlerService,
                                          IMessagesService, IMessengerService, IP2PChatManager, IAppSettingsManager {
+  public func saveMessengerModel(_ model: MessengerModel) async {}
   public func clearAllMessenge() async {}
   public func setAccessType(_ accessType: AppSettingsModel.AccessType) async {}
   public func setFakeAppPassword(_ value: String?) async {}

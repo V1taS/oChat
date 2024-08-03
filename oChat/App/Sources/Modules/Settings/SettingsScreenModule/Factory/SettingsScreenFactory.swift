@@ -87,18 +87,18 @@ extension SettingsScreenFactory: SettingsScreenFactoryInput {
   ) -> [WidgetCryptoView.Model] {
     var models: [WidgetCryptoView.Model] = []
     
-    let profileModel = createWidgetWithChevron(
-      image: Image(systemName: "person.fill"),
-      backgroundColor: #colorLiteral(red: 0.1844805479, green: 0.5407295227, blue: 0.9590529799, alpha: 1),
-      title: OChatStrings.SettingsScreenLocalization.State.profile,
-      additionRightTitle: "",
-      action: { [weak self] in
-        self?.output?.openMyProfileSection()
-      }
-    )
-    models.append(profileModel)
-    
     if appSettingsModel.accessType == .main {
+      let profileModel = createWidgetWithChevron(
+        image: Image(systemName: "person.fill"),
+        backgroundColor: #colorLiteral(red: 0.1844805479, green: 0.5407295227, blue: 0.9590529799, alpha: 1),
+        title: OChatStrings.SettingsScreenLocalization.State.profile,
+        additionRightTitle: "",
+        action: { [weak self] in
+          self?.output?.openMyProfileSection()
+        }
+      )
+      models.append(profileModel)
+      
       let securityModel = createWidgetWithChevron(
         image: Image(systemName: "lock"),
         backgroundColor: #colorLiteral(red: 0.4229286313, green: 0.5245543122, blue: 0.6798206568, alpha: 1),
@@ -145,15 +145,18 @@ extension SettingsScreenFactory: SettingsScreenFactoryInput {
     )
     models.append(appearanceModel)
     
-    let feedbackModel = createWidgetWithChevron(
-      image: Image(systemName: "pencil"),
-      backgroundColor: #colorLiteral(red: 0.6352941176, green: 0.5176470588, blue: 0.368627451, alpha: 1),
-      title: OChatStrings.SettingsScreenLocalization.Feedback.title,
-      action: { [weak self] in
-        self?.output?.userSelectFeedBack()
-      }
-    )
-    models.append(feedbackModel)
+    if appSettingsModel.accessType == .main {
+      let feedbackModel = createWidgetWithChevron(
+        image: Image(systemName: "pencil"),
+        backgroundColor: #colorLiteral(red: 0.6352941176, green: 0.5176470588, blue: 0.368627451, alpha: 1),
+        title: OChatStrings.SettingsScreenLocalization.Feedback.title,
+        action: { [weak self] in
+          self?.output?.userSelectFeedBack()
+        }
+      )
+      models.append(feedbackModel)
+    }
+    
     return models
   }
   

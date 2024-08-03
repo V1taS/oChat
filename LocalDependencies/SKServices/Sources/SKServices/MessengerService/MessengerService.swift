@@ -32,4 +32,4 @@ public final class MessengerService: IMessengerService {
   }
 }
 
-private let messengerService = MessengerModelHandlerService()
+private let messengerService = MessengerModelHandlerService.shared

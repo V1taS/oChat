@@ -13,11 +13,35 @@ import SKManagers
 /// Сборщик `MessengerListScreenModule`
 public final class MessengerListScreenModuleAssembly {
   
+  // MARK: - Init
+  
+  public init() {}
+  
+  // MARK: - Public funcs
+  
   /// Собирает модуль `MessengerListScreenModule`
   /// - Returns: Cобранный модуль `MessengerListScreenModule`
-  public func createModule(
-    services: IApplicationServices
-  ) -> MessengerListScreenModuleModule {
+  public func createModule(services: IApplicationServices) -> MessengerListScreenModuleModule {
+    let interactor = createInteractor(services: services, isMock: false)
+    return assembleModule(interactor: interactor)
+  }
+  
+  /// Собирает модуль для Демо `MessengerListScreenModule`
+  /// - Returns: Cобранный модуль `MessengerListScreenModule`
+  public func createMockModule(services: IApplicationServices) -> MessengerListScreenModuleModule {
+    let interactor = createInteractor(services: services, isMock: true)
+    return assembleModule(interactor: interactor)
+  }
+}
+
+// MARK: - Private
+
+private extension MessengerListScreenModuleAssembly {
+  /// Метод для создания интерактора
+  /// - Parameter services: Сервисы приложения
+  /// - Parameter isMock: Флаг для создания мокового интерактора
+  /// - Returns: Интерактор модуля
+  func createInteractor(services: IApplicationServices, isMock: Bool) -> MessengerListScreenModuleInteractorInput {
     let cryptoManager = CryptoManager(
       cryptoService: services.accessAndSecurityManagementService.cryptoService,
       systemService: services.userInterfaceAndExperienceService.systemService
@@ -54,39 +78,42 @@ public final class MessengerListScreenModuleAssembly {
     )
     let interfaceManager = InterfaceManager()
     
-    let interactor = MessengerListScreenModuleInteractor(
-      services: services,
-      cryptoManager: cryptoManager,
-      contactManager: contactManager,
-      notificationManager: notificationManager,
-      fileManager: fileManager,
-      messageManager: messageManager,
-      settingsManager: settingsManager,
-      toxManager: toxManager,
-      interfaceManager: interfaceManager
-    )
-    return assembleModule(interactor: interactor)
+    if isMock {
+      return MessengerListScreenModuleDemoInteractor(
+        services: services,
+        cryptoManager: cryptoManager,
+        contactManager: contactManager,
+        notificationManager: notificationManager,
+        fileManager: fileManager,
+        messageManager: messageManager,
+        settingsManager: settingsManager,
+        toxManager: toxManager,
+        interfaceManager: interfaceManager
+      )
+    } else {
+      return MessengerListScreenModuleInteractor(
+        services: services,
+        cryptoManager: cryptoManager,
+        contactManager: contactManager,
+        notificationManager: notificationManager,
+        fileManager: fileManager,
+        messageManager: messageManager,
+        settingsManager: settingsManager,
+        toxManager: toxManager,
+        interfaceManager: interfaceManager
+      )
+    }
   }
   
-  /// Собирает модуль для Демо `MessengerListScreenModule`
-  /// - Returns: Cобранный модуль `MessengerListScreenModule`
-  public func createMockModule(
-    services: IApplicationServices
-  ) -> MessengerListScreenModuleModule {
-    return assembleModule(interactor: MessengerListScreenModuleMockInteractor(services: services))
-  }
-  
-  /// Приватный метод для сборки модуля
+  /// Метод для сборки модуля
   /// - Parameter interactor: Интерактор, используемый для создания модуля
   /// - Returns: Cобранный модуль `MessengerListScreenModule`
-  private func assembleModule(
-    interactor: MessengerListScreenModuleInteractorInput
-  ) -> MessengerListScreenModuleModule {
+  func assembleModule(interactor: MessengerListScreenModuleInteractorInput) -> MessengerListScreenModuleModule {
     var interactor = interactor
     let factory = MessengerListScreenModuleFactory()
     let presenter = MessengerListScreenModulePresenter(
       interactor: interactor,
-      factory: factory, 
+      factory: factory,
       incomingDataManager: IncomingDataManager.shared
     )
     let view = MessengerListScreenModuleView(presenter: presenter)

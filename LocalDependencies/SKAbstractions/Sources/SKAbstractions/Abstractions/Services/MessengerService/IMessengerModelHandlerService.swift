@@ -42,4 +42,7 @@ public protocol IMessengerModelHandlerService {
   /// Удаляет модель контакта `ContactModel` асинхронно.
   /// - Parameter contactModel: Модель `ContactModel`, которая будет удалена.
   func removeContactModels(_ contactModel: ContactModel) async
+  
+  /// Сохранить оснавную модель
+  func saveMessengerModel(_ model: MessengerModel) async
 }

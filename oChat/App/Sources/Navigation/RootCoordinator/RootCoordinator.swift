@@ -127,13 +127,19 @@ private extension RootCoordinator {
   
   @MainActor
   func setupLaunchScreen() async {
-    let messengerModel = await services.messengerService.modelHandlerService.getMessengerModel()
+    let modelHandlerService = services.messengerService.modelHandlerService
+    let appSettingsModel = await modelHandlerService.getAppSettingsModel()
+    
+    if appSettingsModel.accessType == .demo || appSettingsModel.accessType == .fake {
+      modelHandlerService.deleteAllData()
+    }
+    
     /// В модельке нет сохраненных данных
-    if messengerModel.appSettingsModel.toxStateAsString == nil {
+    if appSettingsModel.toxStateAsString == nil {
       openInitialFlowCoordinator(isPresentScreenAnimated: true)
     } else {
-      if messengerModel.appSettingsModel.appPassword != nil {
-        openAuthenticationFlowCoordinator(.loginPasscode(.loginFaceID))
+      if appSettingsModel.appPassword != nil {
+        openAuthenticationFlowCoordinator(.loginPasscode(.enterPasscode))
       } else {
         openMainFlowCoordinator(isPresentScreenAnimated: true)
       }

@@ -263,6 +263,9 @@ protocol MessengerListScreenModuleInteractorInput {
   /// Получает модель `MessengerModel` асинхронно.
   func getMessengerModel() async -> MessengerModel
   
+  /// Возвращает текущий язык приложения.
+  func getCurrentLanguage() -> AppLanguageType
+  
   /// Делегат, через который интерактор передает события презентеру.
   /// Используется для уведомления презентера о завершении асинхронных операций или изменениях состояния.
   ///

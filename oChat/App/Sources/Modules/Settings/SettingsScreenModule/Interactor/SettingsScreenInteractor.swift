@@ -14,9 +14,6 @@ protocol SettingsScreenInteractorOutput: AnyObject {}
 /// События которые отправляем от Presenter к Interactor
 protocol SettingsScreenInteractorInput {
   /// Возвращает текущий язык приложения.
-  /// Метод анализирует системные настройки и возвращает один из поддерживаемых языков,
-  /// указанных в перечислении `AppLanguageType`.
-  /// - Returns: Текущий язык приложения как значение перечисления `AppLanguageType`.
   func getCurrentLanguage() -> AppLanguageType
   
   /// Возвращает текущую версию приложения.

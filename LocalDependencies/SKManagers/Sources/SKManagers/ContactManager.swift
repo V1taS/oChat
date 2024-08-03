@@ -37,13 +37,11 @@ public final class ContactManager: IContactManager {
   
   public func saveContactModel(_ model: ContactModel) async {
     await modelHandlerService.saveContactModel(model)
-    await saveToxState()
   }
   
   public func removeContactModel(_ contactModel: ContactModel) async -> Bool {
     await modelHandlerService.removeContactModels(contactModel)
     let success = await p2pChatManager.deleteFriend(toxPublicKey: contactModel.toxPublicKey ?? "")
-    await saveToxState()
     return success
   }
   
@@ -71,14 +69,5 @@ public final class ContactManager: IContactManager {
   
   public func clearAllMessengeTempID() async {
     await modelSettingsManager.clearAllMessengeTempID()
-  }
-}
-
-// MARK: - Private
-
-private extension ContactManager {
-  func saveToxState() async {
-    let stateAsString = await p2pChatManager.toxStateAsString()
-    await modelSettingsManager.setToxStateAsString(stateAsString)
   }
 }

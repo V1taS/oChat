@@ -1,8 +1,9 @@
 //
-//  MessengerListScreenModuleInteractor.swift
-//  SafeKeeper
+//  MessengerListScreenModuleDemoInteractor.swift
+//  oChat
 //
-//  Created by Vitalii Sosin on 21.04.2024.
+//  Created by Vitalii Sosin on 03.08.2024.
+//  Copyright © 2024 SosinVitalii.com. All rights reserved.
 //
 
 import SwiftUI
@@ -11,7 +12,8 @@ import SKStyle
 import AVFoundation
 import SKManagers
 
-final class MessengerListScreenModuleInteractor {
+// swiftlint:disable all
+final class MessengerListScreenModuleDemoInteractor {
   
   // MARK: - Internal properties
   
@@ -32,8 +34,8 @@ final class MessengerListScreenModuleInteractor {
   private let deepLinkService: IDeepLinkService
   private let notificationService: INotificationService
   private let modelHandlerService: IMessengerModelHandlerService
-  private let p2pChatManager: IP2PChatManager
-  private let modelSettingsManager: IMessengerModelSettingsManager
+  
+  private var isFirstStartDemo = true
   
   // MARK: - Initialization
   
@@ -61,14 +63,12 @@ final class MessengerListScreenModuleInteractor {
     self.deepLinkService = services.userInterfaceAndExperienceService.deepLinkService
     self.notificationService = services.userInterfaceAndExperienceService.notificationService
     self.modelHandlerService = services.messengerService.modelHandlerService
-    self.p2pChatManager = services.messengerService.p2pChatManager
-    self.modelSettingsManager = services.messengerService.modelSettingsManager
   }
 }
 
 // MARK: - MessengerListScreenModuleInteractorInput
 
-extension MessengerListScreenModuleInteractor: MessengerListScreenModuleInteractorInput {
+extension MessengerListScreenModuleDemoInteractor: MessengerListScreenModuleInteractorInput {
   
   // MARK: - CryptoManager
   
@@ -95,82 +95,72 @@ extension MessengerListScreenModuleInteractor: MessengerListScreenModuleInteract
   // MARK: - ToxManager
   
   func getToxPublicKey(from address: String) -> String? {
-    toxManager.getToxPublicKey(from: address)
+    Constants.mockValue
   }
   
   func getToxAddress() async -> String? {
-    await toxManager.getToxAddress()
+    Constants.mockValue
   }
   
   func getToxPublicKey() async -> String? {
-    await toxManager.getToxPublicKey()
+    Constants.mockValue
   }
   
   func confirmFriendRequest(with publicToxKey: String) async -> String? {
-    await toxManager.confirmFriendRequest(with: publicToxKey)
+    Constants.mockValue
   }
   
-  func setSelfStatus(isOnline: Bool) async {
-    await toxManager.setSelfStatus(isOnline: isOnline)
-  }
-  
+  func setSelfStatus(isOnline: Bool) async {}
   func setUserIsTyping(_ isTyping: Bool, to toxPublicKey: String) async -> Result<Void, Error> {
-    await toxManager.setUserIsTyping(isTyping, to: toxPublicKey)
+    .success(())
   }
-  
-  func startPeriodicFriendStatusCheck(completion: (() -> Void)?) async {
-    await toxManager.startPeriodicFriendStatusCheck(completion: completion)
-  }
-  
-  func stratTOXService() async {
-    await toxManager.startToxService()
-  }
+  func startPeriodicFriendStatusCheck(completion: (() -> Void)?) async {}
+  func stratTOXService() async {}
   
   // MARK: - ContactManager
   
   func getContactModels() async -> [ContactModel] {
-    await contactManager.getContactModels()
+    await firstStartDemoCheck()
+    return await contactManager.getContactModels()
   }
   
   func saveContactModel(_ model: ContactModel) async {
-    await contactManager.saveContactModel(model)
-    await saveToxState()
+    await firstStartDemoCheck()
+    return await contactManager.saveContactModel(model)
   }
   
   func removeContactModels(_ contactModel: ContactModel) async -> Bool {
-    let result = await contactManager.removeContactModel(contactModel)
-    await saveToxState()
-    return result
+    await firstStartDemoCheck()
+    return await contactManager.removeContactModel(contactModel)
   }
   
   func getContactModelsFrom(toxAddress: String) async -> ContactModel? {
-    await contactManager.getContactModelFrom(toxAddress: toxAddress)
+    await firstStartDemoCheck()
+    return await contactManager.getContactModelFrom(toxAddress: toxAddress)
   }
   
   func getContactModelsFrom(toxPublicKey: String) async -> ContactModel? {
-    await contactManager.getContactModelFrom(toxPublicKey: toxPublicKey)
+    await firstStartDemoCheck()
+    return await contactManager.getContactModelFrom(toxPublicKey: toxPublicKey)
   }
   
-  func setStatus(_ model: ContactModel, _ status: ContactModel.Status) async {
-    await contactManager.setStatus(model, status)
-  }
-  
-  func setAllContactsIsOffline() async {
-    await contactManager.setAllContactsOffline()
-  }
+  func setStatus(_ model: ContactModel, _ status: ContactModel.Status) async {}
+  func setAllContactsIsOffline() async {}
   
   func setAllContactsNoTyping() async {
-    await contactManager.setAllContactsNotTyping()
+    await firstStartDemoCheck()
+    return await contactManager.setAllContactsNotTyping()
   }
   
   func clearAllMessengeTempID() async {
-    await contactManager.clearAllMessengeTempID()
+    await firstStartDemoCheck()
+    return await contactManager.clearAllMessengeTempID()
   }
   
   // MARK: - SettingsManager
   
   func getAppSettingsModel() async -> AppSettingsModel {
-    await settingsManager.getAppSettingsModel()
+    createAppSettingsModel()
   }
   
   func passcodeNotSetInSystemIOSheck() async {
@@ -203,6 +193,7 @@ extension MessengerListScreenModuleInteractor: MessengerListScreenModuleInteract
   }
   
   // MARK: - FileManager
+  
   func getFileNameWithoutExtension(from url: URL) -> String {
     fileManager.getFileNameWithoutExtension(from: url)
   }
@@ -251,7 +242,7 @@ extension MessengerListScreenModuleInteractor: MessengerListScreenModuleInteract
     recordingDTO: MessengeRecordingDTO?,
     files: [URL]
   ) {
-    try await fileManager.receiveAndUnzipFile(zipFileURL: zipFileURL, password: password)
+    (MessengerNetworkRequestModel.defaultValue().mapToModel(), nil, [])
   }
   
   // MARK: - MessageManager
@@ -260,20 +251,14 @@ extension MessengerListScreenModuleInteractor: MessengerListScreenModuleInteract
     toxPublicKey: String,
     messengerRequest: MessengerNetworkRequestModel?
   ) async -> Int32? {
-    await messageManager.sendMessage(
-      toxPublicKey: toxPublicKey,
-      messengerRequest: messengerRequest
-    )
+    .zero
   }
   
   func initialChat(
     senderAddress: String,
     messengerRequest: MessengerNetworkRequestModel?
   ) async -> Int32? {
-    await messageManager.initialChat(
-      senderAddress: senderAddress,
-      messengerRequest: messengerRequest
-    )
+    .zero
   }
   
   func sendFile(
@@ -282,15 +267,7 @@ extension MessengerListScreenModuleInteractor: MessengerListScreenModuleInteract
     recordModel: MessengeRecordingModel?,
     messengerRequest: MessengerNetworkRequestModel,
     files: [URL]
-  ) async {
-    await messageManager.sendFile(
-      toxPublicKey: toxPublicKey,
-      recipientPublicKey: recipientPublicKey,
-      recordModel: recordModel,
-      messengerRequest: messengerRequest,
-      files: files
-    )
-  }
+  ) async {}
   
   // MARK: - InterfaceManager
   
@@ -304,19 +281,14 @@ extension MessengerListScreenModuleInteractor: MessengerListScreenModuleInteract
     systemService.getDeviceIdentifier()
   }
   
-  func getCurrentLanguage() -> SKAbstractions.AppLanguageType {
+  func getCurrentLanguage() -> AppLanguageType {
     systemService.getCurrentLanguage()
   }
   
   // MARK: - DeepLinkService
   
-  func getDeepLinkAdress() async -> String? {
-    await deepLinkService.getMessengerAddress()
-  }
-  
-  func deleteDeepLinkURL() {
-    deepLinkService.deleteDeepLinkURL()
-  }
+  func getDeepLinkAdress() async -> String? { nil }
+  func deleteDeepLinkURL() {}
   
   // MARK: - NotificationService (Directly accessed)
   
@@ -327,19 +299,27 @@ extension MessengerListScreenModuleInteractor: MessengerListScreenModuleInteract
   // MARK: - ModelHandlerService (Directly accessed)
   
   func getMessengerModel() async -> MessengerModel {
-    await modelHandlerService.getMessengerModel()
+    await firstStartDemoCheck()
+    return await modelHandlerService.getMessengerModel()
   }
 }
 
 // MARK: - Private
 
-private extension MessengerListScreenModuleInteractor {
-  func saveToxState() async {
-    let stateAsString = await p2pChatManager.toxStateAsString()
-    await modelSettingsManager.setToxStateAsString(stateAsString)
+private extension MessengerListScreenModuleDemoInteractor {
+  func firstStartDemoCheck() async {
+    guard isFirstStartDemo else {
+      return
+    }
+    let messengerModel = createDemoData()
+    await modelHandlerService.saveMessengerModel(messengerModel)
+    isFirstStartDemo = false
   }
 }
 
 // MARK: - Constants
 
-private enum Constants {}
+private enum Constants {
+  static let mockValue = "b8d35bb4b73df0c50a06472ecb0d603241570a0507f49f570ae4ee39f5559c5587145ef0c540"
+}
+// swiftlint:enable all

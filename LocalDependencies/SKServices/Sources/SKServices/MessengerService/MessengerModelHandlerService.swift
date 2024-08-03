@@ -13,14 +13,18 @@ import SKStyle
 
 public final class MessengerModelHandlerService: IMessengerModelHandlerService {
   
+  // MARK: - Public properties
+  
+  public static let shared = MessengerModelHandlerService()
+  
   // MARK: - Private properties
   
-  private let secureDataManagerService = SecureDataManagerService(.messengerModelHandler)
+  private var secureDataManagerService = SecureDataManagerService(.messengerModelHandler)
   private let queue = DispatchQueue(label: "com.sosinvitalii.MessengerModelHandlerServiceQueue")
   
   // MARK: - Init
   
-  public init() {}
+  private init() {}
   
   // MARK: - Public func
   
@@ -36,6 +40,16 @@ public final class MessengerModelHandlerService: IMessengerModelHandlerService {
           messengerModel = MessengerModel.setDefaultValues()
         }
         continuation.resume(returning: messengerModel)
+      }
+    }
+  }
+  
+  public func saveMessengerModel(_ model: MessengerModel) async {
+    await withCheckedContinuation { continuation in
+      queue.async { [weak self] in
+        guard let self else { return }
+        self.secureDataManagerService.saveModel(model, for: Constants.messengerModelKey)
+        continuation.resume()
       }
     }
   }
@@ -101,20 +115,6 @@ public final class MessengerModelHandlerService: IMessengerModelHandlerService {
     var model = await getMessengerModel()
     model.appSettingsModel = appSettingsModel
     await saveMessengerModel(model)
-  }
-}
-
-// MARK: - Funcs
-
-extension MessengerModelHandlerService {
-  public func saveMessengerModel(_ model: MessengerModel) async {
-    await withCheckedContinuation { continuation in
-      queue.async { [weak self] in
-        guard let self else { return }
-        self.secureDataManagerService.saveModel(model, for: Constants.messengerModelKey)
-        continuation.resume()
-      }
-    }
   }
 }
 
