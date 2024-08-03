@@ -118,19 +118,6 @@ extension MessengerModelHandlerService {
   }
 }
 
-// MARK: - DataStorageType
-
-extension MessengerModelHandlerService {
-  /// Перечисление типов хранения данных
-  public enum DataStorageType {
-    /// Постоянное хранение данных
-    case persistent
-    
-    /// Хранение данных в пределах сессии
-    case session
-  }
-}
-
 // MARK: - Constants
 
 private enum Constants {
