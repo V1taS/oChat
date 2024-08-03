@@ -46,13 +46,31 @@ protocol MessengerListScreenModuleFactoryInput {
     contactModels: [ContactModel],
     torAddress: String
   ) -> ContactModel?
+  
+  /// Создать новый контакт
+  func createNewContact(
+    messageModel: MessengerNetworkRequestModel,
+    pushNotificationToken: String?,
+    status: ContactModel.Status
+  ) -> ContactModel
+  
+  /// Обновить существующий контакт
+  func updateExistingContact(
+    contact: ContactModel,
+    messageModel: MessengerNetworkRequestModel,
+    messageText: String,
+    pushNotificationToken: String?,
+    images: [MessengeImageModel],
+    videos: [MessengeVideoModel],
+    recording: MessengeRecordingModel?
+  ) -> ContactModel
 }
 
 /// Фабрика
 final class MessengerListScreenModuleFactory {
   
   // MARK: - Internal properties
-
+  
   weak var output: MessengerListScreenModuleFactoryOutput?
 }
 
@@ -133,8 +151,8 @@ extension MessengerListScreenModuleFactory: MessengerListScreenModuleFactoryInpu
       if dialogModel.isNewMessagesAvailable {
         itemModel = .custom(
           item: AnyView(
-          Circle()
-            .foregroundColor(SKStyleAsset.constantRuby.swiftUIColor)
+            Circle()
+              .foregroundColor(SKStyleAsset.constantRuby.swiftUIColor)
           ),
           size: .custom(width: .s2, height: .s2),
           isHitTesting: false
@@ -185,6 +203,56 @@ extension MessengerListScreenModuleFactory: MessengerListScreenModuleFactoryInpu
       )
     }
     return models
+  }
+  
+  func createNewContact(
+    messageModel: MessengerNetworkRequestModel,
+    pushNotificationToken: String?,
+    status: ContactModel.Status
+  ) -> ContactModel {
+    return ContactModel(
+      name: nil,
+      toxAddress: messageModel.senderAddress,
+      meshAddress: messageModel.senderLocalMeshAddress,
+      messenges: [],
+      status: status,
+      encryptionPublicKey: messageModel.senderPublicKey,
+      toxPublicKey: nil,
+      pushNotificationToken: pushNotificationToken,
+      isNewMessagesAvailable: true,
+      isTyping: false,
+      canSaveMedia: messageModel.canSaveMedia,
+      isChatHistoryStored: messageModel.isChatHistoryStored
+    )
+  }
+  
+  func updateExistingContact(
+    contact: ContactModel,
+    messageModel: MessengerNetworkRequestModel,
+    messageText: String,
+    pushNotificationToken: String?,
+    images: [MessengeImageModel],
+    videos: [MessengeVideoModel],
+    recording: MessengeRecordingModel?
+  ) -> ContactModel {
+    var updatedContact = contact
+    updatedContact = addMessageToContact(
+      message: messageText,
+      contactModel: updatedContact,
+      messageType: .received,
+      replyMessageText: messageModel.replyMessageText,
+      images: images,
+      videos: videos,
+      recording: recording
+    )
+    updatedContact.status = .online
+    if let senderPushNotificationToken = pushNotificationToken {
+      updatedContact.pushNotificationToken = senderPushNotificationToken
+    }
+    updatedContact.toxAddress = messageModel.senderAddress
+    updatedContact.isNewMessagesAvailable = true
+    updatedContact.encryptionPublicKey = messageModel.senderPublicKey
+    return updatedContact
   }
 }
 

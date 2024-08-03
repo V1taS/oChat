@@ -86,7 +86,8 @@ public final class MessengerListScreenModuleAssembly {
     let factory = MessengerListScreenModuleFactory()
     let presenter = MessengerListScreenModulePresenter(
       interactor: interactor,
-      factory: factory
+      factory: factory, 
+      incomingDataManager: IncomingDataManager.shared
     )
     let view = MessengerListScreenModuleView(presenter: presenter)
     let viewController = SceneViewController(viewModel: presenter, content: view)
