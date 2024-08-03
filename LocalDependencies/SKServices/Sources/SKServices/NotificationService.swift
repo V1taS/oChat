@@ -15,7 +15,9 @@ public final class NotificationService: INotificationService {
   private let notifications = Notifications()
   
   public func showNotification(_ type: NotificationServiceType) {
-    showNotification(type, action: nil)
+    DispatchQueue.main.async { [weak self] in
+      self?.showNotification(type, action: nil)
+    }
   }
   
   public func showNotification(

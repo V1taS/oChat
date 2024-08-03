@@ -12,6 +12,7 @@ public protocol IDeepLinkService {
   /// Сохраняет URL глубокой ссылки.
   /// - Parameters:
   ///   - url: URL, который необходимо сохранить.
+  @MainActor
   func saveDeepLinkURL(_ url: URL) async
   
   /// Удаляет URL глубокой ссылки.
@@ -19,5 +20,6 @@ public protocol IDeepLinkService {
   
   /// Получает адрес глубокой ссылки.
   /// - Parameter completion: Блок выполнения с адресом в виде строки или nil, если адрес не найден.
+  @MainActor
   func getMessengerAddress() async -> String?
 }

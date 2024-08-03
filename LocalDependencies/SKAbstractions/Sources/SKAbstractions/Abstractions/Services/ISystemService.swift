@@ -67,10 +67,7 @@ public protocol ISystemService {
   func getAppBuildNumber() -> String
   
   /// Проверяет, установлен ли пароль на устройстве.
-  /// - Parameter completion: Замыкание, вызываемое с результатом проверки.
-  ///  Если пароль установлен, возвращает `.success`.
-  ///  В противном случае возвращает `.failure` с ошибкой `SystemServiceError.passcodeNotSet`.
-  func checkIfPasscodeIsSet(completion: ((Result<Void, SystemServiceError>) -> Void)?)
+  func checkIfPasscodeIsSet() async -> Result<Void, SystemServiceError>
   
   /// Определяет, первый ли это запуск приложения
   func isFirstLaunch() -> Bool

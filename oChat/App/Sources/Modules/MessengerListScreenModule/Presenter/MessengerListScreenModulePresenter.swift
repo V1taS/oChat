@@ -364,11 +364,11 @@ private extension MessengerListScreenModulePresenter {
       }
       
       await updateListContacts()
+      await interactor.passcodeNotSetInSystemIOSheck()
       moduleOutput?.dataModelHasBeenUpdated()
     }
     
     updateIsNotificationsEnabled()
-    interactor.passcodeNotSetInSystemIOSheck()
     
     NotificationCenter.default.addObserver(
       self,
@@ -729,13 +729,12 @@ private extension MessengerListScreenModulePresenter {
       guard let self else { return }
       await interactor.setSelfStatus(isOnline: true)
       await interactor.clearAllMessengeTempID()
+      await interactor.passcodeNotSetInSystemIOSheck()
       
       if await interactor.getPushNotificationToken() == nil {
         await UIApplication.shared.registerForRemoteNotifications()
       }
     }
-    
-    interactor.passcodeNotSetInSystemIOSheck()
   }
   
   @objc

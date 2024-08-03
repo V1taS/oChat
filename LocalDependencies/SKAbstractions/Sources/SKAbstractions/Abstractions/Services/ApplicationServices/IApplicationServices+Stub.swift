@@ -16,6 +16,7 @@ public final class ApplicationServicesStub: IApplicationServices, IDataManagerSe
                                             ICloudKitService, IAppSettingsManager, IDataManagementService,
                                             IAccessAndSecurityManagementService, IUserInterfaceAndExperienceService,
                                             IDeepLinkService, IPushNotificationService, IZipArchiveService {
+  public func checkIfPasscodeIsSet() async -> Result<Void, SystemServiceError> { .success(()) }
   public func setAccessType(_ accessType: AppSettingsModel.AccessType) async {}
   public func setFakeAppPassword(_ value: String?) async {}
   public func setIsFakeAccessEnabled(_ value: Bool) async {}

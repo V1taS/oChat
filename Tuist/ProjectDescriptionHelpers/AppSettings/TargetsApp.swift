@@ -31,7 +31,7 @@ public extension Array<Target> {
         ],
         dependencies: [
           .external(name: "SKStoriesWidget"),
-          .external(name: "SKServices"),
+          .external(name: "SKManagers"),
           .external(name: "SKUIKit"),
           .external(name: "Wormholy"),
           .external(name: "ExyteChat")

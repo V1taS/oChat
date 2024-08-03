@@ -40,8 +40,6 @@ let package = Package(
         "Wormholy",
         "Zip"
       ]
-    ),
-    .binaryTarget(name: "WalletCore", path: "Sources/XCFrameworks/WalletCore.xcframework"),
-    .binaryTarget(name: "SwiftProtobuf", path: "Sources/XCFrameworks/SwiftProtobuf.xcframework")
+    )
   ]
 )

@@ -117,21 +117,23 @@ public final class SystemService: ISystemService {
     return build
   }
   
-  public func checkIfPasscodeIsSet(completion: ((Result<Void, SystemServiceError>) -> Void)?) {
-    let context = LAContext()
-    var error: NSError?
-    let isPasscodeSet = context.canEvaluatePolicy(.deviceOwnerAuthentication, error: &error)
-    
-    if let laError = error, laError.code == kLAErrorPasscodeNotSet {
-      completion?(.failure(.passcodeNotSet))
-      return
+  public func checkIfPasscodeIsSet() async -> Result<Void, SystemServiceError> {
+    await withCheckedContinuation { continuation in
+      let context = LAContext()
+      var error: NSError?
+      let isPasscodeSet = context.canEvaluatePolicy(.deviceOwnerAuthentication, error: &error)
+      
+      if let laError = error, laError.code == kLAErrorPasscodeNotSet {
+        continuation.resume(returning: .failure(.passcodeNotSet))
+        return
+      }
+      
+      if !isPasscodeSet {
+        continuation.resume(returning: .failure(.passcodeNotSet))
+        return
+      }
+      continuation.resume(returning: .success(()))
     }
-    
-    if !isPasscodeSet {
-      completion?(.failure(.passcodeNotSet))
-      return
-    }
-    completion?(.success(()))
   }
 }
 
