@@ -12,6 +12,9 @@ public enum AuthenticationFinishFlowType {
   /// Успех
   case success
   
+  /// Успех фейк
+  case successFake
+  
   /// Ошибка
   case failure
 }

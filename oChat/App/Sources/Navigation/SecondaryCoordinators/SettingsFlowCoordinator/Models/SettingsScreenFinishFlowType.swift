@@ -16,5 +16,5 @@ public enum SettingsScreenFinishFlowType {
   case lockOChat
   
   /// Удалить и выйти
-  case deleteOChat
+  case exit
 }

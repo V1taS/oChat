@@ -20,6 +20,7 @@ public final class AuthenticationFlowCoordinator: Coordinator<AuthenticationScre
   
   private let services: IApplicationServices
   private var authenticationScreenModule: AuthenticationScreenModule?
+  private let isFake: Bool
   
   // MARK: - Initialization
   
@@ -27,20 +28,28 @@ public final class AuthenticationFlowCoordinator: Coordinator<AuthenticationScre
   ///   - services: Сервисы приложения
   ///   - viewController: Вью контроллер
   ///   - openType: Способ открытия
+  ///   - isFake: Флоу фейковых данных
   public init(_ services: IApplicationServices,
               viewController: UIViewController? = nil,
-              openType: AuthenticationFlowOpenType = .present) {
+              openType: AuthenticationFlowOpenType = .present,
+              isFake: Bool) {
     self.services = services
     self.viewController = viewController
     self.openType = openType
+    self.isFake = isFake
   }
   
   // MARK: - Internal func
   
   public override func start(parameter: AuthenticationScreenState) {
-    var authenticationScreenModule = AuthenticationScreenAssembly().createModule(services, parameter)
+    var authenticationScreenModule = AuthenticationScreenAssembly().createModule(
+      services,
+      parameter,
+      isFake: isFake
+    )
     self.authenticationScreenModule = authenticationScreenModule
     authenticationScreenModule.input.moduleOutput = self
+    authenticationScreenModule.viewController.hidesBottomBarWhenPushed = true
     
     if let viewController {
       switch openType {
@@ -73,6 +82,10 @@ public final class AuthenticationFlowCoordinator: Coordinator<AuthenticationScre
 // MARK: - AuthenticationScreenModuleOutput
 
 extension AuthenticationFlowCoordinator: AuthenticationScreenModuleOutput {
+  public func authenticationFakeSuccess() {
+    finishAuthenticationFlow(.successFake)
+  }
+  
   public func authenticationSuccess() {
     finishAuthenticationFlow(.success)
   }

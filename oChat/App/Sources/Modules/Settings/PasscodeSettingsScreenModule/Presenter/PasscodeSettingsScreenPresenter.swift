@@ -72,6 +72,7 @@ extension PasscodeSettingsScreenPresenter: PasscodeSettingsScreenInteractorOutpu
 // MARK: - PasscodeSettingsScreenFactoryOutput
 
 extension PasscodeSettingsScreenPresenter: PasscodeSettingsScreenFactoryOutput {
+  @MainActor
   func openSetAccessCode(_ isNewAccessCode: Bool) async {
     if isNewAccessCode {
       moduleOutput?.openNewAccessCode()
@@ -87,11 +88,11 @@ extension PasscodeSettingsScreenPresenter: PasscodeSettingsScreenFactoryOutput {
   }
   
   func openFakeChangeAccessCode() async {
-    // MARK: - 🟡
+    await moduleOutput?.openFakeChangeAccessCode()
   }
   
   func openFakeSetAccessCode(_ code: Bool) async {
-    // MARK: - 🟡
+    await moduleOutput?.openFakeSetAccessCode(code)
   }
   
   func setTypingIndicator(_ value: Bool) async {

@@ -18,14 +18,16 @@ public final class AuthenticationScreenAssembly {
   /// - Returns: Cобранный модуль `AuthenticationScreen`
   public func createModule(
     _ services: IApplicationServices,
-    _ state: AuthenticationScreenState
+    _ state: AuthenticationScreenState,
+    isFake: Bool
   ) -> AuthenticationScreenModule {
     let interactor = AuthenticationScreenInteractor(services)
     let factory = AuthenticationScreenFactory()
     let presenter = AuthenticationScreenPresenter(
       interactor: interactor,
       factory: factory,
-      state: state
+      state: state,
+      isFake: isFake
     )
     let view = AuthenticationScreenView(presenter: presenter)
     let viewController = SceneViewController(viewModel: presenter, content: view)

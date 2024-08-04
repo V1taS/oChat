@@ -58,9 +58,6 @@ extension AuthenticationScreenState {
 extension AuthenticationScreenState {
   /// Сценарий входа в приложение
   public enum LoginPasscodeFlow: Equatable {
-    /// Ввойти по FaceID
-    case loginFaceID
-    
     /// Введите пароль
     case enterPasscode
   }

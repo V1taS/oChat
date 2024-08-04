@@ -314,8 +314,17 @@ extension MessengerListScreenModulePresenter: SceneViewModel {
     [
       .init(
         .lock(
-          action: { [weak self] in
-            // TODO: - Проверить включен ли пароль на приложение, если включен то заблокировать экран иначе предложить установить код
+          action: {
+            Task { @MainActor [weak self] in
+              guard let self else { return }
+              let appSettingsModel = await interactor.getAppSettingsModel()
+              
+              if appSettingsModel.appPassword == nil {
+                await moduleOutput?.setPasswordForApp()
+              } else {
+                await moduleOutput?.lockScreen()
+              }
+            }
           }, buttonItem: { [weak self] buttonItem in
             self?.rightBarLockButton = buttonItem
           }

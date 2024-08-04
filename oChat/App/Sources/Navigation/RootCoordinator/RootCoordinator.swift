@@ -58,8 +58,8 @@ private extension RootCoordinator {
     mainFlowCoordinator.finishFlow = { [weak self] state in
       switch state {
       case .lockOChat:
-        self?.openAuthenticationFlowCoordinator(.loginPasscode(.loginFaceID))
-      case .deleteOChat:
+        self?.openAuthenticationFlowCoordinator(.loginPasscode(.enterPasscode))
+      case .exit:
         self?.openInitialFlowCoordinator(isPresentScreenAnimated: true)
       }
       self?.mainFlowCoordinator = nil
@@ -83,12 +83,18 @@ private extension RootCoordinator {
   }
   
   func openAuthenticationFlowCoordinator(_ state: AuthenticationScreenState) {
-    let authenticationFlowCoordinator = AuthenticationFlowCoordinator(services)
+    let authenticationFlowCoordinator = AuthenticationFlowCoordinator(services, isFake: false)
     self.authenticationFlowCoordinator = authenticationFlowCoordinator
     authenticationFlowCoordinator.finishFlow = { [weak self] state in
       switch state {
       case .success:
         self?.openMainFlowCoordinator(isPresentScreenAnimated: true)
+      case .successFake:
+        Task { @MainActor [weak self] in
+          guard let self else { return }
+          await services.messengerService.appSettingsManager.setAccessType(.fake)
+          openMainFlowCoordinator(isPresentScreenAnimated: true)
+        }
       case .failure:
         break
       }
@@ -118,7 +124,7 @@ private extension RootCoordinator {
           guard let self else { return }
           let model = await services.messengerService.modelHandlerService.getAppSettingsModel()
           guard model.appPassword != nil else { return }
-          openAuthenticationFlowCoordinator(.loginPasscode(.loginFaceID))
+          openAuthenticationFlowCoordinator(.loginPasscode(.enterPasscode))
           mainFlowCoordinator = nil
         }
       }
@@ -130,7 +136,7 @@ private extension RootCoordinator {
     let modelHandlerService = services.messengerService.modelHandlerService
     let appSettingsModel = await modelHandlerService.getAppSettingsModel()
     
-    if appSettingsModel.accessType == .demo || appSettingsModel.accessType == .fake {
+    if appSettingsModel.accessType == .demo {
       modelHandlerService.deleteAllData()
     }
     
@@ -150,7 +156,7 @@ private extension RootCoordinator {
   func sessionCheck() async {
     let model = await services.messengerService.modelHandlerService.getAppSettingsModel()
     if !services.accessAndSecurityManagementService.sessionService.isSessionActive(), model.appPassword != nil {
-      openAuthenticationFlowCoordinator(.loginPasscode(.loginFaceID))
+      openAuthenticationFlowCoordinator(.loginPasscode(.enterPasscode))
     }
   }
   

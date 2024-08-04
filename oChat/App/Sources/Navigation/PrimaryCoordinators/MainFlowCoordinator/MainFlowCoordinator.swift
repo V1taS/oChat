@@ -72,8 +72,8 @@ private extension MainFlowCoordinator {
       switch state {
       case .lockOChat:
         self?.finishMainFlow(.lockOChat)
-      case .deleteOChat:
-        self?.finishMainFlow(.deleteOChat)
+      case .exit:
+        self?.finishMainFlow(.exit)
       }
       self?.messengerScreenFlowCoordinator = nil
     }
@@ -104,8 +104,8 @@ private extension MainFlowCoordinator {
       switch state {
       case .lockOChat:
         self?.finishMainFlow(.lockOChat)
-      case .deleteOChat:
-        self?.finishMainFlow(.deleteOChat)
+      case .exit:
+        self?.finishMainFlow(.exit)
       }
       self?.settingsScreenFlowCoordinator = nil
     }

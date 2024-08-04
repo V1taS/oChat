@@ -45,6 +45,13 @@ final class SettingsScreenFlowCoordinator: Coordinator<Void, SettingsScreenFinis
 // MARK: - MainScreenModuleOutput
 
 extension SettingsScreenFlowCoordinator: SettingsScreenModuleOutput {
+  func userIntentionExit() {
+    Task { @MainActor [weak self] in
+      guard let self else { return }
+      finishSettingsScreenFlow(.lockOChat)
+    }
+  }
+  
   func userIntentionDeleteAndExit() {
     let title = OChatStrings.SettingsScreenFlowCoordinatorLocalization
       .Notification.IntentionDeleteAndExit.title
@@ -58,7 +65,7 @@ extension SettingsScreenFlowCoordinator: SettingsScreenModuleOutput {
         Task { @MainActor [weak self] in
           guard let self else { return }
           await settingsScreenModule?.input.deleteAllData()
-          finishSettingsScreenFlow(.deleteOChat)
+          finishSettingsScreenFlow(.exit)
         }
       }
     )
@@ -112,8 +119,42 @@ extension SettingsScreenFlowCoordinator: NotificationsSettingsScreenModuleOutput
 // MARK: - PasscodeSettingsScreenModuleOutput
 
 extension SettingsScreenFlowCoordinator: PasscodeSettingsScreenModuleOutput {
+  @MainActor
+  func openFakeChangeAccessCode() async {
+    openAuthenticationFlow(state: .changePasscode(.enterOldPasscode), isFake: true) { [weak self] in
+      Task { [weak self] in
+        await self?.passcodeSettingsScreenModule?.input.updateScreen()
+      }
+      
+      Timer.scheduledTimer(withTimeInterval: 1, repeats: false) { [weak self] _ in
+        self?.services.userInterfaceAndExperienceService.notificationService.showNotification(
+          .positive(
+            title: "Фейковый пароль изменен"
+          )
+        )
+      }
+    }
+  }
+  
+  @MainActor
+  func openFakeSetAccessCode(_ code: Bool) async {
+    openAuthenticationFlow(state: .createPasscode(.enterPasscode), isFake: true) { [weak self] in
+      Task { [weak self] in
+        await self?.passcodeSettingsScreenModule?.input.updateScreen()
+      }
+      
+      Timer.scheduledTimer(withTimeInterval: 1, repeats: false) { [weak self] _ in
+        self?.services.userInterfaceAndExperienceService.notificationService.showNotification(
+          .positive(
+            title: "Фейковый пароль установлен"
+          )
+        )
+      }
+    }
+  }
+  
   func openAuthorizationPasswordDisable() {
-    openAuthenticationFlow(state: .loginPasscode(.loginFaceID)) { [weak self] in
+    openAuthenticationFlow(state: .loginPasscode(.enterPasscode), isFake: false) { [weak self] in
       Task { [weak self] in
         await self?.passcodeSettingsScreenModule?.input.successAuthorizationPasswordDisable()
       }
@@ -121,7 +162,7 @@ extension SettingsScreenFlowCoordinator: PasscodeSettingsScreenModuleOutput {
   }
   
   func openNewAccessCode() {
-    openAuthenticationFlow(state: .createPasscode(.enterPasscode)) { [weak self] in
+    openAuthenticationFlow(state: .createPasscode(.enterPasscode), isFake: false) { [weak self] in
       Task { [weak self] in
         await self?.passcodeSettingsScreenModule?.input.updateScreen()
       }
@@ -138,7 +179,7 @@ extension SettingsScreenFlowCoordinator: PasscodeSettingsScreenModuleOutput {
   }
   
   func openChangeAccessCode() {
-    openAuthenticationFlow(state: .changePasscode(.enterOldPasscode)) { [weak self] in
+    openAuthenticationFlow(state: .changePasscode(.enterOldPasscode), isFake: false) { [weak self] in
       Task { [weak self] in
         await self?.passcodeSettingsScreenModule?.input.updateScreen()
       }
@@ -215,12 +256,15 @@ private extension SettingsScreenFlowCoordinator {
   
   func openAuthenticationFlow(
     state: AuthenticationScreenState,
+    isFake: Bool,
+    openType: AuthenticationFlowOpenType = .push,
     completion: (() -> Void)?
   ) {
     let authenticationFlowCoordinator = AuthenticationFlowCoordinator(
       services,
       viewController: navigationController,
-      openType: .push
+      openType: openType,
+      isFake: isFake
     )
     self.authenticationFlowCoordinator = authenticationFlowCoordinator
     authenticationFlowCoordinator.finishFlow = { [weak self] state in
@@ -228,7 +272,7 @@ private extension SettingsScreenFlowCoordinator {
         return
       }
       switch state {
-      case .success:
+      case .success, .successFake:
         completion?()
         navigationController?.popViewController(animated: true)
       case .failure:

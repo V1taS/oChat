@@ -11,6 +11,9 @@ import SwiftUI
 public protocol AuthenticationScreenModuleOutput: AnyObject {
   /// Успешная аунтификация
   func authenticationSuccess()
+  
+  /// Успешная фейковая аунтификация
+  func authenticationFakeSuccess()
 }
 
 /// События которые отправляем из `Coordinator` в `AuthenticationScreenModule`

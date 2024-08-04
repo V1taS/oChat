@@ -20,6 +20,7 @@ public final class MessengerScreenFlowCoordinator: Coordinator<AppSettingsModel.
   private let services: IApplicationServices
   private var messengerListScreenModuleModule: MessengerListScreenModuleModule?
   private var messengerDialogModule: MessengerDialogScreenModule?
+  private var authenticationFlowCoordinator: AuthenticationFlowCoordinator?
   
   // MARK: - Initialization
   
@@ -53,6 +54,16 @@ public final class MessengerScreenFlowCoordinator: Coordinator<AppSettingsModel.
 // MARK: - MessengerListScreenModuleModuleOutput
 
 extension MessengerScreenFlowCoordinator: MessengerListScreenModuleOutput {
+  public func lockScreen() async {
+    finishMessengerFlow(.lockOChat)
+  }
+  
+  public func setPasswordForApp() async {
+    DispatchQueue.main.async { [weak self] in
+      self?.openAuthenticationFlow(state: .createPasscode(.enterPasscode))
+    }
+  }
+  
   public func suggestToRemoveContact(index: Int) async {
     let title = OChatStrings.MessengerFlowCoordinatorLocalization
       .Alert.IntentionDeleteContact.title
@@ -201,14 +212,45 @@ private extension MessengerScreenFlowCoordinator {
     messengerDialogModule.viewController.hidesBottomBarWhenPushed = true
     navigationController?.pushViewController(messengerDialogModule.viewController, animated: true)
   }
+  
+  func openAuthenticationFlow(
+    state: AuthenticationScreenState,
+    completion: (() -> Void)? = nil
+  ) {
+    let authenticationFlowCoordinator = AuthenticationFlowCoordinator(
+      services,
+      viewController: navigationController,
+      openType: .push, 
+      isFake: false
+    )
+    self.authenticationFlowCoordinator = authenticationFlowCoordinator
+    authenticationFlowCoordinator.finishFlow = { [weak self] state in
+      guard let self else {
+        return
+      }
+      switch state {
+      case .success, .successFake:
+        completion?()
+        navigationController?.popViewController(animated: true)
+      case .failure:
+        break
+      }
+      self.authenticationFlowCoordinator = nil
+    }
+    authenticationFlowCoordinator.start(parameter: state)
+  }
 }
 
 // MARK: - Private
 
 private extension MessengerScreenFlowCoordinator {
   func finishMessengerFlow(_ flowType: MessengerScreenFinishFlowType) {
-    messengerListScreenModuleModule = nil
-    messengerDialogModule = nil
-    finishFlow?(flowType)
+    DispatchQueue.main.async { [ weak self] in
+      guard let self else { return }
+      messengerListScreenModuleModule = nil
+      messengerDialogModule = nil
+      authenticationFlowCoordinator = nil
+      finishFlow?(flowType)
+    }
   }
 }

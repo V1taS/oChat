@@ -69,7 +69,7 @@ extension PasscodeSettingsScreenFactory: PasscodeSettingsScreenFactoryInput {
       initialState: isAppPasswordEnabled,
       description: "Требовать пароль для разблокировки",
       action: { [weak self] newValue in
-        Task { [weak self] in
+        Task { @MainActor [weak self] in
           await self?.output?.openSetAccessCode(newValue)
         }
       }
@@ -80,7 +80,7 @@ extension PasscodeSettingsScreenFactory: PasscodeSettingsScreenFactoryInput {
       let accessCodeModel = createWidgetWithChevron(
         title: "Изменить пароль доступа",
         action: { [weak self] in
-          Task { [weak self] in
+          Task { @MainActor [weak self] in
             await self?.output?.openChangeAccessCode()
           }
         }
@@ -90,10 +90,10 @@ extension PasscodeSettingsScreenFactory: PasscodeSettingsScreenFactoryInput {
     
     let fakeAccessModel = createWidgetModel(
       title: "Фейковый доступ в oChat",
-      initialState: isAppPasswordEnabled,
+      initialState: isFakePasswordEnabled,
       description: "Можно ввести фейковый пароль и откроется пустой чат",
       action: { [weak self] newValue in
-        Task { [weak self] in
+        Task { @MainActor [weak self] in
           await self?.output?.openFakeSetAccessCode(newValue)
         }
       }
@@ -104,7 +104,7 @@ extension PasscodeSettingsScreenFactory: PasscodeSettingsScreenFactoryInput {
       let accessCodeModel = createWidgetWithChevron(
         title: "Изменить фейковый пароль",
         action: { [weak self] in
-          Task { [weak self] in
+          Task { @MainActor [weak self] in
             await self?.output?.openFakeChangeAccessCode()
           }
         }

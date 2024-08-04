@@ -29,6 +29,9 @@ public protocol SettingsScreenModuleOutput: AnyObject {
   
   /// Пользователь намерен удалить и выйти
   func userIntentionDeleteAndExit()
+  
+  /// Пользователь намерен  выйти
+  func userIntentionExit()
 }
 
 /// События которые отправляем из `Coordinator` в `SettingsScreenModule`

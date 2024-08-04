@@ -59,8 +59,6 @@ private extension AuthenticationScreenView {
                 Task {
                   await presenter.authenticationSuccess()
                 }
-              case .loginFaceID:
-                break
               }
             case let .changePasscode(result):
               switch result {
@@ -90,6 +88,8 @@ private extension AuthenticationScreenView {
         )
       },
       onChangeAccessCode: { code in
+        presenter.getPasscodeTitle()
+        guard !code.isEmpty else { return }
         switch presenter.stateCurrentStateScreen {
         case let .createPasscode(result):
           switch result {
@@ -102,8 +102,6 @@ private extension AuthenticationScreenView {
           switch result {
           case .enterPasscode:
             presenter.setAccessCode(code)
-          case .loginFaceID:
-            break
           }
         case let .changePasscode(result):
           switch result {
@@ -117,7 +115,6 @@ private extension AuthenticationScreenView {
         }
         
         presenter.validationPasscode()
-        presenter.getPasscodeTitle()
       }
     )
   }
@@ -130,7 +127,8 @@ struct AuthenticationScreenView_Previews: PreviewProvider {
     UIViewControllerPreview {
       AuthenticationScreenAssembly().createModule(
         ApplicationServicesStub(),
-        .createPasscode(.enterPasscode)
+        .createPasscode(.enterPasscode), 
+        isFake: false
       ).viewController
     }
   }

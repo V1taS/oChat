@@ -11,16 +11,25 @@ import SwiftUI
 public protocol PasscodeSettingsScreenModuleOutput: AnyObject {
   /// Открыть экран изменения пароля
   func openChangeAccessCode()
+  
   /// Открыть экран создания пароля
   func openNewAccessCode()
+  
   /// Открыть экран подтверждения отключения пароля
   func openAuthorizationPasswordDisable()
+  
+  /// Открыть экран изменения фейкового пароля
+  func openFakeChangeAccessCode() async
+  
+  /// Устанавливаем фейковый пароль на вход в приложение
+  func openFakeSetAccessCode(_ code: Bool) async
 }
 
 /// События которые отправляем из `Coordinator` в `PasscodeSettingsScreenModule`
 public protocol PasscodeSettingsScreenModuleInput {
   /// Отключить пароль
   func successAuthorizationPasswordDisable() async
+  
   /// Обновить экран
   func updateScreen() async
 

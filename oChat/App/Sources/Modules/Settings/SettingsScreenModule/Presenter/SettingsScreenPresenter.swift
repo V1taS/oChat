@@ -74,6 +74,10 @@ extension SettingsScreenPresenter: SettingsScreenInteractorOutput {}
 // MARK: - SettingsScreenFactoryOutput
 
 extension SettingsScreenPresenter: SettingsScreenFactoryOutput {
+  func userIntentionExit() {
+    moduleOutput?.userIntentionExit()
+  }
+  
   func userIntentionDeleteAndExit() {
     moduleOutput?.userIntentionDeleteAndExit()
   }

@@ -20,7 +20,8 @@ protocol AuthenticationScreenFactoryInput {
     accessCode: String,
     confirmAccessCode: String,
     maxDigitsAccessCode: Int,
-    oldAccessCode: String?
+    oldAccessCode: String?,
+    fakeAccessCode: String?
   ) -> (isValidation: Bool, helperText: String?)
 }
 
@@ -70,7 +71,8 @@ extension AuthenticationScreenFactory: AuthenticationScreenFactoryInput {
     accessCode: String,
     confirmAccessCode: String,
     maxDigitsAccessCode: Int,
-    oldAccessCode: String?
+    oldAccessCode: String?,
+    fakeAccessCode: String?
   ) -> (isValidation: Bool, helperText: String?) {
     switch state {
     case let .createPasscode(result):
@@ -79,7 +81,6 @@ extension AuthenticationScreenFactory: AuthenticationScreenFactoryInput {
         return isValidationCode(accessCode, maxDigitsAccessCode: maxDigitsAccessCode)
       default:
         let isValidation = accessCode == confirmAccessCode
-        
         let isValidationText: String? = isValidation ?
         OChatStrings.AuthenticationScreenLocalization.State
           .CreatePasscode.Success.title :
@@ -88,7 +89,7 @@ extension AuthenticationScreenFactory: AuthenticationScreenFactoryInput {
         return (isValidation: isValidation, helperText: isValidationText)
       }
     case .loginPasscode:
-      let isValidation = accessCode == oldAccessCode
+      let isValidation = accessCode == oldAccessCode || accessCode == fakeAccessCode
       let isValidationText: String? = isValidation ?
       OChatStrings.AuthenticationScreenLocalization.State
         .LoginPasscode.Success.title :
@@ -98,7 +99,7 @@ extension AuthenticationScreenFactory: AuthenticationScreenFactoryInput {
     case let .changePasscode(result):
       switch result {
       case .enterOldPasscode:
-        let isValidation = oldAccessCode == confirmAccessCode
+        let isValidation = oldAccessCode == confirmAccessCode || fakeAccessCode == confirmAccessCode
         let isValidationText: String? = isValidation ?
         OChatStrings.AuthenticationScreenLocalization.State
           .LoginPasscode.Success.title :

@@ -17,6 +17,7 @@ final class AuthenticationScreenPresenter: ObservableObject {
   @Published var stateAccessCode = ""
   @Published var stateConfirmAccessCode = ""
   @Published var stateOldAccessCode: String?
+  @Published var stateFakeAccessCode: String?
   @Published var stateMaxDigitsAccessCode = 4
   @Published var stateValidationPasscode: (isValidation: Bool, helperText: String?) = (true, nil)
   @Published var statePasscodeTitle = ""
@@ -29,6 +30,7 @@ final class AuthenticationScreenPresenter: ObservableObject {
   
   private let interactor: AuthenticationScreenInteractorInput
   private let factory: AuthenticationScreenFactoryInput
+  private let isFake: Bool
   
   // MARK: - Initialization
   
@@ -36,12 +38,15 @@ final class AuthenticationScreenPresenter: ObservableObject {
   ///   - interactor: Интерактор
   ///   - factory: Фабрика
   ///   - state: Состояние экрана
+  ///   - isFake: Работаем с фейковым паролем
   init(interactor: AuthenticationScreenInteractorInput,
        factory: AuthenticationScreenFactoryInput,
-       state: AuthenticationScreenState) {
+       state: AuthenticationScreenState,
+       isFake: Bool) {
     self.interactor = interactor
     self.factory = factory
     self.stateCurrentStateScreen = state
+    self.isFake = isFake
   }
   
   // MARK: - The lifecycle of a UIViewController
@@ -55,7 +60,6 @@ final class AuthenticationScreenPresenter: ObservableObject {
     Task { [weak self] in
       guard let self else { return }
       
-      await loginFaceID()
       await getOldAccessCodeForchangePasscodeAndloginPasscode()
     }
   }
@@ -68,7 +72,8 @@ final class AuthenticationScreenPresenter: ObservableObject {
       accessCode: stateAccessCode,
       confirmAccessCode: stateConfirmAccessCode,
       maxDigitsAccessCode: stateMaxDigitsAccessCode,
-      oldAccessCode: stateOldAccessCode
+      oldAccessCode: stateOldAccessCode, 
+      fakeAccessCode: stateFakeAccessCode
     )
     stateValidationPasscode = validationPasscode
   }
@@ -89,13 +94,24 @@ final class AuthenticationScreenPresenter: ObservableObject {
     stateCurrentStateScreen = state
   }
   
+  @MainActor
   func authenticationSuccess() async {
     if stateValidationPasscode.isValidation {
       switch stateCurrentStateScreen {
       case .createPasscode, .changePasscode:
-        await interactor.setAppPassword(stateConfirmAccessCode)
+        if isFake {
+          await interactor.setFakeAppPassword(stateConfirmAccessCode)
+        } else {
+          await interactor.setAppPassword(stateConfirmAccessCode)
+        }
         moduleOutput?.authenticationSuccess()
       case .loginPasscode:
+        if stateAccessCode == stateFakeAccessCode {
+          await interactor.setAccessType(.fake)
+          moduleOutput?.authenticationFakeSuccess()
+          return
+        }
+        await interactor.setAccessType(.main)
         moduleOutput?.authenticationSuccess()
       }
     }
@@ -122,13 +138,9 @@ extension AuthenticationScreenPresenter: SceneViewModel {}
 
 private extension AuthenticationScreenPresenter {
   @MainActor
-  func loginFaceID() async {
-    stateCurrentStateScreen = .loginPasscode(.enterPasscode)
-  }
-  
-  @MainActor
   func getOldAccessCodeForchangePasscodeAndloginPasscode() async {
     stateOldAccessCode = await interactor.getOldAccessCode()
+    stateFakeAccessCode = await interactor.getFakeAccessCode()
   }
 }
 

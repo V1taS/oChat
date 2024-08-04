@@ -30,6 +30,12 @@ public protocol MessengerListScreenModuleOutput: AnyObject {
   
   /// Предложить удалить контакт
   func suggestToRemoveContact(index: Int) async
+  
+  /// Заблокировать экран
+  func lockScreen() async
+  
+  /// Установить пароль на приложение
+  func setPasswordForApp() async
 }
 
 /// События которые отправляем из `Coordinator` в `MessengerListScreenModuleModule`

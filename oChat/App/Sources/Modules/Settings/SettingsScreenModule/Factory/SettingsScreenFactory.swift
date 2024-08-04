@@ -32,6 +32,9 @@ protocol SettingsScreenFactoryOutput: AnyObject {
   
   /// Пользователь намерен удалить и выйти
   func userIntentionDeleteAndExit()
+  
+  /// Пользователь намерен  выйти
+  func userIntentionExit()
 }
 
 /// Cобытия которые отправляем от Presenter к Factory
@@ -120,20 +123,20 @@ extension SettingsScreenFactory: SettingsScreenFactoryInput {
         }
       )
       models.append(notificationsModel)
-      
-      let languageModel = createWidgetWithChevron(
-        image: Image(systemName: "globe"),
-        backgroundColor: #colorLiteral(red: 0.02118782885, green: 0.6728788018, blue: 0.6930519938, alpha: 1),
-        title: OChatStrings.SettingsScreenLocalization
-          .State.Language.title,
-        additionRightTitle: languageValue,
-        action: { [weak self] in
-          self?.output?.openLanguageSection()
-        }
-      )
-      models.append(languageModel)
     }
-
+    
+    let languageModel = createWidgetWithChevron(
+      image: Image(systemName: "globe"),
+      backgroundColor: #colorLiteral(red: 0.02118782885, green: 0.6728788018, blue: 0.6930519938, alpha: 1),
+      title: OChatStrings.SettingsScreenLocalization
+        .State.Language.title,
+      additionRightTitle: languageValue,
+      action: { [weak self] in
+        self?.output?.openLanguageSection()
+      }
+    )
+    models.append(languageModel)
+    
     let appearanceModel = createWidgetWithChevron(
       image: Image(systemName: "applepencil.and.scribble"),
       backgroundColor: #colorLiteral(red: 0.9988374114, green: 0.6133651733, blue: 0.03555859998, alpha: 1),
@@ -145,17 +148,15 @@ extension SettingsScreenFactory: SettingsScreenFactoryInput {
     )
     models.append(appearanceModel)
     
-    if appSettingsModel.accessType == .main {
-      let feedbackModel = createWidgetWithChevron(
-        image: Image(systemName: "pencil"),
-        backgroundColor: #colorLiteral(red: 0.6352941176, green: 0.5176470588, blue: 0.368627451, alpha: 1),
-        title: OChatStrings.SettingsScreenLocalization.Feedback.title,
-        action: { [weak self] in
-          self?.output?.userSelectFeedBack()
-        }
-      )
-      models.append(feedbackModel)
-    }
+    let feedbackModel = createWidgetWithChevron(
+      image: Image(systemName: "pencil"),
+      backgroundColor: #colorLiteral(red: 0.6352941176, green: 0.5176470588, blue: 0.368627451, alpha: 1),
+      title: OChatStrings.SettingsScreenLocalization.Feedback.title,
+      action: { [weak self] in
+        self?.output?.userSelectFeedBack()
+      }
+    )
+    models.append(feedbackModel)
     
     return models
   }
@@ -165,17 +166,30 @@ extension SettingsScreenFactory: SettingsScreenFactoryInput {
   ) -> [WidgetCryptoView.Model] {
     var models: [WidgetCryptoView.Model] = []
     
-    let profileModel = createWidgetWithChevron(
-      image: Image(systemName: "trash"),
-      backgroundColor: #colorLiteral(red: 0.9443466663, green: 0.3974885345, blue: 0.4782627821, alpha: 1),
-      title: OChatStrings.SettingsScreenLocalization.DeleteAndExit.title,
-      additionRightTitle: "",
-      action: { [weak self] in
-        self?.output?.userIntentionDeleteAndExit()
-      }
-    )
-    models.append(profileModel)
-    
+    if appSettingsModel.accessType != .fake {
+      let profileModel = createWidgetWithChevron(
+        image: Image(systemName: "trash"),
+        backgroundColor: #colorLiteral(red: 0.9443466663, green: 0.3974885345, blue: 0.4782627821, alpha: 1),
+        title: OChatStrings.SettingsScreenLocalization.DeleteAndExit.title,
+        additionRightTitle: "",
+        action: { [weak self] in
+          self?.output?.userIntentionDeleteAndExit()
+        }
+      )
+      models.append(profileModel)
+    } else {
+      let profileModel = createWidgetWithChevron(
+        image: Image(systemName: "trash"),
+        backgroundColor: #colorLiteral(red: 0.9443466663, green: 0.3974885345, blue: 0.4782627821, alpha: 1),
+        title: "Выйти",
+        additionRightTitle: "",
+        action: { [weak self] in
+          self?.output?.userIntentionExit()
+        }
+      )
+      models.append(profileModel)
+    }
+
     return models
   }
 }

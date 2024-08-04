@@ -15,6 +15,6 @@ public enum MessengerScreenFinishFlowType {
   /// Заблокировать экран
   case lockOChat
   
-  /// Удалить и выйти
-  case deleteOChat
+  /// Выйти
+  case exit
 }
