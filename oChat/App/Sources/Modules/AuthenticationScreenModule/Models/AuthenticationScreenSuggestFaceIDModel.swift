@@ -13,10 +13,13 @@ import Foundation
 struct AuthenticationScreenSuggestFaceIDModel {
   /// Название лотти картинки для предложения подключить FaceID
   let imageName: String
+  
   /// Заголовок для предложения подключить FaceID
   var title: String
+  
   /// Название кнопки которая подключает FaceID
   var confirmButtonTitle: String
+  
   /// Название кнопки которая пропускает подключение FaceID
   var skipButtonTitle: String
 }

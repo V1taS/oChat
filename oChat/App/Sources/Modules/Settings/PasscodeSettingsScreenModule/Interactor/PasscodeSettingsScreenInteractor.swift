@@ -13,8 +13,11 @@ protocol PasscodeSettingsScreenInteractorOutput: AnyObject {}
 
 /// События которые отправляем от Presenter к Interactor
 protocol PasscodeSettingsScreenInteractorInput {
-  /// Сбрасывает текущий код доступа до значения по умолчанию.
+  /// Сбрасывает текущий код доступа
   func resetPasscode() async
+  
+  /// Сбрасывает фейковый код доступа
+  func resetFakePasscode() async
   
   /// Получить модель со всеми настройками
   func getAppSettingsModel() async -> AppSettingsModel
@@ -46,6 +49,11 @@ protocol PasscodeSettingsScreenInteractorInput {
   /// Включает или отключает изменение голоса.
   /// - Parameter value: Значение, указывающее, следует ли включить изменение голоса.
   func setIsVoiceChangerEnabled(_ value: Bool) async
+  
+  /// Показать уведомление
+  /// - Parameters:
+  ///   - type: Тип уведомления
+  func showNotification(_ type: NotificationServiceType)
 }
 
 /// Интерактор
@@ -60,6 +68,7 @@ final class PasscodeSettingsScreenInteractor {
   private let permissionService: IPermissionService
   private let modelHandlerService: IMessengerModelHandlerService
   private let appSettingsManager: IAppSettingsManager
+  private let notificationService: INotificationService
   
   // MARK: - Initialization
   
@@ -69,12 +78,17 @@ final class PasscodeSettingsScreenInteractor {
     permissionService = services.accessAndSecurityManagementService.permissionService
     modelHandlerService = services.messengerService.modelHandlerService
     appSettingsManager = services.messengerService.appSettingsManager
+    notificationService = services.userInterfaceAndExperienceService.notificationService
   }
 }
 
 // MARK: - PasscodeSettingsScreenInteractorInput
 
 extension PasscodeSettingsScreenInteractor: PasscodeSettingsScreenInteractorInput {
+  func showNotification(_ type: SKAbstractions.NotificationServiceType) {
+    notificationService.showNotification(type)
+  }
+  
   func setFakeAppPassword(_ value: String?) async {
     await appSettingsManager.setFakeAppPassword(value)
   }
@@ -105,6 +119,10 @@ extension PasscodeSettingsScreenInteractor: PasscodeSettingsScreenInteractorInpu
   
   func resetPasscode() async {
     await appSettingsManager.setAppPassword(nil)
+  }
+  
+  func resetFakePasscode() async {
+    await appSettingsManager.setFakeAppPassword(nil)
   }
   
   func getAppSettingsModel() async -> AppSettingsModel {

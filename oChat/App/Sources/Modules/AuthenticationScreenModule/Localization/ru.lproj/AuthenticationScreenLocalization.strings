@@ -10,6 +10,7 @@
 "State.EnterPasscode.Title" = "Введите новый код доступа";
 "State.EnterOldPasscode.Title" = "Введите старый код доступа";
 "State.ReEnterPasscode.Title" = "Подтвердите ваш новый код доступа";
+
 "State.LoginPasscode.Title" = "Введите код доступа";
 
 "State.CreatePasscode.Success.Title" = "Вы установили новый код доступа";
@@ -18,5 +19,8 @@
 "State.LoginPasscode.Success.Title" = "Код доступа подтвержден";
 "State.LoginPasscode.Failure.Title" = "Код доступа не подтвержден";
 
+"State.LoginPasscode.AllDataErased.Title" = "Все данные стерты";
+
 "State.ValidationCount.Failure.Title" = "Код доступа должен состоять из %@ цифр";
 "State.SimplePasswords.Failure.Title" = "Пароль слишком простой";
+"State.CreatePasscode.NotAvailable.Title" = "Такой пароль недоступен";

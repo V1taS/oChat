@@ -15,8 +15,11 @@
 "State.CreatePasscode.Success.Title" = "You have set a new access code";
 "State.CreatePasscode.Failure.Title" = "Access code is not confirmed";
 
+"State.LoginPasscode.AllDataErased.Title" = "All data erased";
+
 "State.LoginPasscode.Success.Title" = "Access code is confirmed";
 "State.LoginPasscode.Failure.Title" = "Access code is not confirmed";
 
 "State.ValidationCount.Failure.Title" = "The access code must consist of %@ digits";
 "State.SimplePasswords.Failure.Title" = "The password is too simple";
+"State.CreatePasscode.NotAvailable.Title" = "This password is not available";

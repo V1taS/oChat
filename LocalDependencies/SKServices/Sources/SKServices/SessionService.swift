@@ -87,7 +87,7 @@ public class SessionService: ISessionService {
 private enum Constants {
   static let sessionActivityKey = "SessionActivityKey"
   static let dateFormat = "yyyy-MM-dd HH:mm:ss"
-  static let timeInterval: CGFloat = 600
+  static let timeInterval: CGFloat = 300
 }
 
 // MARK: - UIApplication

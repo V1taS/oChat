@@ -14,6 +14,9 @@ public protocol AuthenticationScreenModuleOutput: AnyObject {
   
   /// Успешная фейковая аунтификация
   func authenticationFakeSuccess()
+  
+  /// Стереть все данные
+  func allDataErased()
 }
 
 /// События которые отправляем из `Coordinator` в `AuthenticationScreenModule`

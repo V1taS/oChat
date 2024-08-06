@@ -217,7 +217,7 @@ extension MessengerListScreenModuleFactory: MessengerListScreenModuleFactoryInpu
       messenges: [],
       status: status,
       encryptionPublicKey: messageModel.senderPublicKey,
-      toxPublicKey: nil,
+      toxPublicKey: messageModel.senderToxPublicKey,
       pushNotificationToken: pushNotificationToken,
       isNewMessagesAvailable: true,
       isTyping: false,

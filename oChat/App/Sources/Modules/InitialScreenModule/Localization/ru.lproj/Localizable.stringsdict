@@ -2,26 +2,6 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>century_count</key>
-	<dict>
-		<key>NSStringLocalizedFormatKey</key>
-		<string>%#@century_count_values@</string>
-		<key>century_count_values</key>
-		<dict>
-			<key>few</key>
-			<string>%d века</string>
-			<key>many</key>
-			<string>%d веков</string>
-			<key>one</key>
-			<string>%d век</string>
-			<key>NSStringFormatValueTypeKey</key>
-			<string>d</string>
-			<key>NSStringFormatSpecTypeKey</key>
-			<string>NSStringPluralRuleType</string>
-			<key>other</key>
-			<string>%d веков</string>
-		</dict>
-	</dict>
 	<key>years_count</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>

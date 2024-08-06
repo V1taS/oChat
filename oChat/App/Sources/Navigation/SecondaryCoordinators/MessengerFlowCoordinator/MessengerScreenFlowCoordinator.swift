@@ -33,21 +33,24 @@ public final class MessengerScreenFlowCoordinator: Coordinator<AppSettingsModel.
   // MARK: - Internal func
   
   public override func start(parameter: AppSettingsModel.AccessType) {
-    if parameter == .demo {
-      var messengerListScreenModuleModule = MessengerListScreenModuleAssembly().createMockModule(
+    var messengerListScreenModuleModule: MessengerListScreenModuleModule
+    switch parameter {
+    case .demo:
+      messengerListScreenModuleModule = MessengerListScreenModuleAssembly().createMockModule(
         services: services
       )
-      self.messengerListScreenModuleModule = messengerListScreenModuleModule
-      messengerListScreenModuleModule.input.moduleOutput = self
-      navigationController = messengerListScreenModuleModule.viewController.wrapToNavigationController()
-    } else {
-      var messengerListScreenModuleModule = MessengerListScreenModuleAssembly().createModule(
+    case .fake:
+      messengerListScreenModuleModule = MessengerListScreenModuleAssembly().createFakeModule(
         services: services
       )
-      self.messengerListScreenModuleModule = messengerListScreenModuleModule
-      messengerListScreenModuleModule.input.moduleOutput = self
-      navigationController = messengerListScreenModuleModule.viewController.wrapToNavigationController()
+    case .main:
+      messengerListScreenModuleModule = MessengerListScreenModuleAssembly().createModule(
+        services: services
+      )
     }
+    self.messengerListScreenModuleModule = messengerListScreenModuleModule
+    messengerListScreenModuleModule.input.moduleOutput = self
+    navigationController = messengerListScreenModuleModule.viewController.wrapToNavigationController()
   }
 }
 
@@ -60,7 +63,7 @@ extension MessengerScreenFlowCoordinator: MessengerListScreenModuleOutput {
   
   public func setPasswordForApp() async {
     DispatchQueue.main.async { [weak self] in
-      self?.openAuthenticationFlow(state: .createPasscode(.enterPasscode))
+      self?.openAuthenticationFlow(state: .createPasscode(.enterPasscode), flowType: .mainFlow)
     }
   }
   
@@ -135,6 +138,7 @@ extension MessengerScreenFlowCoordinator: MessengerDialogScreenModuleOutput {
     )
   }
   
+  @MainActor
   public func closeMessengerDialog() {
     navigationController?.popViewController(animated: true)
     messengerDialogModule = nil
@@ -215,13 +219,14 @@ private extension MessengerScreenFlowCoordinator {
   
   func openAuthenticationFlow(
     state: AuthenticationScreenState,
+    flowType: AuthenticationScreenFlowType,
     completion: (() -> Void)? = nil
   ) {
     let authenticationFlowCoordinator = AuthenticationFlowCoordinator(
       services,
       viewController: navigationController,
       openType: .push, 
-      isFake: false
+      flowType: flowType
     )
     self.authenticationFlowCoordinator = authenticationFlowCoordinator
     authenticationFlowCoordinator.finishFlow = { [weak self] state in
@@ -232,7 +237,7 @@ private extension MessengerScreenFlowCoordinator {
       case .success, .successFake:
         completion?()
         navigationController?.popViewController(animated: true)
-      case .failure:
+      case .failure, .allDataErased:
         break
       }
       self.authenticationFlowCoordinator = nil

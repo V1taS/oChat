@@ -22,14 +22,21 @@ public final class MessengerListScreenModuleAssembly {
   /// Собирает модуль `MessengerListScreenModule`
   /// - Returns: Cобранный модуль `MessengerListScreenModule`
   public func createModule(services: IApplicationServices) -> MessengerListScreenModuleModule {
-    let interactor = createInteractor(services: services, isMock: false)
+    let interactor = createInteractor(services: services, accessType: .main)
     return assembleModule(interactor: interactor)
   }
   
   /// Собирает модуль для Демо `MessengerListScreenModule`
   /// - Returns: Cобранный модуль `MessengerListScreenModule`
   public func createMockModule(services: IApplicationServices) -> MessengerListScreenModuleModule {
-    let interactor = createInteractor(services: services, isMock: true)
+    let interactor = createInteractor(services: services, accessType: .demo)
+    return assembleModule(interactor: interactor)
+  }
+  
+  /// Собирает модуль для фейка `MessengerListScreenModule`
+  /// - Returns: Cобранный модуль `MessengerListScreenModule`
+  public func createFakeModule(services: IApplicationServices) -> MessengerListScreenModuleModule {
+    let interactor = createInteractor(services: services, accessType: .fake)
     return assembleModule(interactor: interactor)
   }
 }
@@ -39,9 +46,12 @@ public final class MessengerListScreenModuleAssembly {
 private extension MessengerListScreenModuleAssembly {
   /// Метод для создания интерактора
   /// - Parameter services: Сервисы приложения
-  /// - Parameter isMock: Флаг для создания мокового интерактора
+  /// - Parameter accessType: Тип доступа
   /// - Returns: Интерактор модуля
-  func createInteractor(services: IApplicationServices, isMock: Bool) -> MessengerListScreenModuleInteractorInput {
+  func createInteractor(
+    services: IApplicationServices,
+    accessType: AppSettingsModel.AccessType
+  ) -> MessengerListScreenModuleInteractorInput {
     let cryptoManager = CryptoManager(
       cryptoService: services.accessAndSecurityManagementService.cryptoService,
       systemService: services.userInterfaceAndExperienceService.systemService
@@ -78,7 +88,8 @@ private extension MessengerListScreenModuleAssembly {
     )
     let interfaceManager = InterfaceManager()
     
-    if isMock {
+    switch accessType {
+    case .demo:
       return MessengerListScreenModuleDemoInteractor(
         services: services,
         cryptoManager: cryptoManager,
@@ -90,7 +101,19 @@ private extension MessengerListScreenModuleAssembly {
         toxManager: toxManager,
         interfaceManager: interfaceManager
       )
-    } else {
+    case .fake:
+      return MessengerListScreenModuleFakeInteractor(
+        services: services,
+        cryptoManager: cryptoManager,
+        contactManager: contactManager,
+        notificationManager: notificationManager,
+        fileManager: fileManager,
+        messageManager: messageManager,
+        settingsManager: settingsManager,
+        toxManager: toxManager,
+        interfaceManager: interfaceManager
+      )
+    case .main:
       return MessengerListScreenModuleInteractor(
         services: services,
         cryptoManager: cryptoManager,

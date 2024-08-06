@@ -19,7 +19,7 @@ public final class AuthenticationScreenAssembly {
   public func createModule(
     _ services: IApplicationServices,
     _ state: AuthenticationScreenState,
-    isFake: Bool
+    flowType: AuthenticationScreenFlowType
   ) -> AuthenticationScreenModule {
     let interactor = AuthenticationScreenInteractor(services)
     let factory = AuthenticationScreenFactory()
@@ -27,7 +27,7 @@ public final class AuthenticationScreenAssembly {
       interactor: interactor,
       factory: factory,
       state: state,
-      isFake: isFake
+      flowType: flowType
     )
     let view = AuthenticationScreenView(presenter: presenter)
     let viewController = SceneViewController(viewModel: presenter, content: view)

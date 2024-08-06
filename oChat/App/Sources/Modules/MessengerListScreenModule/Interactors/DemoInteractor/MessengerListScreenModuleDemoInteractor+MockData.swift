@@ -58,10 +58,4 @@ extension MessengerListScreenModuleDemoInteractor {
     )
   }
 }
-
-// MARK: - Demo ContactModel
-
-extension MessengerListScreenModuleDemoInteractor {
-
-}
 // swiftlint:enable all

@@ -18,17 +18,23 @@ public protocol PasscodeSettingsScreenModuleOutput: AnyObject {
   /// Открыть экран подтверждения отключения пароля
   func openAuthorizationPasswordDisable()
   
+  /// Открыть экран подтверждения отключения фейкового пароля
+  func openFakeAuthorizationPasswordDisable()
+  
   /// Открыть экран изменения фейкового пароля
   func openFakeChangeAccessCode() async
   
   /// Устанавливаем фейковый пароль на вход в приложение
-  func openFakeSetAccessCode(_ code: Bool) async
+  func openFakeSetAccessCode() async
 }
 
 /// События которые отправляем из `Coordinator` в `PasscodeSettingsScreenModule`
 public protocol PasscodeSettingsScreenModuleInput {
   /// Отключить пароль
   func successAuthorizationPasswordDisable() async
+  
+  /// Отключить фейковый пароль
+  func successFakeAuthorizationPasswordDisable() async
   
   /// Обновить экран
   func updateScreen() async

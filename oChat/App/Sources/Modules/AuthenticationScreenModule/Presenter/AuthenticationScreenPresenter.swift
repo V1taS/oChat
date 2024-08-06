@@ -30,7 +30,17 @@ final class AuthenticationScreenPresenter: ObservableObject {
   
   private let interactor: AuthenticationScreenInteractorInput
   private let factory: AuthenticationScreenFactoryInput
-  private let isFake: Bool
+  private let flowType: AuthenticationScreenFlowType
+  
+  // Максимальное количество попыток
+  private var stateMaxCountAttempts = 5
+  private var currentAttempts: Int {
+    get {
+      UserDefaults.standard.integer(forKey: Constants.attemptsPasscodeKey)
+    } set {
+      UserDefaults.standard.setValue(newValue, forKey: Constants.attemptsPasscodeKey)
+    }
+  }
   
   // MARK: - Initialization
   
@@ -38,23 +48,23 @@ final class AuthenticationScreenPresenter: ObservableObject {
   ///   - interactor: Интерактор
   ///   - factory: Фабрика
   ///   - state: Состояние экрана
-  ///   - isFake: Работаем с фейковым паролем
+  ///   - flowType: Тип флоу
   init(interactor: AuthenticationScreenInteractorInput,
        factory: AuthenticationScreenFactoryInput,
        state: AuthenticationScreenState,
-       isFake: Bool) {
+       flowType: AuthenticationScreenFlowType) {
     self.interactor = interactor
     self.factory = factory
     self.stateCurrentStateScreen = state
-    self.isFake = isFake
+    self.flowType = flowType
   }
   
   // MARK: - The lifecycle of a UIViewController
   
   lazy var viewDidLoad: (() -> Void)? = { [weak self] in
-    guard let self else {
-      return
-    }
+    guard let self else { return }
+    if currentAttempts == .zero { currentAttempts = 1 }
+    
     getPasscodeTitle()
     
     Task { [weak self] in
@@ -73,8 +83,21 @@ final class AuthenticationScreenPresenter: ObservableObject {
       confirmAccessCode: stateConfirmAccessCode,
       maxDigitsAccessCode: stateMaxDigitsAccessCode,
       oldAccessCode: stateOldAccessCode, 
-      fakeAccessCode: stateFakeAccessCode
+      fakeAccessCode: stateFakeAccessCode, 
+      flowType: flowType,
+      maxCountAttempts: stateMaxCountAttempts,
+      currentAttempts: currentAttempts
     )
+    
+    if case .fakeFlow = flowType, stateOldAccessCode == stateAccessCode {
+      stateValidationPasscode = (
+        isValidation: false,
+        helperText: OChatStrings.AuthenticationScreenLocalization.State
+          .CreatePasscode.NotAvailable.title
+      )
+      return
+    }
+    
     stateValidationPasscode = validationPasscode
   }
   
@@ -99,21 +122,39 @@ final class AuthenticationScreenPresenter: ObservableObject {
     if stateValidationPasscode.isValidation {
       switch stateCurrentStateScreen {
       case .createPasscode, .changePasscode:
-        if isFake {
-          await interactor.setFakeAppPassword(stateConfirmAccessCode)
-        } else {
+        switch flowType {
+        case .mainFlow:
           await interactor.setAppPassword(stateConfirmAccessCode)
+          moduleOutput?.authenticationSuccess()
+        case .fakeFlow:
+          await interactor.setFakeAppPassword(stateConfirmAccessCode)
+          moduleOutput?.authenticationSuccess()
+        case .all:
+          break
         }
-        moduleOutput?.authenticationSuccess()
       case .loginPasscode:
-        if stateAccessCode == stateFakeAccessCode {
+        switch flowType {
+        case .mainFlow:
+          await interactor.setAccessType(.main)
+          moduleOutput?.authenticationSuccess()
+        case .fakeFlow:
           await interactor.setAccessType(.fake)
           moduleOutput?.authenticationFakeSuccess()
-          return
+        case .all:
+          if stateAccessCode == stateFakeAccessCode {
+            await interactor.setAccessType(.fake)
+            moduleOutput?.authenticationFakeSuccess()
+            return
+          }
+          await interactor.setAccessType(.main)
+          moduleOutput?.authenticationSuccess()
         }
-        await interactor.setAccessType(.main)
-        moduleOutput?.authenticationSuccess()
       }
+    } else if currentAttempts >= stateMaxCountAttempts {
+      currentAttempts = 1
+      moduleOutput?.allDataErased()
+    } else if flowType != .fakeFlow {
+      currentAttempts += 1
     }
   }
 }
@@ -146,4 +187,6 @@ private extension AuthenticationScreenPresenter {
 
 // MARK: - Constants
 
-private enum Constants {}
+private enum Constants {
+  static let attemptsPasscodeKey = "Authentication_AttemptsPasscode"
+}

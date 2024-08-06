@@ -17,4 +17,7 @@ public enum AuthenticationFinishFlowType {
   
   /// Ошибка
   case failure
+  
+  /// Все данные должны быть удалены
+  case allDataErased
 }

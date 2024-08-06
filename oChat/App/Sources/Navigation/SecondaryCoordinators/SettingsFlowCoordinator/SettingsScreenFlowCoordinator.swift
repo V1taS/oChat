@@ -119,9 +119,17 @@ extension SettingsScreenFlowCoordinator: NotificationsSettingsScreenModuleOutput
 // MARK: - PasscodeSettingsScreenModuleOutput
 
 extension SettingsScreenFlowCoordinator: PasscodeSettingsScreenModuleOutput {
+  func openFakeAuthorizationPasswordDisable() {
+    openAuthenticationFlow(state: .loginPasscode(.enterPasscode), flowType: .fakeFlow) { [weak self] in
+      Task { [weak self] in
+        await self?.passcodeSettingsScreenModule?.input.successFakeAuthorizationPasswordDisable()
+      }
+    }
+  }
+  
   @MainActor
   func openFakeChangeAccessCode() async {
-    openAuthenticationFlow(state: .changePasscode(.enterOldPasscode), isFake: true) { [weak self] in
+    openAuthenticationFlow(state: .changePasscode(.enterOldPasscode), flowType: .fakeFlow) { [weak self] in
       Task { [weak self] in
         await self?.passcodeSettingsScreenModule?.input.updateScreen()
       }
@@ -137,8 +145,8 @@ extension SettingsScreenFlowCoordinator: PasscodeSettingsScreenModuleOutput {
   }
   
   @MainActor
-  func openFakeSetAccessCode(_ code: Bool) async {
-    openAuthenticationFlow(state: .createPasscode(.enterPasscode), isFake: true) { [weak self] in
+  func openFakeSetAccessCode() async {
+    openAuthenticationFlow(state: .createPasscode(.enterPasscode), flowType: .fakeFlow) { [weak self] in
       Task { [weak self] in
         await self?.passcodeSettingsScreenModule?.input.updateScreen()
       }
@@ -154,7 +162,7 @@ extension SettingsScreenFlowCoordinator: PasscodeSettingsScreenModuleOutput {
   }
   
   func openAuthorizationPasswordDisable() {
-    openAuthenticationFlow(state: .loginPasscode(.enterPasscode), isFake: false) { [weak self] in
+    openAuthenticationFlow(state: .loginPasscode(.enterPasscode), flowType: .mainFlow) { [weak self] in
       Task { [weak self] in
         await self?.passcodeSettingsScreenModule?.input.successAuthorizationPasswordDisable()
       }
@@ -162,7 +170,7 @@ extension SettingsScreenFlowCoordinator: PasscodeSettingsScreenModuleOutput {
   }
   
   func openNewAccessCode() {
-    openAuthenticationFlow(state: .createPasscode(.enterPasscode), isFake: false) { [weak self] in
+    openAuthenticationFlow(state: .createPasscode(.enterPasscode), flowType: .mainFlow) { [weak self] in
       Task { [weak self] in
         await self?.passcodeSettingsScreenModule?.input.updateScreen()
       }
@@ -179,7 +187,7 @@ extension SettingsScreenFlowCoordinator: PasscodeSettingsScreenModuleOutput {
   }
   
   func openChangeAccessCode() {
-    openAuthenticationFlow(state: .changePasscode(.enterOldPasscode), isFake: false) { [weak self] in
+    openAuthenticationFlow(state: .changePasscode(.enterOldPasscode), flowType: .mainFlow) { [weak self] in
       Task { [weak self] in
         await self?.passcodeSettingsScreenModule?.input.updateScreen()
       }
@@ -256,7 +264,7 @@ private extension SettingsScreenFlowCoordinator {
   
   func openAuthenticationFlow(
     state: AuthenticationScreenState,
-    isFake: Bool,
+    flowType: AuthenticationScreenFlowType,
     openType: AuthenticationFlowOpenType = .push,
     completion: (() -> Void)?
   ) {
@@ -264,7 +272,7 @@ private extension SettingsScreenFlowCoordinator {
       services,
       viewController: navigationController,
       openType: openType,
-      isFake: isFake
+      flowType: flowType
     )
     self.authenticationFlowCoordinator = authenticationFlowCoordinator
     authenticationFlowCoordinator.finishFlow = { [weak self] state in
@@ -275,6 +283,12 @@ private extension SettingsScreenFlowCoordinator {
       case .success, .successFake:
         completion?()
         navigationController?.popViewController(animated: true)
+      case .allDataErased:
+        Task { @MainActor [weak self] in
+          guard let self else { return }
+          await settingsScreenModule?.input.deleteAllData()
+          finishSettingsScreenFlow(.exit)
+        }
       case .failure:
         break
       }

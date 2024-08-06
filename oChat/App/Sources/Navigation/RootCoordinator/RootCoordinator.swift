@@ -83,7 +83,7 @@ private extension RootCoordinator {
   }
   
   func openAuthenticationFlowCoordinator(_ state: AuthenticationScreenState) {
-    let authenticationFlowCoordinator = AuthenticationFlowCoordinator(services, isFake: false)
+    let authenticationFlowCoordinator = AuthenticationFlowCoordinator(services, flowType: .all)
     self.authenticationFlowCoordinator = authenticationFlowCoordinator
     authenticationFlowCoordinator.finishFlow = { [weak self] state in
       switch state {
@@ -97,6 +97,12 @@ private extension RootCoordinator {
         }
       case .failure:
         break
+      case .allDataErased:
+        Task { @MainActor [weak self] in
+          guard let self else { return }
+          services.messengerService.modelHandlerService.deleteAllData()
+          openInitialFlowCoordinator(isPresentScreenAnimated: true)
+        }
       }
       self?.authenticationFlowCoordinator = nil
     }

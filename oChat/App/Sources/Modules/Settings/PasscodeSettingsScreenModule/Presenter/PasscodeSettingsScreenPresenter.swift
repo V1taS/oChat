@@ -61,6 +61,12 @@ extension PasscodeSettingsScreenPresenter: PasscodeSettingsScreenModuleInput {
   
   func successAuthorizationPasswordDisable() async {
     await interactor.resetPasscode()
+    await interactor.resetFakePasscode()
+    await updateScreen()
+  }
+  
+  func successFakeAuthorizationPasswordDisable() async {
+    await interactor.resetFakePasscode()
     await updateScreen()
   }
 }
@@ -91,8 +97,23 @@ extension PasscodeSettingsScreenPresenter: PasscodeSettingsScreenFactoryOutput {
     await moduleOutput?.openFakeChangeAccessCode()
   }
   
-  func openFakeSetAccessCode(_ code: Bool) async {
-    await moduleOutput?.openFakeSetAccessCode(code)
+  @MainActor
+  func openFakeSetAccessCode(_ isNewFakeCode: Bool) async {
+    guard await interactor.getAppSettingsModel().appPassword != nil else {
+      interactor.showNotification(
+        .negative(
+          title: "Необходимо  сначала включить основной пароль"
+        )
+      )
+      await updateScreen()
+      return
+    }
+    
+    if isNewFakeCode {
+      await moduleOutput?.openFakeSetAccessCode()
+    } else {
+      moduleOutput?.openFakeAuthorizationPasswordDisable()
+    }
   }
   
   func setTypingIndicator(_ value: Bool) async {

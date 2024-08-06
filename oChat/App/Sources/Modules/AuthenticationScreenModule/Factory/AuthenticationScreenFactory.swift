@@ -21,7 +21,10 @@ protocol AuthenticationScreenFactoryInput {
     confirmAccessCode: String,
     maxDigitsAccessCode: Int,
     oldAccessCode: String?,
-    fakeAccessCode: String?
+    fakeAccessCode: String?,
+    flowType: AuthenticationScreenFlowType,
+    maxCountAttempts: Int,
+    currentAttempts: Int
   ) -> (isValidation: Bool, helperText: String?)
 }
 
@@ -72,13 +75,16 @@ extension AuthenticationScreenFactory: AuthenticationScreenFactoryInput {
     confirmAccessCode: String,
     maxDigitsAccessCode: Int,
     oldAccessCode: String?,
-    fakeAccessCode: String?
+    fakeAccessCode: String?,
+    flowType: AuthenticationScreenFlowType,
+    maxCountAttempts: Int,
+    currentAttempts: Int
   ) -> (isValidation: Bool, helperText: String?) {
     switch state {
     case let .createPasscode(result):
       switch result {
       case .enterPasscode:
-        return isValidationCode(accessCode, maxDigitsAccessCode: maxDigitsAccessCode)
+        return isValidationCode(accessCode, maxDigitsAccessCode: maxDigitsAccessCode, flowType: flowType)
       default:
         let isValidation = accessCode == confirmAccessCode
         let isValidationText: String? = isValidation ?
@@ -89,17 +95,44 @@ extension AuthenticationScreenFactory: AuthenticationScreenFactoryInput {
         return (isValidation: isValidation, helperText: isValidationText)
       }
     case .loginPasscode:
-      let isValidation = accessCode == oldAccessCode || accessCode == fakeAccessCode
-      let isValidationText: String? = isValidation ?
+      var isValidation = false
+      switch flowType {
+      case .mainFlow:
+        isValidation = accessCode == oldAccessCode
+      case .fakeFlow:
+        isValidation = accessCode == fakeAccessCode
+      case .all:
+        isValidation = accessCode == oldAccessCode || accessCode == fakeAccessCode
+      }
+      
+      var isValidationText: String? = isValidation ?
       OChatStrings.AuthenticationScreenLocalization.State
         .LoginPasscode.Success.title :
       OChatStrings.AuthenticationScreenLocalization.State
-        .LoginPasscode.title
+        .LoginPasscode.Failure.title
+      
+      if currentAttempts == maxCountAttempts {
+        isValidationText = OChatStrings.AuthenticationScreenLocalization.State
+          .LoginPasscode.AllDataErased.title
+      } else if currentAttempts > 2 {
+        isValidationText = OChatStrings.AuthenticationScreenLocalizable
+          .attemptsCount(maxCountAttempts - currentAttempts)
+      }
+      
       return (isValidation: isValidation, helperText: isValidationText)
     case let .changePasscode(result):
       switch result {
       case .enterOldPasscode:
-        let isValidation = oldAccessCode == confirmAccessCode || fakeAccessCode == confirmAccessCode
+        var isValidation = false
+        switch flowType {
+        case .mainFlow:
+          isValidation = oldAccessCode == confirmAccessCode
+        case .fakeFlow:
+          isValidation = fakeAccessCode == confirmAccessCode
+        case .all:
+          isValidation = oldAccessCode == confirmAccessCode || fakeAccessCode == confirmAccessCode
+        }
+        
         let isValidationText: String? = isValidation ?
         OChatStrings.AuthenticationScreenLocalization.State
           .LoginPasscode.Success.title :
@@ -107,7 +140,7 @@ extension AuthenticationScreenFactory: AuthenticationScreenFactoryInput {
           .LoginPasscode.Failure.title
         return (isValidation: isValidation, helperText: isValidationText)
       case .enterNewPasscode:
-        return isValidationCode(accessCode, maxDigitsAccessCode: maxDigitsAccessCode)
+        return isValidationCode(accessCode, maxDigitsAccessCode: maxDigitsAccessCode, flowType: flowType)
       case .reEnterNewPasscode:
         let isValidation = accessCode == confirmAccessCode
         let isValidationText: String? = isValidation ?
@@ -126,7 +159,8 @@ extension AuthenticationScreenFactory: AuthenticationScreenFactoryInput {
 private extension AuthenticationScreenFactory {
   func isValidationCode(
     _ accessCode: String,
-    maxDigitsAccessCode: Int
+    maxDigitsAccessCode: Int,
+    flowType: AuthenticationScreenFlowType
   ) -> (isValidation: Bool, helperText: String?) {
     guard accessCode.count == 4 else {
       return (
@@ -137,7 +171,7 @@ private extension AuthenticationScreenFactory {
     }
     
     let simplePasswords = Constants.simplePasswords
-    if simplePasswords.contains(accessCode) {
+    if simplePasswords.contains(accessCode) && flowType != .fakeFlow {
       
       return (
         isValidation: false,
@@ -145,6 +179,7 @@ private extension AuthenticationScreenFactory {
           .SimplePasswords.Failure.title
       )
     }
+    
     return (isValidation: true, helperText: nil)
   }
 }

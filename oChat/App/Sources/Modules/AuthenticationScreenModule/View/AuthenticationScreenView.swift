@@ -127,8 +127,8 @@ struct AuthenticationScreenView_Previews: PreviewProvider {
     UIViewControllerPreview {
       AuthenticationScreenAssembly().createModule(
         ApplicationServicesStub(),
-        .createPasscode(.enterPasscode), 
-        isFake: false
+        .createPasscode(.enterPasscode),
+        flowType: .all
       ).viewController
     }
   }
