@@ -44,6 +44,7 @@ final class MessengerDialogScreenPresenter: ObservableObject {
   @Published var stateIsDownloadAvailability = false
   @Published var stateIsPremiumEnabled = false
   @Published var stateIsChatHistoryStored = false
+  @Published var stateMyStatus: AppSettingsModel.Status = .offline
   
   // MARK: - Internal properties
   
@@ -490,6 +491,11 @@ final class MessengerDialogScreenPresenter: ObservableObject {
 // MARK: - MessengerDialogScreenModuleInput
 
 extension MessengerDialogScreenPresenter: MessengerDialogScreenModuleInput {
+  @MainActor
+  func updateMyStatus(_ status: SKAbstractions.AppSettingsModel.Status) async {
+    stateMyStatus = status
+  }
+  
   func handleFileSender(progress: Int, publicToxKey: String) {
     guard stateContactModel.toxPublicKey == publicToxKey else {
       return

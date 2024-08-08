@@ -36,6 +36,9 @@ public protocol MessengerListScreenModuleOutput: AnyObject {
   
   /// Установить пароль на приложение
   func setPasswordForApp() async
+  
+  /// Обновился мой статус в сети
+  func updateMyStatus(_ status: AppSettingsModel.Status) async
 }
 
 /// События которые отправляем из `Coordinator` в `MessengerListScreenModuleModule`
