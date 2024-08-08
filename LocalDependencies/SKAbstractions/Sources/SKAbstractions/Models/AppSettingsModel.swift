@@ -111,7 +111,7 @@ extension AppSettingsModel {
       case .offline:
         AbstractionsStrings.SKAbstractionsLocalization.commonStatusTitleOffline
       case .inProgress:
-        AbstractionsStrings.SKAbstractionsLocalization.messengerModelStatusTitleConnecting
+        "\(AbstractionsStrings.SKAbstractionsLocalization.messengerModelStatusTitleConnecting)..."
       }
     }
   }

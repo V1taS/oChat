@@ -48,7 +48,7 @@ extension MessengerListScreenModuleDemoInteractor {
       accessType: .demo,
       pushNotificationToken: nil,
       isNotificationsEnabled: true,
-      myStatus: .online,
+      myStatus: .offline,
       toxStateAsString: nil,
       isPremiumEnabled: true,
       isTypingIndicatorEnabled: true,

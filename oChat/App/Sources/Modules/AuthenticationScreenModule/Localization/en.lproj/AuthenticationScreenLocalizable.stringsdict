@@ -9,17 +9,17 @@
 		<key>attempts_count_values</key>
 		<dict>
 			<key>many</key>
-			<string>%d attempts remaining</string>
+			<string>Access code is not confirmed. %d attempts remaining</string>
 			<key>few</key>
-			<string>%d attempts remaining</string>
+			<string>Access code is not confirmed. %d attempts remaining</string>
 			<key>one</key>
-			<string>%d attempt remaining</string>
+			<string>Access code is not confirmed. %d attempt remaining</string>
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>NSStringFormatSpecTypeKey</key>
 			<string>NSStringPluralRuleType</string>
 			<key>other</key>
-			<string>%d attempts remaining</string>
+			<string>Access code is not confirmed. %d attempts remaining</string>
 		</dict>
 	</dict>
 </dict>

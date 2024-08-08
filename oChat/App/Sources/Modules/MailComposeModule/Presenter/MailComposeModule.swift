@@ -38,9 +38,9 @@ final class MailComposeModule: NSObject {
     let appVersion = systemService.getAppVersion()
     let systemVersion = systemService.getSystemVersion()
     let systemName = systemService.getSystemName()
-    let identifierForVendorText = "\("Идентийфикатор поставщика"): \(systemService.getDeviceIdentifier())"
-    let systemVersionText = "\("Версия системы"): \(systemName) \(systemVersion)"
-    let appVersionText = "\("Версия приложения"): \(appVersion)"
+    let identifierForVendorText = "\(OChatStrings.MailComposeModuleLocalization.Identifier.title): \(systemService.getDeviceIdentifier())"
+    let systemVersionText = "\(OChatStrings.MailComposeModuleLocalization.SystemVersion.title): \(systemName) \(systemVersion)"
+    let appVersionText = "\(OChatStrings.MailComposeModuleLocalization.AppVersion.title): \(appVersion)"
     let messageBody = """
 
 
@@ -51,7 +51,7 @@ final class MailComposeModule: NSObject {
     
     mailComposeViewController.mailComposeDelegate = self
     mailComposeViewController.setToRecipients([Secrets.supportOChatMail])
-    mailComposeViewController.setSubject("Поддержка приложения oChat")
+    mailComposeViewController.setSubject(OChatStrings.MailComposeModuleLocalization.Subject.title)
     mailComposeViewController.setMessageBody(messageBody, isHTML: false)
     UIViewController.topController?.present(mailComposeViewController, animated: true)
   }

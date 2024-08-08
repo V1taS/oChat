@@ -107,11 +107,18 @@ private extension MessengerDialogScreenView {
       }
     } else if presenter.stateContactModel.status == .offline {
       inputViewBuilder = { _, _, _, _, _, _ in
-        AnyView(
+        let askToComeContact = OChatStrings.MessengerDialogScreenLocalization
+          .Messenger.AskToComeContact.title
+        let AskToComeContactVia = OChatStrings.MessengerDialogScreenLocalization
+          .Messenger.AskToComeContactVia.title
+        let seconds = OChatStrings.MessengerDialogScreenLocalization
+          .Messenger.Message.seconds
+        
+        return AnyView(
           MainButtonView(
             text: presenter.stateIsAskToComeContact ?
-            "Позвать контакт" :
-              "Позвать контакт через \(presenter.stateSecondsUntilAskToComeContactAllowed) сек.",
+            askToComeContact :
+              "\(AskToComeContactVia) \(presenter.stateSecondsUntilAskToComeContactAllowed) \(seconds)",
             isEnabled: presenter.stateIsAskToComeContact,
             style: .primary,
             action: {

@@ -38,7 +38,14 @@ private extension P2PChatManager {
       // MARK: - ШАГ 2 Подтверждение запроса от юзера 1
       
       fileInfo = (friendNumber, fileId, fileName, fileSize)
-      self.toxCore.acceptFile(friendNumber: friendNumber, fileId: fileId) { _ in }
+      self.toxCore.acceptFile(friendNumber: friendNumber, fileId: fileId) { result in
+        switch result {
+        case .success:
+          print("Успех 🥳")
+        case .failure:
+          print("failure ❌")
+        }
+      }
     }
     
     toxCore.setFileChunkReceiveCallback { [weak self] friendNumber, fileId, position, data in
@@ -91,7 +98,7 @@ private extension P2PChatManager {
     toxCore.setFileControlCallback { friendNumber, fileId, control in }
     
     toxCore.setFileChunkRequestCallback { [weak self] friendNumber, fileId, position, length in
-      Task { [weak self] in
+      Task { @MainActor [weak self] in
         guard let self else { return }
         await self.sendChunk(
           to: friendNumber,
@@ -99,7 +106,7 @@ private extension P2PChatManager {
           position: position,
           length: length,
           completion: { [weak self] result in
-            Task { [weak self] in
+            Task { @MainActor [weak self] in
               guard let self else { return }
               switch result {
               case let .success(progress):
@@ -292,23 +299,22 @@ private extension P2PChatManager {
     }
   }
   
+  @MainActor
   func updateFileReceiveCallback(progress: Double, friendId: Int32, filePath: URL?) async {
     guard let publicKey = await toxCore.publicKeyFromFriendNumber(friendNumber: Int32(friendId)) else {
       return
     }
     
-    DispatchQueue.main.async {
-      // Отправка уведомления что файл получается
-      NotificationCenter.default.post(
-        name: Notification.Name(NotificationConstants.didUpdateFileReceive.rawValue),
-        object: nil,
-        userInfo: [
-          "publicKey": publicKey,
-          "progress": progress,
-          "filePath": filePath
-        ]
-      )
-    }
+    // Отправка уведомления что файл получается
+    NotificationCenter.default.post(
+      name: Notification.Name(NotificationConstants.didUpdateFileReceive.rawValue),
+      object: nil,
+      userInfo: [
+        "publicKey": publicKey,
+        "progress": progress,
+        "filePath": filePath
+      ]
+    )
   }
   
   func updateFriendReadReceiptCallback(_ friendId: UInt32, _ messageId: UInt32) async {

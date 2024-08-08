@@ -98,7 +98,10 @@ extension MessengerScreenFlowCoordinator: MessengerListScreenModuleOutput {
   }
   
   public func openNewMessengeScreen(contactAdress: String?) {
-    openMessengerDialogModule(dialogModel: nil, contactAdress: contactAdress)
+    Task { @MainActor [weak self] in
+      guard let self else { return }
+      openMessengerDialogModule(dialogModel: nil, contactAdress: contactAdress)
+    }
   }
   
   public func dataModelHasBeenUpdated() {
@@ -106,7 +109,10 @@ extension MessengerScreenFlowCoordinator: MessengerListScreenModuleOutput {
   }
   
   public func openMessengerDialogScreen(dialogModel: ContactModel) {
-    openMessengerDialogModule(dialogModel: dialogModel)
+    Task { @MainActor [weak self] in
+      guard let self else { return }
+      openMessengerDialogModule(dialogModel: dialogModel)
+    }
   }
 }
 
@@ -204,6 +210,7 @@ extension MessengerScreenFlowCoordinator: MessengerDialogScreenModuleOutput {
 // MARK: - Open modules
 
 private extension MessengerScreenFlowCoordinator {
+  @MainActor
   func openMessengerDialogModule(dialogModel: ContactModel?, contactAdress: String? = nil) {
     var messengerDialogModule = MessengerDialogScreenAssembly().createModule(
       dialogModel: dialogModel,
@@ -217,6 +224,7 @@ private extension MessengerScreenFlowCoordinator {
     navigationController?.pushViewController(messengerDialogModule.viewController, animated: true)
   }
   
+  @MainActor
   func openAuthenticationFlow(
     state: AuthenticationScreenState,
     flowType: AuthenticationScreenFlowType,

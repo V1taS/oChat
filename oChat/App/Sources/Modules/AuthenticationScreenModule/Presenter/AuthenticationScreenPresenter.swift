@@ -102,7 +102,7 @@ final class AuthenticationScreenPresenter: ObservableObject {
   }
   
   func getPasscodeTitle() {
-    statePasscodeTitle = factory.createPasscodeTitle(stateCurrentStateScreen)
+    statePasscodeTitle = factory.createPasscodeTitle(stateCurrentStateScreen, flowType: flowType)
   }
   
   func setAccessCode(_ code: String) {
@@ -150,6 +150,7 @@ final class AuthenticationScreenPresenter: ObservableObject {
           moduleOutput?.authenticationSuccess()
         }
       }
+      currentAttempts = 1
     } else if currentAttempts >= stateMaxCountAttempts {
       currentAttempts = 1
       moduleOutput?.allDataErased()

@@ -60,7 +60,8 @@ final class MessengerProfileModulePresenter: ObservableObject {
     interactor.copyToClipboard(text: stateMyOnionAddress)
     interactor.showNotification(
       .positive(
-        title: "Copied to clipboard"
+        title: OChatStrings.MessengerProfileModuleLocalization
+          .CopiedToClipboard.title
       )
     )
   }

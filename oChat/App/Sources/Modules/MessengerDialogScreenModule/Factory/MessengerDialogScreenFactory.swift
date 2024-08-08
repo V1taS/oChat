@@ -250,10 +250,6 @@ extension MessengerDialogScreenFactory: MessengerDialogScreenFactoryInput {
     )
   }
   
-  func createPlaceholder() -> String {
-    return "Message"
-  }
-  
   func createInitialPlaceholder() -> String {
     OChatStrings.MessengerDialogScreenLocalization.Messenger.Initial.request
   }

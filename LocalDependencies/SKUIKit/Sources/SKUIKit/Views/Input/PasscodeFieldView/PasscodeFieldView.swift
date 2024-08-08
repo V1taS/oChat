@@ -61,7 +61,9 @@ public struct PasscodeFieldView: View {
         .font(.fancy.text.title)
         .foregroundColor(SKStyleAsset.ghost.swiftUIColor)
         .multilineTextAlignment(.center)
+        .lineLimit(1)
         .allowsHitTesting(false)
+        .padding(.horizontal, .s6)
       
       ZStack {
         createPinDots()
@@ -72,13 +74,19 @@ public struct PasscodeFieldView: View {
           .font(.fancy.text.regularMedium)
           .foregroundColor(passcodeState.color)
           .multilineTextAlignment(.center)
+          .lineLimit(2)
           .allowsHitTesting(false)
+          .padding(.horizontal, .s6)
+          .frame(height: .s15)
       } else {
-        Text(" ")
+        Text("")
           .font(.fancy.text.regularMedium)
           .foregroundColor(passcodeState.color)
           .multilineTextAlignment(.center)
+          .lineLimit(2)
           .allowsHitTesting(false)
+          .padding(.horizontal, .s6)
+          .frame(height: .s15)
       }
     }
     .onChange(of: pin) { _ in

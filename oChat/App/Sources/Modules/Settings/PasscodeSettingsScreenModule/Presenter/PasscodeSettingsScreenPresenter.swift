@@ -94,7 +94,7 @@ extension PasscodeSettingsScreenPresenter: PasscodeSettingsScreenFactoryOutput {
   }
   
   func openFakeChangeAccessCode() async {
-    await moduleOutput?.openFakeChangeAccessCode()
+    await moduleOutput?.openFakeSetAccessCode()
   }
   
   @MainActor
@@ -102,7 +102,8 @@ extension PasscodeSettingsScreenPresenter: PasscodeSettingsScreenFactoryOutput {
     guard await interactor.getAppSettingsModel().appPassword != nil else {
       interactor.showNotification(
         .negative(
-          title: "Необходимо  сначала включить основной пароль"
+          title: OChatStrings.PasscodeSettingsScreenLocalization
+            .State.FakeSetAccess.Error.title
         )
       )
       await updateScreen()
@@ -112,7 +113,8 @@ extension PasscodeSettingsScreenPresenter: PasscodeSettingsScreenFactoryOutput {
     if isNewFakeCode {
       await moduleOutput?.openFakeSetAccessCode()
     } else {
-      moduleOutput?.openFakeAuthorizationPasswordDisable()
+      await interactor.resetFakePasscode()
+      await updateScreen()
     }
   }
   

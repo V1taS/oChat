@@ -27,12 +27,11 @@ final class MessengerListScreenModulePresenter: ObservableObject {
   let factory: MessengerListScreenModuleFactoryInput
   let incomingDataManager: IIncomingDataManager
   var centerBarButtonView: SKBarButtonView?
+  var rightBarLockButton: SKBarButtonItem?
+  var rightBarWriteButton: SKBarButtonItem?
   let impactFeedback = UIImpactFeedbackGenerator(style: .soft)
   
   // MARK: - Private properties
-  
-  private var rightBarLockButton: SKBarButtonItem?
-  private var rightBarWriteButton: SKBarButtonItem?
   
   // MARK: - Initialization
   
@@ -432,6 +431,7 @@ private extension MessengerListScreenModulePresenter {
         guard let self else { return }
         centerBarButtonView?.iconLeftView.image = messengerModel.appSettingsModel.myStatus.imageStatus
         centerBarButtonView?.labelView.text = messengerModel.appSettingsModel.myStatus.title
+        rightBarWriteButton?.isEnabled = messengerModel.appSettingsModel.myStatus == .online
       }
     }
   }

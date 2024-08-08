@@ -181,7 +181,8 @@ extension SettingsScreenFactory: SettingsScreenFactoryInput {
       let profileModel = createWidgetWithChevron(
         image: Image(systemName: "trash"),
         backgroundColor: #colorLiteral(red: 0.9443466663, green: 0.3974885345, blue: 0.4782627821, alpha: 1),
-        title: "Выйти",
+        title: OChatStrings.SettingsScreenLocalization
+          .Exit.title,
         additionRightTitle: "",
         action: { [weak self] in
           self?.output?.userIntentionExit()

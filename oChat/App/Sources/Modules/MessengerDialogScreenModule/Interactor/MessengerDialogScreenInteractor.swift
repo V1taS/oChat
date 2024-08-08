@@ -42,6 +42,10 @@ protocol MessengerDialogScreenInteractorInput {
   ///   - video: Ссылка на видео
   ///   - completion: Коллбэк, который вызывается после попытки сохранения. Передает `Bool`, указывающий успешно ли было сохранение видео.
   func saveVideoToGallery(_ video: URL?, completion: ((Bool) -> Void)?)
+  
+  /// Получить адрес Tox.
+  /// - Returns: Адрес Tox в виде строки.
+  func getToxAddress() async -> String?
 }
 
 /// Интерактор
@@ -60,6 +64,7 @@ final class MessengerDialogScreenInteractor {
   private let dataManagementService: IDataManagerService
   private let uiService: IUIService
   private let permissionService: IPermissionService
+  private let p2pChatManager: IP2PChatManager
   
   // MARK: - Initialization
   
@@ -73,6 +78,7 @@ final class MessengerDialogScreenInteractor {
     dataManagementService = services.dataManagementService.dataManagerService
     uiService = services.userInterfaceAndExperienceService.uiService
     permissionService = services.accessAndSecurityManagementService.permissionService
+    p2pChatManager = services.messengerService.p2pChatManager
   }
 }
 
@@ -128,6 +134,10 @@ extension MessengerDialogScreenInteractor: MessengerDialogScreenInteractorInput 
       return contactModels[contactIndex]
     }
     return contactModel
+  }
+  
+  func getToxAddress() async -> String? {
+    await p2pChatManager.getToxAddress()
   }
 }
 

@@ -119,44 +119,11 @@ extension SettingsScreenFlowCoordinator: NotificationsSettingsScreenModuleOutput
 // MARK: - PasscodeSettingsScreenModuleOutput
 
 extension SettingsScreenFlowCoordinator: PasscodeSettingsScreenModuleOutput {
-  func openFakeAuthorizationPasswordDisable() {
-    openAuthenticationFlow(state: .loginPasscode(.enterPasscode), flowType: .fakeFlow) { [weak self] in
-      Task { [weak self] in
-        await self?.passcodeSettingsScreenModule?.input.successFakeAuthorizationPasswordDisable()
-      }
-    }
-  }
-  
-  @MainActor
-  func openFakeChangeAccessCode() async {
-    openAuthenticationFlow(state: .changePasscode(.enterOldPasscode), flowType: .fakeFlow) { [weak self] in
-      Task { [weak self] in
-        await self?.passcodeSettingsScreenModule?.input.updateScreen()
-      }
-      
-      Timer.scheduledTimer(withTimeInterval: 1, repeats: false) { [weak self] _ in
-        self?.services.userInterfaceAndExperienceService.notificationService.showNotification(
-          .positive(
-            title: "Фейковый пароль изменен"
-          )
-        )
-      }
-    }
-  }
-  
   @MainActor
   func openFakeSetAccessCode() async {
     openAuthenticationFlow(state: .createPasscode(.enterPasscode), flowType: .fakeFlow) { [weak self] in
       Task { [weak self] in
         await self?.passcodeSettingsScreenModule?.input.updateScreen()
-      }
-      
-      Timer.scheduledTimer(withTimeInterval: 1, repeats: false) { [weak self] _ in
-        self?.services.userInterfaceAndExperienceService.notificationService.showNotification(
-          .positive(
-            title: "Фейковый пароль установлен"
-          )
-        )
       }
     }
   }
@@ -174,15 +141,6 @@ extension SettingsScreenFlowCoordinator: PasscodeSettingsScreenModuleOutput {
       Task { [weak self] in
         await self?.passcodeSettingsScreenModule?.input.updateScreen()
       }
-      
-      Timer.scheduledTimer(withTimeInterval: 1, repeats: false) { [weak self] _ in
-        self?.services.userInterfaceAndExperienceService.notificationService.showNotification(
-          .positive(
-            title: OChatStrings.SettingsScreenFlowCoordinatorLocalization
-              .State.Notification.NewAccessCode.success
-          )
-        )
-      }
     }
   }
   
@@ -190,15 +148,6 @@ extension SettingsScreenFlowCoordinator: PasscodeSettingsScreenModuleOutput {
     openAuthenticationFlow(state: .changePasscode(.enterOldPasscode), flowType: .mainFlow) { [weak self] in
       Task { [weak self] in
         await self?.passcodeSettingsScreenModule?.input.updateScreen()
-      }
-      
-      Timer.scheduledTimer(withTimeInterval: 1, repeats: false) { [weak self] _ in
-        self?.services.userInterfaceAndExperienceService.notificationService.showNotification(
-          .positive(
-            title: OChatStrings.SettingsScreenFlowCoordinatorLocalization
-              .State.Notification.ChangePassCode.success
-          )
-        )
       }
     }
   }

@@ -23,6 +23,7 @@ final class MessengerDialogScreenPresenter: ObservableObject {
   @Published var stateIsDeeplinkAdress = false
   @Published var stateContactAdressMaxLength = 76
   @Published var stateShowInitialTips = true
+  @Published var stateIsSendInitialRequestButton = false
   
   @Published var stateIsCanResendInitialRequest = false
   @Published var stateSecondsUntilResendInitialRequestAllowed = 0
@@ -57,6 +58,7 @@ final class MessengerDialogScreenPresenter: ObservableObject {
   private var resendInitialRequestTimer: Timer?
   private var timer: Timer?
   private let impactFeedback = UIImpactFeedbackGenerator(style: .soft)
+  private var toxSelfAddress = ""
   
   // MARK: - Initialization
   
@@ -342,7 +344,10 @@ final class MessengerDialogScreenPresenter: ObservableObject {
   }
   
   func isInitialChatValidation() -> Bool {
-    !stateContactAdress.isEmpty && stateContactAdress.count == stateContactAdressMaxLength
+    let isToxSelfAddressValid = toxSelfAddress != stateContactAdress
+    let isNoEmpty = !stateContactAdress.isEmpty
+    let isAdressMaxLengthValid = stateContactAdress.count == stateContactAdressMaxLength
+    return isToxSelfAddressValid && isNoEmpty && isAdressMaxLengthValid
   }
   
   func isChatValidation() -> Bool {
@@ -588,6 +593,7 @@ private extension MessengerDialogScreenPresenter {
       }
       await markMessageAsRead(contactModel: stateContactModel)
       stateIsPremiumEnabled = getAppSettingsModel.isPremiumEnabled
+      toxSelfAddress = await interactor.getToxAddress() ?? ""
     }
     
     updateCenterBarButtonView(isHidden: isInitialAddressEntryState() || isRequestChatState())

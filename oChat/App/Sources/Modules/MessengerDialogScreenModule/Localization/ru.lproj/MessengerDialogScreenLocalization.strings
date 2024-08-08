@@ -44,3 +44,5 @@
 "Messenger.SavingError.Title" = "Ошибка сохранения";
 "Messenger.VideoSavedToGallery.Title" = "Видео сохранено в галерее";
 "Messenger.ImageSavedToGallery.Title" = "Изображение сохранено в галерее";
+"Messenger.AskToComeContact.Title" = "Позвать контакт";
+"Messenger.AskToComeContactVia.Title" = "Позвать контакт через";

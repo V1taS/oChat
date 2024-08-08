@@ -65,9 +65,11 @@ extension PasscodeSettingsScreenFactory: PasscodeSettingsScreenFactoryInput {
     let isFakePasswordEnabled = appSettingsModel.fakeAppPassword != nil
     
     let passcodeModel = createWidgetModel(
-      title: "Заблокировать oChat",
+      title: OChatStrings.PasscodeSettingsScreenLocalization
+        .State.Passcode.title,
       initialState: isAppPasswordEnabled,
-      description: "Требовать пароль для разблокировки",
+      description: OChatStrings.PasscodeSettingsScreenLocalization
+        .State.Passcode.description,
       action: { [weak self] newValue in
         Task { @MainActor [weak self] in
           await self?.output?.openSetAccessCode(newValue)
@@ -78,7 +80,8 @@ extension PasscodeSettingsScreenFactory: PasscodeSettingsScreenFactoryInput {
     
     if isAppPasswordEnabled {
       let accessCodeModel = createWidgetWithChevron(
-        title: "Изменить пароль доступа",
+        title: OChatStrings.PasscodeSettingsScreenLocalization
+          .State.ChangeAccessCode.title,
         action: { [weak self] in
           Task { @MainActor [weak self] in
             await self?.output?.openChangeAccessCode()
@@ -89,9 +92,11 @@ extension PasscodeSettingsScreenFactory: PasscodeSettingsScreenFactoryInput {
     }
     
     let fakeAccessModel = createWidgetModel(
-      title: "Фейковый доступ в oChat",
+      title: OChatStrings.PasscodeSettingsScreenLocalization
+        .State.FakePasscode.title,
       initialState: isFakePasswordEnabled,
-      description: "Можно ввести фейковый пароль и откроется пустой чат",
+      description: OChatStrings.PasscodeSettingsScreenLocalization
+        .State.FakePasscode.description,
       action: { [weak self] newValue in
         Task { @MainActor [weak self] in
           await self?.output?.openFakeSetAccessCode(newValue)
@@ -102,7 +107,8 @@ extension PasscodeSettingsScreenFactory: PasscodeSettingsScreenFactoryInput {
     
     if isFakePasswordEnabled {
       let accessCodeModel = createWidgetWithChevron(
-        title: "Изменить фейковый пароль",
+        title: OChatStrings.PasscodeSettingsScreenLocalization
+          .State.FakeChangeAccessCode.title,
         action: { [weak self] in
           Task { @MainActor [weak self] in
             await self?.output?.openFakeChangeAccessCode()
@@ -119,9 +125,11 @@ extension PasscodeSettingsScreenFactory: PasscodeSettingsScreenFactoryInput {
     var models: [WidgetCryptoView.Model] = []
     
     let typingIndicatorModel = createWidgetModel(
-      title: "Индикатор ввода текста",
+      title: OChatStrings.PasscodeSettingsScreenLocalization
+        .State.TypingIndicator.title,
       initialState: appSettingsModel.isTypingIndicatorEnabled,
-      description: "Показывает собеседнику, когда Вы набираете сообщение",
+      description: OChatStrings.PasscodeSettingsScreenLocalization
+        .State.TypingIndicator.description,
       action: { [weak self] newValue in
         Task { [weak self] in
           await self?.output?.setTypingIndicator(newValue)
@@ -131,9 +139,11 @@ extension PasscodeSettingsScreenFactory: PasscodeSettingsScreenFactoryInput {
     models.append(typingIndicatorModel)
     
     let canSaveMediaModel = createWidgetModel(
-      title: "Сохранение медиафайлов",
+      title: OChatStrings.PasscodeSettingsScreenLocalization
+        .State.CanSaveMedia.title,
       initialState: appSettingsModel.canSaveMedia,
-      description: "Разрешить собеседнику сохранять фото и видео",
+      description: OChatStrings.PasscodeSettingsScreenLocalization
+        .State.CanSaveMedia.description,
       action: { [weak self] newValue in
         Task { [weak self] in
           await self?.output?.setCanSaveMedia(newValue)
@@ -143,9 +153,11 @@ extension PasscodeSettingsScreenFactory: PasscodeSettingsScreenFactoryInput {
     models.append(canSaveMediaModel)
     
     let chatHistoryStoredModel = createWidgetModel(
-      title: "Хранение истории переписки",
+      title: OChatStrings.PasscodeSettingsScreenLocalization
+        .State.ChatHistory.title,
       initialState: appSettingsModel.isChatHistoryStored,
-      description: "Разрешить хранить переписку на устройстве собеседника",
+      description: OChatStrings.PasscodeSettingsScreenLocalization
+        .State.ChatHistory.description,
       action: { [weak self] newValue in
         Task { [weak self] in
           await self?.output?.setChatHistoryStored(newValue)
@@ -156,9 +168,11 @@ extension PasscodeSettingsScreenFactory: PasscodeSettingsScreenFactoryInput {
     
     if appSettingsModel.isPremiumEnabled {
       let voiceChangerModel = createWidgetModel(
-        title: "Изменение голоса",
+        title: OChatStrings.PasscodeSettingsScreenLocalization
+          .State.VoiceChanger.title,
         initialState: appSettingsModel.isVoiceChangerEnabled,
-        description: "Измените свой голос при аудиозвонках и в аудиозаписях",
+        description: OChatStrings.PasscodeSettingsScreenLocalization
+          .State.VoiceChanger.description,
         isSwitcherEnabled: false,
         action: { [weak self] newValue in
           Task { [weak self] in

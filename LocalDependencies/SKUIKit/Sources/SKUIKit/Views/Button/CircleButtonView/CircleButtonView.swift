@@ -74,7 +74,7 @@ private extension CircleButtonView {
         touchesEnded: { action() }
       ) {
         ZStack {
-          style.buttonColor
+          isEnabled ? style.buttonColor : SKStyleAsset.constantSlate.swiftUIColor.opacity(0.5)
           
           Image(systemName: type.imageSystemName)
             .resizable()

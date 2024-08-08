@@ -9,17 +9,17 @@
 		<key>attempts_count_values</key>
 		<dict>
 			<key>many</key>
-			<string>Осталось %d попыток</string>
+			<string>Код доступа не подтвержден. Осталось %d попыток</string>
 			<key>few</key>
-			<string>Осталось %d попытки</string>
+			<string>Код доступа не подтвержден. Осталось %d попытки</string>
 			<key>one</key>
-			<string>Осталось %d попытка</string>
+			<string>Код доступа не подтвержден. Осталось %d попытка</string>
 			<key>NSStringFormatValueTypeKey</key>
 			<string>d</string>
 			<key>NSStringFormatSpecTypeKey</key>
 			<string>NSStringPluralRuleType</string>
 			<key>other</key>
-			<string>Осталось %d попыток</string>
+			<string>Код доступа не подтвержден. Осталось %d попыток</string>
 		</dict>
 	</dict>
 </dict>

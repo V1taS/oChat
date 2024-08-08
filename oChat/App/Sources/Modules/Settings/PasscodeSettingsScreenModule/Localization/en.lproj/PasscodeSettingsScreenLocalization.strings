@@ -8,5 +8,18 @@
 // MARK: - State
 
 "State.Header.Title" = "Privacy";
-"State.Passcode.Title" = "Use Passcode";
-"State.ChangeAccessCode.Title" = "Change passcode";
+"State.Passcode.Title" = "Lock oChat";
+"State.Passcode.Description" = "Require code to unlock";
+"State.ChangeAccessCode.Title" = "Change access code";
+"State.FakePasscode.Title" = "Fake access to oChat";
+"State.FakePasscode.Description" = "Fake code to open an empty chat";
+"State.FakeChangeAccessCode.Title" = "Change fake code";
+"State.TypingIndicator.Title" = "Typing Indicator";
+"State.TypingIndicator.Description" = "Shows when you are typing a message";
+"State.CanSaveMedia.Title" = "Save Media Files";
+"State.CanSaveMedia.Description" = "Allow the interlocutor to save photos and videos";
+"State.ChatHistory.Title" = "Chat History";
+"State.ChatHistory.Description" = "Allow the interlocutor to keep the chat history";
+"State.VoiceChanger.Title" = "Voice Changer";
+"State.VoiceChanger.Description" = "Change your voice during audio calls";
+"State.FakeSetAccess.Error.Title" = "It is necessary to enable the main password first";

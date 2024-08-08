@@ -9,3 +9,4 @@
 
 "Messenger.Profile.CopyButton.Title" = "Copy";
 "Messenger.Profile.Description" = "This screen displays your unique address. Share it with another user to start a secure conversation and exchange messages in complete privacy.";
+"CopiedToClipboard.Title" = "Copied to clipboard";

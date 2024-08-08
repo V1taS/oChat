@@ -13,7 +13,11 @@ protocol AuthenticationScreenFactoryOutput: AnyObject {}
 /// Cобытия которые отправляем от Presenter к Factory
 protocol AuthenticationScreenFactoryInput {
   /// Создать заголовок текст ввода кода доступа
-  func createPasscodeTitle(_ state: AuthenticationScreenState) -> String
+  func createPasscodeTitle(
+    _ state: AuthenticationScreenState,
+    flowType: AuthenticationScreenFlowType
+  ) -> String
+  
   /// Валидация кода доступа
   func createValidationPasscode(
     _ state: AuthenticationScreenState,
@@ -39,32 +43,62 @@ final class AuthenticationScreenFactory {
 // MARK: - AuthenticationScreenFactoryInput
 
 extension AuthenticationScreenFactory: AuthenticationScreenFactoryInput {
-  func createPasscodeTitle(_ state: AuthenticationScreenState) -> String {
+  func createPasscodeTitle(
+    _ state: AuthenticationScreenState,
+    flowType: AuthenticationScreenFlowType
+  ) -> String {
     switch state {
     case let .createPasscode(result):
       switch result {
       case .enterPasscode:
-        return OChatStrings.AuthenticationScreenLocalization.State
-          .EnterPasscode.title
+        switch flowType {
+        case .mainFlow, .all:
+          return OChatStrings.AuthenticationScreenLocalization.State
+            .EnterPasscode.title
+        case .fakeFlow:
+          return OChatStrings.AuthenticationScreenLocalization.State
+            .EnterFakePasscode.title
+        }
       default:
-        return OChatStrings.AuthenticationScreenLocalization.State
-          .ReEnterPasscode.title
+        switch flowType {
+        case .mainFlow, .all:
+          return OChatStrings.AuthenticationScreenLocalization.State
+            .ReEnterPasscode.title
+        case .fakeFlow:
+          return OChatStrings.AuthenticationScreenLocalization.State
+            .ReEnterFakePasscode.title
+        }
       }
     case .loginPasscode:
       let title = OChatStrings.AuthenticationScreenLocalization.State
         .LoginPasscode.title
       return title
     case let .changePasscode(result):
-      switch result {
-      case .enterOldPasscode:
-        return OChatStrings.AuthenticationScreenLocalization.State
-          .EnterOldPasscode.title
-      case .enterNewPasscode:
-        return OChatStrings.AuthenticationScreenLocalization.State
-          .EnterPasscode.title
-      case .reEnterNewPasscode:
-        return OChatStrings.AuthenticationScreenLocalization.State
-          .ReEnterPasscode.title
+      switch flowType {
+      case .mainFlow, .all:
+        switch result {
+        case .enterOldPasscode:
+          return OChatStrings.AuthenticationScreenLocalization.State
+            .EnterOldPasscode.title
+        case .enterNewPasscode:
+          return OChatStrings.AuthenticationScreenLocalization.State
+            .EnterPasscode.title
+        case .reEnterNewPasscode:
+          return OChatStrings.AuthenticationScreenLocalization.State
+            .ReEnterPasscode.title
+        }
+      case .fakeFlow:
+        switch result {
+        case .enterOldPasscode:
+          return OChatStrings.AuthenticationScreenLocalization.State
+            .EnterFakeOldPasscode.title
+        case .enterNewPasscode:
+          return OChatStrings.AuthenticationScreenLocalization.State
+            .EnterFakePasscode.title
+        case .reEnterNewPasscode:
+          return OChatStrings.AuthenticationScreenLocalization.State
+            .ReEnterFakePasscode.title
+        }
       }
     }
   }
@@ -111,14 +145,15 @@ extension AuthenticationScreenFactory: AuthenticationScreenFactoryInput {
       OChatStrings.AuthenticationScreenLocalization.State
         .LoginPasscode.Failure.title
       
-      if currentAttempts == maxCountAttempts {
-        isValidationText = OChatStrings.AuthenticationScreenLocalization.State
-          .LoginPasscode.AllDataErased.title
-      } else if currentAttempts > 2 {
-        isValidationText = OChatStrings.AuthenticationScreenLocalizable
-          .attemptsCount(maxCountAttempts - currentAttempts)
+      if !isValidation {
+        if currentAttempts == maxCountAttempts {
+          isValidationText = OChatStrings.AuthenticationScreenLocalization.State
+            .LoginPasscode.AllDataErased.title
+        } else if currentAttempts > 2 {
+          isValidationText = OChatStrings.AuthenticationScreenLocalizable
+            .attemptsCount(maxCountAttempts - currentAttempts)
+        }
       }
-      
       return (isValidation: isValidation, helperText: isValidationText)
     case let .changePasscode(result):
       switch result {

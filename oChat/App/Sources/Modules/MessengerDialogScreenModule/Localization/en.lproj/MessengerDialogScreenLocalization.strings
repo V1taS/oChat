@@ -44,3 +44,5 @@
 "Messenger.SavingError.Title" = "Saving Error";
 "Messenger.VideoSavedToGallery.Title" = "Video Saved to Gallery";
 "Messenger.ImageSavedToGallery.Title" = "Image Saved to Gallery";
+"Messenger.AskToComeContact.Title" = "Ask to come contact";
+"Messenger.AskToComeContactVia.Title" = "Ask to come into contact in";

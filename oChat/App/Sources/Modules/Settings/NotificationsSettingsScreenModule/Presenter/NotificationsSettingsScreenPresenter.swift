@@ -73,8 +73,6 @@ extension NotificationsSettingsScreenPresenter: NotificationsSettingsScreenFacto
       }
       return
     }
-    
-#warning("TODO: - Если пользователь выбрал отключить уведомления, то надо отправить на бек запрос о запрете пушей этому пользователю")
   }
 }
 

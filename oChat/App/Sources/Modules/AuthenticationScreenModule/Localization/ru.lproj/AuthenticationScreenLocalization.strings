@@ -8,8 +8,11 @@
 // MARK: - State
 
 "State.EnterPasscode.Title" = "Введите новый код доступа";
+"State.EnterFakePasscode.Title" = "Введите новый фейковый код доступа";
 "State.EnterOldPasscode.Title" = "Введите старый код доступа";
+"State.EnterFakeOldPasscode.Title" = "Введите старый фейковый код доступа";
 "State.ReEnterPasscode.Title" = "Подтвердите ваш новый код доступа";
+"State.ReEnterFakePasscode.Title" = "Подтвердите ваш новый фейковый код доступа";
 
 "State.LoginPasscode.Title" = "Введите код доступа";
 
