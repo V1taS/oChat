@@ -64,6 +64,9 @@ public protocol MessengerDialogScreenModuleInput {
   /// Обновить список контактов
   func updateDialog()
   
+  /// Обновился мой статус в сети
+  func updateMyStatus(_ status: AppSettingsModel.Status) async
+  
   /// События которые отправляем из `MessengerDialogScreenModule` в `Coordinator`
   var moduleOutput: MessengerDialogScreenModuleOutput? { get set }
 }

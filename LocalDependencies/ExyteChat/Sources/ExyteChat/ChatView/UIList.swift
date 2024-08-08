@@ -308,10 +308,28 @@ struct UIList<MessageContent: View>: UIViewRepresentable {
   // MARK: - Coordinator
   
   func makeCoordinator() -> Coordinator {
-    Coordinator(viewModel: viewModel, paginationState: paginationState, isScrolledToBottom: $isScrolledToBottom, isScrolledToTop: $isScrolledToTop, messageBuilder: messageBuilder, chatTheme: theme, type: type, showDateHeaders: showDateHeaders, avatarSize: avatarSize, showMessageMenuOnLongPress: showMessageMenuOnLongPress, tapAvatarClosure: tapAvatarClosure, messageUseMarkdown: messageUseMarkdown, showMessageTimeView: showMessageTimeView, messageFont: messageFont, sections: sections, ids: ids, mainBackgroundColor: theme.colors.mainBackground)
+    Coordinator(
+      viewModel: viewModel,
+      paginationState: paginationState,
+      isScrolledToBottom: $isScrolledToBottom,
+      isScrolledToTop: $isScrolledToTop,
+      messageBuilder: messageBuilder,
+      chatTheme: theme,
+      type: type,
+      showDateHeaders: showDateHeaders,
+      avatarSize: avatarSize,
+      showMessageMenuOnLongPress: showMessageMenuOnLongPress,
+      tapAvatarClosure: tapAvatarClosure,
+      messageUseMarkdown: messageUseMarkdown,
+      showMessageTimeView: showMessageTimeView,
+      messageFont: messageFont,
+      sections: sections,
+      ids: ids,
+      mainBackgroundColor: theme.colors.mainBackground
+    )
   }
   
-  class Coordinator: NSObject, UITableViewDataSource, UITableViewDelegate {
+  final class Coordinator: NSObject, UITableViewDataSource, UITableViewDelegate {
     
     @ObservedObject var viewModel: ChatViewModel
     @ObservedObject var paginationState: PaginationState
@@ -335,7 +353,25 @@ struct UIList<MessageContent: View>: UIViewRepresentable {
     
     let mainBackgroundColor: Color
     
-    init(viewModel: ChatViewModel, paginationState: PaginationState, isScrolledToBottom: Binding<Bool>, isScrolledToTop: Binding<Bool>, messageBuilder: MessageBuilderClosure?, chatTheme: ChatTheme, type: ChatType, showDateHeaders: Bool, avatarSize: CGFloat, showMessageMenuOnLongPress: Bool, tapAvatarClosure: ChatView.TapAvatarClosure?, messageUseMarkdown: Bool, showMessageTimeView: Bool, messageFont: UIFont, sections: [MessagesSection], ids: [String], mainBackgroundColor: Color) {
+    init(
+      viewModel: ChatViewModel,
+      paginationState: PaginationState,
+      isScrolledToBottom: Binding<Bool>,
+      isScrolledToTop: Binding<Bool>,
+      messageBuilder: MessageBuilderClosure?,
+      chatTheme: ChatTheme,
+      type: ChatType,
+      showDateHeaders: Bool,
+      avatarSize: CGFloat,
+      showMessageMenuOnLongPress: Bool,
+      tapAvatarClosure: ChatView.TapAvatarClosure?,
+      messageUseMarkdown: Bool,
+      showMessageTimeView: Bool,
+      messageFont: UIFont,
+      sections: [MessagesSection],
+      ids: [String],
+      mainBackgroundColor: Color
+    ) {
       self.viewModel = viewModel
       self.paginationState = paginationState
       self._isScrolledToBottom = isScrolledToBottom

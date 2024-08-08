@@ -116,11 +116,13 @@ public struct ChatView<MessageContent: View, InputViewContent: View>: View {
   private let placeholder: String
   private var onChange: (_ newValue: String) -> Void
   private let maxLength: Int
+  private let isSendButtonEnabled: Bool
   
   public init(messages: [Message],
               placeholder: String,
               isDownloadAvailability: Bool,
               maxLength: Int,
+              isSendButtonEnabled: Bool,
               onChange: @escaping (_ newValue: String) -> Void,
               didSendMessage: @escaping (DraftMessage) -> Void,
               messageBuilder: @escaping MessageBuilderClosure,
@@ -131,6 +133,7 @@ public struct ChatView<MessageContent: View, InputViewContent: View>: View {
     self.placeholder = placeholder
     self.isDownloadAvailability = isDownloadAvailability
     self.maxLength = maxLength
+    self.isSendButtonEnabled = isSendButtonEnabled
     self.onChange = onChange
     self.sections = ChatView.mapMessages(messages)
     self.ids = messages.map { $0.id }
@@ -203,7 +206,8 @@ public struct ChatView<MessageContent: View, InputViewContent: View>: View {
         availableInput: availablelInput,
         placeholder: placeholder,
         onChange: onChange,
-        maxLength: maxLength
+        maxLength: maxLength,
+        isSendButtonEnabled: isSendButtonEnabled
       )
       .environmentObject(globalFocusState)
     }
@@ -332,7 +336,8 @@ public struct ChatView<MessageContent: View, InputViewContent: View>: View {
           messageUseMarkdown: messageUseMarkdown,
           placeholder: placeholder,
           onChange: onChange,
-          maxLength: maxLength
+          maxLength: maxLength,
+          isSendButtonEnabled: isSendButtonEnabled
         )
       }
     }
@@ -587,6 +592,7 @@ public extension ChatView where MessageContent == EmptyView {
        placeholder: String,
        isDownloadAvailability: Bool = true,
        maxLength: Int = .max,
+       isSendButtonEnabled: Bool,
        onChange: @escaping (_ newValue: String) -> Void,
        didSendMessage: @escaping (DraftMessage) -> Void,
        onImageSave: ((URL) -> Void)? = nil,
@@ -595,6 +601,7 @@ public extension ChatView where MessageContent == EmptyView {
     self.placeholder = placeholder
     self.isDownloadAvailability = isDownloadAvailability
     self.maxLength = maxLength
+    self.isSendButtonEnabled = isSendButtonEnabled
     self.onChange = onChange
     self.didSendMessage = didSendMessage
     self.onImageSave = onImageSave
@@ -610,6 +617,7 @@ public extension ChatView where InputViewContent == EmptyView {
        placeholder: String,
        isDownloadAvailability: Bool = true,
        maxLength: Int = .max,
+       isSendButtonEnabled: Bool,
        onChange: @escaping (_ newValue: String) -> Void,
        didSendMessage: @escaping (DraftMessage) -> Void,
        onImageSave: ((URL) -> Void)? = nil,
@@ -618,6 +626,7 @@ public extension ChatView where InputViewContent == EmptyView {
     self.placeholder = placeholder
     self.isDownloadAvailability = isDownloadAvailability
     self.maxLength = maxLength
+    self.isSendButtonEnabled = isSendButtonEnabled
     self.onChange = onChange
     self.didSendMessage = didSendMessage
     self.onImageSave = onImageSave
@@ -633,6 +642,7 @@ public extension ChatView where MessageContent == EmptyView, InputViewContent ==
        placeholder: String,
        isDownloadAvailability: Bool = true,
        maxLength: Int = .max,
+       isSendButtonEnabled: Bool,
        onChange: @escaping (_ newValue: String) -> Void,
        didSendMessage: @escaping (DraftMessage) -> Void,
        onImageSave: ((URL) -> Void)? = nil,
@@ -640,6 +650,7 @@ public extension ChatView where MessageContent == EmptyView, InputViewContent ==
     self.placeholder = placeholder
     self.isDownloadAvailability = isDownloadAvailability
     self.maxLength = maxLength
+    self.isSendButtonEnabled = isSendButtonEnabled
     self.onChange = onChange
     self.didSendMessage = didSendMessage
     self.onImageSave = onImageSave

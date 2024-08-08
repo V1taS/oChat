@@ -57,6 +57,10 @@ public final class MessengerScreenFlowCoordinator: Coordinator<AppSettingsModel.
 // MARK: - MessengerListScreenModuleModuleOutput
 
 extension MessengerScreenFlowCoordinator: MessengerListScreenModuleOutput {
+  public func updateMyStatus(_ status: SKAbstractions.AppSettingsModel.Status) async {
+    await messengerDialogModule?.input.updateMyStatus(status)
+  }
+  
   public func lockScreen() async {
     finishMessengerFlow(.lockOChat)
   }

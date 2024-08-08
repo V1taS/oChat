@@ -106,6 +106,7 @@ extension MessengerListScreenModulePresenter {
       centerBarButtonView?.iconLeftView.image = status.imageStatus
       centerBarButtonView?.labelView.text = status.title
       rightBarWriteButton?.isEnabled = status == .online
+      await moduleOutput?.updateMyStatus(status)
     }
   }
   

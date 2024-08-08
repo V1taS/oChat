@@ -147,6 +147,7 @@ private extension MessengerDialogScreenView {
       messages: presenter.stateMessengeModels,
       placeholder: presenter.getMainPlaceholder(),
       isDownloadAvailability: presenter.stateIsDownloadAvailability,
+      isSendButtonEnabled: presenter.stateMyStatus == .online,
       onChange: { newValue in
         Task {
           await presenter.setUserIsTyping(text: newValue)
@@ -201,7 +202,6 @@ private extension MessengerDialogScreenView {
         await presenter.loadMoreMessage(before: message)
       }
     }
-    .messageUseMarkdown(messageUseMarkdown: true)
     .mediaPickerTheme()
   }
 }

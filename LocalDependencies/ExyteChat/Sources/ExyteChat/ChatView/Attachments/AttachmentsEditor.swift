@@ -31,6 +31,7 @@ struct AttachmentsEditor<InputViewContent: View>: View {
   var placeholder: String
   var onChange: (_ newValue: String) -> Void
   let maxLength: Int
+  let isSendButtonEnabled: Bool
   
   private let impactFeedback = UIImpactFeedbackGenerator(style: .soft)
   
@@ -137,7 +138,8 @@ struct AttachmentsEditor<InputViewContent: View>: View {
           messageUseMarkdown: messageUseMarkdown,
           placeholder: placeholder,
           onChange: onChange,
-          maxLength: maxLength
+          maxLength: maxLength,
+          isSendButtonEnabled: isSendButtonEnabled
         )
       }
     }

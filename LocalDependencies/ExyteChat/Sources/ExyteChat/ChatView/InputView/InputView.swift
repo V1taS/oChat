@@ -86,7 +86,8 @@ public struct InputView: View {
     messageUseMarkdown: Bool,
     placeholder: String,
     onChange: @escaping (String) -> Void,
-    maxLength: Int
+    maxLength: Int,
+    isSendButtonEnabled: Bool
   ) {
     self.viewModel = viewModel
     self.inputFieldId = inputFieldId
@@ -96,6 +97,7 @@ public struct InputView: View {
     self.placeholder = placeholder
     self.onChange = onChange
     self.maxLength = maxLength
+    self.isSendButtonEnabled = isSendButtonEnabled
   }
   
   @ObservedObject var viewModel: InputViewModel
@@ -106,6 +108,7 @@ public struct InputView: View {
   var placeholder: String
   var onChange: (_ newValue: String) -> Void
   let maxLength: Int
+  let isSendButtonEnabled: Bool
   
   // MARK: - Private properties
   
@@ -362,7 +365,7 @@ public struct InputView: View {
         .padding(EdgeInsets(top: 12, leading: 8, bottom: 12, trailing: 12))
     }
   }
-  
+
   var sendButton: some View {
     Button(action: {
       onAction(.send)
@@ -371,7 +374,7 @@ public struct InputView: View {
         .viewSize(.s10)
         .circleBackground(state.canSend ? theme.colors.sendButtonBackground : SKStyleAsset.constantSlate.swiftUIColor)
     }
-    .disabled(!state.canSend)
+    .disabled(!state.canSend && !isSendButtonEnabled)
   }
   
   var recordButton: some View {
