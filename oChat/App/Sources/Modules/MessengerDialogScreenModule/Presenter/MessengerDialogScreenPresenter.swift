@@ -67,10 +67,12 @@ final class MessengerDialogScreenPresenter: ObservableObject {
   ///   - interactor: Интерактор
   ///   - factory: Фабрика
   ///   - contactModel: Моделька контакта
+  ///   - messengeModels: Модельки с сообщениями
   ///   - contactAdress: Адрес контакта
   init(interactor: MessengerDialogScreenInteractorInput,
        factory: MessengerDialogScreenFactoryInput,
        contactModel: ContactModel?,
+       messengeModels: [MessengeModel]?,
        contactAdress: String?) {
     self.interactor = interactor
     self.factory = factory
@@ -80,6 +82,13 @@ final class MessengerDialogScreenPresenter: ObservableObject {
     stateContactModel = contact
     stateIsDownloadAvailability = contact.canSaveMedia
     stateIsChatHistoryStored = contact.isChatHistoryStored
+    
+    if let messengeModels {
+      stateMessengeModels = factory.createMessageModels(
+        models: messengeModels,
+        contactModel: contact
+      )
+    }
     
     Task { @MainActor [weak self] in
       guard let self else { return }
@@ -623,7 +632,6 @@ private extension MessengerDialogScreenPresenter {
       toxSelfAddress = await interactor.getToxAddress() ?? ""
       
       let listMessenge = await interactor.getListMessengeModels(stateContactModel)
-      
       stateMessengeModels = factory.createMessageModels(
         models: listMessenge,
         contactModel: stateContactModel

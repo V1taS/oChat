@@ -400,7 +400,8 @@ struct MessengerDialogScreenView_Previews: PreviewProvider {
   static var previews: some View {
     UIViewControllerPreview {
       MessengerDialogScreenAssembly().createModule(
-        contactModel: .mock(),
+        contactModel: .mock(), 
+        messengeModels: [],
         contactAdress: nil,
         services: ApplicationServicesStub()
       ).viewController

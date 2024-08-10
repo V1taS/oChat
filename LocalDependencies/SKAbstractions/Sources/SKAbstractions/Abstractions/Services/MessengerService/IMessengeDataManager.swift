@@ -29,6 +29,11 @@ public protocol IMessengeDataManager {
   ///   - id: Идентификатор сообщения, которое нужно удалить
   func removeMessenge(_ contactModel: ContactModel, _ id: String) async
   
+  /// Удалить все сообщения для контакта.
+  /// - Parameters:
+  ///   - contactModel: Модель контакта `ContactModel`, для которого нужно удалить все сообщения.
+  func removeMessenges(_ contactModel: ContactModel) async
+  
   /// Очистить все сообщения
   func clearAllMessenge() async
   

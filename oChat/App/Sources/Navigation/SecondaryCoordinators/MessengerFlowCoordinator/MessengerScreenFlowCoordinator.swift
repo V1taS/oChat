@@ -58,8 +58,11 @@ public final class MessengerScreenFlowCoordinator: Coordinator<AppSettingsModel.
 
 extension MessengerScreenFlowCoordinator: MessengerListScreenModuleOutput {
   @MainActor
-  public func openMessengerDialogScreen(dialogModel: ContactModel) async {
-    openMessengerDialogModule(dialogModel: dialogModel)
+  public func openMessengerDialogScreen(
+    dialogModel: ContactModel,
+    messengeModels: [MessengeModel]?
+  ) async {
+    openMessengerDialogModule(dialogModel: dialogModel, messengeModels: messengeModels)
   }
   
   public func updateMyStatus(_ status: SKAbstractions.AppSettingsModel.Status) async {
@@ -215,10 +218,12 @@ private extension MessengerScreenFlowCoordinator {
   @MainActor
   func openMessengerDialogModule(
     dialogModel: ContactModel?,
+    messengeModels: [MessengeModel]? = nil,
     contactAdress: String? = nil
   ) {
     var messengerDialogModule = MessengerDialogScreenAssembly().createModule(
-      contactModel: dialogModel,
+      contactModel: dialogModel, 
+      messengeModels: messengeModels,
       contactAdress: contactAdress,
       services: services
     )

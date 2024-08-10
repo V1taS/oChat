@@ -29,6 +29,7 @@ final class MessengerListScreenModulePresenter: ObservableObject {
   var centerBarButtonView: SKBarButtonView?
   var rightBarLockButton: SKBarButtonItem?
   var rightBarWriteButton: SKBarButtonItem?
+  var messengeDictionaryModels: [String: [MessengeModel]] = [:]
   let impactFeedback = UIImpactFeedbackGenerator(style: .soft)
   
   // MARK: - Private properties
@@ -94,6 +95,7 @@ final class MessengerListScreenModulePresenter: ObservableObject {
             recording: nil
           )
         )
+        messengeDictionaryModels = await interactor.getDictionaryMessengeModels()
         
         moduleOutput?.dataModelHasBeenUpdated()
         await updateListContacts()
@@ -118,6 +120,12 @@ final class MessengerListScreenModulePresenter: ObservableObject {
 // MARK: - MessengerListScreenModuleModuleInput
 
 extension MessengerListScreenModulePresenter: MessengerListScreenModuleModuleInput {
+  func removeContactModels(_ contactModel: SKAbstractions.ContactModel) async {
+    await interactor.removeContactModels(contactModel)
+    moduleOutput?.dataModelHasBeenUpdated()
+    await updateListContacts()
+  }
+  
   func getAppSettingsModel() async -> SKAbstractions.AppSettingsModel {
     await interactor.getAppSettingsModel()
   }
@@ -126,7 +134,7 @@ extension MessengerListScreenModulePresenter: MessengerListScreenModuleModuleInp
     stateWidgetModels.remove(at: index)
     let contactModels = await interactor.getContactModels()
     let contactModel = contactModels[index]
-    await removeContactModels(contactModel)
+    await interactor.removeContactModels(contactModel)
     moduleOutput?.dataModelHasBeenUpdated()
     await updateListContacts()
   }
@@ -220,6 +228,8 @@ extension MessengerListScreenModulePresenter: MessengerListScreenModuleModuleInp
     
     switch await sendMessageNetworkRequest(contact: updatedContactModel) {
     case let .success(messageId):
+      messengeDictionaryModels = await interactor.getDictionaryMessengeModels()
+      
       if let messageId {
         await updateContactStatus(
           contact: contact,
@@ -243,6 +253,7 @@ extension MessengerListScreenModulePresenter: MessengerListScreenModuleModuleInp
               await updateListContacts()
               moduleOutput?.dataModelHasBeenUpdated()
             }
+            messengeDictionaryModels = await interactor.getDictionaryMessengeModels()
           }
         }
       }
@@ -252,6 +263,7 @@ extension MessengerListScreenModulePresenter: MessengerListScreenModuleModuleInp
       await updateContactStatus(contact: contact, status: .failed, messageId: nil)
       moduleOutput?.dataModelHasBeenUpdated()
       await updateListContacts()
+      messengeDictionaryModels = await interactor.getDictionaryMessengeModels()
     }
   }
   
@@ -263,11 +275,7 @@ extension MessengerListScreenModulePresenter: MessengerListScreenModuleModuleInp
     await interactor.removeMessenge(contact, id)
     moduleOutput?.dataModelHasBeenUpdated()
     await updateListContacts()
-  }
-  
-  func removeContactModels(_ contactModel: ContactModel) async {
-    await interactor.removeContactModels(contactModel)
-    await updateListContacts()
+    messengeDictionaryModels = await interactor.getDictionaryMessengeModels()
   }
   
   @MainActor
@@ -287,8 +295,10 @@ extension MessengerListScreenModulePresenter: MessengerListScreenModuleInteracto
 
 extension MessengerListScreenModulePresenter: MessengerListScreenModuleFactoryOutput {
   func openMessengerDialogScreen(dialogModel: ContactModel) async {
-    let messengeModel = await interactor.getMessengeModelsFor(dialogModel.id)
-    await moduleOutput?.openMessengerDialogScreen(dialogModel: dialogModel)
+    await moduleOutput?.openMessengerDialogScreen(
+      dialogModel: dialogModel,
+      messengeModels: messengeDictionaryModels[dialogModel.id]
+    )
   }
 }
 
@@ -390,7 +400,7 @@ private extension MessengerListScreenModulePresenter {
       
       await updateListContacts()
       await interactor.passcodeNotSetInSystemIOSheck()
-      moduleOutput?.dataModelHasBeenUpdated()
+      messengeDictionaryModels = await interactor.getDictionaryMessengeModels()
     }
     
     updateIsNotificationsEnabled()

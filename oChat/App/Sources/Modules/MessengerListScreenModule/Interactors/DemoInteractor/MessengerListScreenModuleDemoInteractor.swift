@@ -296,6 +296,14 @@ extension MessengerListScreenModuleDemoInteractor: MessengerListScreenModuleInte
     await messengeDataManager.getMessengeModelsFor(contactID)
   }
   
+  func getDictionaryMessengeModels() async -> MessengeModels {
+    await messengeDataManager.getDictionaryMessengeModels()
+  }
+  
+  func removeMessenges(_ contactModel: ContactModel) async {
+    await messengeDataManager.removeMessenges(contactModel)
+  }
+  
   // MARK: - InterfaceManager
   
   func setRedDotToTabBar(value: String?) {

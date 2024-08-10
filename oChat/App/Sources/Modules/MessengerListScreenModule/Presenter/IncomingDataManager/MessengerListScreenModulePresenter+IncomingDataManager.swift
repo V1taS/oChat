@@ -144,6 +144,7 @@ extension MessengerListScreenModulePresenter {
         moduleOutput?.dataModelHasBeenUpdated()
         await impactFeedback.impactOccurred()
         sendLocalNotificationIfNeeded(contactModel: updatedContact)
+        messengeDictionaryModels = await interactor.getDictionaryMessengeModels()
       } else {
         let newContact = factory.createNewContact(
           messageModel: messageModel,
@@ -155,6 +156,7 @@ extension MessengerListScreenModulePresenter {
         moduleOutput?.dataModelHasBeenUpdated()
         await impactFeedback.impactOccurred()
         sendLocalNotificationIfNeeded(contactModel: newContact)
+        messengeDictionaryModels = await interactor.getDictionaryMessengeModels()
       }
     }
   }
@@ -359,12 +361,12 @@ extension MessengerListScreenModulePresenter {
         
         await interactor.addMessenge(contact.id, messengeModel)
         await interactor.saveContactModel(updatedContact)
-        await interactor.saveContactModel(updatedContact)
         await updateListContacts()
         moduleOutput?.dataModelHasBeenUpdated()
         interactor.clearTemporaryDirectory()
         await impactFeedback.impactOccurred()
         sendLocalNotificationIfNeeded(contactModel: updatedContact)
+        messengeDictionaryModels = await interactor.getDictionaryMessengeModels()
       } else {
         let newContact = factory.createNewContact(
           messageModel: messageModel,
@@ -398,6 +400,7 @@ extension MessengerListScreenModulePresenter {
         var updatedMessenges = messenges[messengesIndex]
         updatedMessenges.messageStatus = .sent
         await interactor.updateMessenge(contactModel, updatedMessenges)
+        messengeDictionaryModels = await interactor.getDictionaryMessengeModels()
       }
       
       await interactor.saveContactModel(updatedContactModel)
@@ -419,6 +422,7 @@ extension MessengerListScreenModulePresenter {
         var updatedMessenges = messenges[messengesIndex]
         updatedMessenges.messageStatus = .failed
         await interactor.updateMessenge(contactModel, updatedMessenges)
+        messengeDictionaryModels = await interactor.getDictionaryMessengeModels()
       }
       
       await interactor.saveContactModel(updatedContactModel)

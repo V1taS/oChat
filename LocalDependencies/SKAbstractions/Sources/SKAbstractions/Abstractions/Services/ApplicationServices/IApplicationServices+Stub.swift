@@ -204,6 +204,7 @@ public final class ApplicationServicesStub: IApplicationServices, IDataManagerSe
 // MARK: - MessengerServiceStub
 
 public final class MessengerServiceStub: IMessagesService, IMessengerService, IP2PChatManager, IMessengeDataManager, IContactsDataManager, IAppSettingsDataManager {
+  public func removeMessenges(_ contactModel: ContactModel) async {}
   public func getMessengeModelsFor(_ contactID: String) async -> [MessengeModel] {[]}
   public func addMessenge(_ contactID: String, _ messengeModel: MessengeModel) async {}
   public func removeMessenge(_ contactModel: ContactModel, _ id: String) async {}

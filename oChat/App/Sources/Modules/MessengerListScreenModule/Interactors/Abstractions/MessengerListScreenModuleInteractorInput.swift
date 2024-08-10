@@ -273,6 +273,15 @@ protocol MessengerListScreenModuleInteractorInput {
   /// - Returns: Массив объектов `MessengeModel`, представляющих сообщения для указанного контакта.
   func getMessengeModelsFor(_ contactID: String) async -> [MessengeModel]
   
+  /// Получить словарь моделей сообщений
+  /// - Returns: Асинхронная операция, возвращающая словарь моделей сообщений `MessengeModels`
+  func getDictionaryMessengeModels() async -> MessengeModels
+  
+  /// Удалить все сообщения для контакта.
+  /// - Parameters:
+  ///   - contactModel: Модель контакта `ContactModel`, для которого нужно удалить все сообщения.
+  func removeMessenges(_ contactModel: ContactModel) async
+  
   // MARK: - InterfaceManager
   
   /// Установить красную точку на таб баре

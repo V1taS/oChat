@@ -141,6 +141,7 @@ extension MessengerListScreenModuleInteractor: MessengerListScreenModuleInteract
   
   func removeContactModels(_ contactModel: ContactModel) async -> Bool {
     let result = await contactManager.removeContactModel(contactModel)
+    await messengeDataManager.removeMessenges(contactModel)
     await saveToxState()
     return result
   }
@@ -320,6 +321,14 @@ extension MessengerListScreenModuleInteractor: MessengerListScreenModuleInteract
   
   func getMessengeModelsFor(_ contactID: String) async -> [MessengeModel] {
     await messengeDataManager.getMessengeModelsFor(contactID)
+  }
+  
+  func getDictionaryMessengeModels() async -> MessengeModels {
+    await messengeDataManager.getDictionaryMessengeModels()
+  }
+  
+  func removeMessenges(_ contactModel: ContactModel) async {
+    await messengeDataManager.removeMessenges(contactModel)
   }
   
   // MARK: - InterfaceManager

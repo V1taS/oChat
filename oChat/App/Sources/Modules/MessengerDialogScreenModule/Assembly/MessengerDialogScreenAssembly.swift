@@ -18,6 +18,7 @@ public final class MessengerDialogScreenAssembly {
   /// - Returns: Cобранный модуль `MessengerDialogScreen`
   public func createModule(
     contactModel: ContactModel?,
+    messengeModels: [MessengeModel]?,
     contactAdress: String?,
     services: IApplicationServices
   ) -> MessengerDialogScreenModule {
@@ -26,7 +27,8 @@ public final class MessengerDialogScreenAssembly {
     let presenter = MessengerDialogScreenPresenter(
       interactor: interactor,
       factory: factory, 
-      contactModel: contactModel,
+      contactModel: contactModel, 
+      messengeModels: messengeModels,
       contactAdress: contactAdress
     )
     let view = MessengerDialogScreenView(presenter: presenter)
