@@ -23,6 +23,8 @@
 "BanScreenshot.Description" = "Снимок экрана недоступен";
 "SwipeActions.Clear.Title" = "Очистить";
 "SwipeActions.Delete.Title" = "Удалить";
+"PushNotification.YouAreInvitedToChat.Title" = "Вас зовут в чат";
+"PushNotification.YouAreInvitedToChat.Description" = "Ваш контакт %@ хочет с вами пообщаться. Пожалуйста, зайдите в чат.";
 
 // MARK: - DemoContact1
 

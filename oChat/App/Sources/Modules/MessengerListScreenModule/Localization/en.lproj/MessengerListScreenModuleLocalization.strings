@@ -23,6 +23,8 @@
 "BanScreenshot.Description" = "Taking a screenshot is not available";
 "SwipeActions.Clear.Title" = "Clear";
 "SwipeActions.Delete.Title" = "Delete";
+"PushNotification.YouAreInvitedToChat.Title" = "You are invited to chat";
+"PushNotification.YouAreInvitedToChat.Description" = "Your contact %@ wants to chat with you. Please join the chat.";
 
 // MARK: - DemoContact1
 

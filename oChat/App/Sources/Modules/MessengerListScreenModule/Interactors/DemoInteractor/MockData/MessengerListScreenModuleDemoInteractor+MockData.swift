@@ -12,18 +12,10 @@ import SKStyle
 import AVFoundation
 import SKManagers
 
+
+// MARK: - DemoInteractor
+
 // swiftlint:disable all
-extension MessengerListScreenModuleDemoInteractor {
-  func createDemoData() -> MessengerModel {
-    MessengerModel(
-      appSettingsModel: createAppSettingsModel(),
-      contacts: createContacts()
-    )
-  }
-}
-
-// MARK: - Private
-
 extension MessengerListScreenModuleDemoInteractor {
   func createContacts() -> [ContactModel] {
     [
@@ -56,6 +48,27 @@ extension MessengerListScreenModuleDemoInteractor {
       isChatHistoryStored: true,
       isVoiceChangerEnabled: true
     )
+  }
+  
+  func createMessengesModels() -> [String: [MessengeModel]] {
+    var dictionaries: [[String: [MessengeModel]]] = [
+      createMessengesModel1(),
+      createMessengesModel2(),
+      createMessengesModel3(),
+      createMessengesModel4(),
+      createMessengesModel5(),
+      createMessengesModel6(),
+      createMessengesModel7(),
+      createMessengesModel8(),
+      createMessengesModel9(),
+      createMessengesModel10(),
+      createMessengesModel11()
+    ]
+    
+    let combinedDict = dictionaries.reduce([:]) { (result, dict) in
+        result.merging(dict) { (current, _) in current }
+    }
+    return combinedDict
   }
 }
 // swiftlint:enable all

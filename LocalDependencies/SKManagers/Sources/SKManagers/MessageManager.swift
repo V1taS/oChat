@@ -15,16 +15,19 @@ public final class MessageManager: IMessageManager {
   // MARK: - Private properties
   
   private let p2pChatManager: IP2PChatManager
-  private let modelSettingsManager: IMessengerModelSettingsManager
+  private let appSettingsDataManager: IAppSettingsDataManager
+  private let messengeDataManager: IMessengeDataManager
   
   // MARK: - Init
   
   public init(
     p2pChatManager: IP2PChatManager,
-    modelSettingsManager: IMessengerModelSettingsManager
+    appSettingsDataManager: IAppSettingsDataManager,
+    messengeDataManager: IMessengeDataManager
   ) {
     self.p2pChatManager = p2pChatManager
-    self.modelSettingsManager = modelSettingsManager
+    self.appSettingsDataManager = appSettingsDataManager
+    self.messengeDataManager = messengeDataManager
   }
   
   // MARK: - Public funcs
@@ -76,6 +79,10 @@ public final class MessageManager: IMessageManager {
     print("✅ Запрос отправлен")
     return contactID
   }
+  
+  public func clearAllMessengeTempID() async {
+    await messengeDataManager.clearAllMessengeTempID()
+  }
 }
 
 // MARK: - Private
@@ -99,6 +106,6 @@ private extension MessageManager {
   
   func saveToxState() async {
     let stateAsString = await p2pChatManager.toxStateAsString()
-    await modelSettingsManager.setToxStateAsString(stateAsString)
+    await appSettingsDataManager.setToxStateAsString(stateAsString)
   }
 }

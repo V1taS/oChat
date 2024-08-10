@@ -56,17 +56,15 @@ private extension MessengerListScreenModuleAssembly {
       cryptoService: services.accessAndSecurityManagementService.cryptoService,
       systemService: services.userInterfaceAndExperienceService.systemService
     )
+    
     let contactManager = ContactManager(
-      modelHandlerService: services.messengerService.modelHandlerService,
-      modelSettingsManager: services.messengerService.modelSettingsManager,
+      contactsDataManager: services.messengerService.contactsDataManager,
       p2pChatManager: services.messengerService.p2pChatManager
     )
     let notificationManager = NotificationManager(
       permissionService: services.accessAndSecurityManagementService.permissionService,
       pushNotificationService: services.pushNotificationService,
-      p2pChatManager: services.messengerService.p2pChatManager,
-      modelSettingsManager: services.messengerService.modelSettingsManager,
-      modelHandlerService: services.messengerService.modelHandlerService
+      appSettingsDataManager: services.messengerService.appSettingsDataManager
     )
     let fileManager = SKFileManager(
       dataManagementService: services.dataManagementService.dataManagerService,
@@ -74,17 +72,18 @@ private extension MessengerListScreenModuleAssembly {
     )
     let messageManager = MessageManager(
       p2pChatManager: services.messengerService.p2pChatManager,
-      modelSettingsManager: services.messengerService.modelSettingsManager
+      appSettingsDataManager: services.messengerService.appSettingsDataManager,
+      messengeDataManager: services.messengerService.messengeDataManager
     )
     let settingsManager = SettingsManager(
-      modelHandlerService: services.messengerService.modelHandlerService,
+      appSettingsDataManager: services.messengerService.appSettingsDataManager,
       systemService: services.userInterfaceAndExperienceService.systemService,
       notificationService: services.userInterfaceAndExperienceService.notificationService
     )
     let toxManager = ToxManager(
       p2pChatManager: services.messengerService.p2pChatManager,
-      modelHandlerService: services.messengerService.modelHandlerService,
-      modelSettingsManager: services.messengerService.modelSettingsManager
+      appSettingsDataManager: services.messengerService.appSettingsDataManager,
+      contactsDataManager: services.messengerService.contactsDataManager
     )
     let interfaceManager = InterfaceManager()
     

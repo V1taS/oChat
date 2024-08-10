@@ -48,7 +48,6 @@ final class MessengerProfileModuleInteractor {
   private let uiService: IUIService
   private let systemService: ISystemService
   private var p2pChatManager: IP2PChatManager
-  private let modelHandlerService: IMessengerModelHandlerService
   
   // MARK: - Initialization
   
@@ -59,7 +58,6 @@ final class MessengerProfileModuleInteractor {
     uiService = services.userInterfaceAndExperienceService.uiService
     systemService = services.userInterfaceAndExperienceService.systemService
     p2pChatManager = services.messengerService.p2pChatManager
-    modelHandlerService = services.messengerService.modelHandlerService
   }
 }
 

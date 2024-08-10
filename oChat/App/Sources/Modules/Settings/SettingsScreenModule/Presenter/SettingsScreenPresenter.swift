@@ -125,7 +125,7 @@ private extension SettingsScreenPresenter {
   @MainActor
   func updateContent() async {
     stateCurrentLanguage = interactor.getCurrentLanguage()
-    let appSettingsModel = await interactor.getMessengerModel().appSettingsModel
+    let appSettingsModel = await interactor.getAppSettingsModel()
     let languageValue = factory.createLanguageValue(from: stateCurrentLanguage)
     
     stateTopWidgetModels = factory.createTopWidgetModels(appSettingsModel, languageValue: languageValue)

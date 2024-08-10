@@ -15,20 +15,20 @@ public final class ToxManager: IToxManager {
   // MARK: - Private properties
   
   private let p2pChatManager: IP2PChatManager
-  private let modelHandlerService: IMessengerModelHandlerService
-  private let modelSettingsManager: IMessengerModelSettingsManager
   private var cacheFriendStatus: [String: Bool] = [:]
+  private let appSettingsDataManager: IAppSettingsDataManager
+  private let contactsDataManager: IContactsDataManager
   
   // MARK: - Init
   
   public init(
     p2pChatManager: IP2PChatManager,
-    modelHandlerService: IMessengerModelHandlerService,
-    modelSettingsManager: IMessengerModelSettingsManager
+    appSettingsDataManager: IAppSettingsDataManager,
+    contactsDataManager: IContactsDataManager
   ) {
     self.p2pChatManager = p2pChatManager
-    self.modelHandlerService = modelHandlerService
-    self.modelSettingsManager = modelSettingsManager
+    self.appSettingsDataManager = appSettingsDataManager
+    self.contactsDataManager = contactsDataManager
   }
   
   // MARK: - Public funcs
@@ -51,7 +51,7 @@ public final class ToxManager: IToxManager {
             }
             
             if let updateContact {
-              await self.modelHandlerService.saveContactModel(updateContact)
+              await self.contactsDataManager.saveContact(updateContact)
               
               DispatchQueue.main.async {
                 completion?()
@@ -65,15 +65,14 @@ public final class ToxManager: IToxManager {
   }
   
   public func startToxService() async {
-    let messengerModel = await modelHandlerService.getMessengerModel()
-    let toxStateAsString = messengerModel.appSettingsModel.toxStateAsString
+    let toxStateAsString = await appSettingsDataManager.getAppSettingsModel().toxStateAsString
     
     do {
       try? await p2pChatManager.start(saveDataString: toxStateAsString)
       
       if toxStateAsString == nil {
         let stateAsString = await p2pChatManager.toxStateAsString()
-        await modelSettingsManager.setToxStateAsString(stateAsString)
+        await appSettingsDataManager.setToxStateAsString(stateAsString)
       }
     }
   }
@@ -107,7 +106,7 @@ public final class ToxManager: IToxManager {
 
 private extension ToxManager {
   func getContactModelsFrom(toxPublicKey: String) async -> ContactModel? {
-    let contactModels = await modelHandlerService.getContactModels()
+    let contactModels = await contactsDataManager.getListContactModels()
     return contactModels.first { $0.toxPublicKey == toxPublicKey }
   }
 }

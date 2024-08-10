@@ -43,7 +43,4 @@ public protocol IContactManager {
   
   /// Устанавливает всем контактам статус "не печатает".
   func setAllContactsNotTyping() async
-  
-  /// Очищает все временные идентификаторы сообщений.
-  func clearAllMessengeTempID() async
 }

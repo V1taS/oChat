@@ -79,8 +79,10 @@ final class MessengerListScreenModulePresenter: ObservableObject {
       Task { [weak self] in
         guard let self else { return }
         let contactModels = await interactor.getContactModels()
-        var updatedContactModel = contactModels[index]
-        updatedContactModel.messenges = [
+        let contactModel = contactModels[index]
+        
+        await interactor.addMessenge(
+          contactModel.id,
           .init(
             messageType: .systemSuccess,
             messageStatus: .sent,
@@ -91,9 +93,8 @@ final class MessengerListScreenModulePresenter: ObservableObject {
             videos: [],
             recording: nil
           )
-        ]
+        )
         
-        await interactor.saveContactModel(updatedContactModel)
         moduleOutput?.dataModelHasBeenUpdated()
         await updateListContacts()
       }
@@ -232,17 +233,13 @@ extension MessengerListScreenModulePresenter: MessengerListScreenModuleModuleInp
             let contactModel = await interactor.getContactModelsFrom(toxAddress: contact.toxAddress ?? "")
             
             guard let contactModel else { return }
-            var updatedContactModel = contactModel
-            var updatedMessenges = updatedContactModel.messenges
+            var updatedMessenges = await interactor.getListMessengeModels(contactModel)
             let messageId = UInt32(messageId)
             
             if let messengesIndex = updatedMessenges.firstIndex(where: { $0.tempMessageID == messageId }) {
               updatedMessenges[messengesIndex].messageStatus = .failed
               updatedMessenges[messengesIndex].tempMessageID = nil
-              
-              updatedContactModel.messenges = updatedMessenges
-              
-              await interactor.saveContactModel(updatedContactModel)
+              await interactor.updateMessenge(contactModel, updatedMessenges[messengesIndex])
               await updateListContacts()
               moduleOutput?.dataModelHasBeenUpdated()
             }
@@ -263,8 +260,7 @@ extension MessengerListScreenModulePresenter: MessengerListScreenModuleModuleInp
   }
   
   func removeMessage(id: String, contact: ContactModel) async {
-    let updatedContact = factory.removeMessageToContact(id: id, contactModel: contact)
-    await interactor.saveContactModel(updatedContact)
+    await interactor.removeMessenge(contact, id)
     moduleOutput?.dataModelHasBeenUpdated()
     await updateListContacts()
   }
@@ -279,10 +275,7 @@ extension MessengerListScreenModulePresenter: MessengerListScreenModuleModuleInp
     updateIsNotificationsEnabled()
     let contactModels = await interactor.getContactModels()
     updateRedDotToTabBar(contactModels: contactModels)
-    
-    stateWidgetModels = factory.createDialogWidgetModels(
-      messengerDialogModels: contactModels
-    )
+    await updateWidgetsOnMainScreen(contactModels: contactModels)
   }
 }
 
@@ -293,8 +286,9 @@ extension MessengerListScreenModulePresenter: MessengerListScreenModuleInteracto
 // MARK: - MessengerListScreenModuleFactoryOutput
 
 extension MessengerListScreenModulePresenter: MessengerListScreenModuleFactoryOutput {
-  func openMessengerDialogScreen(dialogModel: ContactModel) {
-    moduleOutput?.openMessengerDialogScreen(dialogModel: dialogModel)
+  func openMessengerDialogScreen(dialogModel: ContactModel) async {
+    let messengeModel = await interactor.getMessengeModelsFor(dialogModel.id)
+    await moduleOutput?.openMessengerDialogScreen(dialogModel: dialogModel)
   }
 }
 
@@ -352,6 +346,18 @@ extension MessengerListScreenModulePresenter: SceneViewModel {
 // MARK: - Private
 
 private extension MessengerListScreenModulePresenter {
+  func updateWidgetsOnMainScreen(contactModels: [ContactModel]) async {
+    var lastMessageDictionary: [String: String] = [:]
+    for contactModel in contactModels {
+      let lastMessage = await interactor.getListMessengeModels(contactModel).last?.message ?? ""
+      lastMessageDictionary[contactModel.id] = lastMessage
+    }
+    stateWidgetModels = factory.createDialogWidgetModels(
+      messengerDialogModels: contactModels,
+      lastMessageDictionary: lastMessageDictionary
+    )
+  }
+  
   func updateIsNotificationsEnabled() {
     Task {
       stateIsNotificationsEnabled = await interactor.isNotificationsEnabled()
@@ -374,8 +380,7 @@ private extension MessengerListScreenModulePresenter {
       await interactor.setSelfStatus(isOnline: true)
       await interactor.stratTOXService()
       let contactModels = await interactor.getContactModels()
-      stateWidgetModels = factory.createDialogWidgetModels(messengerDialogModels: contactModels)
-      
+      await updateWidgetsOnMainScreen(contactModels: contactModels)
       await interactor.setAllContactsIsOffline()
       await interactor.setAllContactsNoTyping()
       let token = await interactor.getPushNotificationToken()
@@ -396,17 +401,16 @@ private extension MessengerListScreenModulePresenter {
     status: MessengeModel.MessageStatus,
     messageId: UInt32?
   ) async {
-    guard var updatedLastMessage = contact.messenges.last else { return }
+    let listMessengeModels = await interactor.getListMessengeModels(contact)
+    guard var updatedLastMessage = listMessengeModels.last else { return }
     updatedLastMessage.messageStatus = status
     
-    var updatedContact = contact
-    updatedContact.status = .online
-    updatedContact.messenges[updatedContact.messenges.count - 1] = updatedLastMessage
-    
     if let messageId {
-      updatedContact.messenges[updatedContact.messenges.count - 1].tempMessageID = messageId
+      updatedLastMessage.tempMessageID = messageId
     }
-    await interactor.saveContactModel(updatedContact)
+    
+    await interactor.setStatus(contact, .online)
+    await interactor.updateMessenge(contact, updatedLastMessage)
   }
   
   func setupSKBarButtonView() {
@@ -425,13 +429,13 @@ private extension MessengerListScreenModulePresenter {
     
     Task { [weak self] in
       guard let self else { return }
-      let messengerModel = await interactor.getMessengerModel()
+      let appSettingsModel = await interactor.getAppSettingsModel()
       
       await MainActor.run { [weak self] in
         guard let self else { return }
-        centerBarButtonView?.iconLeftView.image = messengerModel.appSettingsModel.myStatus.imageStatus
-        centerBarButtonView?.labelView.text = messengerModel.appSettingsModel.myStatus.title
-        rightBarWriteButton?.isEnabled = messengerModel.appSettingsModel.myStatus == .online
+        centerBarButtonView?.iconLeftView.image = appSettingsModel.myStatus.imageStatus
+        centerBarButtonView?.labelView.text = appSettingsModel.myStatus.title
+        rightBarWriteButton?.isEnabled = appSettingsModel.myStatus == .online
       }
     }
   }
@@ -508,7 +512,8 @@ private extension MessengerListScreenModulePresenter {
     var messageID = ""
     var replyMessageText: String?
     
-    if let messengeModel = contact.messenges.last, messengeModel.messageStatus == .sending {
+    if let messengeModel = await interactor.getListMessengeModels(contact).last,
+       messengeModel.messageStatus == .sending {
       message = messengeModel.message
       messageID = messengeModel.id
       replyMessageText = messengeModel.replyMessageText
@@ -569,23 +574,24 @@ private extension MessengerListScreenModulePresenter {
       return .failure(URLError(.unknown))
     }
     let (recipientTorAddress, requestModel) = networkRequest
-    let messengeIndex = contact.messenges.firstIndex(where: {
-      $0.id == contact.messenges.last?.id
+    let listMessenge = await interactor.getListMessengeModels(contact)
+    let messengeIndex = listMessenge.firstIndex(where: {
+      $0.id == listMessenge.last?.id
     })
     
     if let messengeIndex,
-       !contact.messenges[messengeIndex].videos.isEmpty ||
-        !contact.messenges[messengeIndex].images.isEmpty ||
-        contact.messenges[messengeIndex].recording != nil {
+       !listMessenge[messengeIndex].videos.isEmpty ||
+        !listMessenge[messengeIndex].images.isEmpty ||
+        listMessenge[messengeIndex].recording != nil {
       var files: [URL?] = []
       
-      contact.messenges[messengeIndex].videos.forEach { files.append($0.full) }
-      contact.messenges[messengeIndex].images.forEach { files.append($0.full) }
+      listMessenge[messengeIndex].videos.forEach { files.append($0.full) }
+      listMessenge[messengeIndex].images.forEach { files.append($0.full) }
       
       await interactor.sendFile(
         toxPublicKey: toxPublicKey,
         recipientPublicKey: encryptionPublicKey,
-        recordModel: contact.messenges[messengeIndex].recording,
+        recordModel: listMessenge[messengeIndex].recording,
         messengerRequest: requestModel,
         files: files.compactMap({ $0 })
       )
@@ -607,14 +613,13 @@ private extension MessengerListScreenModulePresenter {
       toxPublicKey: toxPublicKey,
       messengerRequest: requestModel
     ) {
-      var updatedContact = contact
-      if let messengeIndex {
-        var updatedMessenge = updatedContact.messenges[messengeIndex]
-        updatedMessenge.messageStatus = .sent
-        updatedContact.messenges[messengeIndex] = updatedMessenge
-      }
+      let listMessenge = await interactor.getListMessengeModels(contact)
       
-      await interactor.saveContactModel(updatedContact)
+      if let messengeIndex {
+        var updatedMessenge = listMessenge[messengeIndex]
+        updatedMessenge.messageStatus = .sent
+        await interactor.updateMessenge(contact, updatedMessenge)
+      }
       return .success(messageID)
     }
     return .failure(URLError(.unknown))

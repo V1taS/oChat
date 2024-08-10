@@ -13,7 +13,7 @@ public final class ApplicationServicesStub: IApplicationServices, IDataManagerSe
                                             INotificationService, IPermissionService, ISessionService,
                                             ISteganographyService, ISystemService, IUIService,
                                             IAnalyticsService, ISecureDataManagerService, ICryptoService,
-                                            ICloudKitService, IAppSettingsManager, IDataManagementService,
+                                            ICloudKitService, IDataManagementService,
                                             IAccessAndSecurityManagementService, IUserInterfaceAndExperienceService,
                                             IDeepLinkService, IPushNotificationService, IZipArchiveService {
   public func checkIfPasscodeIsSet() async -> Result<Void, SystemServiceError> { .success(()) }
@@ -79,7 +79,6 @@ public final class ApplicationServicesStub: IApplicationServices, IDataManagerSe
   public func getSecureDataManagerService(_ serviceName: SecureDataManagerServiceKey) -> any ISecureDataManagerService { self }
   public func getCryptoService() -> any ICryptoService { self }
   public func getCloudKitService() -> any ICloudKitService { self }
-  public func getAppSettingsManager() -> IAppSettingsManager { self }
   public func getDataManagementService() -> any IDataManagementService { self }
   public func getAccessAndSecurityManagementService() -> any IAccessAndSecurityManagementService { self }
   public func getUserInterfaceAndExperienceService() -> any IUserInterfaceAndExperienceService { self }
@@ -93,7 +92,6 @@ public final class ApplicationServicesStub: IApplicationServices, IDataManagerSe
   public var cryptoService: any ICryptoService { self }
   public var dataManagerService: any IDataManagerService { self }
   public var dataMappingService: any IDataMappingService { self }
-  public var appSettingsManager: any IAppSettingsManager { self }
   public var uiService: any IUIService { self }
   public var systemService: any ISystemService { self }
   public var notificationService: any INotificationService { self }
@@ -205,9 +203,23 @@ public final class ApplicationServicesStub: IApplicationServices, IDataManagerSe
 
 // MARK: - MessengerServiceStub
 
-public final class MessengerServiceStub: IMessengerModelSettingsManager, IMessengerModelHandlerService,
-                                         IMessagesService, IMessengerService, IP2PChatManager, IAppSettingsManager {
-  public func saveMessengerModel(_ model: MessengerModel) async {}
+public final class MessengerServiceStub: IMessagesService, IMessengerService, IP2PChatManager, IMessengeDataManager, IContactsDataManager, IAppSettingsDataManager {
+  public func getMessengeModelsFor(_ contactID: String) async -> [MessengeModel] {[]}
+  public func addMessenge(_ contactID: String, _ messengeModel: MessengeModel) async {}
+  public func removeMessenge(_ contactModel: ContactModel, _ id: String) async {}
+  public func updateMessenge(_ contactModel: ContactModel, _ messengeModel: MessengeModel) async {}
+  public func getDictionaryContactModels() async -> [String : ContactModel] {[:]}
+  public func getListContactModels() async -> [ContactModel] {[]}
+  public func saveContactModels(_ models: ContactModels) async {}
+  public func removeContact(_ contactModel: ContactModel) async {}
+  public func saveContact(_ contactModel: ContactModel) async {}
+  public func getDictionaryMessengeModels() async -> MessengeModels {.init()}
+  public func getListMessengeModels(_ contactModel: ContactModel) async -> [MessengeModel] {[]}
+  public func saveMessengeModels(_ models: MessengeModels) async {}
+  public func addMessenge(_ contactModel: ContactModel, _ messengeModel: MessengeModel) async {}
+  public var messengeDataManager: any IMessengeDataManager { self }
+  public var contactsDataManager: any IContactsDataManager { self }
+  public var appSettingsDataManager: any IAppSettingsDataManager { self }
   public func clearAllMessenge() async {}
   public func setAccessType(_ accessType: AppSettingsModel.AccessType) async {}
   public func setFakeAppPassword(_ value: String?) async {}
@@ -229,7 +241,6 @@ public final class MessengerServiceStub: IMessengerModelSettingsManager, IMessen
   public func deleteContact(_ model: ContactModel) async {}
   public func setAllContactsIsOffline() async {}
   public func setAllContactsNoTyping() async {}
-  public func getMessengerModel() async -> MessengerModel { .setDefaultValues() }
   public func getAppSettingsModel() async -> AppSettingsModel { .setDefaultValues() }
   public func saveAppSettingsModel(_ model: AppSettingsModel) async {}
   public func getContactModels() async -> [ContactModel] { [] }
@@ -239,7 +250,7 @@ public final class MessengerServiceStub: IMessengerModelSettingsManager, IMessen
   public func setIsEnabledFaceID(_ value: Bool) async {}
   public func setAppPassword(_ value: String?) async {}
   public func setIsEnabledNotifications(_ value: Bool) async {}
-  public func setIsNewMessagesAvailable(_ value: Bool, toxAddress: String) async {}
+  public func setIsNewMessagesAvailable(_ value: Bool, id: String) async {}
   public func start(saveDataString: String?) async throws {}
   public func getToxAddress() async -> String? { nil }
   public func getToxPublicKey() async -> String? { nil }
@@ -308,7 +319,6 @@ public final class MessengerServiceStub: IMessengerModelSettingsManager, IMessen
   public func setAppPassword(_ value: String?, completion: (() -> Void)?) {}
   public func setIsEnabledNotifications(_ value: Bool, completion: (() -> Void)?) {}
   
-  public var appSettingsManager: any IAppSettingsManager { self }
   public var serverStateAction: ((TorServerState) -> Void)?
   public var sessionStateAction: ((TorSessionState) -> Void)?
   public func getOnionAddress(completion: ((Result<String, TorServiceError>) -> Void)?) {}
@@ -319,8 +329,6 @@ public final class MessengerServiceStub: IMessengerModelSettingsManager, IMessen
   public var p2pChatManager: any IP2PChatManager { self }
   
   public func messagesEncryptionService(privateKey: String) -> any IMessagesService { self }
-  public var modelSettingsManager: any IMessengerModelSettingsManager { self }
-  public var modelHandlerService: any IMessengerModelHandlerService { self}
   
   public func deleteAllData() -> Bool { false }
   public func getAppSettingsModel(completion: @escaping (AppSettingsModel) -> Void) {}
@@ -336,8 +344,6 @@ public final class MessengerServiceStub: IMessengerModelSettingsManager, IMessen
   public func addMessenge(_ model: ContactModel, _ messengeModel: MessengeModel, completion: ((ContactModel?) -> Void)?) {}
   public func setEncryptionPublicKey(_ model: ContactModel, _ publicKey: String, completion: ((ContactModel?) -> Void)?) {}
   public func deleteContact(_ model: ContactModel, completion: (() -> Void)?) {}
-  public func getMessengerModel(completion: @escaping (MessengerModel) -> Void) {}
-  public func saveMessengerModel(_ model: MessengerModel, completion: (() -> Void)?) {}
   public func getContactModels(completion: @escaping ([ContactModel]) -> Void) {}
   public func saveContactModel(_ model: ContactModel, completion: (() -> Void)?) {}
   public func saveContactModels(_ models: [ContactModel], completion: (() -> Void)?) {}

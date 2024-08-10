@@ -14,12 +14,19 @@ public enum SecureDataManagerServiceKey: String {
   case session = "SessionService"
   /// Контайнер для конфигураций приложения CloudKit
   case configurationSecrets = "ConfigurationSecrets"
-  /// Контайнер для моделек Мессенджера
-  case messengerModelHandler = "MessengerModelHandlerService"
   /// Контейнер с диплинками
   case deepLinkService = "DeepLinkService"
   /// Контейнер для сервиса ТОР
   case torService = "TorService"
+  
+  /// Контайнер для Настроек приложения
+  case appSettingsData = "AppSettingsData"
+  
+  /// Контайнер для Контактов
+  case contactsData = "ContactsData"
+  
+  /// Контайнер для Сообщений
+  case messengeData = "MessengeData"
 }
 
 // MARK: - Extension
@@ -27,6 +34,14 @@ public enum SecureDataManagerServiceKey: String {
 extension SecureDataManagerServiceKey {
   /// Элементы которые надо очищать при удалении программы с устройства
   static public var itemsToClear: [SecureDataManagerServiceKey] {
-    [.modelHandler, .session, .messengerModelHandler, deepLinkService, torService]
+    [
+      .modelHandler,
+      .session,
+      .deepLinkService,
+      .torService,
+      .appSettingsData,
+      .contactsData,
+      .messengeData
+    ]
   }
 }

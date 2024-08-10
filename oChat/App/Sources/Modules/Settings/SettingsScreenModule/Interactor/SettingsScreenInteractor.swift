@@ -30,12 +30,13 @@ protocol SettingsScreenInteractorInput {
   ///   - type: Тип уведомления
   func showNotification(_ type: NotificationServiceType)
   
-  /// Получает модель `MessengerModel` асинхронно.
-  func getMessengerModel() async -> MessengerModel
-  
   /// Удалить все данные из основной модели
   @discardableResult
   func deleteAllData() async -> Bool
+  
+  /// Получить модель настроек приложения
+  /// - Returns: Асинхронная операция, возвращающая модель настроек `AppSettingsModel`
+  func getAppSettingsModel() async -> AppSettingsModel
 }
 
 /// Интерактор
@@ -48,9 +49,9 @@ final class SettingsScreenInteractor {
   // MARK: - Private properties
   
   private let systemService: ISystemService
-  private let modelHandlerService: IMessengerModelHandlerService
   private let notificationService: INotificationService
   private let p2pChatManager: IP2PChatManager
+  private let appSettingsDataManager: IAppSettingsDataManager
   
   // MARK: - Initialization
   
@@ -58,28 +59,28 @@ final class SettingsScreenInteractor {
   ///   - services: Сервисы
   init(_ services: IApplicationServices) {
     systemService = services.userInterfaceAndExperienceService.systemService
-    modelHandlerService = services.messengerService.modelHandlerService
     notificationService = services.userInterfaceAndExperienceService.notificationService
     p2pChatManager = services.messengerService.p2pChatManager
+    appSettingsDataManager = services.messengerService.appSettingsDataManager
   }
 }
 
 // MARK: - SettingsScreenInteractorInput
 
 extension SettingsScreenInteractor: SettingsScreenInteractorInput {
-  func deleteAllData() async -> Bool {
-    modelHandlerService.deleteAllData()
+  func getAppSettingsModel() async -> SKAbstractions.AppSettingsModel {
+    await appSettingsDataManager.getAppSettingsModel()
   }
   
-  func getMessengerModel() async -> MessengerModel {
-    await modelHandlerService.getMessengerModel()
+  func deleteAllData() async -> Bool {
+    appSettingsDataManager.deleteAllData()
   }
   
   func copyToClipboard(text: String) {
     systemService.copyToClipboard(text: text)
   }
   
-  func showNotification(_ type: SKAbstractions.NotificationServiceType) {
+  func showNotification(_ type: NotificationServiceType) {
     notificationService.showNotification(type)
   }
   

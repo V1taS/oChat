@@ -66,25 +66,41 @@ final class MessengerDialogScreenPresenter: ObservableObject {
   /// - Parameters:
   ///   - interactor: Интерактор
   ///   - factory: Фабрика
-  ///   - dialogModel: Моделька с данными
+  ///   - contactModel: Моделька контакта
   ///   - contactAdress: Адрес контакта
   init(interactor: MessengerDialogScreenInteractorInput,
        factory: MessengerDialogScreenFactoryInput,
-       dialogModel: ContactModel?,
+       contactModel: ContactModel?,
        contactAdress: String?) {
     self.interactor = interactor
     self.factory = factory
-    stateContactAdress = contactAdress ?? (dialogModel?.toxAddress ?? "")
+    stateContactAdress = contactAdress ?? (contactModel?.toxAddress ?? "")
     stateIsDeeplinkAdress = contactAdress != nil
-    let contact = dialogModel ?? factory.createInitialContact(address: contactAdress ?? "")
+    let contact = contactModel ?? factory.createInitialContact(address: contactAdress ?? "")
     stateContactModel = contact
-    
-    stateMessengeModels = factory.createMessageModels(
-      models: contact.messenges,
-      contactModel: contact
-    )
     stateIsDownloadAvailability = contact.canSaveMedia
     stateIsChatHistoryStored = contact.isChatHistoryStored
+    
+    Task { @MainActor [weak self] in
+      guard let self else { return }
+      if contactModel == nil {
+        let messengeModel: MessengeModel = .init(
+          messageType: .systemAttention,
+          messageStatus: .sent,
+          message: OChatStrings.MessengerDialogScreenLocalization.Messenger
+            .Initial.note,
+          replyMessageText: nil,
+          images: [],
+          videos: [],
+          recording: nil
+        )
+        
+        await interactor.addMessenge(
+          contact.id,
+          messengeModel
+        )
+      }
+    }
   }
   
   // MARK: - The lifecycle of a UIViewController
@@ -184,7 +200,7 @@ final class MessengerDialogScreenPresenter: ObservableObject {
     replyMessageText: String?
   ) async {
     await impactFeedback.impactOccurred()
-    var updatedContactModel = stateContactModel
+    let updatedContactModel = stateContactModel
     
     let messengeModel = MessengeModel(
       messageType: .own,
@@ -196,13 +212,14 @@ final class MessengerDialogScreenPresenter: ObservableObject {
       recording: nil
     )
     
-    updatedContactModel.messenges.append(messengeModel)
+    await interactor.addMessenge(updatedContactModel.id, messengeModel)
+    let listMessengeModels = await interactor.getListMessengeModels(updatedContactModel)
     
     await MainActor.run { [weak self, updatedContactModel] in
       guard let self else { return }
       stateContactModel = updatedContactModel
       stateMessengeModels = factory.createMessageModels(
-        models: updatedContactModel.messenges,
+        models: listMessengeModels,
         contactModel: stateContactModel
       )
     }
@@ -216,7 +233,6 @@ final class MessengerDialogScreenPresenter: ObservableObject {
     replyMessageText: String?
   ) async {
     await impactFeedback.impactOccurred()
-    var updatedContactModel = stateContactModel
     var recordingModel: MessengeRecordingModel?
     
     if let recording,
@@ -305,19 +321,19 @@ final class MessengerDialogScreenPresenter: ObservableObject {
       videos: videos,
       recording: recordingModel
     )
-    updatedContactModel.messenges.append(messengeModel)
     
-    await MainActor.run { [weak self, updatedContactModel] in
+    await interactor.addMessenge(stateContactModel.id, messengeModel)
+    let listMessengeModels = await interactor.getListMessengeModels(stateContactModel)
+    
+    await MainActor.run { [weak self, stateContactModel] in
       guard let self else { return }
-      stateContactModel = updatedContactModel
-      
       stateMessengeModels = factory.createMessageModels(
-        models: updatedContactModel.messenges,
+        models: listMessengeModels,
         contactModel: stateContactModel
       )
     }
     
-    await moduleOutput?.sendMessage(contact: updatedContactModel)
+    await moduleOutput?.sendMessage(contact: stateContactModel)
   }
   
   func sendInitiateChatFromDialog(toxAddress: String?) async {
@@ -465,8 +481,8 @@ final class MessengerDialogScreenPresenter: ObservableObject {
     let youNotifiedContactTitle = OChatStrings.MessengerDialogScreenLocalization.Message
       .YouNotifiedContact.title
     
-    var updatedContactModel = stateContactModel
-    updatedContactModel.messenges.append(
+    await interactor.addMessenge(
+      stateContactModel.id,
       .init(
         messageType: .systemSuccess,
         messageStatus: .sent,
@@ -477,14 +493,16 @@ final class MessengerDialogScreenPresenter: ObservableObject {
         recording: nil
       )
     )
+    let listMessengeModels = await interactor.getListMessengeModels(stateContactModel)
     
-    await MainActor.run { [updatedContactModel, weak self] in
+    await MainActor.run { [weak self] in
       guard let self else { return }
-      stateContactModel = updatedContactModel
+      stateMessengeModels = factory.createMessageModels(
+        models: listMessengeModels,
+        contactModel: stateContactModel
+      )
     }
-    
-    await moduleOutput?.saveContactModel(updatedContactModel)
-    await moduleOutput?.sendPushNotification(contact: updatedContactModel)
+    await moduleOutput?.sendPushNotification(contact: stateContactModel)
   }
 }
 
@@ -531,7 +549,7 @@ extension MessengerDialogScreenPresenter: MessengerDialogScreenModuleInput {
     Task { @MainActor [weak self] in
       guard let self else { return }
       let contactModel = await interactor.getNewContactModels(stateContactModel)
-      if isWelcomeMessageAllowed(contactModel: contactModel) {
+      if await isWelcomeMessageAllowed(contactModel: contactModel) {
         await addWelcomeMessage(contactModel: contactModel)
         return
       }
@@ -540,8 +558,10 @@ extension MessengerDialogScreenPresenter: MessengerDialogScreenModuleInput {
       stateIsDownloadAvailability = contactModel.canSaveMedia
       stateIsChatHistoryStored = contactModel.isChatHistoryStored
       
+      let listMessengeModels = await interactor.getListMessengeModels(stateContactModel)
+      
       stateMessengeModels = factory.createMessageModels(
-        models: contactModel.messenges,
+        models: listMessengeModels,
         contactModel: stateContactModel
       )
       updateCenterBarButtonView(isHidden: false)
@@ -593,7 +613,7 @@ private extension MessengerDialogScreenPresenter {
       )
     )
     
-    Task { [weak self] in
+    Task { @MainActor [weak self] in
       guard let self,
             let getAppSettingsModel = await moduleOutput?.getAppSettingsModel() else {
         return
@@ -601,6 +621,13 @@ private extension MessengerDialogScreenPresenter {
       await markMessageAsRead(contactModel: stateContactModel)
       stateIsPremiumEnabled = getAppSettingsModel.isPremiumEnabled
       toxSelfAddress = await interactor.getToxAddress() ?? ""
+      
+      let listMessenge = await interactor.getListMessengeModels(stateContactModel)
+      
+      stateMessengeModels = factory.createMessageModels(
+        models: listMessenge,
+        contactModel: stateContactModel
+      )
     }
     
     updateCenterBarButtonView(isHidden: isInitialAddressEntryState() || isRequestChatState())
@@ -660,7 +687,6 @@ private extension MessengerDialogScreenPresenter {
   }
   
   func addWelcomeMessage(contactModel: ContactModel) async {
-    var contactUpdated = contactModel
     let publicKeyIsEmpty = (stateContactModel.encryptionPublicKey ?? "").isEmpty
     
     let sender = OChatStrings.MessengerDialogScreenLocalization.Messenger
@@ -668,7 +694,8 @@ private extension MessengerDialogScreenPresenter {
     let receiver = OChatStrings.MessengerDialogScreenLocalization.Messenger
       .Message.Welcome.receiver
     
-    contactUpdated.messenges.append(
+    await interactor.addMessenge(
+      contactModel.id,
       .init(
         messageType: .systemSuccess,
         messageStatus: .sent,
@@ -679,13 +706,12 @@ private extension MessengerDialogScreenPresenter {
         recording: nil
       )
     )
-    
-    await moduleOutput?.saveContactModel(contactUpdated)
   }
   
-  func isWelcomeMessageAllowed(contactModel: ContactModel) -> Bool {
-    let isMessengesIsEmpty = contactModel.messenges.filter({ !$0.messageType.isSystem }).isEmpty
-    let isContainsSystemMessengeSuccess = contactModel.messenges.contains(where: ({
+  func isWelcomeMessageAllowed(contactModel: ContactModel) async -> Bool {
+    let listMessengeModels = await interactor.getListMessengeModels(stateContactModel)
+    let isMessengesIsEmpty = listMessengeModels.filter({ !$0.messageType.isSystem }).isEmpty
+    let isContainsSystemMessengeSuccess = listMessengeModels.contains(where: ({
       $0.messageType == .systemSuccess
     }))
     return isMessengesIsEmpty && !isContainsSystemMessengeSuccess && contactModel.status == .online

@@ -36,7 +36,7 @@ final class MainFlowCoordinator: Coordinator<Void, MainFinishFlowType> {
   override func start(parameter: Void) {
     Task { @MainActor [weak self] in
       guard let self else { return }
-      let accessType = await services.messengerService.modelHandlerService.getAppSettingsModel().accessType
+      let accessType = await services.messengerService.appSettingsDataManager.getAppSettingsModel().accessType
       setupMessengerScreenFlowCoordinator(accessType: accessType)
       setupSettingsScreenFlowCoordinator()
 

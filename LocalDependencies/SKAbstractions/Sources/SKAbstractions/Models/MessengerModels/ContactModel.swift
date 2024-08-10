@@ -7,6 +7,8 @@
 
 import SwiftUI
 
+public typealias ContactModels = [String: ContactModel]
+
 /// Структура для описания контакта в мессенджере.
 public struct ContactModel {
   
@@ -21,9 +23,6 @@ public struct ContactModel {
   
   /// Локальный адрес в mesh-сети.
   public var meshAddress: String?
-  
-  /// Список сообщений с этим контактом.
-  public var messenges: [MessengeModel]
   
   /// Статус онлайн контакта.
   public var status: ContactModel.Status
@@ -49,12 +48,14 @@ public struct ContactModel {
   /// Разрешить собеседнику хранить историю переписки
   public var isChatHistoryStored: Bool
   
+  /// Дата создания контакта
+  public let dateOfCreation: Date
+  
   /// Инициализатор для создания нового контакта.
   /// - Parameters:
   ///   - name: Имя контакта.
   ///   - toxAddress: Адрес контакта в сети Tox.
   ///   - meshAddress: Локальный адрес в mesh-сети.
-  ///   - messenges: Список сообщений с этим контактом.
   ///   - status: Статус онлайн контакта.
   ///   - encryptionPublicKey: Публичный ключ для шифрования сообщений.
   ///   - toxPublicKey: Публичный ключ для шифрования сообщений.
@@ -64,10 +65,10 @@ public struct ContactModel {
   ///   - canSaveMedia: Разрешить собеседнику сохранять отправленные вами фото и видео
   ///   - isChatHistoryStored: Разрешить собеседнику хранить историю переписки
   public init(
+    id: String = UUID().uuidString,
     name: String?,
     toxAddress: String?,
     meshAddress: String?,
-    messenges: [MessengeModel],
     status: ContactModel.Status,
     encryptionPublicKey: String?,
     toxPublicKey: String?,
@@ -77,11 +78,10 @@ public struct ContactModel {
     canSaveMedia: Bool,
     isChatHistoryStored: Bool
   ) {
-    self.id = UUID().uuidString
+    self.id = id
     self.name = name
     self.toxAddress = toxAddress
     self.meshAddress = meshAddress
-    self.messenges = messenges
     self.status = status
     self.encryptionPublicKey = encryptionPublicKey
     self.toxPublicKey = toxPublicKey
@@ -90,6 +90,7 @@ public struct ContactModel {
     self.isTyping = isTyping
     self.canSaveMedia = canSaveMedia
     self.isChatHistoryStored = isChatHistoryStored
+    self.dateOfCreation = Date()
   }
 }
 
@@ -101,7 +102,6 @@ extension ContactModel {
       name: nil,
       toxAddress: nil,
       meshAddress: nil,
-      messenges: [],
       status: .offline,
       encryptionPublicKey: nil, 
       toxPublicKey: nil, 

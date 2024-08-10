@@ -16,14 +16,9 @@ import SKManagers
 
 // swiftlint:disable all
 extension MessengerListScreenModuleDemoInteractor {
-  /// Шифрование данных
-  func createDemoContactModel9() -> ContactModel {
-    let toxAddress = "7dee20e6f2edaedde73e702a844a5751a4c43a7f34aa32e6492d8d201b9efb3749cd397889d1"
-    return ContactModel(
-      name: nil,
-      toxAddress: toxAddress,
-      meshAddress: nil,
-      messenges: [
+  func createMessengesModel9() -> [String: [MessengeModel]] {
+    [
+      toxAddress: [
         .init(
           messageType: .received,
           messageStatus: .sent,
@@ -105,7 +100,16 @@ extension MessengerListScreenModuleDemoInteractor {
           videos: [],
           recording: nil
         )
-      ],
+      ]
+    ]
+  }
+  
+  func createDemoContactModel9() -> ContactModel {
+    return ContactModel(
+      id: toxAddress,
+      name: nil,
+      toxAddress: toxAddress,
+      meshAddress: nil,
       status: .offline,
       encryptionPublicKey: toxAddress,
       toxPublicKey: toxAddress,
@@ -117,4 +121,6 @@ extension MessengerListScreenModuleDemoInteractor {
     )
   }
 }
+
+private let toxAddress = "7dee20e6f2edaedde73e702a844a5751a4c43a7f34aa32e6492d8d201b9efb3749cd397889d1"
 // swiftlint:enable all

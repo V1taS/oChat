@@ -39,7 +39,7 @@ struct FirstLaunchConfigurator: Configurator {
 
 private extension FirstLaunchConfigurator {
   func clearDataOnFirstLaunch() {
-    services.messengerService.modelHandlerService.deleteAllData()
+    services.messengerService.appSettingsDataManager.deleteAllData()
   }
   
   func setDarkColorScheme() {

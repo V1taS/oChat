@@ -66,9 +66,8 @@ final class PasscodeSettingsScreenInteractor {
   // MARK: - Private properties
   
   private let permissionService: IPermissionService
-  private let modelHandlerService: IMessengerModelHandlerService
-  private let appSettingsManager: IAppSettingsManager
   private let notificationService: INotificationService
+  private let appSettingsDataManager: IAppSettingsDataManager
   
   // MARK: - Initialization
   
@@ -76,9 +75,8 @@ final class PasscodeSettingsScreenInteractor {
   ///   - services: Сервисы
   init(_ services: IApplicationServices) {
     permissionService = services.accessAndSecurityManagementService.permissionService
-    modelHandlerService = services.messengerService.modelHandlerService
-    appSettingsManager = services.messengerService.appSettingsManager
     notificationService = services.userInterfaceAndExperienceService.notificationService
+    appSettingsDataManager = services.messengerService.appSettingsDataManager
   }
 }
 
@@ -90,43 +88,43 @@ extension PasscodeSettingsScreenInteractor: PasscodeSettingsScreenInteractorInpu
   }
   
   func setFakeAppPassword(_ value: String?) async {
-    await appSettingsManager.setFakeAppPassword(value)
+    await appSettingsDataManager.setFakeAppPassword(value)
   }
   
   func setAccessType(_ accessType: AppSettingsModel.AccessType) async {
-    await appSettingsManager.setAccessType(accessType)
+    await appSettingsDataManager.setAccessType(accessType)
   }
   
   func setIsPremiumEnabled(_ value: Bool) async {
-    await appSettingsManager.setIsPremiumEnabled(value)
+    await appSettingsDataManager.setIsPremiumEnabled(value)
   }
   
   func setIsTypingIndicatorEnabled(_ value: Bool) async {
-    await appSettingsManager.setIsTypingIndicatorEnabled(value)
+    await appSettingsDataManager.setIsTypingIndicatorEnabled(value)
   }
   
   func setCanSaveMedia(_ value: Bool) async {
-    await appSettingsManager.setCanSaveMedia(value)
+    await appSettingsDataManager.setCanSaveMedia(value)
   }
   
   func setIsChatHistoryStored(_ value: Bool) async {
-    await appSettingsManager.setIsChatHistoryStored(value)
+    await appSettingsDataManager.setIsChatHistoryStored(value)
   }
   
   func setIsVoiceChangerEnabled(_ value: Bool) async {
-    await appSettingsManager.setIsVoiceChangerEnabled(value)
+    await appSettingsDataManager.setIsVoiceChangerEnabled(value)
   }
   
   func resetPasscode() async {
-    await appSettingsManager.setAppPassword(nil)
+    await appSettingsDataManager.setAppPassword(nil)
   }
   
   func resetFakePasscode() async {
-    await appSettingsManager.setFakeAppPassword(nil)
+    await appSettingsDataManager.setFakeAppPassword(nil)
   }
   
   func getAppSettingsModel() async -> AppSettingsModel {
-    await modelHandlerService.getAppSettingsModel()
+    await appSettingsDataManager.getAppSettingsModel()
   }
 }
 

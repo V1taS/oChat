@@ -78,12 +78,12 @@ extension MessengerListScreenModulePresenter {
           interactor.deleteDeepLinkURL()
         }
         
-        let messengerModel = await interactor.getMessengerModel()
+        let appSettingsModel = await interactor.getAppSettingsModel()
         await MainActor.run { [weak self] in
           guard let self else { return }
-          centerBarButtonView?.iconLeftView.image = messengerModel.appSettingsModel.myStatus.imageStatus
-          centerBarButtonView?.labelView.text = messengerModel.appSettingsModel.myStatus.title
-          rightBarWriteButton?.isEnabled = messengerModel.appSettingsModel.myStatus == .online
+          centerBarButtonView?.iconLeftView.image = appSettingsModel.myStatus.imageStatus
+          centerBarButtonView?.labelView.text = appSettingsModel.myStatus.title
+          rightBarWriteButton?.isEnabled = appSettingsModel.myStatus == .online
         }
       }
     }
@@ -126,13 +126,19 @@ extension MessengerListScreenModulePresenter {
         let updatedContact = factory.updateExistingContact(
           contact: contact,
           messageModel: messageModel,
-          messageText: messageText,
-          pushNotificationToken: pushNotificationToken,
+          pushNotificationToken: pushNotificationToken
+        )
+        
+        let messengeModel = factory.addMessageToContact(
+          message: messageText,
+          messageType: .received,
+          replyMessageText: messageModel.replyMessageText,
           images: [],
           videos: [],
           recording: nil
         )
         
+        await interactor.addMessenge(contact.id, messengeModel)
         await interactor.saveContactModel(updatedContact)
         await updateListContacts()
         moduleOutput?.dataModelHasBeenUpdated()
@@ -219,14 +225,15 @@ extension MessengerListScreenModulePresenter {
       let contactModel = await interactor.getContactModelsFrom(toxPublicKey: toxPublicKey)
       guard let contactModel else { return }
       var updatedContactModel = contactModel
-      var updatedMessenges = updatedContactModel.messenges
+      let messenges = await interactor.getMessengeModelsFor(contactModel.id)
       updatedContactModel.status = .online
       
-      if let messengesIndex = updatedMessenges.firstIndex(where: { $0.tempMessageID == messageId }) {
-        updatedMessenges[messengesIndex].messageStatus = .sent
-        updatedMessenges[messengesIndex].tempMessageID = nil
+      if let messengesIndex = messenges.firstIndex(where: { $0.tempMessageID == messageId }) {
+        var updatedMessenges = messenges[messengesIndex]
+        updatedMessenges.messageStatus = .sent
+        updatedMessenges.tempMessageID = nil
+        await interactor.updateMessenge(contactModel, updatedMessenges)
       }
-      updatedContactModel.messenges = updatedMessenges
       
       await interactor.saveContactModel(updatedContactModel)
       await updateListContacts()
@@ -339,13 +346,19 @@ extension MessengerListScreenModulePresenter {
         let updatedContact = factory.updateExistingContact(
           contact: contact,
           messageModel: messageModel,
-          messageText: messageText,
-          pushNotificationToken: pushNotificationToken,
+          pushNotificationToken: pushNotificationToken
+        )
+        let messengeModel = factory.addMessageToContact(
+          message: messageText,
+          messageType: .received,
+          replyMessageText: messageModel.replyMessageText,
           images: images,
           videos: videos,
           recording: recordingModel
         )
         
+        await interactor.addMessenge(contact.id, messengeModel)
+        await interactor.saveContactModel(updatedContact)
         await interactor.saveContactModel(updatedContact)
         await updateListContacts()
         moduleOutput?.dataModelHasBeenUpdated()
@@ -378,13 +391,14 @@ extension MessengerListScreenModulePresenter {
       let contactModel = await interactor.getContactModelsFrom(toxPublicKey: toxPublicKey)
       guard let contactModel else { return }
       var updatedContactModel = contactModel
-      var updatedMessenges = updatedContactModel.messenges
+      let messenges = await interactor.getMessengeModelsFor(contactModel.id)
       updatedContactModel.status = .online
       
-      if let messengesIndex = updatedMessenges.firstIndex(where: { $0.id == messageID }) {
-        updatedMessenges[messengesIndex].messageStatus = .sent
+      if let messengesIndex = messenges.firstIndex(where: { $0.id == messageID }) {
+        var updatedMessenges = messenges[messengesIndex]
+        updatedMessenges.messageStatus = .sent
+        await interactor.updateMessenge(contactModel, updatedMessenges)
       }
-      updatedContactModel.messenges = updatedMessenges
       
       await interactor.saveContactModel(updatedContactModel)
       await updateListContacts()
@@ -398,13 +412,14 @@ extension MessengerListScreenModulePresenter {
       let contactModel = await interactor.getContactModelsFrom(toxPublicKey: toxPublicKey)
       guard let contactModel else { return }
       var updatedContactModel = contactModel
-      var updatedMessenges = updatedContactModel.messenges
+      let messenges = await interactor.getMessengeModelsFor(contactModel.id)
       updatedContactModel.status = .online
       
-      if let messengesIndex = updatedMessenges.firstIndex(where: { $0.id == messageID }) {
-        updatedMessenges[messengesIndex].messageStatus = .failed
+      if let messengesIndex = messenges.firstIndex(where: { $0.id == messageID }) {
+        var updatedMessenges = messenges[messengesIndex]
+        updatedMessenges.messageStatus = .failed
+        await interactor.updateMessenge(contactModel, updatedMessenges)
       }
-      updatedContactModel.messenges = updatedMessenges
       
       await interactor.saveContactModel(updatedContactModel)
       await updateListContacts()

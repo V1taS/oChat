@@ -32,9 +32,10 @@ final class MessengerListScreenModuleFakeInteractor {
   private let systemService: ISystemService
   private let deepLinkService: IDeepLinkService
   private let notificationService: INotificationService
-  private let modelHandlerService: IMessengerModelHandlerService
   private let p2pChatManager: IP2PChatManager
-  private let modelSettingsManager: IMessengerModelSettingsManager
+  private let messengeDataManager: IMessengeDataManager
+  private let appSettingsDataManager: IAppSettingsDataManager
+  private let contactsDataManager: IContactsDataManager
   
   // MARK: - Initialization
   
@@ -61,9 +62,10 @@ final class MessengerListScreenModuleFakeInteractor {
     self.systemService = services.userInterfaceAndExperienceService.systemService
     self.deepLinkService = services.userInterfaceAndExperienceService.deepLinkService
     self.notificationService = services.userInterfaceAndExperienceService.notificationService
-    self.modelHandlerService = services.messengerService.modelHandlerService
     self.p2pChatManager = services.messengerService.p2pChatManager
-    self.modelSettingsManager = services.messengerService.modelSettingsManager
+    self.messengeDataManager = services.messengerService.messengeDataManager
+    self.appSettingsDataManager = services.messengerService.appSettingsDataManager
+    self.contactsDataManager = services.messengerService.contactsDataManager
   }
 }
 
@@ -246,6 +248,26 @@ extension MessengerListScreenModuleFakeInteractor: MessengerListScreenModuleInte
     )
   }
   
+  func getListMessengeModels(_ contactModel: ContactModel) async -> [MessengeModel] {
+    await messengeDataManager.getListMessengeModels(contactModel)
+  }
+  
+  func addMessenge(_ contactID: String, _ messengeModel: MessengeModel) async {
+    await messengeDataManager.addMessenge(contactID, messengeModel)
+  }
+  
+  func updateMessenge(_ contactModel: ContactModel, _ messengeModel: MessengeModel) async {
+    await messengeDataManager.updateMessenge(contactModel, messengeModel)
+  }
+  
+  func removeMessenge(_ contactModel: ContactModel, _ id: String) async {
+    await messengeDataManager.removeMessenge(contactModel, id)
+  }
+  
+  func getMessengeModelsFor(_ contactID: String) async -> [MessengeModel] {
+    await messengeDataManager.getMessengeModelsFor(contactID)
+  }
+  
   // MARK: - InterfaceManager
   
   func setRedDotToTabBar(value: String?) {
@@ -272,13 +294,6 @@ extension MessengerListScreenModuleFakeInteractor: MessengerListScreenModuleInte
   
   func showNotification(_ type: NotificationServiceType) {
     notificationService.showNotification(type)
-  }
-  
-  // MARK: - ModelHandlerService (Directly accessed)
-  
-  func getMessengerModel() async -> MessengerModel {
-    let appSettingsMode = await getAppSettingsModel()
-    return .init(appSettingsModel: appSettingsMode, contacts: [])
   }
 }
 

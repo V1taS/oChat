@@ -14,32 +14,31 @@ import SKStyle
 /// Cобытия которые отправляем из Factory в Presenter
 protocol MessengerListScreenModuleFactoryOutput: AnyObject {
   /// Открыть экран с диалогом
-  func openMessengerDialogScreen(dialogModel: ContactModel)
+  func openMessengerDialogScreen(
+    dialogModel: ContactModel
+  ) async
 }
 
 /// Cобытия которые отправляем от Presenter к Factory
 protocol MessengerListScreenModuleFactoryInput {
   /// Создать заголовок для экрана
   func createHeaderTitle() -> String
+  
   /// Создать список моделек с виджетами
-  func createDialogWidgetModels(messengerDialogModels: [ContactModel]) -> [WidgetCryptoView.Model]
+  func createDialogWidgetModels(
+    messengerDialogModels: [ContactModel],
+    lastMessageDictionary: [String: String]
+  ) -> [WidgetCryptoView.Model]
   
   /// Добавить сообщение
   func addMessageToContact(
-    message: String?,
-    contactModel: ContactModel,
+    message: String,
     messageType: MessengeModel.MessageType,
     replyMessageText: String?,
     images: [MessengeImageModel],
     videos: [MessengeVideoModel],
     recording: MessengeRecordingModel?
-  ) -> ContactModel
-  
-  /// Удалить сообщение
-  func removeMessageToContact(
-    id: String,
-    contactModel: ContactModel
-  ) -> ContactModel
+  ) -> MessengeModel
   
   /// Найти контакт в массиве
   func searchContact(
@@ -58,11 +57,7 @@ protocol MessengerListScreenModuleFactoryInput {
   func updateExistingContact(
     contact: ContactModel,
     messageModel: MessengerNetworkRequestModel,
-    messageText: String,
-    pushNotificationToken: String?,
-    images: [MessengeImageModel],
-    videos: [MessengeVideoModel],
-    recording: MessengeRecordingModel?
+    pushNotificationToken: String?
   ) -> ContactModel
 }
 
@@ -85,43 +80,22 @@ extension MessengerListScreenModuleFactory: MessengerListScreenModuleFactoryInpu
   }
   
   func addMessageToContact(
-    message: String?,
-    contactModel: ContactModel,
+    message: String,
     messageType: MessengeModel.MessageType,
     replyMessageText: String?,
     images: [MessengeImageModel],
     videos: [MessengeVideoModel],
     recording: MessengeRecordingModel?
-  ) -> ContactModel {
-    var updatedModel = contactModel
-    if let message {
-      updatedModel.messenges.append(
-        .init(
-          messageType: messageType,
-          messageStatus: messageType == .own ? .sending : .sent,
-          message: message,
-          replyMessageText: replyMessageText,
-          images: images,
-          videos: videos,
-          recording: recording
-        )
-      )
-    }
-    return updatedModel
-  }
-  
-  func removeMessageToContact(
-    id: String,
-    contactModel: ContactModel
-  ) -> ContactModel {
-    var updatedModel = contactModel
-    var updatedMessengesModel = updatedModel.messenges
-    
-    if let messengeIndex = updatedMessengesModel.firstIndex(where: { $0.id == id}) {
-      updatedMessengesModel.remove(at: messengeIndex)
-    }
-    updatedModel.messenges = updatedMessengesModel
-    return updatedModel
+  ) -> MessengeModel {
+    .init(
+      messageType: messageType,
+      messageStatus: messageType == .own ? .sending : .sent,
+      message: message,
+      replyMessageText: replyMessageText,
+      images: images,
+      videos: videos,
+      recording: recording
+    )
   }
   
   func createHeaderTitle() -> String {
@@ -129,7 +103,10 @@ extension MessengerListScreenModuleFactory: MessengerListScreenModuleFactoryInpu
       .State.Header.title
   }
   
-  func createDialogWidgetModels(messengerDialogModels: [ContactModel]) -> [WidgetCryptoView.Model] {
+  func createDialogWidgetModels(
+    messengerDialogModels: [ContactModel],
+    lastMessageDictionary: [String: String]
+  ) -> [WidgetCryptoView.Model] {
     var models: [WidgetCryptoView.Model] = []
     
     messengerDialogModels.forEach { dialogModel in
@@ -184,7 +161,7 @@ extension MessengerListScreenModuleFactory: MessengerListScreenModuleFactoryInpu
               textStyle: contactStatusStyle
             ),
             descriptionModel: .init(
-              text: dialogModel.messenges.last?.message ?? "",
+              text: lastMessageDictionary[dialogModel.id] ?? "",
               lineLimit: 1,
               textStyle: .netural
             )
@@ -197,7 +174,10 @@ extension MessengerListScreenModuleFactory: MessengerListScreenModuleFactoryInpu
           isSelectable: true,
           backgroundColor: nil,
           action: { [weak self] in
-            self?.output?.openMessengerDialogScreen(dialogModel: dialogModel)
+            Task { [weak self] in
+              guard let self else { return }
+              await output?.openMessengerDialogScreen(dialogModel: dialogModel)
+            }
           }
         )
       )
@@ -214,7 +194,6 @@ extension MessengerListScreenModuleFactory: MessengerListScreenModuleFactoryInpu
       name: nil,
       toxAddress: messageModel.senderAddress,
       meshAddress: messageModel.senderLocalMeshAddress,
-      messenges: [],
       status: status,
       encryptionPublicKey: messageModel.senderPublicKey,
       toxPublicKey: messageModel.senderToxPublicKey,
@@ -229,22 +208,9 @@ extension MessengerListScreenModuleFactory: MessengerListScreenModuleFactoryInpu
   func updateExistingContact(
     contact: ContactModel,
     messageModel: MessengerNetworkRequestModel,
-    messageText: String,
-    pushNotificationToken: String?,
-    images: [MessengeImageModel],
-    videos: [MessengeVideoModel],
-    recording: MessengeRecordingModel?
+    pushNotificationToken: String?
   ) -> ContactModel {
     var updatedContact = contact
-    updatedContact = addMessageToContact(
-      message: messageText,
-      contactModel: updatedContact,
-      messageType: .received,
-      replyMessageText: messageModel.replyMessageText,
-      images: images,
-      videos: videos,
-      recording: recording
-    )
     updatedContact.status = .online
     if let senderPushNotificationToken = pushNotificationToken {
       updatedContact.pushNotificationToken = senderPushNotificationToken

@@ -27,14 +27,14 @@ final class InitialScreenInteractor {
   
   // MARK: - Private properties
   
-  private let appSettingsManager: IAppSettingsManager
+  private let appSettingsDataManager: IAppSettingsDataManager
   
   // MARK: - Initialization
   
   /// - Parameters:
   ///   - services: Сервисы
   init(_ services: IApplicationServices) {
-    appSettingsManager = services.messengerService.appSettingsManager
+    appSettingsDataManager = services.messengerService.appSettingsDataManager
   }
 }
 
@@ -42,7 +42,7 @@ final class InitialScreenInteractor {
 
 extension InitialScreenInteractor: InitialScreenInteractorInput {
   func setAccessType(_ accessType: AppSettingsModel.AccessType) async {
-    await appSettingsManager.setAccessType(accessType)
+    await appSettingsDataManager.setAccessType(accessType)
   }
 }
 

@@ -33,7 +33,9 @@ final class MessengerListScreenModuleDemoInteractor {
   private let systemService: ISystemService
   private let deepLinkService: IDeepLinkService
   private let notificationService: INotificationService
-  private let modelHandlerService: IMessengerModelHandlerService
+  private let messengeDataManager: IMessengeDataManager
+  private let appSettingsDataManager: IAppSettingsDataManager
+  private let contactsDataManager: IContactsDataManager
   
   private var isFirstStartDemo = true
   
@@ -62,7 +64,14 @@ final class MessengerListScreenModuleDemoInteractor {
     self.systemService = services.userInterfaceAndExperienceService.systemService
     self.deepLinkService = services.userInterfaceAndExperienceService.deepLinkService
     self.notificationService = services.userInterfaceAndExperienceService.notificationService
-    self.modelHandlerService = services.messengerService.modelHandlerService
+    self.messengeDataManager = services.messengerService.messengeDataManager
+    self.appSettingsDataManager = services.messengerService.appSettingsDataManager
+    self.contactsDataManager = services.messengerService.contactsDataManager
+    
+    Task { [weak self] in
+      guard let self else { return }
+      await firstStartDemoCheck()
+    }
   }
 }
 
@@ -154,7 +163,7 @@ extension MessengerListScreenModuleDemoInteractor: MessengerListScreenModuleInte
   
   func clearAllMessengeTempID() async {
     await firstStartDemoCheck()
-    return await contactManager.clearAllMessengeTempID()
+    return await messageManager.clearAllMessengeTempID()
   }
   
   // MARK: - SettingsManager
@@ -172,9 +181,7 @@ extension MessengerListScreenModuleDemoInteractor: MessengerListScreenModuleInte
   
   // MARK: - NotificationManager
   
-  func sendPushNotification(contact: ContactModel) async {
-    await notificationManager.sendPushNotification(contact: contact)
-  }
+  func sendPushNotification(contact: ContactModel) async {}
   
   func requestNotification() async -> Bool {
     await notificationManager.requestNotification()
@@ -269,6 +276,26 @@ extension MessengerListScreenModuleDemoInteractor: MessengerListScreenModuleInte
     files: [URL]
   ) async {}
   
+  func getListMessengeModels(_ contactModel: ContactModel) async -> [MessengeModel] {
+    await messengeDataManager.getListMessengeModels(contactModel)
+  }
+  
+  func addMessenge(_ contactID: String, _ messengeModel: MessengeModel) async {
+    await messengeDataManager.addMessenge(contactID, messengeModel)
+  }
+  
+  func updateMessenge(_ contactModel: ContactModel, _ messengeModel: MessengeModel) async {
+    await messengeDataManager.updateMessenge(contactModel, messengeModel)
+  }
+  
+  func removeMessenge(_ contactModel: ContactModel, _ id: String) async {
+    await messengeDataManager.removeMessenge(contactModel, id)
+  }
+  
+  func getMessengeModelsFor(_ contactID: String) async -> [MessengeModel] {
+    await messengeDataManager.getMessengeModelsFor(contactID)
+  }
+  
   // MARK: - InterfaceManager
   
   func setRedDotToTabBar(value: String?) {
@@ -295,13 +322,6 @@ extension MessengerListScreenModuleDemoInteractor: MessengerListScreenModuleInte
   func showNotification(_ type: NotificationServiceType) {
     notificationService.showNotification(type)
   }
-  
-  // MARK: - ModelHandlerService (Directly accessed)
-  
-  func getMessengerModel() async -> MessengerModel {
-    await firstStartDemoCheck()
-    return await modelHandlerService.getMessengerModel()
-  }
 }
 
 // MARK: - Private
@@ -311,8 +331,12 @@ private extension MessengerListScreenModuleDemoInteractor {
     guard isFirstStartDemo else {
       return
     }
-    let messengerModel = createDemoData()
-    await modelHandlerService.saveMessengerModel(messengerModel)
+    
+    let contacts = createContacts()
+    let contactsDictionary = Dictionary(uniqueKeysWithValues: contacts.map { ($0.id, $0) })
+    await contactsDataManager.saveContactModels(contactsDictionary)
+    await messengeDataManager.saveMessengeModels(createMessengesModels())
+    await appSettingsDataManager.saveAppSettingsModel(createAppSettingsModel())
     isFirstStartDemo = false
   }
 }

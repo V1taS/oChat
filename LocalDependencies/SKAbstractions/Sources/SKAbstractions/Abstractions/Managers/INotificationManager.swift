@@ -19,7 +19,7 @@ public protocol INotificationManager {
   
   /// Отправляет push-уведомление контакту.
   /// - Parameter contact: Модель контакта.
-  func sendPushNotification(contact: ContactModel) async
+  func sendPushNotification(contact: ContactModel, title: String, body: String) async
   
   /// Сохраняет токен для push-уведомлений.
   /// - Parameter token: Токен push-уведомлений.

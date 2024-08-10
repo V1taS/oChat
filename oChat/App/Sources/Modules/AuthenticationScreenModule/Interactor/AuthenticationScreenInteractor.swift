@@ -45,17 +45,15 @@ final class AuthenticationScreenInteractor {
   // MARK: - Private properties
   
   private let permissionService: IPermissionService
-  private let modelHandlerService: IMessengerModelHandlerService
-  private let appSettingsManager: IAppSettingsManager
+  private let appSettingsDataManager: IAppSettingsDataManager
   
   // MARK: - Initialization
   
   /// - Parameters:
   ///   - services: Сервисы
   init(_ services: IApplicationServices) {
-    permissionService = services.accessAndSecurityManagementService.permissionService
-    modelHandlerService = services.messengerService.modelHandlerService
-    appSettingsManager = services.messengerService.appSettingsManager
+    self.permissionService = services.accessAndSecurityManagementService.permissionService
+    self.appSettingsDataManager = services.messengerService.appSettingsDataManager
   }
 }
 
@@ -63,19 +61,19 @@ final class AuthenticationScreenInteractor {
 
 extension AuthenticationScreenInteractor: AuthenticationScreenInteractorInput {
   func setAppPassword(_ code: String?) async {
-    await appSettingsManager.setAppPassword(code)
+    await appSettingsDataManager.setAppPassword(code)
   }
   
   func setFakeAppPassword(_ code: String?) async {
-    await appSettingsManager.setFakeAppPassword(code)
+    await appSettingsDataManager.setFakeAppPassword(code)
   }
   
   func getOldAccessCode() async -> String? {
-    await modelHandlerService.getAppSettingsModel().appPassword
+    await appSettingsDataManager.getAppSettingsModel().appPassword
   }
   
   func getFakeAccessCode() async -> String? {
-    await modelHandlerService.getAppSettingsModel().fakeAppPassword
+    await appSettingsDataManager.getAppSettingsModel().fakeAppPassword
   }
   
   func authenticationWithFaceID() async -> Bool {
@@ -83,7 +81,7 @@ extension AuthenticationScreenInteractor: AuthenticationScreenInteractorInput {
   }
   
   func setAccessType(_ accessType: AppSettingsModel.AccessType) async {
-    await appSettingsManager.setAccessType(accessType)
+    await appSettingsDataManager.setAccessType(accessType)
   }
 }
 

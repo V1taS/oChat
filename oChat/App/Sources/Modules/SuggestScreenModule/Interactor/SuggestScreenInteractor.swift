@@ -39,15 +39,13 @@ final class SuggestScreenInteractor {
   // MARK: - Private properties
   
   private let permissionService: IPermissionService
-  private let modelHandlerService: IMessengerModelHandlerService
-  private let appSettingsManager: IAppSettingsManager
+  private let appSettingsDataManager: IAppSettingsDataManager
   
   /// - Parameters:
   ///   - services: Сервисы
   init(services: IApplicationServices) {
-    permissionService = services.accessAndSecurityManagementService.permissionService
-    modelHandlerService = services.messengerService.modelHandlerService
-    appSettingsManager = services.messengerService.appSettingsManager
+    self.permissionService = services.accessAndSecurityManagementService.permissionService
+    self.appSettingsDataManager = services.messengerService.appSettingsDataManager
   }
 }
 
@@ -63,11 +61,11 @@ extension SuggestScreenInteractor: SuggestScreenInteractorInput {
   }
   
   func getAppSettingsModel() async -> AppSettingsModel {
-    await modelHandlerService.getAppSettingsModel()
+    await appSettingsDataManager.getAppSettingsModel()
   }
   
   func setIsEnabledNotifications(_ value: Bool) async {
-    await appSettingsManager.setIsEnabledNotifications(value)
+    await appSettingsDataManager.setIsEnabledNotifications(value)
   }
 }
 

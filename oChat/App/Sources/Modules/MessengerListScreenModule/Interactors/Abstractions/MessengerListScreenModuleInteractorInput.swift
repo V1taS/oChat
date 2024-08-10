@@ -14,7 +14,9 @@ import SKManagers
 
 /// События которые отправляем от Presenter к Interactor
 protocol MessengerListScreenModuleInteractorInput {
-  // CryptoManager
+  
+  // MARK: - CryptoManager
+  
   /// Расшифровывает данные, используя приватный ключ.
   /// - Parameters:
   ///   - encryptedText: Зашифрованные данные.
@@ -49,7 +51,8 @@ protocol MessengerListScreenModuleInteractorInput {
   /// - Throws: Ошибка генерации публичного ключа.
   func publicKey(from privateKey: String) -> String?
   
-  // ToxManager
+  // MARK: - ToxManager
+  
   /// Извлекает публичный ключ из адреса Tox.
   /// - Параметр address: Адрес Tox в виде строки (76 символов).
   /// - Возвращаемое значение: Строка с публичным ключом (64 символа) или `nil` при ошибке.
@@ -86,7 +89,7 @@ protocol MessengerListScreenModuleInteractorInput {
   /// Запуск TOX сервисы
   func stratTOXService() async
   
-  // ContactManager
+  // MARK: - ContactManager
   /// Получает массив моделей контактов `ContactModel` асинхронно.
   func getContactModels() async -> [ContactModel]
   
@@ -123,14 +126,16 @@ protocol MessengerListScreenModuleInteractorInput {
   /// Очищает все временные ИДишники
   func clearAllMessengeTempID() async
   
-  // SettingsManager
+  // MARK: - SettingsManager
+  
   /// Получить модель со всеми настройками
   func getAppSettingsModel() async -> AppSettingsModel
   
   /// Проверяем установлен ли пароль на телефоне, это необходимо для шифрования данных
   func passcodeNotSetInSystemIOSheck() async
   
-  // NotificationManager
+  // MARK: - NotificationManager
+  
   /// Метод для отправки push-уведомлений
   func sendPushNotification(contact: ContactModel) async
   
@@ -151,7 +156,8 @@ protocol MessengerListScreenModuleInteractorInput {
   /// Получить токен для пушей
   func getPushNotificationToken() async -> String?
   
-  // FileManager
+  // MARK: - FileManager
+  
   /// Получить имя файла по URL без расширения
   func getFileNameWithoutExtension(from url: URL) -> String
   
@@ -207,7 +213,8 @@ protocol MessengerListScreenModuleInteractorInput {
     password: String
   ) async throws -> (model: MessengerNetworkRequestModel, recordingDTO: MessengeRecordingDTO?, files: [URL])
   
-  // MessageManager
+  // MARK: - MessageManager
+  
   /// Отправляет сообщение на сервер.
   /// - Parameters:
   ///   - toxPublicKey: Публичный ключ контакта, который находится в контактах
@@ -237,7 +244,37 @@ protocol MessengerListScreenModuleInteractorInput {
     files: [URL]
   ) async
   
-  // InterfaceManager
+  /// Получить список моделей сообщений для определенного контакта
+  /// - Parameter contactModel: Модель контакта `ContactModel`
+  /// - Returns: Асинхронная операция, возвращающая список моделей сообщений `[MessengeModel]` для данного контакта
+  func getListMessengeModels(_ contactModel: ContactModel) async -> [MessengeModel]
+  
+  /// Добавить сообщение для контакта
+  /// - Parameters:
+  ///   - contactID: ID контакта
+  ///   - messengeModel: Модель сообщения `MessengeModel`
+  func addMessenge(_ contactID: String, _ messengeModel: MessengeModel) async
+  
+  /// Этот метод обновляет существующее сообщение для заданного контакта.
+  /// - Parameters:
+  ///   - contactModel: Модель контакта `ContactModel`
+  ///   - messengeModel: Обновленная модель сообщения `MessengeModel`
+  func updateMessenge(_ contactModel: ContactModel, _ messengeModel: MessengeModel) async
+  
+  /// Удалить сообщение
+  /// - Parameters:
+  ///   - contactModel: Модель контакта `ContactModel`, связанная с сообщением, которое нужно удалить
+  ///   - id: Идентификатор сообщения, которое нужно удалить
+  func removeMessenge(_ contactModel: ContactModel, _ id: String) async
+  
+  /// Получить список сообщений для контакта.
+  /// - Parameters:
+  ///   - contactID: Уникальный идентификатор контакта, для которого необходимо получить сообщения.
+  /// - Returns: Массив объектов `MessengeModel`, представляющих сообщения для указанного контакта.
+  func getMessengeModelsFor(_ contactID: String) async -> [MessengeModel]
+  
+  // MARK: - InterfaceManager
+  
   /// Установить красную точку на таб баре
   func setRedDotToTabBar(value: String?)
   
@@ -253,15 +290,12 @@ protocol MessengerListScreenModuleInteractorInput {
   /// Удаляет URL глубокой ссылки.
   func deleteDeepLinkURL()
   
-  // NotificationService (Directly accessed)
+  // MARK: - NotificationService (Directly accessed)
+  
   /// Показать уведомление
   /// - Parameters:
   ///   - type: Тип уведомления
   func showNotification(_ type: NotificationServiceType)
-  
-  // ModelHandlerService (Directly accessed)
-  /// Получает модель `MessengerModel` асинхронно.
-  func getMessengerModel() async -> MessengerModel
   
   /// Возвращает текущий язык приложения.
   func getCurrentLanguage() -> AppLanguageType

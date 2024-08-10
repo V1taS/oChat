@@ -16,24 +16,18 @@ public final class NotificationManager: INotificationManager {
   
   private let permissionService: IPermissionService
   private let pushNotificationService: IPushNotificationService
-  private let p2pChatManager: IP2PChatManager
-  private let modelSettingsManager: IMessengerModelSettingsManager
-  private let modelHandlerService: IMessengerModelHandlerService
+  private let appSettingsDataManager: IAppSettingsDataManager
   
   // MARK: - Init
   
   public init(
     permissionService: IPermissionService,
     pushNotificationService: IPushNotificationService,
-    p2pChatManager: IP2PChatManager,
-    modelSettingsManager: IMessengerModelSettingsManager,
-    modelHandlerService: IMessengerModelHandlerService
+    appSettingsDataManager: IAppSettingsDataManager
   ) {
     self.permissionService = permissionService
     self.pushNotificationService = pushNotificationService
-    self.p2pChatManager = p2pChatManager
-    self.modelSettingsManager = modelSettingsManager
-    self.modelHandlerService = modelHandlerService
+    self.appSettingsDataManager = appSettingsDataManager
   }
   
   public func requestNotification() async -> Bool {
@@ -44,31 +38,28 @@ public final class NotificationManager: INotificationManager {
     return await permissionService.isNotificationsEnabled()
   }
   
-  public func sendPushNotification(contact: ContactModel) async {
+  public func sendPushNotification(contact: ContactModel, title: String, body: String) async {
     guard let pushNotificationToken = contact.pushNotificationToken else {
       // Handle missing token case
       return
     }
     
-    let myToxAddress = await p2pChatManager.getToxAddress()
-    guard let myToxAddress else {
-      return
-    }
-    
-    let name = myToxAddress.formatString(minTextLength: 10)
     pushNotificationService.sendPushNotification(
-      title: "Вас зовут в чат!",
-      body: "Ваш контакт \(name) хочет с вами пообщаться. Пожалуйста, зайдите в чат.",
-      customData: ["toxAddress": contact.toxAddress ?? ""],
+      title: title,
+      body: body,
+      customData: [
+        "toxAddress": contact.toxAddress ?? "",
+        "contactID": contact.id
+      ],
       deviceToken: pushNotificationToken
     )
   }
   
   public func saveMyPushNotificationToken(_ token: String) async {
-    await modelSettingsManager.saveMyPushNotificationToken(token)
+    await appSettingsDataManager.saveMyPushNotificationToken(token)
   }
   
   public func getPushNotificationToken() async -> String? {
-    return await modelHandlerService.getMessengerModel().appSettingsModel.pushNotificationToken
+    return await appSettingsDataManager.getAppSettingsModel().pushNotificationToken
   }
 }

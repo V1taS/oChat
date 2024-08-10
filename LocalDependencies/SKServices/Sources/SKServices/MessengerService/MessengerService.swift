@@ -19,17 +19,15 @@ public final class MessengerService: IMessengerService {
     P2PChatManager.shared
   }
   
-  public var modelSettingsManager: IMessengerModelSettingsManager {
-    messengerService
+  public var messengeDataManager: IMessengeDataManager {
+    MessengeDataManager.shared
   }
   
-  public var modelHandlerService: IMessengerModelHandlerService {
-    messengerService
+  public var contactsDataManager: IContactsDataManager {
+    ContactsDataManager.shared
   }
   
-  public var appSettingsManager: IAppSettingsManager {
-    messengerService
+  public var appSettingsDataManager: IAppSettingsDataManager {
+    AppSettingsDataManager.shared
   }
 }
-
-private let messengerService = MessengerModelHandlerService.shared

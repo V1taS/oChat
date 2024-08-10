@@ -46,6 +46,17 @@ protocol MessengerDialogScreenInteractorInput {
   /// Получить адрес Tox.
   /// - Returns: Адрес Tox в виде строки.
   func getToxAddress() async -> String?
+  
+  /// Получить список моделей сообщений для определенного контакта
+  /// - Parameter contactModel: Модель контакта `ContactModel`
+  /// - Returns: Асинхронная операция, возвращающая список моделей сообщений `[MessengeModel]` для данного контакта
+  func getListMessengeModels(_ contactModel: ContactModel) async -> [MessengeModel]
+  
+  /// Добавить сообщение для контакта
+  /// - Parameters:
+  ///   - contactID: ID контакта
+  ///   - messengeModel: Модель сообщения `MessengeModel`
+  func addMessenge(_ contactID: String, _ messengeModel: MessengeModel) async
 }
 
 /// Интерактор
@@ -57,7 +68,6 @@ final class MessengerDialogScreenInteractor {
   
   // MARK: - Private properties
   
-  private let modelHandlerService: IMessengerModelHandlerService
   private let systemService: ISystemService
   private let cryptoService: ICryptoService
   private let notificationService: INotificationService
@@ -65,13 +75,15 @@ final class MessengerDialogScreenInteractor {
   private let uiService: IUIService
   private let permissionService: IPermissionService
   private let p2pChatManager: IP2PChatManager
+  private let messengeDataManager: IMessengeDataManager
+  private let contactsDataManager: IContactsDataManager
   
   // MARK: - Initialization
   
   /// - Parameters:
   ///   - services: Сервисы
   init(services: IApplicationServices) {
-    modelHandlerService = services.messengerService.modelHandlerService
+    messengeDataManager = services.messengerService.messengeDataManager
     systemService = services.userInterfaceAndExperienceService.systemService
     cryptoService = services.accessAndSecurityManagementService.cryptoService
     notificationService = services.userInterfaceAndExperienceService.notificationService
@@ -79,12 +91,21 @@ final class MessengerDialogScreenInteractor {
     uiService = services.userInterfaceAndExperienceService.uiService
     permissionService = services.accessAndSecurityManagementService.permissionService
     p2pChatManager = services.messengerService.p2pChatManager
+    contactsDataManager = services.messengerService.contactsDataManager
   }
 }
 
 // MARK: - MessengerDialogScreenInteractorInput
 
 extension MessengerDialogScreenInteractor: MessengerDialogScreenInteractorInput {
+  func addMessenge(_ contactID: String, _ messengeModel: MessengeModel) async {
+    await messengeDataManager.addMessenge(contactID, messengeModel)
+  }
+  
+  func getListMessengeModels(_ contactModel: ContactModel) async -> [MessengeModel] {
+    await messengeDataManager.getListMessengeModels(contactModel)
+  }
+  
   func getFileName(from url: URL) -> String? {
     dataManagementService.getFileName(from: url)
   }
@@ -129,7 +150,7 @@ extension MessengerDialogScreenInteractor: MessengerDialogScreenInteractorInput 
   }
   
   func getNewContactModels(_ contactModel: ContactModel) async -> ContactModel {
-    let contactModels = await modelHandlerService.getContactModels()
+    let contactModels = await contactsDataManager.getListContactModels()
     if let contactIndex = contactModels.firstIndex(where: { $0.toxAddress == contactModel.toxAddress }) {
       return contactModels[contactIndex]
     }

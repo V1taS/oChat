@@ -227,18 +227,6 @@ extension MessengerDialogScreenFactory: MessengerDialogScreenFactoryInput {
       name: nil,
       toxAddress: address,
       meshAddress: nil,
-      messenges: [
-        .init(
-          messageType: .systemAttention,
-          messageStatus: .sent,
-          message: OChatStrings.MessengerDialogScreenLocalization.Messenger
-            .Initial.note,
-          replyMessageText: nil,
-          images: [],
-          videos: [],
-          recording: nil
-        )
-      ],
       status: .initialChat,
       encryptionPublicKey: nil,
       toxPublicKey: nil,

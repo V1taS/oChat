@@ -59,7 +59,7 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
     Task {
       let tokenParts = deviceToken.map { data in String(format: "%02.2hhx", data) }
       let token = tokenParts.joined()
-      await MessengerService.shared.modelSettingsManager.saveMyPushNotificationToken(token)
+      await AppSettingsDataManager.shared.saveMyPushNotificationToken(token)
     }
   }
   
@@ -105,30 +105,25 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
   /// - Parameter userInfo: Данные, полученные из уведомления
   func handleNotification(_ userInfo: [AnyHashable: Any]) {
     Task {
-      if let toxAddress = userInfo["toxAddress"] as? String {
-        await MessengerService.shared.appSettingsManager.setIsNewMessagesAvailable(
+      if let toxAddress = userInfo["toxAddress"] as? String,
+         let contactID = userInfo["contactID"] as? String {
+        await ContactsDataManager.shared.setIsNewMessagesAvailable(
           true,
-          toxAddress: toxAddress
+          id: contactID
         )
         
-        let contactModels = await MessengerService.shared.modelHandlerService.getContactModels()
-        if let contactIndex = contactModels.firstIndex(where: { $0.toxAddress == toxAddress }) {
-          var updatedContact = contactModels[contactIndex]
-          if updatedContact.messenges.last?.messageType != .systemSuccess {
-            updatedContact.messenges.append(
-              .init(
-                messageType: .systemSuccess,
-                messageStatus: .sent,
-                message: "Вы получили приглашение на общение. Присоединитесь и начните общение.",
-                replyMessageText: nil,
-                images: [],
-                videos: [],
-                recording: nil
-              )
-            )
-            await MessengerService.shared.modelHandlerService.saveContactModel(updatedContact)
-          }
-        }
+        await MessengeDataManager.shared.addMessenge(
+          contactID,
+          .init(
+            messageType: .systemSuccess,
+            messageStatus: .sent,
+            message: "Вы получили приглашение на общение. Присоединитесь и начните общение.", // 🔴
+            replyMessageText: nil,
+            images: [],
+            videos: [],
+            recording: nil
+          )
+        )
       }
     }
   }

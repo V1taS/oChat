@@ -92,7 +92,7 @@ private extension RootCoordinator {
       case .successFake:
         Task { @MainActor [weak self] in
           guard let self else { return }
-          await services.messengerService.appSettingsManager.setAccessType(.fake)
+          await services.messengerService.appSettingsDataManager.setAccessType(.fake)
           openMainFlowCoordinator(isPresentScreenAnimated: true)
         }
       case .failure:
@@ -100,7 +100,7 @@ private extension RootCoordinator {
       case .allDataErased:
         Task { @MainActor [weak self] in
           guard let self else { return }
-          services.messengerService.modelHandlerService.deleteAllData()
+          services.messengerService.appSettingsDataManager.deleteAllData()
           openInitialFlowCoordinator(isPresentScreenAnimated: true)
         }
       }
@@ -128,7 +128,7 @@ private extension RootCoordinator {
       sessionService.sessionDidExpireAction = {
         Task { [weak self] in
           guard let self else { return }
-          let model = await services.messengerService.modelHandlerService.getAppSettingsModel()
+          let model = await services.messengerService.appSettingsDataManager.getAppSettingsModel()
           guard model.appPassword != nil else { return }
           openAuthenticationFlowCoordinator(.loginPasscode(.enterPasscode))
           mainFlowCoordinator = nil
@@ -139,11 +139,10 @@ private extension RootCoordinator {
   
   @MainActor
   func setupLaunchScreen() async {
-    let modelHandlerService = services.messengerService.modelHandlerService
-    let appSettingsModel = await modelHandlerService.getAppSettingsModel()
+    let appSettingsModel = await services.messengerService.appSettingsDataManager.getAppSettingsModel()
     
     if appSettingsModel.accessType == .demo {
-      modelHandlerService.deleteAllData()
+      services.messengerService.appSettingsDataManager.deleteAllData()
     }
     
     /// В модельке нет сохраненных данных
@@ -160,7 +159,7 @@ private extension RootCoordinator {
   
   @MainActor
   func sessionCheck() async {
-    let model = await services.messengerService.modelHandlerService.getAppSettingsModel()
+    let model = await services.messengerService.appSettingsDataManager.getAppSettingsModel()
     if !services.accessAndSecurityManagementService.sessionService.isSessionActive(), model.appPassword != nil {
       openAuthenticationFlowCoordinator(.loginPasscode(.enterPasscode))
     }

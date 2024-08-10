@@ -44,4 +44,7 @@ public protocol IMessageManager {
     senderAddress: String,
     messengerRequest: MessengerNetworkRequestModel?
   ) async -> Int32?
+  
+  /// Очищает все временные идентификаторы сообщений.
+  func clearAllMessengeTempID() async
 }

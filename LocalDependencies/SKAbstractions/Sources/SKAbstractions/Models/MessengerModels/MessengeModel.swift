@@ -7,6 +7,8 @@
 
 import Foundation
 
+public typealias MessengeModels = [String: [MessengeModel]]
+
 /// Модель сообщения для чата.
 public struct MessengeModel {
   /// Уникальный идентификатор сообщения.

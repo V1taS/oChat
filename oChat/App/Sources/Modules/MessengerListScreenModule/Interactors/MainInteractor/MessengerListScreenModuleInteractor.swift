@@ -31,9 +31,10 @@ final class MessengerListScreenModuleInteractor {
   private let systemService: ISystemService
   private let deepLinkService: IDeepLinkService
   private let notificationService: INotificationService
-  private let modelHandlerService: IMessengerModelHandlerService
   private let p2pChatManager: IP2PChatManager
-  private let modelSettingsManager: IMessengerModelSettingsManager
+  private let messengeDataManager: IMessengeDataManager
+  private let appSettingsDataManager: IAppSettingsDataManager
+  private let contactsDataManager: IContactsDataManager
   
   // MARK: - Initialization
   
@@ -60,9 +61,10 @@ final class MessengerListScreenModuleInteractor {
     self.systemService = services.userInterfaceAndExperienceService.systemService
     self.deepLinkService = services.userInterfaceAndExperienceService.deepLinkService
     self.notificationService = services.userInterfaceAndExperienceService.notificationService
-    self.modelHandlerService = services.messengerService.modelHandlerService
     self.p2pChatManager = services.messengerService.p2pChatManager
-    self.modelSettingsManager = services.messengerService.modelSettingsManager
+    self.messengeDataManager = services.messengerService.messengeDataManager
+    self.appSettingsDataManager = services.messengerService.appSettingsDataManager
+    self.contactsDataManager = services.messengerService.contactsDataManager
   }
 }
 
@@ -164,7 +166,7 @@ extension MessengerListScreenModuleInteractor: MessengerListScreenModuleInteract
   }
   
   func clearAllMessengeTempID() async {
-    await contactManager.clearAllMessengeTempID()
+    await messageManager.clearAllMessengeTempID()
   }
   
   // MARK: - SettingsManager
@@ -183,7 +185,15 @@ extension MessengerListScreenModuleInteractor: MessengerListScreenModuleInteract
   // MARK: - NotificationManager
   
   func sendPushNotification(contact: ContactModel) async {
-    await notificationManager.sendPushNotification(contact: contact)
+    let myToxAddress = await p2pChatManager.getToxAddress()
+    guard let myToxAddress else { return }
+    // 🔴
+    let name = myToxAddress.formatString(minTextLength: 10)
+    await notificationManager.sendPushNotification(
+      contact: contact,
+      title: "Вас зовут в чат!",
+      body: "Ваш контакт \(name) хочет с вами пообщаться. Пожалуйста, зайдите в чат."
+    )
   }
   
   func requestNotification() async -> Bool {
@@ -292,6 +302,26 @@ extension MessengerListScreenModuleInteractor: MessengerListScreenModuleInteract
     )
   }
   
+  func getListMessengeModels(_ contactModel: ContactModel) async -> [MessengeModel] {
+    await messengeDataManager.getListMessengeModels(contactModel)
+  }
+  
+  func addMessenge(_ contactID: String, _ messengeModel: MessengeModel) async {
+    await messengeDataManager.addMessenge(contactID, messengeModel)
+  }
+  
+  func updateMessenge(_ contactModel: ContactModel, _ messengeModel: MessengeModel) async {
+    await messengeDataManager.updateMessenge(contactModel, messengeModel)
+  }
+  
+  func removeMessenge(_ contactModel: ContactModel, _ id: String) async {
+    await messengeDataManager.removeMessenge(contactModel, id)
+  }
+  
+  func getMessengeModelsFor(_ contactID: String) async -> [MessengeModel] {
+    await messengeDataManager.getMessengeModelsFor(contactID)
+  }
+  
   // MARK: - InterfaceManager
   
   func setRedDotToTabBar(value: String?) {
@@ -323,12 +353,6 @@ extension MessengerListScreenModuleInteractor: MessengerListScreenModuleInteract
   func showNotification(_ type: NotificationServiceType) {
     notificationService.showNotification(type)
   }
-  
-  // MARK: - ModelHandlerService (Directly accessed)
-  
-  func getMessengerModel() async -> MessengerModel {
-    await modelHandlerService.getMessengerModel()
-  }
 }
 
 // MARK: - Private
@@ -336,7 +360,7 @@ extension MessengerListScreenModuleInteractor: MessengerListScreenModuleInteract
 private extension MessengerListScreenModuleInteractor {
   func saveToxState() async {
     let stateAsString = await p2pChatManager.toxStateAsString()
-    await modelSettingsManager.setToxStateAsString(stateAsString)
+    await appSettingsDataManager.setToxStateAsString(stateAsString)
   }
 }
 

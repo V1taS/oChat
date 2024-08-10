@@ -14,18 +14,18 @@ public final class SettingsManager: ISettingsManager {
   
   // MARK: - Private properties
   
-  private let modelHandlerService: IMessengerModelHandlerService
   private let systemService: ISystemService
   private let notificationService: INotificationService
+  private let appSettingsDataManager: IAppSettingsDataManager
   
   // MARK: - Init
   
   public init(
-    modelHandlerService: IMessengerModelHandlerService,
+    appSettingsDataManager: IAppSettingsDataManager,
     systemService: ISystemService,
     notificationService: INotificationService
   ) {
-    self.modelHandlerService = modelHandlerService
+    self.appSettingsDataManager = appSettingsDataManager
     self.systemService = systemService
     self.notificationService = notificationService
   }
@@ -33,7 +33,7 @@ public final class SettingsManager: ISettingsManager {
   // MARK: - Public properties
   
   public func getAppSettingsModel() async -> AppSettingsModel {
-    return await modelHandlerService.getAppSettingsModel()
+    return await appSettingsDataManager.getAppSettingsModel()
   }
   
   public func passcodeNotSetInSystemIOSCheck(errorMessage: String) async {
