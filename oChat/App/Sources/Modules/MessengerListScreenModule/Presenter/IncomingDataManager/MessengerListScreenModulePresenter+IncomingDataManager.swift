@@ -77,18 +77,9 @@ extension MessengerListScreenModulePresenter {
           moduleOutput?.openNewMessengeScreen(contactAdress: deepLinkAdress)
           interactor.deleteDeepLinkURL()
         }
-        
-        let appSettingsModel = await interactor.getAppSettingsModel()
-        await MainActor.run { [weak self] in
-          guard let self else { return }
-          centerBarButtonView?.iconLeftView.image = appSettingsModel.myStatus.imageStatus
-          centerBarButtonView?.labelView.text = appSettingsModel.myStatus.title
-          rightBarWriteButton?.isEnabled = appSettingsModel.myStatus == .online
-        }
         await clearHistoryStored()
         messengeDictionaryModels = await interactor.getDictionaryMessengeModels()
       }
-
     }
     
     Task { [weak self] in

@@ -90,8 +90,6 @@ public extension InfoPlist {
       ]),
       // Добавление фоновых режимов
       "UIBackgroundModes": .array([
-        .string("audio"),
-        .string("voip"),
         .string("fetch")
       ])
     ]
