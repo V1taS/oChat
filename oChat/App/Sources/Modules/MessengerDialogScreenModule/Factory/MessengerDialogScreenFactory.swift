@@ -13,11 +13,11 @@ import ExyteChat
 /// Cобытия которые отправляем из Factory в Presenter
 protocol MessengerDialogScreenFactoryOutput: AnyObject {
   /// Пользователь выбрал повторить отправку сообщения
-  func userSelectRetryAction(_ model: MessengeModel)
+  func userSelectRetryAction(_ model: MessengeModel) async
   /// Пользователь выбрал удалить сообщение
-  func userSelectDeleteAction(_ model: MessengeModel)
+  func userSelectDeleteAction(_ model: MessengeModel) async
   /// Пользователь выбрал скопировать сообщение
-  func userSelectCopyAction(_ model: MessengeModel)
+  func userSelectCopyAction(_ model: MessengeModel) async
 }
 
 /// Cобытия которые отправляем от Presenter к Factory
@@ -149,13 +149,22 @@ extension MessengerDialogScreenFactory: MessengerDialogScreenFactoryInput {
         recording: model.recording?.mapTo(),
         replyMessage: replyMessage,
         retryAction: { [weak self] _ in
-          self?.output?.userSelectRetryAction(model)
+          Task { [weak self] in
+            guard let self else { return }
+            await output?.userSelectRetryAction(model)
+          }
         },
         deleteAction: { [weak self] _ in
-          self?.output?.userSelectDeleteAction(model)
+          Task { [weak self] in
+            guard let self else { return }
+            await output?.userSelectDeleteAction(model)
+          }
         },
         copyAction: { [weak self] _ in
-          self?.output?.userSelectCopyAction(model)
+          Task { [weak self] in
+            guard let self else { return }
+            await output?.userSelectCopyAction(model)
+          }
         }
       )
     }

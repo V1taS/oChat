@@ -115,6 +115,28 @@ final class MessengerListScreenModulePresenter: ObservableObject {
     let redDotToTabBarText: String? = newMessages.isEmpty ? nil : "\(newMessages.count)"
     interactor.setRedDotToTabBar(value: redDotToTabBarText)
   }
+  
+  func clearHistoryStored() async {
+    let contactModels = await interactor.getContactModels()
+    for contact in contactModels where !contact.isChatHistoryStored {
+      await interactor.removeMessenges(contact)
+      await interactor.addMessenge(
+        contact.id,
+        .init(
+          messageType: .systemAttention,
+          messageStatus: .sent,
+          message: OChatStrings.MessengerListScreenModuleLocalization
+            .Message.ClearHistoryStored.title,
+          replyMessageText: nil,
+          images: [],
+          videos: [],
+          recording: nil
+        )
+      )
+    }
+    await updateListContacts()
+    moduleOutput?.dataModelHasBeenUpdated()
+  }
 }
 
 // MARK: - MessengerListScreenModuleModuleInput

@@ -22,13 +22,13 @@ var globalLogContext: LogContext?
 
 // Объявляем тип для обратного вызова, соответствующий `Tox_Log_Callback`.
 typealias ToxLogCallback = @convention(c) (
-    UnsafeMutablePointer<Tox>?,
-    TOX_LOG_LEVEL,
-    UnsafePointer<CChar>?,
-    UInt32,
-    UnsafePointer<CChar>?,
-    UnsafePointer<CChar>?,
-    UnsafeMutableRawPointer?
+  UnsafeMutablePointer<Tox>?,
+  TOX_LOG_LEVEL,
+  UnsafePointer<CChar>?,
+  UInt32,
+  UnsafePointer<CChar>?,
+  UnsafePointer<CChar>?,
+  UnsafeMutableRawPointer?
 ) -> Void
 
 // Функция обратного вызова для логирования.
@@ -39,17 +39,17 @@ let logCallback: ToxLogCallback = { (tox: UnsafeMutablePointer<Tox>?,
                                      funcName: UnsafePointer<CChar>?,
                                      message: UnsafePointer<CChar>?,
                                      userData: UnsafeMutableRawPointer?) in
-    guard let context = globalLogContext else {
-        print("🔴 Ошибка: контекст логирования не установлен")
-        return
-    }
-
-    // Преобразуем C-строки в Swift-строки
-    let fileStr = file.map { String(cString: $0) } ?? "Unknown file"
-    let funcStr = funcName.map { String(cString: $0) } ?? "Unknown function"
-    let messageStr = message.map { String(cString: $0) } ?? "Unknown message"
-    let userDataStr = userData != nil ? "Data available" : "No user data"
-
-    // Вызываем переданное замыкание с аргументами
-    context.callback(fileStr, level, funcStr, line, messageStr, userDataStr, userData)
+  guard let context = globalLogContext else {
+    assertionFailure("Ошибка: контекст не установлен")
+    return
+  }
+  
+  // Преобразуем C-строки в Swift-строки
+  let fileStr = file.map { String(cString: $0) } ?? "Unknown file"
+  let funcStr = funcName.map { String(cString: $0) } ?? "Unknown function"
+  let messageStr = message.map { String(cString: $0) } ?? "Unknown message"
+  let userDataStr = userData != nil ? "Data available" : "No user data"
+  
+  // Вызываем переданное замыкание с аргументами
+  context.callback(fileStr, level, funcStr, line, messageStr, userDataStr, userData)
 }

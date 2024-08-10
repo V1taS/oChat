@@ -5,8 +5,14 @@
  Copyright © 2022 SosinVitalii.com. All rights reserved.
  */
 
+// MARK: - System
+
 "NSPhotoLibraryAddUsageDescription" = "Please grant access to your photo gallery so you can save images with Image ID.";
 "NSPhotoLibraryUsageDescription" = "Please grant access to your photo gallery so you can upload photos to create your Image ID.";
 "NSCameraUsageDescription" = "Please grant access to your camera so you can take photos to create your Image ID.";
 "NSFaceIDUsageDescription" = "oChat requires access to Face ID for quick and secure authentication.";
 "NSMicrophoneUsageDescription" = "oChat requires access to Face ID for quick and secure authentication.";
+
+// MARK: - Common
+
+"Notification.AppDelegate.Received.Title" = "You've received an invitation to chat. Join and start the conversation.";

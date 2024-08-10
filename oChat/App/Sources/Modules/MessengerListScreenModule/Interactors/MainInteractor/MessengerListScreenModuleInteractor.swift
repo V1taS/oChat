@@ -188,12 +188,15 @@ extension MessengerListScreenModuleInteractor: MessengerListScreenModuleInteract
   func sendPushNotification(contact: ContactModel) async {
     let myToxAddress = await p2pChatManager.getToxAddress()
     guard let myToxAddress else { return }
-    // 🔴
     let name = myToxAddress.formatString(minTextLength: 10)
+    let title = OChatStrings.MessengerListScreenModuleLocalization
+      .PushNotification.YouAreInvitedToChat.title
+    let description = OChatStrings.MessengerListScreenModuleLocalization
+      .PushNotification.YouAreInvitedToChat.description("\(name)")
     await notificationManager.sendPushNotification(
       contact: contact,
-      title: "Вас зовут в чат!",
-      body: "Ваш контакт \(name) хочет с вами пообщаться. Пожалуйста, зайдите в чат."
+      title: "\(title)!",
+      body: description
     )
   }
   

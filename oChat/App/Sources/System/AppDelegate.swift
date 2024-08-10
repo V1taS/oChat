@@ -117,7 +117,8 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
           .init(
             messageType: .systemSuccess,
             messageStatus: .sent,
-            message: "Вы получили приглашение на общение. Присоединитесь и начните общение.", // 🔴
+            message: OChatStrings.CommonStrings.Notification
+              .AppDelegate.Received.title,
             replyMessageText: nil,
             images: [],
             videos: [],

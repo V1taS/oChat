@@ -85,7 +85,10 @@ extension MessengerListScreenModulePresenter {
           centerBarButtonView?.labelView.text = appSettingsModel.myStatus.title
           rightBarWriteButton?.isEnabled = appSettingsModel.myStatus == .online
         }
+        await clearHistoryStored()
+        messengeDictionaryModels = await interactor.getDictionaryMessengeModels()
       }
+
     }
     
     Task { [weak self] in

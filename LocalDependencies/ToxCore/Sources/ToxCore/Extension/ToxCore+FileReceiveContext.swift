@@ -56,7 +56,7 @@ let fileReceiveCallback: @convention(c) (
   
   // Получаем контекст
   guard let context = globalConnectionFileReceiveContext else {
-    print("🔴 Ошибка: контекст не установлен")
+    assertionFailure("Ошибка: контекст не установлен")
     return
   }
   

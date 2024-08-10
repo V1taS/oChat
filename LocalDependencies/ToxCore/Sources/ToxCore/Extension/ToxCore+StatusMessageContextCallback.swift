@@ -30,7 +30,7 @@ let friendStatusMessageCallback: @convention(c) (
   
   // Получаем контекст из пользовательских данных
   guard let context = globalStatusMessageContext else {
-    print("🔴 Ошибка: контекст не установлен")
+    assertionFailure("Ошибка: контекст не установлен")
     return
   }
   

@@ -25,6 +25,7 @@
 "SwipeActions.Delete.Title" = "Delete";
 "PushNotification.YouAreInvitedToChat.Title" = "You are invited to chat";
 "PushNotification.YouAreInvitedToChat.Description" = "Your contact %@ wants to chat with you. Please join the chat.";
+"Message.ClearHistoryStored.Title" = "The contact has prohibited storing the chat history.";
 
 // MARK: - DemoContact1
 

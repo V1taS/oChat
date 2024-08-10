@@ -55,7 +55,7 @@ public final class ToxManager: IToxManager {
               
               DispatchQueue.main.async {
                 completion?()
-                print("Friend \(publicKey) is \(isOnline ? "🟢🟢🟢 online" : "🔴🔴🔴 offline")")
+                print("Friend \(publicKey) is \(isOnline ? "🟢 online" : "🔴 offline")")
               }
             }
           }

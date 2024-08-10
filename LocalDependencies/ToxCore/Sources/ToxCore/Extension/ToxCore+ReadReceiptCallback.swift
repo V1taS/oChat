@@ -39,7 +39,7 @@ let friendReadReceiptCallback: @convention(c) (
 ) -> Void = { tox, friendNumber, messageId, userData in
   // Получаем контекст из глобальной переменной
   guard let context = globalReadReceiptContext else {
-    print("🔴 Ошибка: контекст не установлен")
+    assertionFailure("Ошибка: контекст не установлен")
     return
   }
   

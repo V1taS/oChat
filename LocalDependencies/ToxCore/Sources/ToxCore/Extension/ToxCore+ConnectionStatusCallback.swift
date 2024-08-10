@@ -39,7 +39,7 @@ let connectionStatusCallback: @convention(c) (
   UnsafeMutableRawPointer?
 ) -> Void = { tox, status, userData in
   guard let context = globalConnectionStatusContext else {
-    print("🔴 Ошибка: контекст не установлен")
+    assertionFailure("Ошибка: контекст не установлен")
     return
   }
   

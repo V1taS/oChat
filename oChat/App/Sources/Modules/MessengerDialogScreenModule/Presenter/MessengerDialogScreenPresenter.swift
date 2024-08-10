@@ -150,8 +150,11 @@ final class MessengerDialogScreenPresenter: ObservableObject {
     }
   }
   
-  func retrySendMessage(messengeModel: MessengeModel) {
-    // TODO: 🔴
+  func retrySendMessage(messengeModel: MessengeModel) async {
+    await sendMessage(
+      messenge: messengeModel.message,
+      replyMessageText: messengeModel.replyMessageText
+    )
   }
   
   func saveImageToGallery(_ imageURL: URL) async {
@@ -585,17 +588,18 @@ extension MessengerDialogScreenPresenter: MessengerDialogScreenInteractorOutput 
 // MARK: - MessengerDialogScreenFactoryOutput
 
 extension MessengerDialogScreenPresenter: MessengerDialogScreenFactoryOutput {
-  func userSelectRetryAction(_ model: SKAbstractions.MessengeModel) {
-    retrySendMessage(messengeModel: model)
+  @MainActor
+  func userSelectRetryAction(_ model: SKAbstractions.MessengeModel) async {
+    await retrySendMessage(messengeModel: model)
   }
   
-  func userSelectDeleteAction(_ model: SKAbstractions.MessengeModel) {
-    Task {
-      await removeMessage(id: model.id)
-    }
+  @MainActor
+  func userSelectDeleteAction(_ model: SKAbstractions.MessengeModel) async {
+    await removeMessage(id: model.id)
   }
   
-  func userSelectCopyAction(_ model: SKAbstractions.MessengeModel) {
+  @MainActor
+  func userSelectCopyAction(_ model: SKAbstractions.MessengeModel) async {
     copyToClipboard(text: model.message)
   }
 }

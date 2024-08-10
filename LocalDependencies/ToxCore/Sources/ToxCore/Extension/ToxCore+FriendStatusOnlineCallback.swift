@@ -39,7 +39,7 @@ let friendStatusOnlineCallback: @convention(c) (
 ) -> Void = { tox, friendNumber, status, userData in
   // Получаем контекст из глобальной переменной
   guard let context = globalFriendStatusOnlineContext else {
-    print("🔴 Ошибка: контекст не установлен")
+    assertionFailure("Ошибка: контекст не установлен")
     return
   }
   

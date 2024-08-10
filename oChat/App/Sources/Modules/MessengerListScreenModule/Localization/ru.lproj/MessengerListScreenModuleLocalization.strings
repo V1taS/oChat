@@ -25,6 +25,7 @@
 "SwipeActions.Delete.Title" = "Удалить";
 "PushNotification.YouAreInvitedToChat.Title" = "Вас зовут в чат";
 "PushNotification.YouAreInvitedToChat.Description" = "Ваш контакт %@ хочет с вами пообщаться. Пожалуйста, зайдите в чат.";
+"Message.ClearHistoryStored.Title" = "Контакт запретил хранить переписку";
 
 // MARK: - DemoContact1
 

@@ -43,7 +43,7 @@ let fileControlCallback: @convention(c) (
   UnsafeMutableRawPointer?
 ) -> Void = { tox, friendNumber, fileNumber, control, userData in
   guard let context = globalFileControlCallbackContext else {
-    print("🔴 Ошибка: контекст управления файлами не установлен")
+    assertionFailure("Ошибка: контекст управления файлами не установлен")
     return
   }
   
@@ -59,7 +59,7 @@ let fileChunkRequestCallback: @convention(c) (
   UnsafeMutableRawPointer?
 ) -> Void = { tox, friendNumber, fileNumber, position, length, userData in
   guard let context = globalFileChunkRequestCallbackContext else {
-    print("🔴 Ошибка: контекст запроса чанков файлов не установлен")
+    assertionFailure("Ошибка: контекст запроса чанков файлов не установлен")
     return
   }
   

@@ -54,7 +54,7 @@ let fileChunkReceiveCallback: @convention(c) (
   
   // Получаем контекст
   guard let context = globalConnectionFileChunkReceiveContext else {
-    print("🔴 Ошибка: контекст не установлен")
+    assertionFailure("Ошибка: контекст не установлен")
     return
   }
   
