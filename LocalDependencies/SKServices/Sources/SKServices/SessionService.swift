@@ -41,7 +41,10 @@ public class SessionService: ISessionService {
     let now = Date()
     let dateString = formatter.string(from: now)
     secureStore.saveString(dateString, key: lastActivityKey)
-    sessionTimer = Timer.scheduledTimer(withTimeInterval: Constants.timeInterval, repeats: false) { [weak self] _ in
+    sessionTimer = Timer.scheduledTimer(
+      withTimeInterval: Secrets.fiveMinutesAgoInSeconds,
+      repeats: false
+    ) { [weak self] _ in
       self?.sessionDidExpire()
     }
     
@@ -60,7 +63,7 @@ public class SessionService: ISessionService {
           let lastActivityTime = formatter.date(from: dateString) else {
       return false
     }
-    return Date().timeIntervalSince(lastActivityTime) < Constants.timeInterval
+    return Date().timeIntervalSince(lastActivityTime) < Secrets.fiveMinutesAgoInSeconds
   }
   
   public func updateLastActivityTime() {
@@ -69,7 +72,10 @@ public class SessionService: ISessionService {
     secureStore.saveString(dateString, key: lastActivityKey)
     
     sessionTimer?.invalidate()
-    sessionTimer = Timer.scheduledTimer(withTimeInterval: Constants.timeInterval, repeats: false) { [weak self] _ in
+    sessionTimer = Timer.scheduledTimer(
+      withTimeInterval: Secrets.fiveMinutesAgoInSeconds,
+      repeats: false
+    ) { [weak self] _ in
       self?.sessionDidExpire()
     }
   }
@@ -87,7 +93,6 @@ public class SessionService: ISessionService {
 private enum Constants {
   static let sessionActivityKey = "SessionActivityKey"
   static let dateFormat = "yyyy-MM-dd HH:mm:ss"
-  static let timeInterval: CGFloat = 300
 }
 
 // MARK: - UIApplication

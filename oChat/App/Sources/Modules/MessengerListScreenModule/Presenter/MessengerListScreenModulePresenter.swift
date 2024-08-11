@@ -29,7 +29,6 @@ final class MessengerListScreenModulePresenter: ObservableObject {
   var centerBarButtonView: SKBarButtonView?
   var rightBarLockButton: SKBarButtonItem?
   var rightBarWriteButton: SKBarButtonItem?
-  var messengeDictionaryModels: [String: [MessengeModel]] = [:]
   let impactFeedback = UIImpactFeedbackGenerator(style: .soft)
   
   // MARK: - Private properties
@@ -59,9 +58,7 @@ final class MessengerListScreenModulePresenter: ObservableObject {
   lazy var viewDidLoad: (() -> Void)? = { [weak self] in
     guard let self else { return }
     
-    setupSKBarButtonView()
     initialSetup()
-    incomingDataManagerSetup()
   }
   
   lazy var viewWillAppear: (() -> Void)? = { [weak self] in
@@ -85,7 +82,7 @@ final class MessengerListScreenModulePresenter: ObservableObject {
         await interactor.addMessenge(
           contactModel.id,
           .init(
-            messageType: .systemSuccess,
+            messageType: .systemAttention,
             messageStatus: .sent,
             message: OChatStrings.MessengerListScreenModuleLocalization
               .Message.SuccessfullyClearedAllChat.title,
@@ -95,7 +92,6 @@ final class MessengerListScreenModulePresenter: ObservableObject {
             recording: nil
           )
         )
-        messengeDictionaryModels = await interactor.getDictionaryMessengeModels()
         
         moduleOutput?.dataModelHasBeenUpdated()
         await updateListContacts()
@@ -119,6 +115,15 @@ final class MessengerListScreenModulePresenter: ObservableObject {
   func clearHistoryStored() async {
     let contactModels = await interactor.getContactModels()
     for contact in contactModels where !contact.isChatHistoryStored {
+      let messages = await interactor.getMessengeModelsFor(contact.id)
+      let fiveMinutesAgo = Date().addingTimeInterval(-Secrets.fiveMinutesAgoInSeconds)
+      
+      // Код продолжает выполняться, если прошло более 5 минут (300 Секунд) с момента последнего сообщения
+      guard let lastMessageDate = messages.last?.date,
+            lastMessageDate <= fiveMinutesAgo else {
+        continue
+      }
+      
       await interactor.removeMessenges(contact)
       await interactor.addMessenge(
         contact.id,
@@ -250,8 +255,6 @@ extension MessengerListScreenModulePresenter: MessengerListScreenModuleModuleInp
     
     switch await sendMessageNetworkRequest(contact: updatedContactModel) {
     case let .success(messageId):
-      messengeDictionaryModels = await interactor.getDictionaryMessengeModels()
-      
       if let messageId {
         await updateContactStatus(
           contact: contact,
@@ -275,7 +278,6 @@ extension MessengerListScreenModulePresenter: MessengerListScreenModuleModuleInp
               await updateListContacts()
               moduleOutput?.dataModelHasBeenUpdated()
             }
-            messengeDictionaryModels = await interactor.getDictionaryMessengeModels()
           }
         }
       }
@@ -285,7 +287,6 @@ extension MessengerListScreenModulePresenter: MessengerListScreenModuleModuleInp
       await updateContactStatus(contact: contact, status: .failed, messageId: nil)
       moduleOutput?.dataModelHasBeenUpdated()
       await updateListContacts()
-      messengeDictionaryModels = await interactor.getDictionaryMessengeModels()
     }
   }
   
@@ -297,7 +298,6 @@ extension MessengerListScreenModulePresenter: MessengerListScreenModuleModuleInp
     await interactor.removeMessenge(contact, id)
     moduleOutput?.dataModelHasBeenUpdated()
     await updateListContacts()
-    messengeDictionaryModels = await interactor.getDictionaryMessengeModels()
   }
   
   @MainActor
@@ -318,8 +318,7 @@ extension MessengerListScreenModulePresenter: MessengerListScreenModuleInteracto
 extension MessengerListScreenModulePresenter: MessengerListScreenModuleFactoryOutput {
   func openMessengerDialogScreen(dialogModel: ContactModel) async {
     await moduleOutput?.openMessengerDialogScreen(
-      dialogModel: dialogModel,
-      messengeModels: messengeDictionaryModels[dialogModel.id]
+      dialogModel: dialogModel
     )
   }
 }
@@ -400,6 +399,13 @@ private extension MessengerListScreenModulePresenter {
     // Отключаем таймер простоя
     UIApplication.shared.isIdleTimerDisabled = true
     
+    incomingDataManager.onAppDidBecomeActive = { [weak self] in
+      self?.handleAppDidBecomeActive()
+    }
+    
+    setupSKBarButtonView()
+    incomingDataManagerSetup()
+    
     Task {
       await interactor.clearAllMessengeTempID()
       await interactor.startPeriodicFriendStatusCheck {
@@ -422,7 +428,6 @@ private extension MessengerListScreenModulePresenter {
       
       await updateListContacts()
       await interactor.passcodeNotSetInSystemIOSheck()
-      messengeDictionaryModels = await interactor.getDictionaryMessengeModels()
     }
     
     updateIsNotificationsEnabled()

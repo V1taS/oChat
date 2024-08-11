@@ -57,6 +57,10 @@ protocol MessengerDialogScreenInteractorInput {
   ///   - contactID: ID контакта
   ///   - messengeModel: Модель сообщения `MessengeModel`
   func addMessenge(_ contactID: String, _ messengeModel: MessengeModel) async
+  
+  /// Получить модель настроек приложения
+  /// - Returns: Асинхронная операция, возвращающая модель настроек `AppSettingsModel`
+  func getAppSettingsModel() async -> AppSettingsModel
 }
 
 /// Интерактор
@@ -77,6 +81,7 @@ final class MessengerDialogScreenInteractor {
   private let p2pChatManager: IP2PChatManager
   private let messengeDataManager: IMessengeDataManager
   private let contactsDataManager: IContactsDataManager
+  private let appSettingsDataManager: IAppSettingsDataManager
   
   // MARK: - Initialization
   
@@ -92,12 +97,17 @@ final class MessengerDialogScreenInteractor {
     permissionService = services.accessAndSecurityManagementService.permissionService
     p2pChatManager = services.messengerService.p2pChatManager
     contactsDataManager = services.messengerService.contactsDataManager
+    appSettingsDataManager = services.messengerService.appSettingsDataManager
   }
 }
 
 // MARK: - MessengerDialogScreenInteractorInput
 
 extension MessengerDialogScreenInteractor: MessengerDialogScreenInteractorInput {
+  func getAppSettingsModel() async -> AppSettingsModel {
+    await appSettingsDataManager.getAppSettingsModel()
+  }
+  
   func addMessenge(_ contactID: String, _ messengeModel: MessengeModel) async {
     await messengeDataManager.addMessenge(contactID, messengeModel)
   }

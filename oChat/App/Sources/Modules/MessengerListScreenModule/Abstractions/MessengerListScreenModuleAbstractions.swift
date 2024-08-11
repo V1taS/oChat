@@ -15,8 +15,7 @@ public protocol MessengerListScreenModuleOutput: AnyObject {
   
   /// Открыть экран с диалогом
   func openMessengerDialogScreen(
-    dialogModel: ContactModel,
-    messengeModels: [MessengeModel]?
+    dialogModel: ContactModel
   ) async
   
   /// Модель данных была обновлена

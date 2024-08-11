@@ -199,7 +199,7 @@ extension MessengerListScreenModuleFactory: MessengerListScreenModuleFactoryInpu
       toxPublicKey: messageModel.senderToxPublicKey,
       pushNotificationToken: pushNotificationToken,
       isNewMessagesAvailable: true,
-      isTyping: false,
+      isTyping: true,
       canSaveMedia: messageModel.canSaveMedia,
       isChatHistoryStored: messageModel.isChatHistoryStored
     )
@@ -216,8 +216,12 @@ extension MessengerListScreenModuleFactory: MessengerListScreenModuleFactoryInpu
       updatedContact.pushNotificationToken = senderPushNotificationToken
     }
     updatedContact.toxAddress = messageModel.senderAddress
+    updatedContact.meshAddress = messageModel.senderLocalMeshAddress
     updatedContact.isNewMessagesAvailable = true
     updatedContact.encryptionPublicKey = messageModel.senderPublicKey
+    updatedContact.toxPublicKey = messageModel.senderToxPublicKey
+    updatedContact.canSaveMedia = messageModel.canSaveMedia
+    updatedContact.isChatHistoryStored = messageModel.isChatHistoryStored
     return updatedContact
   }
 }

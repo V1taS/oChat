@@ -18,10 +18,6 @@ import SKManagers
 
 extension MessengerListScreenModulePresenter {
   func incomingDataManagerSetup() {
-    incomingDataManager.onAppDidBecomeActive = { [weak self] in
-      self?.handleAppDidBecomeActive()
-    }
-    
     incomingDataManager.onMyOnlineStatusUpdate = { [weak self] status in
       self?.handleMyOnlineStatusUpdate(status)
     }
@@ -68,6 +64,8 @@ extension MessengerListScreenModulePresenter {
 
 extension MessengerListScreenModulePresenter {
   func handleAppDidBecomeActive() {
+    incomingDataManagerSetup()
+    
     Timer.scheduledTimer(withTimeInterval: 0.5, repeats: false) { [weak self] _ in
       guard let self else { return }
       
@@ -78,7 +76,6 @@ extension MessengerListScreenModulePresenter {
           interactor.deleteDeepLinkURL()
         }
         await clearHistoryStored()
-        messengeDictionaryModels = await interactor.getDictionaryMessengeModels()
       }
     }
     
@@ -101,6 +98,10 @@ extension MessengerListScreenModulePresenter {
       centerBarButtonView?.labelView.text = status.title
       rightBarWriteButton?.isEnabled = status == .online
       await moduleOutput?.updateMyStatus(status)
+      
+      if status == .offline {
+        await interactor.stratTOXService()
+      }
     }
   }
   
@@ -138,7 +139,6 @@ extension MessengerListScreenModulePresenter {
         moduleOutput?.dataModelHasBeenUpdated()
         await impactFeedback.impactOccurred()
         sendLocalNotificationIfNeeded(contactModel: updatedContact)
-        messengeDictionaryModels = await interactor.getDictionaryMessengeModels()
       } else {
         let newContact = factory.createNewContact(
           messageModel: messageModel,
@@ -150,7 +150,6 @@ extension MessengerListScreenModulePresenter {
         moduleOutput?.dataModelHasBeenUpdated()
         await impactFeedback.impactOccurred()
         sendLocalNotificationIfNeeded(contactModel: newContact)
-        messengeDictionaryModels = await interactor.getDictionaryMessengeModels()
       }
     }
   }
@@ -360,7 +359,6 @@ extension MessengerListScreenModulePresenter {
         interactor.clearTemporaryDirectory()
         await impactFeedback.impactOccurred()
         sendLocalNotificationIfNeeded(contactModel: updatedContact)
-        messengeDictionaryModels = await interactor.getDictionaryMessengeModels()
       } else {
         let newContact = factory.createNewContact(
           messageModel: messageModel,
@@ -394,7 +392,6 @@ extension MessengerListScreenModulePresenter {
         var updatedMessenges = messenges[messengesIndex]
         updatedMessenges.messageStatus = .sent
         await interactor.updateMessenge(contactModel, updatedMessenges)
-        messengeDictionaryModels = await interactor.getDictionaryMessengeModels()
       }
       
       await interactor.saveContactModel(updatedContactModel)
@@ -416,7 +413,6 @@ extension MessengerListScreenModulePresenter {
         var updatedMessenges = messenges[messengesIndex]
         updatedMessenges.messageStatus = .failed
         await interactor.updateMessenge(contactModel, updatedMessenges)
-        messengeDictionaryModels = await interactor.getDictionaryMessengeModels()
       }
       
       await interactor.saveContactModel(updatedContactModel)

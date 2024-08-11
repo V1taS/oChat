@@ -78,7 +78,11 @@ public final class MessengeDataManager: IMessengeDataManager {
   
   public func removeMessenge(_ contactModel: ContactModel, _ id: String) async {
     var updatedDictionaryContactModels: MessengeModels = await getDictionaryMessengeModels()
-    updatedDictionaryContactModels.removeValue(forKey: id)
+    if var messengeModels = updatedDictionaryContactModels[contactModel.id],
+       let messengeModelIndex = messengeModels.firstIndex(where: { $0.id == id }) {
+      messengeModels.remove(at: messengeModelIndex)
+      updatedDictionaryContactModels[contactModel.id] = messengeModels
+    }
     await saveMessengeModels(updatedDictionaryContactModels)
   }
   

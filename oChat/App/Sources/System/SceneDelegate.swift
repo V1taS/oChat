@@ -51,10 +51,9 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     rootCoordinator = RootCoordinator(services)
     rootCoordinator?.start()
     
-    // #if DEBUG
-#warning("Необходимо включить дебаг перед публикацией в стор")
+#if DEBUG
     Wormholy.awake()
-    // #endif
+#endif
   }
   
   func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
@@ -86,11 +85,10 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     ConfigurationValueConfigurator(services: services).configure()
   }
   
-  // TODO: - 🔴 сделать работу в фоне
-  
   func sceneDidEnterBackground(_ scene: UIScene) {
     let application = UIApplication.shared
     var backgroundTask: UIBackgroundTaskIdentifier = .invalid
+    let didEnterBackgroundConfigurator = DidEnterBackgroundConfigurator(services: services)
     
     backgroundTask = application.beginBackgroundTask(withName: "ToxCoreBackgroundTask") {
       application.endBackgroundTask(backgroundTask)
@@ -98,20 +96,9 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     }
     
     DispatchQueue.global(qos: .background).async {
-      self.keepToxCoreActive()
-      
+      didEnterBackgroundConfigurator.configure()
       application.endBackgroundTask(backgroundTask)
       backgroundTask = .invalid
-    }
-  }
-  
-  // TODO: - 🔴 сделать работу в фоне
-  func keepToxCoreActive() {
-    // Код для поддержания активности ToxCore
-    ToxCore.shared.setMessageCallback { [weak self] friendId, jsonString in
-      DispatchQueue.main.async {
-        self?.updateDidReceiveMessage(jsonString: jsonString, friendId: friendId)
-      }
     }
   }
 }
@@ -125,93 +112,5 @@ private extension SceneDelegate {
       AppearanceConfigurator(services: services),
       BanScreenshotConfigurator(window: window)
     ]
-  }
-  
-  // TODO: - 🔴 сделать работу в фоне
-  func sendLocalNotificationIfNeeded(contactModel: ContactModel) {
-    // Проверка, находится ли приложение в фоне
-    DispatchQueue.main.async { [weak self] in
-      if UIApplication.shared.applicationState == .background {
-        self?.sendLocalNotification(contactModel: contactModel)
-      }
-    }
-  }
-  
-  // TODO: - 🔴 сделать работу в фоне
-  func sendLocalNotification(contactModel: ContactModel) {
-    let address: String = "\(contactModel.toxAddress?.formatString(minTextLength: 10) ?? "unknown")"
-    let content = UNMutableNotificationContent()
-    content.title = OChatStrings.MessengerListScreenModuleLocalization
-      .LocalNotification.title
-    content.body = "\(OChatStrings.MessengerListScreenModuleLocalization.LocalNotification.body) \(address)."
-    content.sound = UNNotificationSound.default
-    
-    let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
-    let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: trigger)
-    
-    UNUserNotificationCenter.current().add(request) { _ in }
-  }
-  
-  // TODO: - 🔴 сделать работу в фоне
-  func updateDidReceiveMessage(jsonString: String?, friendId: Int32) {
-    guard let jsonString,
-          let jsonData = jsonString.data(using: .utf8),
-          let model = try? JSONDecoder().decode(MessengerNetworkRequestDTO.self, from: jsonData).mapToModel() else {
-      return
-    }
-    handleMessageReceived(model, friendId)
-  }
-  
-  // TODO: - 🔴 сделать работу в фоне
-  func handleMessageReceived(_ messageModel: MessengerNetworkRequestModel, _ toxFriendId: Int32) {
-    //    Task { [weak self] in
-    //      guard let self else { return }
-    //
-    //
-    //      let contactModels = await interactor.getContactModels()
-    //      updateRedDotToTabBar(contactModels: contactModels)
-    //      let messageText = await interactor.decrypt(messageModel.messageText) ?? ""
-    //      let pushNotificationToken = await interactor.decrypt(messageModel.senderPushNotificationToken)
-    //
-    //      if let contact = factory.searchContact(
-    //        contactModels: contactModels,
-    //        torAddress: messageModel.senderAddress
-    //      ) {
-    //        let updatedContact = factory.updateExistingContact(
-    //          contact: contact,
-    //          messageModel: messageModel,
-    //          pushNotificationToken: pushNotificationToken
-    //        )
-    //
-    //        let messengeModel = factory.addMessageToContact(
-    //          message: messageText,
-    //          messageType: .received,
-    //          replyMessageText: messageModel.replyMessageText,
-    //          images: [],
-    //          videos: [],
-    //          recording: nil
-    //        )
-    //
-    //        await interactor.addMessenge(contact.id, messengeModel)
-    //        await interactor.saveContactModel(updatedContact)
-    //        await updateListContacts()
-    //        moduleOutput?.dataModelHasBeenUpdated()
-    //        await impactFeedback.impactOccurred()
-    //        sendLocalNotificationIfNeeded(contactModel: updatedContact)
-    //        messengeDictionaryModels = await interactor.getDictionaryMessengeModels()
-    //      } else {
-    //        let newContact = factory.createNewContact(
-    //          messageModel: messageModel,
-    //          pushNotificationToken: pushNotificationToken,
-    //          status: .online
-    //        )
-    //        await interactor.saveContactModel(newContact)
-    //        await updateListContacts()
-    //        moduleOutput?.dataModelHasBeenUpdated()
-    //        await impactFeedback.impactOccurred()
-    //        sendLocalNotificationIfNeeded(contactModel: newContact)
-    //        messengeDictionaryModels = await interactor.getDictionaryMessengeModels()
-    //      }
-    //    }
   }
 }

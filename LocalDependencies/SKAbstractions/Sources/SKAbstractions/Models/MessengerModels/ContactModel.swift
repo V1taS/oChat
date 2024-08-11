@@ -107,9 +107,9 @@ extension ContactModel {
       toxPublicKey: nil, 
       pushNotificationToken: nil,
       isNewMessagesAvailable: false,
-      isTyping: false,
-      canSaveMedia: false,
-      isChatHistoryStored: false
+      isTyping: true,
+      canSaveMedia: true,
+      isChatHistoryStored: true
     )
   }
 }

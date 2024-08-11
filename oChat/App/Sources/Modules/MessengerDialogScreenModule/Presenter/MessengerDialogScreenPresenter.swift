@@ -67,12 +67,10 @@ final class MessengerDialogScreenPresenter: ObservableObject {
   ///   - interactor: Интерактор
   ///   - factory: Фабрика
   ///   - contactModel: Моделька контакта
-  ///   - messengeModels: Модельки с сообщениями
   ///   - contactAdress: Адрес контакта
   init(interactor: MessengerDialogScreenInteractorInput,
        factory: MessengerDialogScreenFactoryInput,
        contactModel: ContactModel?,
-       messengeModels: [MessengeModel]?,
        contactAdress: String?) {
     self.interactor = interactor
     self.factory = factory
@@ -83,18 +81,18 @@ final class MessengerDialogScreenPresenter: ObservableObject {
     stateIsDownloadAvailability = contact.canSaveMedia
     stateIsChatHistoryStored = contact.isChatHistoryStored
     
-    if let messengeModels {
-      stateMessengeModels = factory.createMessageModels(
-        models: messengeModels,
-        contactModel: contact
-      )
-    }
-    
     Task { @MainActor [weak self] in
       guard let self else { return }
+      
+      let listMessengeModels = await interactor.getListMessengeModels(stateContactModel)
+      stateMessengeModels = factory.createMessageModels(
+        models: listMessengeModels,
+        contactModel: stateContactModel
+      )
+      
       if contactModel == nil {
         let messengeModel: MessengeModel = .init(
-          messageType: .systemAttention,
+          messageType: .systemSuccess,
           messageStatus: .sent,
           message: OChatStrings.MessengerDialogScreenLocalization.Messenger
             .Initial.note,
@@ -142,12 +140,7 @@ final class MessengerDialogScreenPresenter: ObservableObject {
       }
     }
     
-    Timer.scheduledTimer(withTimeInterval: 0.4, repeats: false) { _ in
-      Task { [weak self] in
-        guard let self else { return }
-        await moduleOutput?.removeMessage(id: id, contact: stateContactModel)
-      }
-    }
+    await moduleOutput?.removeMessage(id: id, contact: stateContactModel)
   }
   
   func retrySendMessage(messengeModel: MessengeModel) async {
@@ -496,7 +489,7 @@ final class MessengerDialogScreenPresenter: ObservableObject {
     await interactor.addMessenge(
       stateContactModel.id,
       .init(
-        messageType: .systemSuccess,
+        messageType: .systemAttention,
         messageStatus: .sent,
         message: youNotifiedContactTitle,
         replyMessageText: nil,
@@ -723,10 +716,14 @@ private extension MessengerDialogScreenPresenter {
   func isWelcomeMessageAllowed(contactModel: ContactModel) async -> Bool {
     let listMessengeModels = await interactor.getListMessengeModels(stateContactModel)
     let isMessengesIsEmpty = listMessengeModels.filter({ !$0.messageType.isSystem }).isEmpty
+    let isMessengesSystemAttentionIsEmpty = listMessengeModels.filter({ $0.messageType == .systemAttention }).isEmpty
     let isContainsSystemMessengeSuccess = listMessengeModels.contains(where: ({
       $0.messageType == .systemSuccess
     }))
-    return isMessengesIsEmpty && !isContainsSystemMessengeSuccess && contactModel.status == .online
+    return isMessengesIsEmpty &&
+    !isContainsSystemMessengeSuccess &&
+    contactModel.status == .online &&
+    isMessengesSystemAttentionIsEmpty
   }
 }
 
