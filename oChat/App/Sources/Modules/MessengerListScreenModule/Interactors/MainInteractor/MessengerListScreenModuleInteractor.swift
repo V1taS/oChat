@@ -35,6 +35,7 @@ final class MessengerListScreenModuleInteractor {
   private let messengeDataManager: IMessengeDataManager
   private let appSettingsDataManager: IAppSettingsDataManager
   private let contactsDataManager: IContactsDataManager
+  private let sessionService: ISessionService
   
   // MARK: - Initialization
   
@@ -65,6 +66,7 @@ final class MessengerListScreenModuleInteractor {
     self.messengeDataManager = services.messengerService.messengeDataManager
     self.appSettingsDataManager = services.messengerService.appSettingsDataManager
     self.contactsDataManager = services.messengerService.contactsDataManager
+    self.sessionService = services.accessAndSecurityManagementService.sessionService
   }
 }
 
@@ -364,6 +366,16 @@ extension MessengerListScreenModuleInteractor: MessengerListScreenModuleInteract
   
   func showNotification(_ type: NotificationServiceType) {
     notificationService.showNotification(type)
+  }
+  
+  // MARK: - Session
+  
+  func isSessionActive() -> Bool {
+    sessionService.isSessionActive()
+  }
+  
+  func sessionDidExpire() {
+    sessionService.sessionDidExpire()
   }
 }
 

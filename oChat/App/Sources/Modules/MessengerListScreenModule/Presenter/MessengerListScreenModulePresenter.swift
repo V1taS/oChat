@@ -116,11 +116,14 @@ final class MessengerListScreenModulePresenter: ObservableObject {
     let contactModels = await interactor.getContactModels()
     for contact in contactModels where !contact.isChatHistoryStored {
       let messages = await interactor.getMessengeModelsFor(contact.id)
+      let appPassword = await interactor.getAppSettingsModel().appPassword
       let fiveMinutesAgo = Date().addingTimeInterval(-Secrets.fiveMinutesAgoInSeconds)
       
       // Код продолжает выполняться, если прошло более 5 минут (300 Секунд) с момента последнего сообщения
+      // Если пароль установлен, то проверяем активность сессии, иначе продолжаем выполнение кода
       guard let lastMessageDate = messages.last?.date,
-            lastMessageDate <= fiveMinutesAgo else {
+            lastMessageDate <= fiveMinutesAgo,
+            appPassword != nil && interactor.isSessionActive() || appPassword == nil else {
         continue
       }
       
@@ -347,6 +350,7 @@ extension MessengerListScreenModulePresenter: SceneViewModel {
                 await moduleOutput?.setPasswordForApp()
               } else {
                 await moduleOutput?.lockScreen()
+                interactor.sessionDidExpire()
               }
             }
           }, buttonItem: { [weak self] buttonItem in

@@ -37,6 +37,9 @@ protocol SettingsScreenInteractorInput {
   /// Получить модель настроек приложения
   /// - Returns: Асинхронная операция, возвращающая модель настроек `AppSettingsModel`
   func getAppSettingsModel() async -> AppSettingsModel
+  
+  /// Завершает сессию пользователя.
+  func sessionDidExpire()
 }
 
 /// Интерактор
@@ -52,6 +55,7 @@ final class SettingsScreenInteractor {
   private let notificationService: INotificationService
   private let p2pChatManager: IP2PChatManager
   private let appSettingsDataManager: IAppSettingsDataManager
+  private let sessionService: ISessionService
   
   // MARK: - Initialization
   
@@ -62,12 +66,17 @@ final class SettingsScreenInteractor {
     notificationService = services.userInterfaceAndExperienceService.notificationService
     p2pChatManager = services.messengerService.p2pChatManager
     appSettingsDataManager = services.messengerService.appSettingsDataManager
+    sessionService = services.accessAndSecurityManagementService.sessionService
   }
 }
 
 // MARK: - SettingsScreenInteractorInput
 
 extension SettingsScreenInteractor: SettingsScreenInteractorInput {
+  func sessionDidExpire() {
+    sessionService.sessionDidExpire()
+  }
+  
   func getAppSettingsModel() async -> SKAbstractions.AppSettingsModel {
     await appSettingsDataManager.getAppSettingsModel()
   }

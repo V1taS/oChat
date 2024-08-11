@@ -87,10 +87,6 @@ public extension InfoPlist {
       ]),
       "com.apple.developer.associated-domains": .array([
         .string("applinks:\(Constants.appLink)")
-      ]),
-      // Добавление фоновых режимов
-      "UIBackgroundModes": .array([
-        .string("fetch")
       ])
     ]
     

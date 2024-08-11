@@ -138,19 +138,21 @@ extension PasscodeSettingsScreenFactory: PasscodeSettingsScreenFactoryInput {
     )
     models.append(typingIndicatorModel)
     
-    let canSaveMediaModel = createWidgetModel(
-      title: OChatStrings.PasscodeSettingsScreenLocalization
-        .State.CanSaveMedia.title,
-      initialState: appSettingsModel.canSaveMedia,
-      description: OChatStrings.PasscodeSettingsScreenLocalization
-        .State.CanSaveMedia.description,
-      action: { [weak self] newValue in
-        Task { [weak self] in
-          await self?.output?.setCanSaveMedia(newValue)
+    if appSettingsModel.isPremiumEnabled {
+      let canSaveMediaModel = createWidgetModel(
+        title: OChatStrings.PasscodeSettingsScreenLocalization
+          .State.CanSaveMedia.title,
+        initialState: appSettingsModel.canSaveMedia,
+        description: OChatStrings.PasscodeSettingsScreenLocalization
+          .State.CanSaveMedia.description,
+        action: { [weak self] newValue in
+          Task { [weak self] in
+            await self?.output?.setCanSaveMedia(newValue)
+          }
         }
-      }
-    )
-    models.append(canSaveMediaModel)
+      )
+      models.append(canSaveMediaModel)
+    }
     
     let chatHistoryStoredModel = createWidgetModel(
       title: OChatStrings.PasscodeSettingsScreenLocalization

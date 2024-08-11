@@ -36,6 +36,7 @@ final class MessengerListScreenModuleDemoInteractor {
   private let messengeDataManager: IMessengeDataManager
   private let appSettingsDataManager: IAppSettingsDataManager
   private let contactsDataManager: IContactsDataManager
+  private let sessionService: ISessionService
   
   private var isFirstStartDemo = true
   
@@ -67,6 +68,7 @@ final class MessengerListScreenModuleDemoInteractor {
     self.messengeDataManager = services.messengerService.messengeDataManager
     self.appSettingsDataManager = services.messengerService.appSettingsDataManager
     self.contactsDataManager = services.messengerService.contactsDataManager
+    self.sessionService = services.accessAndSecurityManagementService.sessionService
     
     Task { [weak self] in
       guard let self else { return }
@@ -329,6 +331,16 @@ extension MessengerListScreenModuleDemoInteractor: MessengerListScreenModuleInte
   
   func showNotification(_ type: NotificationServiceType) {
     notificationService.showNotification(type)
+  }
+  
+  // MARK: - Session
+  
+  func isSessionActive() -> Bool {
+    sessionService.isSessionActive()
+  }
+  
+  func sessionDidExpire() {
+    sessionService.sessionDidExpire()
   }
 }
 

@@ -14,5 +14,6 @@ public enum Secrets {
   public static var pushNotificationTeamID = ""
   public static var ushNotificationTestURL = ""
   public static var supportOChatMail = ""
+  public static var premiumList: [PremiumModel] = []
   public static let fiveMinutesAgoInSeconds: Double = 300 // 300 секунд = 5 минут
 }

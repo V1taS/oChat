@@ -63,7 +63,8 @@ final class SettingsScreenPresenter: ObservableObject {
 
 extension SettingsScreenPresenter: SettingsScreenModuleInput {
   func deleteAllData() async -> Bool {
-    await interactor.deleteAllData()
+    interactor.sessionDidExpire()
+    return await interactor.deleteAllData()
   }
 }
 
@@ -76,6 +77,7 @@ extension SettingsScreenPresenter: SettingsScreenInteractorOutput {}
 extension SettingsScreenPresenter: SettingsScreenFactoryOutput {
   func userIntentionExit() {
     moduleOutput?.userIntentionExit()
+    interactor.sessionDidExpire()
   }
   
   func userIntentionDeleteAndExit() {

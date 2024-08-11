@@ -131,6 +131,9 @@ protocol MessengerListScreenModuleInteractorInput {
   /// Получить модель со всеми настройками
   func getAppSettingsModel() async -> AppSettingsModel
   
+  /// Возвращает текущий язык приложения.
+  func getCurrentLanguage() -> AppLanguageType
+  
   /// Проверяем установлен ли пароль на телефоне, это необходимо для шифрования данных
   func passcodeNotSetInSystemIOSheck() async
   
@@ -306,8 +309,14 @@ protocol MessengerListScreenModuleInteractorInput {
   ///   - type: Тип уведомления
   func showNotification(_ type: NotificationServiceType)
   
-  /// Возвращает текущий язык приложения.
-  func getCurrentLanguage() -> AppLanguageType
+  // MARK: - Session
+  
+  /// Проверяет, активна ли сессия.
+  /// - Returns: Булево значение, указывающее, активна ли сессия.
+  func isSessionActive() -> Bool
+  
+  /// Завершает сессию пользователя.
+  func sessionDidExpire()
   
   /// Делегат, через который интерактор передает события презентеру.
   /// Используется для уведомления презентера о завершении асинхронных операций или изменениях состояния.

@@ -38,6 +38,7 @@ struct ConfigurationValueConfigurator: Configurator {
     getPushNotificationTeamID()
     getPushNotificationTestURL()
     getSupportOChatMail()
+    getPremiumList()
   }
 }
 
@@ -80,6 +81,16 @@ private extension ConfigurationValueConfigurator {
     }
   }
   
+  func getPremiumList() {
+    getConfigurationValue(forKey: Constants.premiumList) { value in
+      guard let jsonData = value.data(using: .utf8) else {
+        return
+      }
+      let premiumList = PremiumModel.decodeFromJSON(jsonData)
+      Secrets.premiumList = premiumList
+    }
+  }
+  
   func getConfigurationValue(forKey key: String, completion: @escaping (String) -> Void) {
     if let value = secureDataManagerService.getString(for: key) {
       completion(value)
@@ -104,4 +115,5 @@ private enum Constants {
   static let pushNotificationTeamID = "PushNotificationTeamID"
   static let ushNotificationTestURL = "PushNotificationTestURL"
   static let supportOChatMail = "SupportOChatMail"
+  static let premiumList = "PremiumList"
 }
