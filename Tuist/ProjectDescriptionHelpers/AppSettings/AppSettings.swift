@@ -19,7 +19,7 @@ enum AppSettings {
       "DEVELOPMENT_TEAM": "\(Constants.developmentTeam)",
       "CODE_SIGN_STYLE": "Automatic",
       "SDKROOT": "iphoneos",
-      "TARGETED_DEVICE_FAMILY": "1,2",
+      "TARGETED_DEVICE_FAMILY": "1",
       "ENABLE_TARGET_PARALLELIZATION": "YES"
     ]
     
