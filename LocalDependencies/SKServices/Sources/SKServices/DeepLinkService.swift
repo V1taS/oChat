@@ -59,5 +59,5 @@ private extension DeepLinkService {
 
 private enum Constants {
   static let deepLinkServiceKey = String(describing: DeepLinkService.self)
-  static let basePart = "oChatTOR://new_contact/"
+  static let basePart = "onionChat://new_contact/"
 }

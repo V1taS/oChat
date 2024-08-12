@@ -90,7 +90,7 @@ struct MessageView: View {
       VStack(alignment: message.user.isCurrentUser ? .trailing : .leading, spacing: 2) {
         if let countEmojis = countEmojis(in: message.text), countEmojis != .zero {
           Text(message.text)
-            .font(.system(size: countEmojis == 1 ? .s13 : .s8))
+            .font(.system(size: countEmojis == 1 ? .s20 : .s15))
         } else {
           bubbleView(message)
         }
@@ -348,7 +348,16 @@ struct MessageView_Preview: PreviewProvider {
 
 private extension MessageView {
   func countEmojis(in string: String) -> Int? {
-    let emojiCount = string.filter { $0.isEmoji }.count
+    let isNumber: (Character) -> Bool = { $0.unicodeScalars.allSatisfy { $0.properties.numericType != nil } }
+    let isEmoji: (Character) -> Bool = { $0.unicodeScalars.first?.properties.isEmojiPresentation ?? false }
+    
+    // Проверяем, состоит ли строка только из цифр
+    let allNumbers = string.allSatisfy(isNumber)
+    if (allNumbers) {
+      return nil
+    }
+    
+    let emojiCount = string.filter(isEmoji).count
     return emojiCount == string.count ? emojiCount : nil
   }
 }

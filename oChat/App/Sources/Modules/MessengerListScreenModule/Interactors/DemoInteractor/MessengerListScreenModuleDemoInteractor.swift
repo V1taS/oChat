@@ -126,7 +126,7 @@ extension MessengerListScreenModuleDemoInteractor: MessengerListScreenModuleInte
     .success(())
   }
   func startPeriodicFriendStatusCheck(completion: (() -> Void)?) async {}
-  func stratTOXService() async {}
+  func startTOXService() async {}
   
   // MARK: - ContactManager
   

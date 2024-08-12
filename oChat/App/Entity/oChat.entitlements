@@ -20,7 +20,7 @@
     <true/>
     <key>com.apple.developer.associated-domains</key>
     <array>
-        <string>applinks:oChatTOR</string>
+        <string>applinks:onionChat</string>
     </array>
 </dict>
 </plist>

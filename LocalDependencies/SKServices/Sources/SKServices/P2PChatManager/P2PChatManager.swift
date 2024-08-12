@@ -16,6 +16,7 @@ public final class P2PChatManager: IP2PChatManager {
   
   public static let shared = P2PChatManager()
   public var sessionStateAction: ((_ state: TorSessionState) -> Void)?
+  public var messageBackgroundCallback: ((_ friendId: Int32, _ message: String) -> Void)?
   public let toxCore: ToxCore = ToxCore.shared
   
   // MARK: - Private properties

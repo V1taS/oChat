@@ -96,6 +96,7 @@ extension MessengerListScreenModuleDemoInteractor {
   func createDemoContactModel6() -> ContactModel {
     return ContactModel(
       id: toxAddress,
+      dateOfCreation: Date().addingTimeInterval(6),
       name: nil,
       toxAddress: toxAddress,
       meshAddress: nil,

@@ -134,5 +134,5 @@ private extension MessengerProfileModuleInteractor {
 // MARK: - Constants
 
 private enum Constants {
-  static let basePart = "oChatTOR://new_contact/"
+  static let basePart = "onionChat://new_contact/"
 }

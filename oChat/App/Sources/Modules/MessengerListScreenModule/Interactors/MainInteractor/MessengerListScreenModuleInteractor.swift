@@ -126,7 +126,7 @@ extension MessengerListScreenModuleInteractor: MessengerListScreenModuleInteract
     await toxManager.startPeriodicFriendStatusCheck(completion: completion)
   }
   
-  func stratTOXService() async {
+  func startTOXService() async {
     await toxManager.startToxService()
   }
   

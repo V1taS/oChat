@@ -250,8 +250,17 @@ private extension P2PChatManager {
   
   func setMessageCallback() {
     toxCore.setMessageCallback { [weak self] friendId, jsonString in
-      guard let self else { return }
-      updateDidReceiveMessage(jsonString: jsonString, friendId: friendId)
+      DispatchQueue.main.async { [weak self] in
+        guard let self else { return }
+        switch UIApplication.shared.applicationState {
+        case .active:
+          updateDidReceiveMessage(jsonString: jsonString, friendId: friendId)
+        case .background:
+          messageBackgroundCallback?(friendId, jsonString)
+        @unknown default:
+          break
+        }
+      }
     }
   }
 }

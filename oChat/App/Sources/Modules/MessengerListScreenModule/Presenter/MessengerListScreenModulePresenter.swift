@@ -420,7 +420,7 @@ private extension MessengerListScreenModulePresenter {
         }
       }
       await interactor.setSelfStatus(isOnline: true)
-      await interactor.stratTOXService()
+      await interactor.startTOXService()
       let contactModels = await interactor.getContactModels()
       await updateWidgetsOnMainScreen(contactModels: contactModels)
       await interactor.setAllContactsIsOffline()

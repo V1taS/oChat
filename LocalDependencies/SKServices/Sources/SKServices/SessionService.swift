@@ -46,6 +46,7 @@ public class SessionService: ISessionService {
       repeats: false
     ) { [weak self] _ in
       self?.sessionDidExpire()
+      self?.sessionDidExpireAction?()
     }
     
     DispatchQueue.main.async { [weak self] in
@@ -77,11 +78,11 @@ public class SessionService: ISessionService {
       repeats: false
     ) { [weak self] _ in
       self?.sessionDidExpire()
+      self?.sessionDidExpireAction?()
     }
   }
   
   public func sessionDidExpire() {
-    sessionDidExpireAction?()
     secureStore.deleteData(for: lastActivityKey)
     sessionTimer?.invalidate()
     sessionTimer = nil

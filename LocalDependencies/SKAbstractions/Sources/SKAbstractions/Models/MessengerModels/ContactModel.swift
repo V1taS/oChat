@@ -66,6 +66,7 @@ public struct ContactModel {
   ///   - isChatHistoryStored: Разрешить собеседнику хранить историю переписки
   public init(
     id: String = UUID().uuidString,
+    dateOfCreation: Date = Date(),
     name: String?,
     toxAddress: String?,
     meshAddress: String?,
@@ -90,7 +91,7 @@ public struct ContactModel {
     self.isTyping = isTyping
     self.canSaveMedia = canSaveMedia
     self.isChatHistoryStored = isChatHistoryStored
-    self.dateOfCreation = Date()
+    self.dateOfCreation = dateOfCreation
   }
 }
 

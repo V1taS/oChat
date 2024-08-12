@@ -87,7 +87,7 @@ protocol MessengerListScreenModuleInteractorInput {
   func startPeriodicFriendStatusCheck(completion: (() -> Void)?) async
   
   /// Запуск TOX сервисы
-  func stratTOXService() async
+  func startTOXService() async
   
   // MARK: - ContactManager
   /// Получает массив моделей контактов `ContactModel` асинхронно.

@@ -39,7 +39,7 @@ private extension DidEnterBackgroundConfigurator {
   func keepToxCoreActive() {
     // TODO: - Сделать обработку входящих файлов 🔴
     
-    ToxCore.shared.setMessageCallback { friendId, jsonString in
+    P2PChatManager.shared.messageBackgroundCallback = { friendId, jsonString in
       DispatchQueue.main.async {
         handleMessageReceived(jsonString: jsonString, friendId: friendId)
       }

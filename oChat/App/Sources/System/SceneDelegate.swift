@@ -13,6 +13,7 @@ import Wormholy
 import SKServices
 import SwiftUI
 import ToxCore
+import BackgroundTasks
 
 final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
   
@@ -44,6 +45,12 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     options connectionOptions: UIScene.ConnectionOptions
   ) {
     guard let windowScene = scene as? UIWindowScene else { return }
+    
+    // Регистрация задачи Background Fetch
+    BGTaskScheduler.shared.register(forTaskWithIdentifier: "com.sosinvitalii.oChat.refresh", using: nil) { task in
+      self.handleAppRefresh(task: task as? BGAppRefreshTask)
+    }
+    
     window = TouchWindow(windowScene: windowScene)
     window?.makeKeyAndVisible()
     
@@ -86,6 +93,9 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
   }
   
   func sceneDidEnterBackground(_ scene: UIScene) {
+    // Запланировать Background Fetch
+    scheduleAppRefresh()
+    
     let application = UIApplication.shared
     var backgroundTask: UIBackgroundTaskIdentifier = .invalid
     let didEnterBackgroundConfigurator = DidEnterBackgroundConfigurator(services: services)
@@ -101,11 +111,43 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
       backgroundTask = .invalid
     }
   }
+  
 }
 
 // MARK: - Private
 
 private extension SceneDelegate {
+  func scheduleAppRefresh() {
+    let request = BGAppRefreshTaskRequest(identifier: "com.sosinvitalii.oChat.refresh")
+    request.earliestBeginDate = Date(timeIntervalSinceNow: 15 * 60) // 15 минут
+    
+    do {
+      try BGTaskScheduler.shared.submit(request)
+    } catch {
+      print("Не удалось запланировать фоновую задачу: \(error)")
+    }
+  }
+  
+  func handleAppRefresh(task: BGAppRefreshTask?) {
+    guard let task else { return
+    }
+    // Запланировать следующую задачу
+    scheduleAppRefresh()
+    
+    // Выполнить вашу фоновую задачу
+    let didEnterBackgroundConfigurator = DidEnterBackgroundConfigurator(services: services)
+    
+    task.expirationHandler = {
+      // Завершить задачу, если время истекло
+      task.setTaskCompleted(success: false)
+    }
+    
+    DispatchQueue.global(qos: .background).async {
+      didEnterBackgroundConfigurator.configure()
+      task.setTaskCompleted(success: true) // Отметить задачу как завершенную
+    }
+  }
+  
   func configurators() -> [Configurator] {
     return [
       FirstLaunchConfigurator(services: services),

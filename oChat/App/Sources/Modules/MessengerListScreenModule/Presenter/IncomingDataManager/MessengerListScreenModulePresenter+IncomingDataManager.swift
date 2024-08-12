@@ -64,8 +64,6 @@ extension MessengerListScreenModulePresenter {
 
 extension MessengerListScreenModulePresenter {
   func handleAppDidBecomeActive() {
-    incomingDataManagerSetup()
-    
     Timer.scheduledTimer(withTimeInterval: 0.5, repeats: false) { [weak self] _ in
       guard let self else { return }
       
@@ -88,21 +86,26 @@ extension MessengerListScreenModulePresenter {
       if await interactor.getPushNotificationToken() == nil {
         await UIApplication.shared.registerForRemoteNotifications()
       }
+      
+      await updateListContacts()
     }
+    moduleOutput?.dataModelHasBeenUpdated()
   }
   
   func handleMyOnlineStatusUpdate(_ status: AppSettingsModel.Status) {
-    Task { @MainActor [weak self] in
-      guard let self else { return }
-      centerBarButtonView?.iconLeftView.image = status.imageStatus
-      centerBarButtonView?.labelView.text = status.title
-      rightBarWriteButton?.isEnabled = status == .online
-      await moduleOutput?.updateMyStatus(status)
-      
-      if status == .offline {
-        await interactor.stratTOXService()
+      Task { @MainActor [weak self] in
+          guard let self = self else { return }
+
+          updateUI(for: status)
+          await moduleOutput?.updateMyStatus(status)
+          
+          if status == .offline {
+              let inProgressStatus: AppSettingsModel.Status = .inProgress
+              updateUI(for: inProgressStatus)
+              await moduleOutput?.updateMyStatus(inProgressStatus)
+              await interactor.startTOXService()
+          }
       }
-    }
   }
   
   func handleMessageReceived(_ messageModel: MessengerNetworkRequestModel, _ toxFriendId: Int32) {
@@ -455,5 +458,11 @@ private extension MessengerListScreenModulePresenter {
     let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: trigger)
     
     UNUserNotificationCenter.current().add(request) { _ in }
+  }
+  
+  func updateUI(for status: AppSettingsModel.Status) {
+    centerBarButtonView?.iconLeftView.image = status.imageStatus
+    centerBarButtonView?.labelView.text = status.title
+    rightBarWriteButton?.isEnabled = status == .online
   }
 }

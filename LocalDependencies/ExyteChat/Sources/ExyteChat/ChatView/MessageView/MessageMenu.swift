@@ -60,7 +60,7 @@ struct MessageMenu<MainButton: View>: View {
       buttons.append(AnyView(
         menuButton(
           title: ExyteChatStrings.messageMenuCopyTitle,
-          icon: theme.images.messageMenu.save,
+          icon: Image(systemName: "doc.on.doc"),
           action: .copy
         )
       ))
