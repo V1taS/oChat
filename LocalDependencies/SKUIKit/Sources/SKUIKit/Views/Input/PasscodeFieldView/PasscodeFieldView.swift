@@ -61,7 +61,7 @@ public struct PasscodeFieldView: View {
         .font(.fancy.text.title)
         .foregroundColor(SKStyleAsset.ghost.swiftUIColor)
         .multilineTextAlignment(.center)
-        .lineLimit(1)
+        .lineLimit(2)
         .allowsHitTesting(false)
         .padding(.horizontal, .s6)
       

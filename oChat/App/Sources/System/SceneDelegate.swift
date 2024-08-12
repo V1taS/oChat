@@ -106,12 +106,14 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     }
     
     DispatchQueue.global(qos: .background).async {
+      // Выполните задачу при входе в фон
+      self.handleAppRefresh(task: nil) // Явный вызов задачи
+      
       didEnterBackgroundConfigurator.configure()
       application.endBackgroundTask(backgroundTask)
       backgroundTask = .invalid
     }
   }
-  
 }
 
 // MARK: - Private
@@ -129,22 +131,26 @@ private extension SceneDelegate {
   }
   
   func handleAppRefresh(task: BGAppRefreshTask?) {
-    guard let task else { return
+    // Запланировать следующую задачу, если вызвано системой
+    if task != nil {
+      scheduleAppRefresh()
     }
-    // Запланировать следующую задачу
-    scheduleAppRefresh()
     
     // Выполнить вашу фоновую задачу
     let didEnterBackgroundConfigurator = DidEnterBackgroundConfigurator(services: services)
     
-    task.expirationHandler = {
+    task?.expirationHandler = {
       // Завершить задачу, если время истекло
-      task.setTaskCompleted(success: false)
+      task?.setTaskCompleted(success: false)
     }
     
     DispatchQueue.global(qos: .background).async {
       didEnterBackgroundConfigurator.configure()
-      task.setTaskCompleted(success: true) // Отметить задачу как завершенную
+      
+      // Если task не равен nil, завершите задачу как успешную
+      if let task = task {
+        task.setTaskCompleted(success: true)
+      }
     }
   }
   
