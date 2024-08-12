@@ -29,17 +29,27 @@ struct DidEnterBackgroundConfigurator: Configurator {
   // MARK: - Internal func
   
   func configure() {
-    keepToxCoreActive()
+    Task {
+      await keepToxCoreActive()
+    }
   }
 }
 
 // MARK: - Private
 
 private extension DidEnterBackgroundConfigurator {
-  func keepToxCoreActive() {
+  @MainActor
+  func keepToxCoreActive() async {
     // TODO: - Сделать обработку входящих файлов 🔴
+    let appSettingsModel = await services.messengerService.appSettingsDataManager.getAppSettingsModel()
+    let sessionService = services.accessAndSecurityManagementService.sessionService
     
     P2PChatManager.shared.messageBackgroundCallback = { friendId, jsonString in
+      guard appSettingsModel.appPassword != nil && sessionService.isSessionActive() ||
+              appSettingsModel.appPassword == nil else {
+        return
+      }
+      
       DispatchQueue.main.async {
         handleMessageReceived(jsonString: jsonString, friendId: friendId)
       }
@@ -47,6 +57,7 @@ private extension DidEnterBackgroundConfigurator {
   }
   
   func handleMessageReceived(jsonString: String?, friendId: Int32) {
+    // Сделать проверки как при очистки сообщений
     guard let jsonString,
           let jsonData = jsonString.data(using: .utf8),
           let messageModel = try? JSONDecoder().decode(MessengerNetworkRequestDTO.self, from: jsonData).mapToModel() else {
