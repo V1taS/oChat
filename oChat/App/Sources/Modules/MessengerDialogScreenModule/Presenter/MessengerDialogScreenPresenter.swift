@@ -68,10 +68,11 @@ final class MessengerDialogScreenPresenter: ObservableObject {
   ///   - factory: Фабрика
   ///   - contactModel: Моделька контакта
   ///   - contactAdress: Адрес контакта
+  @MainActor
   init(interactor: MessengerDialogScreenInteractorInput,
        factory: MessengerDialogScreenFactoryInput,
        contactModel: ContactModel?,
-       contactAdress: String?) {
+       contactAdress: String?) async {
     self.interactor = interactor
     self.factory = factory
     stateContactAdress = contactAdress ?? (contactModel?.toxAddress ?? "")
@@ -81,32 +82,28 @@ final class MessengerDialogScreenPresenter: ObservableObject {
     stateIsDownloadAvailability = contact.canSaveMedia
     stateIsChatHistoryStored = contact.isChatHistoryStored
     
-    Task { @MainActor [weak self] in
-      guard let self else { return }
-      
-      let listMessengeModels = await interactor.getListMessengeModels(stateContactModel)
-      stateMessengeModels = factory.createMessageModels(
-        models: listMessengeModels,
-        contactModel: stateContactModel
+    let listMessengeModels = await interactor.getListMessengeModels(stateContactModel)
+    self.stateMessengeModels = factory.createMessageModels(
+      models: listMessengeModels,
+      contactModel: stateContactModel
+    )
+    
+    if contactModel == nil {
+      let messengeModel: MessengeModel = .init(
+        messageType: .systemSuccess,
+        messageStatus: .sent,
+        message: OChatStrings.MessengerDialogScreenLocalization.Messenger
+          .Initial.note,
+        replyMessageText: nil,
+        images: [],
+        videos: [],
+        recording: nil
       )
       
-      if contactModel == nil {
-        let messengeModel: MessengeModel = .init(
-          messageType: .systemSuccess,
-          messageStatus: .sent,
-          message: OChatStrings.MessengerDialogScreenLocalization.Messenger
-            .Initial.note,
-          replyMessageText: nil,
-          images: [],
-          videos: [],
-          recording: nil
-        )
-        
-        await interactor.addMessenge(
-          contact.id,
-          messengeModel
-        )
-      }
+      await interactor.addMessenge(
+        contact.id,
+        messengeModel
+      )
     }
   }
   
@@ -343,6 +340,30 @@ final class MessengerDialogScreenPresenter: ObservableObject {
   
   func sendInitiateChatFromDialog(toxAddress: String?) async {
     await impactFeedback.impactOccurred()
+    let isToxSelfAddressValid = toxSelfAddress != stateContactAdress
+    let isAdressMaxLengthValid = stateContactAdress.count == stateContactAdressMaxLength
+    
+    guard isToxSelfAddressValid else {
+      interactor.showNotification(
+        .negative(
+          title: OChatStrings.MessengerDialogScreenLocalization
+            .Notification.SelfAddressError.title
+        )
+      )
+      return
+    }
+    guard isAdressMaxLengthValid else {
+      interactor.showNotification(
+        .negative(
+          title: OChatStrings.MessengerDialogScreenLocalization
+            .Notification.ContactAddressValidationError.title
+        )
+      )
+      return
+    }
+    
+    startScheduleResendInitialRequest()
+    
     var updatedModel = stateContactModel
     updatedModel.toxAddress = toxAddress ?? stateContactAdress
     
@@ -363,13 +384,6 @@ final class MessengerDialogScreenPresenter: ObservableObject {
   func cancelRequestForDialog() async {
     await moduleOutput?.cancelRequestForDialog(contactModel: stateContactModel)
     await moduleOutput?.closeMessengerDialog()
-  }
-  
-  func isInitialChatValidation() -> Bool {
-    let isToxSelfAddressValid = toxSelfAddress != stateContactAdress
-    let isNoEmpty = !stateContactAdress.isEmpty
-    let isAdressMaxLengthValid = stateContactAdress.count == stateContactAdressMaxLength
-    return isToxSelfAddressValid && isNoEmpty && isAdressMaxLengthValid
   }
   
   func isChatValidation() -> Bool {

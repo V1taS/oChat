@@ -16,21 +16,22 @@ public final class MessengerDialogScreenAssembly {
   
   /// Собирает модуль `MessengerDialogScreen`
   /// - Returns: Cобранный модуль `MessengerDialogScreen`
+  @MainActor
   public func createModule(
     contactModel: ContactModel?,
     contactAdress: String?,
     services: IApplicationServices
-  ) -> MessengerDialogScreenModule {
+  ) async -> MessengerDialogScreenModule {
     let interactor = MessengerDialogScreenInteractor(services: services)
     let factory = MessengerDialogScreenFactory()
-    let presenter = MessengerDialogScreenPresenter(
+    let presenter = await MessengerDialogScreenPresenter(
       interactor: interactor,
       factory: factory, 
       contactModel: contactModel,
       contactAdress: contactAdress
     )
     let view = MessengerDialogScreenView(presenter: presenter)
-    let viewController = SceneViewController(viewModel: presenter, content: view)
+    let viewController = await SceneViewController(viewModel: presenter, content: view)
     
     interactor.output = presenter
     factory.output = presenter

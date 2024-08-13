@@ -46,3 +46,5 @@
 "Messenger.ImageSavedToGallery.Title" = "Image Saved to Gallery";
 "Messenger.AskToComeContact.Title" = "Ask to come contact";
 "Messenger.AskToComeContactVia.Title" = "Ask to come into contact in";
+"Notification.SelfAddressError.Title" = "You cannot add your own address to contacts";
+"Notification.ContactAddressValidationError.Title" = "The contact address failed validation";

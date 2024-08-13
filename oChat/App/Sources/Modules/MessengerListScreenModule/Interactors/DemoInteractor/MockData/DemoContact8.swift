@@ -100,7 +100,7 @@ extension MessengerListScreenModuleDemoInteractor {
       name: nil,
       toxAddress: toxAddress,
       meshAddress: nil,
-      status: .offline,
+      status: .online,
       encryptionPublicKey: toxAddress,
       toxPublicKey: toxAddress,
       pushNotificationToken: nil,

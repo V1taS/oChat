@@ -12,7 +12,6 @@ import SKStyle
 import AVFoundation
 import SKManagers
 
-
 // MARK: - DemoInteractor
 
 // swiftlint:disable all

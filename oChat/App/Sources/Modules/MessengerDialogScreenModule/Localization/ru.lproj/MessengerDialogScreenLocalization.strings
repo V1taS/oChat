@@ -46,3 +46,5 @@
 "Messenger.ImageSavedToGallery.Title" = "Изображение сохранено в галерее";
 "Messenger.AskToComeContact.Title" = "Позвать контакт";
 "Messenger.AskToComeContactVia.Title" = "Позвать контакт через";
+"Notification.SelfAddressError.Title" = "Нельзя добавить в контакты свой собственный адрес";
+"Notification.ContactAddressValidationError.Title" = "Адрес контакта не прошел валидацию";

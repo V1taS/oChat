@@ -233,7 +233,7 @@ private extension MessengerDialogScreenView {
         .chatFieldStyle(.capsule)
         
         CircleButtonView(
-          isEnabled: presenter.isInitialChatValidation(),
+          isEnabled: !presenter.stateContactAdress.isEmpty,
           type: .send,
           size: .standart,
           style: .custom(color: SKStyleAsset.constantAzure.swiftUIColor),
@@ -241,7 +241,6 @@ private extension MessengerDialogScreenView {
             Task {
               await presenter.sendInitiateChatFromDialog(toxAddress: presenter.stateContactAdress)
             }
-            presenter.startScheduleResendInitialRequest()
           }
         )
         
@@ -396,14 +395,15 @@ private extension MessengerDialogScreenView {
 
 // MARK: - Preview
 
-struct MessengerDialogScreenView_Previews: PreviewProvider {
-  static var previews: some View {
-    UIViewControllerPreview {
-      MessengerDialogScreenAssembly().createModule(
-        contactModel: .mock(),
-        contactAdress: nil,
-        services: ApplicationServicesStub()
-      ).viewController
-    }
-  }
-}
+// TODO: - 🔴 'async' call in a function that does not support concurrency
+//struct MessengerDialogScreenView_Previews: PreviewProvider {
+//  static var previews: some View {
+//    UIViewControllerPreview {
+//      MessengerDialogScreenAssembly().createModule(
+//        contactModel: .mock(),
+//        contactAdress: nil,
+//        services: ApplicationServicesStub()
+//      ).viewController
+//    }
+//  }
+//}

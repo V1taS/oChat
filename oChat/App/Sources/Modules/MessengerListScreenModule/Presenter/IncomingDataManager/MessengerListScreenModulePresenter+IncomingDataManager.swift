@@ -82,11 +82,7 @@ extension MessengerListScreenModulePresenter {
       await interactor.setSelfStatus(isOnline: true)
       await interactor.clearAllMessengeTempID()
       await interactor.passcodeNotSetInSystemIOSheck()
-      
-      if await interactor.getPushNotificationToken() == nil {
-        await UIApplication.shared.registerForRemoteNotifications()
-      }
-      
+      await UIApplication.shared.registerForRemoteNotifications()
       await updateListContacts()
     }
     moduleOutput?.dataModelHasBeenUpdated()
