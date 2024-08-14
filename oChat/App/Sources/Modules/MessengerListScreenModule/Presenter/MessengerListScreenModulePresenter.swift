@@ -73,29 +73,29 @@ final class MessengerListScreenModulePresenter: ObservableObject {
   // MARK: - Internal func
   
   func clearContact(index: Int) {
-    Timer.scheduledTimer(withTimeInterval: 0.3, repeats: false) { _ in
-      Task { [weak self] in
-        guard let self else { return }
-        let contactModels = await interactor.getContactModels()
-        let contactModel = contactModels[index]
-        
-        await interactor.addMessenge(
-          contactModel.id,
-          .init(
-            messageType: .systemAttention,
-            messageStatus: .sent,
-            message: OChatStrings.MessengerListScreenModuleLocalization
-              .Message.SuccessfullyClearedAllChat.title,
-            replyMessageText: nil,
-            images: [],
-            videos: [],
-            recording: nil
-          )
+    Task { [weak self] in
+      guard let self else { return }
+      
+      let contactModels = await interactor.getContactModels()
+      let contactModel = contactModels[index]
+      await interactor.removeMessenges(contactModel)
+      
+      await interactor.addMessenge(
+        contactModel.id,
+        .init(
+          messageType: .systemAttention,
+          messageStatus: .sent,
+          message: OChatStrings.MessengerListScreenModuleLocalization
+            .Message.SuccessfullyClearedAllChat.title,
+          replyMessageText: nil,
+          images: [],
+          videos: [],
+          recording: nil
         )
-        
-        moduleOutput?.dataModelHasBeenUpdated()
-        await updateListContacts()
-      }
+      )
+      
+      moduleOutput?.dataModelHasBeenUpdated()
+      await updateListContacts()
     }
   }
   

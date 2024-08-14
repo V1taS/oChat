@@ -77,7 +77,9 @@ private extension MessengerListScreenModuleView {
         .listRowSeparator(.hidden)
         .swipeActions(edge: .trailing, allowsFullSwipe: true) {
           Button {
-            presenter.clearContact(index: index)
+            Timer.scheduledTimer(withTimeInterval: 0.3, repeats: false) { _ in
+              presenter.clearContact(index: index)
+            }
           } label: {
             Text(OChatStrings.MessengerListScreenModuleLocalization
               .SwipeActions.Clear.title)
