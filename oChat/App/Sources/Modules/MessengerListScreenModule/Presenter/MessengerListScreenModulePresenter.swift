@@ -83,7 +83,7 @@ final class MessengerListScreenModulePresenter: ObservableObject {
       await interactor.addMessenge(
         contactModel.id,
         .init(
-          messageType: .systemAttention,
+          messageType: .systemSuccess,
           messageStatus: .sent,
           message: OChatStrings.MessengerListScreenModuleLocalization
             .Message.SuccessfullyClearedAllChat.title,

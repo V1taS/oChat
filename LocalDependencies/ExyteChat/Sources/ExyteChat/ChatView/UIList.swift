@@ -87,7 +87,27 @@ struct UIList<MessageContent: View>: UIViewRepresentable {
       }
       
       let prevSections = context.coordinator.sections
-      let (appliedDeletes, appliedDeletesSwapsAndEdits, deleteOperations, swapOperations, editOperations, insertOperations) = operationsSplit(oldSections: prevSections, newSections: sections)
+      let (
+        appliedDeletes,
+        appliedDeletesSwapsAndEdits,
+        deleteOperations,
+        swapOperations,
+        editOperations,
+        insertOperations
+      ) = operationsSplit(oldSections: prevSections, newSections: sections)
+      
+      // Сравниваем количество элементов в новой таблице с количеством операций удаления и вставки
+      let newRowCount = sections.reduce(0) { $0 + $1.rows.count }
+      let totalOperations = deleteOperations.count + insertOperations.count
+      
+      if totalOperations >= newRowCount {
+        DispatchQueue.main.async {
+          context.coordinator.sections = sections
+          tableView.reloadData()
+          updateSemaphore.signal()
+        }
+        return
+      }
       
       // step 1
       // preapare intermediate sections and operations
@@ -192,7 +212,6 @@ struct UIList<MessageContent: View>: UIViewRepresentable {
       tableView.deleteSections([section], with: .top)
     case .insertSection(let section):
       tableView.insertSections([section], with: .top)
-      
     case .delete(let section, let row):
       tableView.deleteRows(at: [IndexPath(row: row, section: section)], with: .top)
     case .insert(let section, let row):
@@ -205,7 +224,14 @@ struct UIList<MessageContent: View>: UIViewRepresentable {
     }
   }
   
-  func operationsSplit(oldSections: [MessagesSection], newSections: [MessagesSection]) -> ([MessagesSection], [MessagesSection], [Operation], [Operation], [Operation], [Operation]) {
+  func operationsSplit(oldSections: [MessagesSection], newSections: [MessagesSection]) -> (
+    appliedDeletes: [MessagesSection],
+    appliedDeletesSwapsAndEdits: [MessagesSection],
+    deleteOperations: [Operation],
+    swapOperations: [Operation],
+    editOperations: [Operation],
+    insertOperations: [Operation]
+  ) {
     var appliedDeletes = oldSections // start with old sections, remove rows that need to be deleted
     var appliedDeletesSwapsAndEdits = newSections // take new sections and remove rows that need to be inserted for now, then we'll get array with all the changes except for inserts
     // appliedDeletesSwapsEditsAndInserts == newSection

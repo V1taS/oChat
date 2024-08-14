@@ -34,7 +34,6 @@
 "Messenger.Message.SendRequestIn" = "Отправить запрос через";
 "Messenger.Message.seconds" = "сек.";
 "Messenger.Message.Welcome.Sender" = "Поздравляем! Вас успешно добавили в контакты. Теперь дождитесь, когда ваш новый контакт вам напишет";
-"Messenger.Message.Welcome.Receiver" = "Поздравляем! Вы успешно добавили контакт. Пожалуйста, отправьте сообщение первым, чтобы начать общение";
 "Messenger.Typing.Title" = "Печатает";
 "Messenger.ReceivingFile.Title" = "Получение файла";
 "Messenger.FileTransfer.Title" = "Передача файла";

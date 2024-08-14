@@ -26,6 +26,7 @@
 "PushNotification.YouAreInvitedToChat.Title" = "Вас зовут в чат";
 "PushNotification.YouAreInvitedToChat.Description" = "Ваш контакт %@ хочет с вами пообщаться. Пожалуйста, зайдите в чат.";
 "Message.ClearHistoryStored.Title" = "Контакт запретил хранить переписку";
+"Messenger.Message.Welcome.Receiver" = "Поздравляем! Вы успешно добавили контакт. Пожалуйста, отправьте сообщение первым, чтобы начать общение";
 
 // MARK: - DemoContact1
 

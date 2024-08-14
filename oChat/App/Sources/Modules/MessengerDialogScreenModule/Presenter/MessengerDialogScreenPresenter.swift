@@ -373,7 +373,6 @@ final class MessengerDialogScreenPresenter: ObservableObject {
     }
     
     await moduleOutput?.sendInitiateChatFromDialog(contactModel: updatedModel)
-    
     updateCenterBarButtonView(isHidden: false)
   }
   
@@ -503,7 +502,7 @@ final class MessengerDialogScreenPresenter: ObservableObject {
     await interactor.addMessenge(
       stateContactModel.id,
       .init(
-        messageType: .systemAttention,
+        messageType: .systemSuccess,
         messageStatus: .sent,
         message: youNotifiedContactTitle,
         replyMessageText: nil,
@@ -568,17 +567,11 @@ extension MessengerDialogScreenPresenter: MessengerDialogScreenModuleInput {
     Task { @MainActor [weak self] in
       guard let self else { return }
       let contactModel = await interactor.getNewContactModels(stateContactModel)
-      if await isWelcomeMessageAllowed(contactModel: contactModel) {
-        await addWelcomeMessage(contactModel: contactModel)
-        return
-      }
-      
       self.stateContactModel = contactModel
       stateIsDownloadAvailability = contactModel.canSaveMedia
       stateIsChatHistoryStored = contactModel.isChatHistoryStored
       
       let listMessengeModels = await interactor.getListMessengeModels(stateContactModel)
-      
       stateMessengeModels = factory.createMessageModels(
         models: listMessengeModels,
         contactModel: stateContactModel
@@ -703,41 +696,6 @@ private extension MessengerDialogScreenPresenter {
       barButtonView?.isHidden = isHidden
       barButtonView?.iconLeftView.image = stateContactModel.status.imageStatus
     }
-  }
-  
-  func addWelcomeMessage(contactModel: ContactModel) async {
-    let publicKeyIsEmpty = (stateContactModel.encryptionPublicKey ?? "").isEmpty
-    
-    let sender = OChatStrings.MessengerDialogScreenLocalization.Messenger
-      .Message.Welcome.sender
-    let receiver = OChatStrings.MessengerDialogScreenLocalization.Messenger
-      .Message.Welcome.receiver
-    
-    await interactor.addMessenge(
-      contactModel.id,
-      .init(
-        messageType: .systemSuccess,
-        messageStatus: .sent,
-        message: publicKeyIsEmpty ? sender : receiver,
-        replyMessageText: nil,
-        images: [],
-        videos: [],
-        recording: nil
-      )
-    )
-  }
-  
-  func isWelcomeMessageAllowed(contactModel: ContactModel) async -> Bool {
-    let listMessengeModels = await interactor.getListMessengeModels(stateContactModel)
-    let isMessengesIsEmpty = listMessengeModels.filter({ !$0.messageType.isSystem }).isEmpty
-    let isMessengesSystemAttentionIsEmpty = listMessengeModels.filter({ $0.messageType == .systemAttention }).isEmpty
-    let isContainsSystemMessengeSuccess = listMessengeModels.contains(where: ({
-      $0.messageType == .systemSuccess
-    }))
-    return isMessengesIsEmpty &&
-    !isContainsSystemMessengeSuccess &&
-    contactModel.status == .online &&
-    isMessengesSystemAttentionIsEmpty
   }
 }
 

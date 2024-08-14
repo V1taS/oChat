@@ -34,7 +34,6 @@
 "Messenger.Message.SendRequestIn" = "Send Request in";
 "Messenger.Message.seconds" = "sec.";
 "Messenger.Message.Welcome.Sender" = "Congratulations! You have been successfully added to the contacts. Now wait for your new contact to message you.";
-"Messenger.Message.Welcome.Receiver" = "Congratulations! You have successfully added the contact. Please send a message first to start the chat.";
 "Messenger.Typing.Title" = "Typing";
 "Messenger.ReceivingFile.Title" = "Receiving File";
 "Messenger.FileTransfer.Title" = "File Transfer";

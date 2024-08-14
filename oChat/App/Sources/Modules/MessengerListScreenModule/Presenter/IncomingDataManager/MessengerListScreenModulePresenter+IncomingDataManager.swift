@@ -172,6 +172,18 @@ extension MessengerListScreenModulePresenter {
         pushNotificationToken: pushNotificationToken,
         status: .requestChat
       )
+      let receiver = OChatStrings.MessengerListScreenModuleLocalization.Messenger
+        .Message.Welcome.receiver
+      let messengeModel = factory.addMessageToContact(
+        message: receiver,
+        messageType: .systemSuccess,
+        replyMessageText: nil,
+        images: [],
+        videos: [],
+        recording: nil
+      )
+      
+      await interactor.addMessenge(newContact.id, messengeModel)
       await interactor.saveContactModel(newContact)
       await updateListContacts()
       moduleOutput?.dataModelHasBeenUpdated()
