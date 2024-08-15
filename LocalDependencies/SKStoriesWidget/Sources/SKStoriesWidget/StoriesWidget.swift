@@ -37,6 +37,9 @@ public struct SKStoriesWidget<M: IStoriesManager>: View {
   /// Custom validator to check validity of stories data set
   let validator: IStoriesValidater.Type?
   
+  /// Показать прогресс бар сверху
+  let isShowProgress: Bool
+  
   // MARK: - Life circle
   
   /// - Parameters:
@@ -55,6 +58,7 @@ public struct SKStoriesWidget<M: IStoriesManager>: View {
     strategy: Strategy = .circle,
     leeway: DispatchTimeInterval = .seconds(0),
     pause: Binding<Bool> = .constant(false),
+    isShowProgress: Bool,
     validator: IStoriesValidater.Type? = nil,
     onStoriesStateChanged: ((StoriesState) -> Void)? = nil
   ) {
@@ -64,6 +68,7 @@ public struct SKStoriesWidget<M: IStoriesManager>: View {
     self.strategy = strategy
     self.leeway = leeway
     self.pause = pause
+    self.isShowProgress = isShowProgress
     self.validator = validator
     self.onStoriesStateChanged = onStoriesStateChanged
   }
@@ -79,7 +84,8 @@ public struct SKStoriesWidget<M: IStoriesManager>: View {
         current: current,
         strategy: strategy,
         leeway: leeway,
-        pause: pause
+        pause: pause,
+        isShowProgress: isShowProgress
       )
       .onPreferenceChange(StoriesStateKey.self) { state in
         onStoriesStateChanged?(state)

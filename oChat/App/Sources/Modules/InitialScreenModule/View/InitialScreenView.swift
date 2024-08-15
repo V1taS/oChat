@@ -24,7 +24,8 @@ struct InitialScreenView: View {
     VStack(spacing: .s4) {
       SKStoriesWidget(
         manager: StoriesManager.self,
-        stories: InitialStoriesScreenModel.allCases
+        stories: InitialStoriesScreenModel.allCases, 
+        isShowProgress: true
       )
       
       Spacer()

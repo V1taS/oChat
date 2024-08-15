@@ -16,6 +16,7 @@ struct StoriesView<M: IStoriesManager>: View {
   
   /// Shared var to control stories running process by external controls that are not inside SKStoriesWidget
   private var pause: Binding<Bool>
+  private let isShowProgress: Bool
   
   // MARK: - Life circle
   
@@ -31,10 +32,11 @@ struct StoriesView<M: IStoriesManager>: View {
     current: Item? = nil,
     strategy: Strategy = .circle,
     leeway: DispatchTimeInterval = .seconds(0),
-    pause: Binding<Bool>
+    pause: Binding<Bool>,
+    isShowProgress: Bool
   ) {
     self.pause = pause
-    
+    self.isShowProgress = isShowProgress
     _model = StateObject(wrappedValue:
                           manager.init(stories: stories, current: current, strategy: strategy, leeway: leeway)
     )
@@ -46,8 +48,10 @@ struct StoriesView<M: IStoriesManager>: View {
       let h = proxy.size.height / 25
       bodyTpl
         .overlay(directionControl)
-      progressView
-        .padding(.top, h)
+      if isShowProgress {
+        progressView
+          .padding(.top, h)
+      }
     }
     .onAppear(perform: model.start)
     .onDisappear(perform: model.finish)

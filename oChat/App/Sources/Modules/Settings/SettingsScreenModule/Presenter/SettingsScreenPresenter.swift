@@ -75,6 +75,10 @@ extension SettingsScreenPresenter: SettingsScreenInteractorOutput {}
 // MARK: - SettingsScreenFactoryOutput
 
 extension SettingsScreenPresenter: SettingsScreenFactoryOutput {
+  func openPremiumSection() {
+    moduleOutput?.openPremiumSection()
+  }
+  
   func userIntentionExit() {
     moduleOutput?.userIntentionExit()
     interactor.sessionDidExpire()
