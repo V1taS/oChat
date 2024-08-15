@@ -185,6 +185,7 @@ private extension MessengerDialogScreenView {
     .setAvailableInput(presenter.stateIsPremiumEnabled ? .full : .textOnly)
     .showMessageTimeView(false)
     .showDateHeaders(showDateHeaders: false)
+    .showMessageName(presenter.stateIsShowMessageName)
     .setMediaPickerSelectionParameters(
       .init(
         mediaType: .photoAndVideo,
@@ -395,15 +396,24 @@ private extension MessengerDialogScreenView {
 
 // MARK: - Preview
 
-// TODO: - 🔴 'async' call in a function that does not support concurrency
-//struct MessengerDialogScreenView_Previews: PreviewProvider {
-//  static var previews: some View {
-//    UIViewControllerPreview {
-//      MessengerDialogScreenAssembly().createModule(
-//        contactModel: .mock(),
-//        contactAdress: nil,
-//        services: ApplicationServicesStub()
-//      ).viewController
-//    }
-//  }
-//}
+struct MessengerDialogScreenView_Previews: PreviewProvider {
+  static var previews: some View {
+    UIViewControllerPreview {
+      // Создаем переменную для хранения viewController
+      var viewController: UIViewController?
+      
+      // Используем Task для выполнения асинхронного кода
+      Task {
+        // Вызываем асинхронную функцию createModule и сохраняем результат
+        viewController = await MessengerDialogScreenAssembly().createModule(
+          contactModel: .mock(),
+          contactAdress: nil,
+          services: ApplicationServicesStub()
+        ).viewController
+      }
+      
+      // Возвращаем viewController, если он был создан, иначе пустой UIViewController
+      return viewController ?? UIViewController()
+    }
+  }
+}

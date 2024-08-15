@@ -37,6 +37,7 @@ struct MessageView: View {
   static let horizontalBubblePadding: CGFloat = 70
   
   var font: UIFont
+  let showMessageName: Bool
   
   enum DateArrangement {
     case hstack, vstack, overlay
@@ -98,7 +99,7 @@ struct MessageView: View {
       
       if message.user.isCurrentUser {
         MessageStatusView(status: message.status)
-        .sizeGetter($statusSize)
+          .sizeGetter($statusSize)
       }
     }
     .padding(.top, topPadding)
@@ -112,6 +113,11 @@ struct MessageView: View {
   @ViewBuilder
   func bubbleView(_ message: Message) -> some View {
     VStack(alignment: .leading, spacing: 0) {
+      if showMessageName && !message.user.isCurrentUser {
+        nameBubbleView(message)
+          .padding(.top, .s2)
+      }
+      
       if !isDisplayingMessageMenu, let reply = message.replyMessage?.toMessage() {
         replyBubbleView(reply)
           .padding(.horizontal, .s2)
@@ -156,6 +162,18 @@ struct MessageView: View {
       background: SKStyleAsset.onyx.swiftUIColor.opacity(0.5),
       radius: .s2
     )
+  }
+  
+  @ViewBuilder
+  func nameBubbleView(_ message: Message) -> some View {
+    VStack(alignment: .leading, spacing: 0) {
+      MessageTextView(text: message.user.name, messageUseMarkdown: messageUseMarkdown)
+        .lineLimit(1)
+        .foregroundColor(.colorFromString(message.user.name))
+        .padding(.horizontal, MessageView.horizontalTextPadding)
+    }
+    .fontWeight(.medium)
+    .font(.footnote)
   }
   
   @ViewBuilder
@@ -303,7 +321,7 @@ struct MessageView_Preview: PreviewProvider {
     id: UUID().uuidString,
     user: stan,
     status: .read,
-    isSystemMessage: false, 
+    isSystemMessage: false,
     text: longMessage,
     attachments: [
       Attachment.randomImage(),
@@ -318,7 +336,7 @@ struct MessageView_Preview: PreviewProvider {
     id: UUID().uuidString,
     user: stan,
     status: .read,
-    isSystemMessage: false, 
+    isSystemMessage: false,
     text: shortMessage,
     replyMessage: replyedMessage.toReplyMessage()
   )
@@ -337,7 +355,8 @@ struct MessageView_Preview: PreviewProvider {
         messageUseMarkdown: false,
         isDisplayingMessageMenu: false,
         showMessageTimeView: true,
-        font: UIFontMetrics.default.scaledFont(for: UIFont.systemFont(ofSize: 15))
+        font: UIFontMetrics.default.scaledFont(for: UIFont.systemFont(ofSize: 15)),
+        showMessageName: true
       )
     }
   }

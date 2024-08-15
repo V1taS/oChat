@@ -29,6 +29,7 @@ struct UIList<MessageContent: View>: UIViewRepresentable {
   let showDateHeaders: Bool
   let avatarSize: CGFloat
   let showMessageMenuOnLongPress: Bool
+  let showMessageName: Bool
   let tapAvatarClosure: ChatView.TapAvatarClosure?
   let messageUseMarkdown: Bool
   let showMessageTimeView: Bool
@@ -351,7 +352,8 @@ struct UIList<MessageContent: View>: UIViewRepresentable {
       messageFont: messageFont,
       sections: sections,
       ids: ids,
-      mainBackgroundColor: theme.colors.mainBackground
+      mainBackgroundColor: theme.colors.mainBackground, 
+      showMessageName: showMessageName
     )
   }
   
@@ -376,8 +378,8 @@ struct UIList<MessageContent: View>: UIViewRepresentable {
     let messageFont: UIFont
     var sections: [MessagesSection]
     var ids: [String]
-    
     let mainBackgroundColor: Color
+    let showMessageName: Bool
     
     init(
       viewModel: ChatViewModel,
@@ -396,7 +398,8 @@ struct UIList<MessageContent: View>: UIViewRepresentable {
       messageFont: UIFont,
       sections: [MessagesSection],
       ids: [String],
-      mainBackgroundColor: Color
+      mainBackgroundColor: Color,
+      showMessageName: Bool
     ) {
       self.viewModel = viewModel
       self.paginationState = paginationState
@@ -415,6 +418,7 @@ struct UIList<MessageContent: View>: UIViewRepresentable {
       self.sections = sections
       self.ids = ids
       self.mainBackgroundColor = mainBackgroundColor
+      self.showMessageName = showMessageName
     }
     
     func numberOfSections(in tableView: UITableView) -> Int {
@@ -484,7 +488,8 @@ struct UIList<MessageContent: View>: UIViewRepresentable {
           messageUseMarkdown: messageUseMarkdown,
           isDisplayingMessageMenu: false,
           showMessageTimeView: showMessageTimeView,
-          messageFont: messageFont
+          messageFont: messageFont,
+          showMessageName: showMessageName
         )
           .background(MessageMenuPreferenceViewSetter(id: row.id))
           .rotationEffect(Angle(degrees: (type == .chat ? 180 : 0)))

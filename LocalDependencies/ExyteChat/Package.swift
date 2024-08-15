@@ -29,6 +29,7 @@ let package = Package(
       from: "1.0.0"
     ),
     .package(path: "../../LocalDependencies/SKAbstractions"),
+    .package(path: "../../LocalDependencies/SKFoundation"),
     .package(path: "../../LocalDependencies/SKStyle")
   ],
   targets: [
@@ -39,6 +40,7 @@ let package = Package(
         .product(name: "FloatingButton", package: "FloatingButton"),
         .product(name: "ActivityIndicatorView", package: "ActivityIndicatorView"),
         "SKAbstractions",
+        "SKFoundation",
         "SKStyle",
         "ExyteMediaPicker"
       ]

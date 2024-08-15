@@ -23,6 +23,7 @@ struct ChatMessageView<MessageContent: View>: View {
   let isDisplayingMessageMenu: Bool
   let showMessageTimeView: Bool
   let messageFont: UIFont
+  let showMessageName: Bool
   
   var body: some View {
     Group {
@@ -41,7 +42,9 @@ struct ChatMessageView<MessageContent: View>: View {
           messageUseMarkdown: messageUseMarkdown,
           isDisplayingMessageMenu: isDisplayingMessageMenu,
           showMessageTimeView: showMessageTimeView,
-          font: messageFont)
+          font: messageFont,
+          showMessageName: showMessageName
+        )
       }
     }
     .id(row.message.id)

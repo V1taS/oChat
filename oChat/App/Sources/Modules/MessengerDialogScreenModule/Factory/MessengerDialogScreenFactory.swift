@@ -109,7 +109,7 @@ extension MessengerDialogScreenFactory: MessengerDialogScreenFactoryInput {
     // Создаем объект User
     let user = User(
       id: contactModel.id,
-      name: (contactModel.name ?? contactModel.toxAddress?.formatString(minTextLength: 10)) ?? "",
+      name: (contactModel.name ?? contactModel.toxAddress?.formatString(minTextLength: 20)) ?? "",
       avatarURL: nil,
       isCurrentUser: false
     )

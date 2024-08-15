@@ -44,6 +44,7 @@ final class MessengerDialogScreenPresenter: ObservableObject {
   @Published var stateIsDownloadAvailability = false
   @Published var stateIsPremiumEnabled = false
   @Published var stateIsChatHistoryStored = false
+  @Published var stateIsShowMessageName = false
   @Published var stateMyStatus: AppSettingsModel.Status = .offline
   
   // MARK: - Internal properties
