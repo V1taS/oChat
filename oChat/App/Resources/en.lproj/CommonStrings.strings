@@ -5,14 +5,6 @@
  Copyright © 2022 SosinVitalii.com. All rights reserved.
  */
 
-// MARK: - System
-
-"NSPhotoLibraryAddUsageDescription" = "Please allow access to your photo library to save images and videos sent in the chat.";
-"NSPhotoLibraryUsageDescription" = "Please allow access to your photo library to upload photos and videos for sending in the chat.";
-"NSCameraUsageDescription" = "Please allow access to the camera to take photos or videos and send them in the chat.";
-"NSFaceIDUsageDescription" = "Please allow access to Face ID for quick and secure authentication in the app.";
-"NSMicrophoneUsageDescription" = "Please allow access to the microphone to record and send voice messages in the chat.";
-
 // MARK: - Common
 
 "Notification.AppDelegate.Received.Title" = "You've received an invitation to chat. Join and start the conversation.";

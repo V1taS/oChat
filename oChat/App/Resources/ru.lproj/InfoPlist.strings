@@ -1,0 +1,16 @@
+/* 
+  InfoPlist.strings
+  oChat
+
+  Created by Vitalii Sosin on 15.08.2024.
+  Copyright © 2024 SosinVitalii.com. All rights reserved.
+*/
+
+// MARK: - System
+
+"NSPhotoLibraryAddUsageDescription" = "Пожалуйста, предоставьте доступ к вашей галерее, чтобы сохранить изображения и видео, отправленные в чате.";
+"NSPhotoLibraryUsageDescription" = "Пожалуйста, предоставьте доступ к вашей галерее, чтобы загружать фото и видео для отправки в чате.";
+"NSCameraUsageDescription" = "Пожалуйста, предоставьте доступ к камере, чтобы сделать фото или видео и отправить их в чате.";
+"NSFaceIDUsageDescription" = "Пожалуйста, предоставьте доступ к Face ID для быстрой и безопасной аутентификации в приложении.";
+"NSMicrophoneUsageDescription" = "Пожалуйста, предоставьте доступ к микрофону, чтобы записывать и отправлять аудиосообщения в чате.";
+"NSUserNotificationUsageDescription" = "Пожалуйста, предоставьте разрешение на отправку уведомлений, чтобы получать оповещения о новых сообщениях в чате.";
