@@ -42,7 +42,6 @@ final class MessengerDialogScreenPresenter: ObservableObject {
   @Published var stateShowMessengeMaxCount = 100
   
   @Published var stateIsDownloadAvailability = false
-  @Published var stateIsPremiumEnabled = false
   @Published var stateIsChatHistoryStored = false
   @Published var stateIsShowMessageName = false
   @Published var stateMyStatus: AppSettingsModel.Status = .offline
@@ -633,7 +632,6 @@ private extension MessengerDialogScreenPresenter {
         return
       }
       await markMessageAsRead(contactModel: stateContactModel)
-      stateIsPremiumEnabled = getAppSettingsModel.isPremiumEnabled
       toxSelfAddress = await interactor.getToxAddress() ?? ""
       
       let listMessenge = await interactor.getListMessengeModels(stateContactModel)

@@ -182,7 +182,7 @@ private extension MessengerDialogScreenView {
       },
       inputViewBuilder: createInputViewBuilder()
     )
-    .setAvailableInput(presenter.stateIsPremiumEnabled ? .full : .textOnly)
+    .setAvailableInput(.full)
     .showMessageTimeView(false)
     .showDateHeaders(showDateHeaders: false)
     .showMessageName(presenter.stateIsShowMessageName)
