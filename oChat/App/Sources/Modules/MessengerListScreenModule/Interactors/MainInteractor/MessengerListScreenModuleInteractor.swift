@@ -261,13 +261,14 @@ extension MessengerListScreenModuleInteractor: MessengerListScreenModuleInteract
   
   func receiveAndUnzipFile(
     zipFileURL: URL,
-    password: String
-  ) async throws -> (
-    model: MessengerNetworkRequestModel,
-    recordingDTO: MessengeRecordingDTO?,
-    files: [URL]
+    password: String,
+    completion: @escaping (Result<(
+      model: MessengerNetworkRequestModel,
+      recordingDTO: MessengeRecordingDTO?,
+      files: [URL]
+    ), Error>) -> Void
   ) {
-    try await fileManager.receiveAndUnzipFile(zipFileURL: zipFileURL, password: password)
+    fileManager.receiveAndUnzipFile(zipFileURL: zipFileURL, password: password, completion: completion)
   }
   
   // MARK: - MessageManager

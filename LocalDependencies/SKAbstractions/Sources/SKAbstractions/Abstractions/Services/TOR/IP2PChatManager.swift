@@ -102,5 +102,5 @@ public protocol IP2PChatManager {
     model: MessengerNetworkRequestDTO,
     recordModel: MessengeRecordingModel?,
     files: [URL]
-  ) async
+  )
 }

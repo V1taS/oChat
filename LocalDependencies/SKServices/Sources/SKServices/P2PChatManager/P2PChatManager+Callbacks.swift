@@ -30,7 +30,7 @@ extension P2PChatManager {
 
 @available(iOS 16.0, *)
 private extension P2PChatManager {
-  func setupFileReceiveCallbacks() async {
+  func setupFileReceiveCallbacks() {
     toxCore.setFileReceiveCallback { [weak self] friendNumber, fileId, fileName, fileSize in
       guard let self else { return }
       print("Получен запрос на файл от друга \(friendNumber), fileId: \(fileId), fileName: \(fileName), fileSize: \(fileSize) байт")
@@ -38,14 +38,7 @@ private extension P2PChatManager {
       // MARK: - ШАГ 2 Подтверждение запроса от юзера 1
       
       fileInfo = (friendNumber, fileId, fileName, fileSize)
-      self.toxCore.acceptFile(friendNumber: friendNumber, fileId: fileId) { result in
-        switch result {
-        case .success:
-          print("Успех 🥳")
-        case .failure:
-          print("failure ❌")
-        }
-      }
+      self.toxCore.acceptFile(friendNumber: friendNumber, fileId: fileId) { _ in }
     }
     
     toxCore.setFileChunkReceiveCallback { [weak self] friendNumber, fileId, position, data in
@@ -78,14 +71,12 @@ private extension P2PChatManager {
                 print("Ошибка: не удалось прочитать данные из файла")
               }
             }
-            Task { [weak self] in
-              guard let self else { return }
-              await updateFileReceiveCallback(
-                progress: progress,
-                friendId: friendNumber,
-                filePath: fileURL
-              )
-            }
+            
+            updateFileReceiveCallback(
+              progress: progress,
+              friendId: friendNumber,
+              filePath: fileURL
+            )
           case .failure:
             print("❌ Что-то пошло не так")
             // TODO: - Очищаем хранилище куда получали файлик
@@ -95,31 +86,28 @@ private extension P2PChatManager {
       )
     }
     
+    // MARK: - Получение подтверждения запроса на передачу файла (Просто уведомление)
     toxCore.setFileControlCallback { friendNumber, fileId, control in }
     
     toxCore.setFileChunkRequestCallback { [weak self] friendNumber, fileId, position, length in
-      Task { @MainActor [weak self] in
-        guard let self else { return }
-        await self.sendChunk(
-          to: friendNumber,
-          fileId: fileId,
-          position: position,
-          length: length,
-          completion: { [weak self] result in
-            Task { @MainActor [weak self] in
-              guard let self else { return }
-              switch result {
-              case let .success(progress):
-                await updateFileSenderCallback(progress: progress, friendId: friendNumber)
-                dataManagerService.clearTemporaryDirectory()
-              case .failure:
-                dataManagerService.clearTemporaryDirectory()
-                await updateFileSenderErrorCallback(friendId: friendNumber)
-              }
-            }
+      guard let self else { return }
+      sendChunk(
+        to: friendNumber,
+        fileId: fileId,
+        position: position,
+        length: length,
+        completion: { [weak self] result in
+          guard let self else { return }
+          switch result {
+          case let .success(progress):
+            updateFileSenderCallback(progress: progress, friendId: friendNumber)
+            dataManagerService.clearTemporaryDirectory()
+          case .failure:
+            dataManagerService.clearTemporaryDirectory()
+            updateFileSenderErrorCallback(friendId: friendNumber)
           }
-        )
-      }
+        }
+      )
     }
   }
   
@@ -269,8 +257,8 @@ private extension P2PChatManager {
 
 @available(iOS 16.0, *)
 private extension P2PChatManager {
-  func updateFileSenderErrorCallback(friendId: Int32) async {
-    guard let publicKey = await toxCore.publicKeyFromFriendNumber(friendNumber: Int32(friendId)) else {
+  func updateFileSenderErrorCallback(friendId: Int32) {
+    guard let publicKey = toxCore.publicKeyFromFriendNumber(friendNumber: Int32(friendId)) else {
       return
     }
     
@@ -288,8 +276,8 @@ private extension P2PChatManager {
     }
   }
   
-  func updateFileSenderCallback(progress: Double, friendId: Int32) async {
-    guard let publicKey = await toxCore.publicKeyFromFriendNumber(friendNumber: Int32(friendId)) else {
+  func updateFileSenderCallback(progress: Double, friendId: Int32) {
+    guard let publicKey = toxCore.publicKeyFromFriendNumber(friendNumber: Int32(friendId)) else {
       return
     }
     
@@ -308,22 +296,23 @@ private extension P2PChatManager {
     }
   }
   
-  @MainActor
-  func updateFileReceiveCallback(progress: Double, friendId: Int32, filePath: URL?) async {
-    guard let publicKey = await toxCore.publicKeyFromFriendNumber(friendNumber: Int32(friendId)) else {
+  func updateFileReceiveCallback(progress: Double, friendId: Int32, filePath: URL?) {
+    guard let publicKey = toxCore.publicKeyFromFriendNumber(friendNumber: Int32(friendId)) else {
       return
     }
     
-    // Отправка уведомления что файл получается
-    NotificationCenter.default.post(
-      name: Notification.Name(NotificationConstants.didUpdateFileReceive.rawValue),
-      object: nil,
-      userInfo: [
-        "publicKey": publicKey,
-        "progress": progress,
-        "filePath": filePath
-      ]
-    )
+    DispatchQueue.main.async {
+      // Отправка уведомления что файл получается
+      NotificationCenter.default.post(
+        name: Notification.Name(NotificationConstants.didUpdateFileReceive.rawValue),
+        object: nil,
+        userInfo: [
+          "publicKey": publicKey,
+          "progress": progress,
+          "filePath": filePath
+        ]
+      )
+    }
   }
   
   func updateFriendReadReceiptCallback(_ friendId: UInt32, _ messageId: UInt32) async {

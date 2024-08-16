@@ -163,6 +163,7 @@ extension MessengerListScreenModuleFakeInteractor: MessengerListScreenModuleInte
   func getPushNotificationToken() async -> String? { nil }
   
   // MARK: - FileManager
+  
   func getFileNameWithoutExtension(from url: URL) -> String {
     fileManager.getFileNameWithoutExtension(from: url)
   }
@@ -203,13 +204,14 @@ extension MessengerListScreenModuleFakeInteractor: MessengerListScreenModuleInte
   
   func receiveAndUnzipFile(
     zipFileURL: URL,
-    password: String
-  ) async throws -> (
-    model: MessengerNetworkRequestModel,
-    recordingDTO: MessengeRecordingDTO?,
-    files: [URL]
+    password: String,
+    completion: @escaping (Result<(
+      model: MessengerNetworkRequestModel,
+      recordingDTO: MessengeRecordingDTO?,
+      files: [URL]
+    ), Error>) -> Void
   ) {
-    try await fileManager.receiveAndUnzipFile(zipFileURL: zipFileURL, password: password)
+    fileManager.receiveAndUnzipFile(zipFileURL: zipFileURL, password: password, completion: completion)
   }
   
   // MARK: - MessageManager

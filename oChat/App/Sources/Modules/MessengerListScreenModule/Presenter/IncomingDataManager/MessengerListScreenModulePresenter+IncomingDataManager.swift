@@ -89,19 +89,19 @@ extension MessengerListScreenModulePresenter {
   }
   
   func handleMyOnlineStatusUpdate(_ status: AppSettingsModel.Status) {
-      Task { @MainActor [weak self] in
-          guard let self = self else { return }
-
-          updateUI(for: status)
-          await moduleOutput?.updateMyStatus(status)
-          
-          if status == .offline {
-              let inProgressStatus: AppSettingsModel.Status = .inProgress
-              updateUI(for: inProgressStatus)
-              await moduleOutput?.updateMyStatus(inProgressStatus)
-              await interactor.startTOXService()
-          }
+    Task { @MainActor [weak self] in
+      guard let self = self else { return }
+      
+      updateUI(for: status)
+      await moduleOutput?.updateMyStatus(status)
+      
+      if status == .offline {
+        let inProgressStatus: AppSettingsModel.Status = .inProgress
+        updateUI(for: inProgressStatus)
+        await moduleOutput?.updateMyStatus(inProgressStatus)
+        await interactor.startTOXService()
       }
+    }
   }
   
   func handleMessageReceived(_ messageModel: MessengerNetworkRequestModel, _ toxFriendId: Int32) {
@@ -261,127 +261,129 @@ extension MessengerListScreenModulePresenter {
         return
       }
       
-      let password = await interactor.decrypt(decodedPasswordEncrypt)
-      guard let password, let receiveAndUnzipFile = try? await interactor.receiveAndUnzipFile(
-        zipFileURL: filePath,
-        password: password
-      ) else {
+      guard let password = await interactor.decrypt(decodedPasswordEncrypt) else {
         return
       }
-      let (messageModel, recordingDTO, files) = receiveAndUnzipFile
       
-      updateRedDotToTabBar(contactModels: contactModels)
-      let messageText = await interactor.decrypt(messageModel.messageText) ?? ""
-      let pushNotificationToken = await interactor.decrypt(messageModel.senderPushNotificationToken)
-      var images: [MessengeImageModel] = []
-      var videos: [MessengeVideoModel] = []
-      
-      for fileTempURL in files {
-        if fileTempURL.isImageFile() {
-          let imageFile = interactor.readObjectWith(fileURL: fileTempURL) ?? Data()
-          let fileExtension = fileTempURL.pathExtension
-          let thumbnailData = interactor.resizeThumbnailImageWithFrame(data: imageFile) ?? Data()
-          let thumbnailURL = interactor.saveObjectWith(
-            fileName: UUID().uuidString,
-            fileExtension: fileExtension,
-            data: thumbnailData
-          )
+      interactor.receiveAndUnzipFile(zipFileURL: filePath, password: password) { [weak self] result in
+        Task { [weak self] in
+          guard let self, case let .success(receiveAndUnzipFile) = result  else { return }
+          let (messageModel, recordingDTO, files) = receiveAndUnzipFile
           
-          guard let thumbnailURL,
-                let fullImage = interactor.saveObjectWith(tempURL: fileTempURL),
-                let thumbnailName = interactor.getFileName(from: thumbnailURL),
-                let fullImageName = interactor.getFileName(from: fullImage) else {
-            continue
+          updateRedDotToTabBar(contactModels: contactModels)
+          let messageText = await interactor.decrypt(messageModel.messageText) ?? ""
+          let pushNotificationToken = await interactor.decrypt(messageModel.senderPushNotificationToken)
+          var images: [MessengeImageModel] = []
+          var videos: [MessengeVideoModel] = []
+          
+          for fileTempURL in files {
+            if fileTempURL.isImageFile() {
+              let imageFile = interactor.readObjectWith(fileURL: fileTempURL) ?? Data()
+              let fileExtension = fileTempURL.pathExtension
+              let thumbnailData = interactor.resizeThumbnailImageWithFrame(data: imageFile) ?? Data()
+              let thumbnailURL = interactor.saveObjectWith(
+                fileName: UUID().uuidString,
+                fileExtension: fileExtension,
+                data: thumbnailData
+              )
+              
+              guard let thumbnailURL,
+                    let fullImage = interactor.saveObjectWith(tempURL: fileTempURL),
+                    let thumbnailName = interactor.getFileName(from: thumbnailURL),
+                    let fullImageName = interactor.getFileName(from: fullImage) else {
+                continue
+              }
+              
+              images.append(
+                .init(
+                  id: UUID().uuidString,
+                  thumbnailName: thumbnailName,
+                  fullName: fullImageName
+                )
+              )
+              continue
+            }
+            
+            if fileTempURL.isVideoFile() {
+              guard let videoFileURL = interactor.saveObjectWith(tempURL: fileTempURL),
+                    let videoFileName = interactor.getFileName(from: videoFileURL),
+                    let firstFrameData = interactor.getFirstFrame(from: videoFileURL),
+                    let thumbnailResizeData = interactor.resizeThumbnailImageWithFrame(data: firstFrameData),
+                    let thumbnailURL = interactor.saveObjectWith(
+                      fileName: UUID().uuidString,
+                      fileExtension: "jpg",
+                      data: thumbnailResizeData
+                    ),
+                    let thumbnailName = interactor.getFileName(from: thumbnailURL) else {
+                continue
+              }
+              
+              videos.append(
+                .init(
+                  id: UUID().uuidString,
+                  thumbnailName: thumbnailName,
+                  fullName: videoFileName
+                )
+              )
+              continue
+            }
           }
           
-          images.append(
-            .init(
-              id: UUID().uuidString,
-              thumbnailName: thumbnailName,
-              fullName: fullImageName
+          var recordingModel: MessengeRecordingModel?
+          
+          if let recordingDTO,
+             let recordingURL = interactor.saveObjectWith(
+              fileName: UUID().uuidString,
+              fileExtension: "aac",
+              data: recordingDTO.data
+             ),
+             let recordingName = interactor.getFileName(from: recordingURL) {
+            recordingModel = .init(
+              duration: recordingDTO.duration,
+              waveformSamples: recordingDTO.waveformSamples,
+              name: recordingName
             )
-          )
-          continue
-        }
-        
-        if fileTempURL.isVideoFile() {
-          guard let videoFileURL = interactor.saveObjectWith(tempURL: fileTempURL),
-                let videoFileName = interactor.getFileName(from: videoFileURL),
-                let firstFrameData = interactor.getFirstFrame(from: videoFileURL),
-                let thumbnailResizeData = interactor.resizeThumbnailImageWithFrame(data: firstFrameData),
-                let thumbnailURL = interactor.saveObjectWith(
-                  fileName: UUID().uuidString,
-                  fileExtension: "jpg",
-                  data: thumbnailResizeData
-                ),
-                let thumbnailName = interactor.getFileName(from: thumbnailURL) else {
-            continue
           }
           
-          videos.append(
-            .init(
-              id: UUID().uuidString,
-              thumbnailName: thumbnailName,
-              fullName: videoFileName
+          if let contact = factory.searchContact(
+            contactModels: contactModels,
+            torAddress: messageModel.senderAddress
+          ) {
+            let updatedContact = factory.updateExistingContact(
+              contact: contact,
+              messageModel: messageModel,
+              pushNotificationToken: pushNotificationToken
             )
-          )
-          continue
+            let messengeModel = factory.addMessageToContact(
+              message: messageText,
+              messageType: .received,
+              replyMessageText: messageModel.replyMessageText,
+              images: images,
+              videos: videos,
+              recording: recordingModel
+            )
+            
+            await interactor.addMessenge(contact.id, messengeModel)
+            await interactor.saveContactModel(updatedContact)
+            await updateListContacts()
+            moduleOutput?.dataModelHasBeenUpdated()
+            interactor.clearTemporaryDirectory()
+            await impactFeedback.impactOccurred()
+            sendLocalNotificationIfNeeded(contactModel: updatedContact)
+          } else {
+            let newContact = factory.createNewContact(
+              messageModel: messageModel,
+              pushNotificationToken: pushNotificationToken,
+              status: .online
+            )
+            await interactor.saveContactModel(newContact)
+            await updateListContacts()
+            moduleOutput?.dataModelHasBeenUpdated()
+            interactor.clearTemporaryDirectory()
+            await impactFeedback.impactOccurred()
+            sendLocalNotificationIfNeeded(contactModel: newContact)
+          }
         }
-      }
-      
-      var recordingModel: MessengeRecordingModel?
-      
-      if let recordingDTO,
-         let recordingURL = interactor.saveObjectWith(
-          fileName: UUID().uuidString,
-          fileExtension: "aac",
-          data: recordingDTO.data
-         ),
-         let recordingName = interactor.getFileName(from: recordingURL) {
-        recordingModel = .init(
-          duration: recordingDTO.duration,
-          waveformSamples: recordingDTO.waveformSamples,
-          name: recordingName
-        )
-      }
-      
-      if let contact = factory.searchContact(
-        contactModels: contactModels,
-        torAddress: messageModel.senderAddress
-      ) {
-        let updatedContact = factory.updateExistingContact(
-          contact: contact,
-          messageModel: messageModel,
-          pushNotificationToken: pushNotificationToken
-        )
-        let messengeModel = factory.addMessageToContact(
-          message: messageText,
-          messageType: .received,
-          replyMessageText: messageModel.replyMessageText,
-          images: images,
-          videos: videos,
-          recording: recordingModel
-        )
-        
-        await interactor.addMessenge(contact.id, messengeModel)
-        await interactor.saveContactModel(updatedContact)
-        await updateListContacts()
-        moduleOutput?.dataModelHasBeenUpdated()
-        interactor.clearTemporaryDirectory()
-        await impactFeedback.impactOccurred()
-        sendLocalNotificationIfNeeded(contactModel: updatedContact)
-      } else {
-        let newContact = factory.createNewContact(
-          messageModel: messageModel,
-          pushNotificationToken: pushNotificationToken,
-          status: .online
-        )
-        await interactor.saveContactModel(newContact)
-        await updateListContacts()
-        moduleOutput?.dataModelHasBeenUpdated()
-        interactor.clearTemporaryDirectory()
-        await impactFeedback.impactOccurred()
-        sendLocalNotificationIfNeeded(contactModel: newContact)
       }
     }
   }

@@ -62,11 +62,13 @@ public protocol ISKFileManager {
   /// - Parameters:
   ///   - zipFileURL: URL zip-файла.
   ///   - password: Пароль для распаковки.
-  /// - Throws: Ошибки при распаковке.
-  /// - Returns: Кортеж, содержащий модель запроса мессенджера, DTO записи сообщения и список файлов.
-  func receiveAndUnzipFile(zipFileURL: URL, password: String) async throws -> (
-    model: MessengerNetworkRequestModel,
-    recordingDTO: MessengeRecordingDTO?,
-    files: [URL]
+  func receiveAndUnzipFile(
+    zipFileURL: URL,
+    password: String,
+    completion: @escaping (Result<(
+      model: MessengerNetworkRequestModel,
+      recordingDTO: MessengeRecordingDTO?,
+      files: [URL]
+    ), Error>) -> Void
   )
 }

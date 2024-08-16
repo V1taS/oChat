@@ -210,11 +210,19 @@ protocol MessengerListScreenModuleInteractorInput {
   /// Делаем маленькое изображение
   func resizeThumbnailImageWithFrame(data: Data) -> Data?
   
-  /// Метод для разархивирования файлов
+  /// Получает и распаковывает файл.
+  /// - Parameters:
+  ///   - zipFileURL: URL zip-файла.
+  ///   - password: Пароль для распаковки.
   func receiveAndUnzipFile(
     zipFileURL: URL,
-    password: String
-  ) async throws -> (model: MessengerNetworkRequestModel, recordingDTO: MessengeRecordingDTO?, files: [URL])
+    password: String,
+    completion: @escaping (Result<(
+      model: MessengerNetworkRequestModel,
+      recordingDTO: MessengeRecordingDTO?,
+      files: [URL]
+    ), Error>) -> Void
+  )
   
   // MARK: - MessageManager
   

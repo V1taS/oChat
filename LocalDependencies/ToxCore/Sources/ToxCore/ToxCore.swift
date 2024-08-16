@@ -510,39 +510,38 @@ public extension ToxCore {
   ///   - friendNumber: Номер друга в сети Tox.
   ///   - fileName: Имя файла.
   ///   - fileSize: Размер файла в байтах.
-  ///   - return: Возвращает результат успешной отправки или ошибку
+  ///   - completion: Замыкание, вызываемое по завершении операции, с результатом успешной отправки или ошибкой.
   func sendFile(
     to friendNumber: Int32,
     fileName: String,
-    fileSize: UInt64
-  ) async -> Result<Int32, ToxError> {
-    await withCheckedContinuation { continuation in
-      toxQueue.async { [weak self] in
-        guard let self, let tox else {
-          continuation.resume(returning: .failure(.null))
-          return
-        }
-        
-        let cFileName = [UInt8](fileName.utf8)
-        var cError: TOX_ERR_FILE_SEND = TOX_ERR_FILE_SEND_OK
-        
-        let fileId: Int32 = Int32(tox_file_send(
-          tox,
-          UInt32(friendNumber),
-          0, // Тип файла - данные
-          fileSize,
-          nil, // Нет дополнительных метаданных
-          cFileName,
-          cFileName.count,
-          &cError
-        ))
-        
-        if cError != TOX_ERR_FILE_SEND_OK {
-          let error = ToxError(fileSendError: cError)
-          continuation.resume(returning: .failure(error))
-        } else {
-          continuation.resume(returning: .success(fileId))
-        }
+    fileSize: UInt64,
+    completion: @escaping (Result<Int32, ToxError>) -> Void
+  ) {
+    toxQueue.async {
+      guard let tox = self.tox else {
+        completion(.failure(.null))
+        return
+      }
+      
+      let cFileName = [UInt8](fileName.utf8)
+      var cError: TOX_ERR_FILE_SEND = TOX_ERR_FILE_SEND_OK
+      
+      let fileId: Int32 = Int32(tox_file_send(
+        tox,
+        UInt32(friendNumber),
+        0, // Тип файла - данные
+        fileSize,
+        nil, // Нет дополнительных метаданных
+        cFileName,
+        cFileName.count,
+        &cError
+      ))
+      
+      if cError != TOX_ERR_FILE_SEND_OK {
+        let error = ToxError(fileSendError: cError)
+        completion(.failure(error))
+      } else {
+        completion(.success(fileId))
       }
     }
   }
@@ -553,39 +552,38 @@ public extension ToxCore {
   ///   - fileId: Идентификатор файла.
   ///   - position: Позиция начала данных.
   ///   - data: Данные файла.
-  ///   - return: Возвращает результат успешной отправки или ошибки.
+  ///   - completion: Замыкание, вызываемое по завершении операции, с результатом успешной отправки или ошибкой.
   func sendFileChunk(
     to friendNumber: Int32,
     fileId: Int32,
     position: UInt64,
-    data: Data
-  ) async -> Result<Void, ToxError> {
-    await withCheckedContinuation { continuation in
-      toxQueue.async { [weak self] in
-        guard let self, let tox else {
-          continuation.resume(returning: .failure(.null))
-          return
-        }
+    data: Data,
+    completion: @escaping (Result<Void, ToxError>) -> Void
+  ) {
+    toxQueue.async {
+      guard let tox = self.tox else {
+        completion(.failure(.null))
+        return
+      }
+      
+      var cError: TOX_ERR_FILE_SEND_CHUNK = TOX_ERR_FILE_SEND_CHUNK_OK
+      
+      data.withUnsafeBytes { (rawBufferPointer: UnsafeRawBufferPointer) in
+        let result = tox_file_send_chunk(
+          tox,
+          UInt32(friendNumber),
+          UInt32(fileId),
+          position,
+          rawBufferPointer.baseAddress?.assumingMemoryBound(to: UInt8.self),
+          data.count,
+          &cError
+        )
         
-        var cError: TOX_ERR_FILE_SEND_CHUNK = TOX_ERR_FILE_SEND_CHUNK_OK
-        
-        data.withUnsafeBytes { (rawBufferPointer: UnsafeRawBufferPointer) in
-          let result = tox_file_send_chunk(
-            tox,
-            UInt32(friendNumber),
-            UInt32(fileId),
-            position,
-            rawBufferPointer.baseAddress?.assumingMemoryBound(to: UInt8.self),
-            data.count,
-            &cError
-          )
-          
-          if cError != TOX_ERR_FILE_SEND_CHUNK_OK {
-            let error = ToxError(fileSendChunkError: cError)
-            continuation.resume(returning: .failure(error))
-          } else {
-            continuation.resume(returning: .success(()))
-          }
+        if cError != TOX_ERR_FILE_SEND_CHUNK_OK {
+          let error = ToxError(fileSendChunkError: cError)
+          completion(.failure(error))
+        } else {
+          completion(.success(()))
         }
       }
     }
@@ -1230,98 +1228,78 @@ public extension ToxCore {
   /// - Parameters:
   ///   - publicKey: Публичный ключ друга в сети Tox.
   /// - Returns: Номер друга, если он найден, иначе nil.
-  func friendNumber(publicKey: String) async -> Int32? {
-    await withCheckedContinuation { continuation in
-      toxQueue.async { [weak self] in
-        guard publicKey.count == Constants.publicKeySize * 2 else {
-          print("Public key must be \(Constants.publicKeySize * 2) characters long.")
-          continuation.resume(returning: nil)
-          return
-        }
-        
-        guard let self, let tox else {
-          print("Tox is not initialized.")
-          continuation.resume(returning: nil)
-          return
-        }
-        
-        guard let cPublicKey = publicKey.hexStringToBytes() else {
-          print("Invalid public key format.")
-          continuation.resume(returning: nil)
-          return
-        }
-        
-        var cError: TOX_ERR_FRIEND_BY_PUBLIC_KEY = TOX_ERR_FRIEND_BY_PUBLIC_KEY_OK
-        let friendNumber: Tox_Friend_Number = tox_friend_by_public_key(tox, cPublicKey, &cError)
-        
-        if cError != TOX_ERR_FRIEND_BY_PUBLIC_KEY_OK {
-          print("Failed to get friend number with error code \(cError).")
-          continuation.resume(returning: nil)
-          return
-        }
-        
-        guard let result = Int32(exactly: friendNumber) else {
-          print("Friend number \(friendNumber) is out of range for Int32.")
-          continuation.resume(returning: nil)
-          return
-        }
-        
-        continuation.resume(returning: result)
-      }
+  func friendNumber(publicKey: String) -> Int32? {
+    guard publicKey.count == Constants.publicKeySize * 2 else {
+      print("Public key must be \(Constants.publicKeySize * 2) characters long.")
+      return nil
     }
+    
+    guard let tox = self.tox else {
+      print("Tox is not initialized.")
+      return nil
+    }
+    
+    guard let cPublicKey = publicKey.hexStringToBytes() else {
+      print("Invalid public key format.")
+      return nil
+    }
+    
+    var cError: TOX_ERR_FRIEND_BY_PUBLIC_KEY = TOX_ERR_FRIEND_BY_PUBLIC_KEY_OK
+    let friendNumber: Tox_Friend_Number = tox_friend_by_public_key(tox, cPublicKey, &cError)
+    
+    if cError != TOX_ERR_FRIEND_BY_PUBLIC_KEY_OK {
+      print("Failed to get friend number with error code \(cError).")
+      return nil
+    }
+    
+    guard let result = Int32(exactly: friendNumber) else {
+      print("Friend number \(friendNumber) is out of range for Int32.")
+      return nil
+    }
+    
+    return result
   }
   
   /// Метод для получения публичного ключа друга по его номеру.
   /// - Parameters:
   ///   - friendNumber: Номер друга в сети Tox.
   /// - Returns: Публичный ключ в виде строки, если он найден, иначе nil.
-  func publicKeyFromFriendNumber(friendNumber: Int32) async -> String? {
-    await withCheckedContinuation { continuation in
-      toxQueue.async { [weak self] in
-        guard let self, let tox else {
-          print("Tox is not initialized.")
-          continuation.resume(returning: nil)
-          return
-        }
-        
-        // Выделение памяти для публичного ключа
-        let publicKeySize = Constants.publicKeySize
-        var cPublicKey = [UInt8](repeating: 0, count: publicKeySize)
-        
-        var cError: TOX_ERR_FRIEND_GET_PUBLIC_KEY = TOX_ERR_FRIEND_GET_PUBLIC_KEY_OK
-        let result = tox_friend_get_public_key(tox, UInt32(friendNumber), &cPublicKey, &cError)
-        
-        if !result {
-          print("Failed to get public key with error code \(cError).")
-          continuation.resume(returning: nil)
-          return
-        }
-        
-        // Преобразуем байты в строку в шестнадцатеричном формате
-        let publicKey = cPublicKey.map { String(format: "%02x", $0) }.joined()
-        
-        continuation.resume(returning: publicKey)
-      }
+  func publicKeyFromFriendNumber(friendNumber: Int32) -> String? {
+    guard let tox = self.tox else {
+      print("Tox is not initialized.")
+      return nil
     }
+    
+    // Выделение памяти для публичного ключа
+    let publicKeySize = Constants.publicKeySize
+    var cPublicKey = [UInt8](repeating: 0, count: publicKeySize)
+    
+    var cError: TOX_ERR_FRIEND_GET_PUBLIC_KEY = TOX_ERR_FRIEND_GET_PUBLIC_KEY_OK
+    let result = tox_friend_get_public_key(tox, UInt32(friendNumber), &cPublicKey, &cError)
+    
+    if !result {
+      print("Failed to get public key with error code \(cError).")
+      return nil
+    }
+    
+    // Преобразуем байты в строку в шестнадцатеричном формате
+    let publicKey = cPublicKey.map { String(format: "%02x", $0) }.joined()
+    
+    return publicKey
   }
   
   /// Метод для проверки существования друга по его номеру.
   /// - Parameter friendNumber: Номер друга в сети Tox.
   /// - Returns: true, если друг существует в списке, иначе false.
-  func friendExists(friendNumber: Int32) async -> Bool {
-    await withCheckedContinuation { continuation in
-      toxQueue.async { [weak self] in
-        guard let self, let tox else {
-          print("Tox is not initialized.")
-          continuation.resume(returning: false)
-          return
-        }
-        
-        let result = tox_friend_exists(tox, UInt32(friendNumber))
-        print("Friend exists with friend number \(friendNumber): \(result)")
-        continuation.resume(returning: result)
-      }
+  func friendExists(friendNumber: Int32) -> Bool {
+    guard let tox = self.tox else {
+      print("Tox is not initialized.")
+      return false
     }
+    
+    let result = tox_friend_exists(tox, UInt32(friendNumber))
+    print("Friend exists with friend number \(friendNumber): \(result)")
+    return result
   }
   
   /// Метод для получения времени последней активности друга по его номеру.

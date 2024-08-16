@@ -245,13 +245,14 @@ extension MessengerListScreenModuleDemoInteractor: MessengerListScreenModuleInte
   
   func receiveAndUnzipFile(
     zipFileURL: URL,
-    password: String
-  ) async throws -> (
-    model: MessengerNetworkRequestModel,
-    recordingDTO: MessengeRecordingDTO?,
-    files: [URL]
+    password: String,
+    completion: @escaping (Result<(
+      model: MessengerNetworkRequestModel,
+      recordingDTO: MessengeRecordingDTO?,
+      files: [URL]
+    ), Error>) -> Void
   ) {
-    (MessengerNetworkRequestModel.defaultValue().mapToModel(), nil, [])
+    completion(.success((MessengerNetworkRequestModel.defaultValue().mapToModel(), nil, [])))
   }
   
   // MARK: - MessageManager

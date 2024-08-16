@@ -65,11 +65,10 @@ public extension P2PChatManager {
 extension P2PChatManager {
   /// Запускает таймер для периодического вызова getFriendsStatus каждые 2 секунды.
   public func startPeriodicFriendStatusCheck(completion: @escaping ([String : Bool]) -> Void) async {
-    let queue = DispatchQueue.global(qos: .background)
-    queue.async { [weak self] in
+    Task { [weak self] in
       guard let self = self else { return }
       self.periodicFriendStatusChecktimer?.cancel()
-      self.periodicFriendStatusChecktimer = DispatchSource.makeTimerSource(queue: queue)
+      self.periodicFriendStatusChecktimer = DispatchSource.makeTimerSource(queue: .global())
       self.periodicFriendStatusChecktimer?.schedule(deadline: .now(), repeating: 5.0)
       self.periodicFriendStatusChecktimer?.setEventHandler { [weak self] in
         Task { [weak self] in
@@ -184,7 +183,7 @@ extension P2PChatManager {
     model: MessengerNetworkRequestDTO,
     recordModel: MessengeRecordingModel?,
     files: [URL]
-  ) async {
+  ) {
     dataManagerService.clearTemporaryDirectory()
     var recordDTO: MessengeRecordingDTO?
     
@@ -197,7 +196,7 @@ extension P2PChatManager {
         data: data
       )
     }
-    
+
     cacheMessengerModel = model
     let encoder = JSONEncoder()
     
@@ -250,13 +249,13 @@ extension P2PChatManager {
       self.fileData = fileData
       
       // Получение номера друга по публичному ключу
-      guard let friendNumber = await toxCore.friendNumber(publicKey: toxPublicKey) else {
+      guard let friendNumber = toxCore.friendNumber(publicKey: toxPublicKey) else {
         print("Не удалось получить номер друга по публичному ключу.")
         return
       }
       
       // Проверка существования друга
-      guard await toxCore.friendExists(friendNumber: friendNumber) else {
+      guard toxCore.friendExists(friendNumber: friendNumber) else {
         print("Друг не найден для friendNumber: \(friendNumber)")
         return
       }
@@ -264,11 +263,16 @@ extension P2PChatManager {
       let fileName = archiveURL.lastPathComponent
       let fileSize = UInt64(fileData.count)
       
-      switch await toxCore.sendFile(to: friendNumber, fileName: fileName, fileSize: fileSize) {
-      case let .success(fileId):
-        print("✅ Файл инициализирован, fileId: \(fileId)")
-      case let .failure(error):
-        print("❌ Ошибка при инициализации отправки файла: \(error.localizedDescription)")
+      // Инициализация отправки файла
+      toxCore.sendFile(to: friendNumber, fileName: fileName, fileSize: fileSize) { [weak self] result in
+        guard let self = self else { return }
+        switch result {
+        case let .success(fileId):
+          print("✅ Файл инициализирован, fileId: \(fileId)")
+          
+        case let .failure(error):
+          print("❌ Ошибка при инициализации отправки файла: \(error.localizedDescription)")
+        }
       }
     } catch {
       print("❌ Ошибка при сохранении или архивировании файлов: \(error.localizedDescription)")
@@ -301,7 +305,7 @@ extension P2PChatManager {
     position: UInt64,
     length: size_t,
     completion: ((Result<Double, Error>) -> Void)?
-  ) async {
+  ) {
     guard let fileData else {
       print("Ошибка: данные файла не найдены")
       completion?(.failure(URLError(.unknown)))
@@ -319,18 +323,20 @@ extension P2PChatManager {
     let chunk = fileData.subdata(in: Int(position)..<Int(end))
     let progress = Double(position + UInt64(length)) / Double(fileData.count) * 100
     
-    switch await toxCore.sendFileChunk(to: friendNumber, fileId: fileId, position: position, data: chunk) {
-    case .success:
-      print("Чанк отправлен, позиция: \(position), длина: \(length) байт")
-      // Проверка завершения передачи файла
-      if position + UInt64(length) >= UInt64(fileData.count) {
-        print("Передача файла завершена")
-      }
-      completion?(.success(progress))
-    case let .failure(error):
-      if progress < 100 {
-        completion?(.failure(error))
-        print("❌ Ошибка при отправке чанка: \(error.localizedDescription)")
+    toxCore.sendFileChunk(to: friendNumber, fileId: fileId, position: position, data: chunk) { result in
+      switch result {
+      case .success:
+        print("Чанк отправлен, позиция: \(position), длина: \(length) байт")
+        // Проверка завершения передачи файла
+        if position + UInt64(length) >= UInt64(fileData.count) {
+          print("Передача файла завершена")
+        }
+        completion?(.success(progress))
+      case let .failure(error):
+        if progress < 100 {
+          completion?(.failure(error))
+          print("❌ Ошибка при отправке чанка: \(error.localizedDescription)")
+        }
       }
     }
   }

@@ -104,69 +104,76 @@ public final class SKFileManager: ISKFileManager {
   
   public func receiveAndUnzipFile(
     zipFileURL: URL,
-    password: String
-  ) async throws -> (model: MessengerNetworkRequestModel, recordingDTO: MessengeRecordingDTO?, files: [URL]) {
-    return try await withCheckedThrowingContinuation { continuation in
-      DispatchQueue.global().async { [weak self] in
+    password: String,
+    completion: @escaping (Result<(
+      model: MessengerNetworkRequestModel,
+      recordingDTO: MessengeRecordingDTO?,
+      files: [URL]
+    ), Error>) -> Void
+  ) {
+    DispatchQueue.global().async { [weak self] in
+      guard let self else { return }
+      // Для получения директории Documents
+      guard let documentDirectory = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first else {
+        print("Ошибка: не удалось получить путь к директории Documents")
+        return
+      }
+      let destinationURL = documentDirectory.appendingPathComponent(UUID().uuidString)
+      
+      var model: MessengerNetworkRequestModel?
+      var recordingModel: MessengeRecordingDTO?
+      var fileURLs: [URL] = []
+      
+      try? zipArchiveService.unzipFile(
+        atPath: zipFileURL,
+        toDestination: destinationURL,
+        overwrite: true,
+        password: password,
+        progress: nil
+      ) { [weak self] unzippedFile in
         guard let self else { return }
-        // Для получения директории Documents
-        guard let documentDirectory = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first else {
-          print("Ошибка: не удалось получить путь к директории Documents")
-          continuation.resume(throwing: URLError(.cannotFindHost)) // Используем подходящий URLError
-          return
-        }
-        let destinationURL = documentDirectory.appendingPathComponent(UUID().uuidString)
+        print("Unzipped file: \(unzippedFile)")
         
-        var model: MessengerNetworkRequestModel?
-        var recordingModel: MessengeRecordingDTO?
-        var fileURLs: [URL] = []
-        
-        do {
-          try zipArchiveService.unzipFile(
-            atPath: zipFileURL,
-            toDestination: destinationURL,
-            overwrite: true,
-            password: password,
-            progress: nil
-          ) { unzippedFile in
-            print("Unzipped file: \(unzippedFile)")
-            
-            if unzippedFile.pathExtension == "model" {
-              if let modelData = FileManager.default.contents(atPath: unzippedFile.path()) {
-                let decoder = JSONDecoder()
-                guard let dto = try? decoder.decode(MessengerNetworkRequestDTO.self, from: modelData) else {
-                  continuation.resume(throwing: URLError(.cannotDecodeContentData))
-                  return
-                }
-                model = dto.mapToModel()
-              } else {
-                print("Не удалось прочитать данные из файла")
+        if unzippedFile.pathExtension == "model" {
+          if let modelData = FileManager.default.contents(atPath: unzippedFile.path()) {
+            let decoder = JSONDecoder()
+            guard let dto = try? decoder.decode(MessengerNetworkRequestDTO.self, from: modelData) else {
+              DispatchQueue.main.async {
+                completion(.failure(URLError(.unknown)))
               }
-            } else if unzippedFile.pathExtension == "record" {
-              if let modelData = FileManager.default.contents(atPath: unzippedFile.path()) {
-                let decoder = JSONDecoder()
-                guard let model = try? decoder.decode(MessengeRecordingDTO.self, from: modelData) else {
-                  continuation.resume(throwing: URLError(.cannotDecodeContentData))
-                  return
-                }
-                recordingModel = model
-              } else {
-                print("Не удалось прочитать данные из файла")
-              }
-            } else {
-              fileURLs.append(unzippedFile)
+              return
             }
+            model = dto.mapToModel()
+          } else {
+            print("Не удалось прочитать данные из файла")
           }
-          
-          guard let model else {
-            continuation.resume(throwing: URLError(.unknown))
-            return
+        } else if unzippedFile.pathExtension == "record" {
+          if let modelData = FileManager.default.contents(atPath: unzippedFile.path()) {
+            let decoder = JSONDecoder()
+            guard let model = try? decoder.decode(MessengeRecordingDTO.self, from: modelData) else {
+              DispatchQueue.main.async {
+                completion(.failure(URLError(.unknown)))
+              }
+              return
+            }
+            recordingModel = model
+          } else {
+            print("Не удалось прочитать данные из файла")
           }
-          
-          continuation.resume(returning: (model, recordingModel, fileURLs))
-        } catch {
-          continuation.resume(throwing: error)
+        } else {
+          fileURLs.append(unzippedFile)
         }
+      }
+      
+      guard let model else {
+        DispatchQueue.main.async {
+          completion(.failure(URLError(.unknown)))
+        }
+        return
+      }
+      
+      DispatchQueue.main.async {
+        completion(.success((model, recordingModel, fileURLs)))
       }
     }
   }
