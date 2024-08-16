@@ -19,14 +19,6 @@ let package = Package(
       url: "https://github.com/siteline/swiftui-introspect",
       from: "1.0.0"
     ),
-    .package(
-      url: "https://github.com/exyte/FloatingButton",
-      from: "1.2.2"
-    ),
-    .package(
-      url: "https://github.com/exyte/ActivityIndicatorView",
-      from: "1.0.0"
-    ),
     .package(path: "../../LocalDependencies/SKAbstractions"),
     .package(path: "../../LocalDependencies/SKFoundation"),
     .package(path: "../../LocalDependencies/SKStyle")
@@ -36,8 +28,6 @@ let package = Package(
       name: "SKChat",
       dependencies: [
         .product(name: "SwiftUIIntrospect", package: "swiftui-introspect"),
-        .product(name: "FloatingButton", package: "FloatingButton"),
-        .product(name: "ActivityIndicatorView", package: "ActivityIndicatorView"),
         "SKAbstractions",
         "SKFoundation",
         "SKStyle"

@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import ActivityIndicatorView
 import SKStyle
 
 struct AttachmentsEditor<InputViewContent: View>: View {

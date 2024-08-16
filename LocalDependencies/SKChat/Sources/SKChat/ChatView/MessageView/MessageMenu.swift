@@ -6,8 +6,6 @@
 //
 
 import SwiftUI
-import FloatingButton
-import enum FloatingButton.Alignment
 import SKStyle
 
 enum MessageMenuAction {
