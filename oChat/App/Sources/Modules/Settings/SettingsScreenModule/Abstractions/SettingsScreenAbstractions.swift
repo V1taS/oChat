@@ -32,9 +32,6 @@ public protocol SettingsScreenModuleOutput: AnyObject {
   
   /// Пользователь намерен  выйти
   func userIntentionExit()
-  
-  /// Открыть секцию премиум раздела
-  func openPremiumSection()
 }
 
 /// События которые отправляем из `Coordinator` в `SettingsScreenModule`

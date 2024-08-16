@@ -47,8 +47,8 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     guard let windowScene = scene as? UIWindowScene else { return }
     
     // TODO: - 🔴 Кажется из-за Background Task происходит таск, надо проверить
-//    // Регистрация задачи Background Fetch
-//    BGTaskScheduler.shared.register(forTaskWithIdentifier: "com.sosinvitalii.oChat.refresh", using: nil) { task in
+    //    // Регистрация задачи Background Fetch
+    //    BGTaskScheduler.shared.register(forTaskWithIdentifier: "com.sosinvitalii.oChat.refresh", using: nil) { task in
 //      self.handleAppRefresh(task: task as? BGAppRefreshTask)
 //    }
     

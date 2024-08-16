@@ -26,7 +26,6 @@ final class SettingsScreenFlowCoordinator: Coordinator<Void, SettingsScreenFinis
   private var authenticationFlowCoordinator: AuthenticationFlowCoordinator?
   private var messengerProfileModule: MessengerProfileModule?
   private var mailComposeModule: MailComposeModule?
-  private var premiumScreenModule: PremiumScreenModule?
   
   // MARK: - Initialization
   
@@ -46,10 +45,6 @@ final class SettingsScreenFlowCoordinator: Coordinator<Void, SettingsScreenFinis
 // MARK: - MainScreenModuleOutput
 
 extension SettingsScreenFlowCoordinator: SettingsScreenModuleOutput {
-  func openPremiumSection() {
-    openPremiumModule()
-  }
-  
   func userIntentionExit() {
     Task { @MainActor [weak self] in
       guard let self else { return }
@@ -170,25 +165,9 @@ extension SettingsScreenFlowCoordinator: MessengerProfileModuleModuleOutput {
   }
 }
 
-// MARK: - PremiumScreenModuleOutput
-
-extension SettingsScreenFlowCoordinator: PremiumScreenModuleOutput {}
-
 // MARK: - Open modules
 
 private extension SettingsScreenFlowCoordinator {
-  func openPremiumModule() {
-    var premiumScreenModule = PremiumScreenAssembly().createModule(services)
-    self.premiumScreenModule = premiumScreenModule
-    premiumScreenModule.input.moduleOutput = self
-    premiumScreenModule.viewController.hidesBottomBarWhenPushed = true
-    
-    navigationController?.pushViewController(
-      premiumScreenModule.viewController,
-      animated: true
-    )
-  }
-  
   func openSettingsScreenModule() {
     var settingsScreenModule = SettingsScreenAssembly().createModule(services)
     self.settingsScreenModule = settingsScreenModule
@@ -311,7 +290,6 @@ private extension SettingsScreenFlowCoordinator {
     authenticationFlowCoordinator = nil
     messengerProfileModule = nil
     mailComposeModule = nil
-    premiumScreenModule = nil
     finishFlow?(flowType)
   }
   

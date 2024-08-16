@@ -35,9 +35,6 @@ protocol SettingsScreenFactoryOutput: AnyObject {
   
   /// Пользователь намерен  выйти
   func userIntentionExit()
-  
-  /// Открыть секцию премиум раздела
-  func openPremiumSection()
 }
 
 /// Cобытия которые отправляем от Presenter к Factory
@@ -160,19 +157,6 @@ extension SettingsScreenFactory: SettingsScreenFactoryInput {
       }
     )
     models.append(feedbackModel)
-    
-    if appSettingsModel.accessType == .main {
-      let premiumModel = createWidgetWithChevron(
-        image: Image(systemName: "star"),
-        backgroundColor: #colorLiteral(red: 1, green: 0.578322351, blue: 0.7400115132, alpha: 1),
-        title: OChatStrings.SettingsScreenLocalization.Premium.title,
-        action: { [weak self] in
-          self?.output?.openPremiumSection()
-        }
-      )
-      models.append(premiumModel)
-    }
-    
     return models
   }
   

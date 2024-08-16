@@ -95,7 +95,10 @@ public extension InfoPlist {
       ]),
       "BGTaskSchedulerPermittedIdentifiers": .array([
         .string("com.sosinvitalii.oChat.refresh")
-      ])
+      ]),
+      "UIKeyboardDoesNotSupportHardwareKeyboard": .boolean(true),
+      "UITextInputTraitSoftwareKeyboardBehavior": .integer(1),
+      "UITextInputTraitKeyboardAppearance": .string("Default")
     ]
     
     // Добавление кастомной URL схемы
