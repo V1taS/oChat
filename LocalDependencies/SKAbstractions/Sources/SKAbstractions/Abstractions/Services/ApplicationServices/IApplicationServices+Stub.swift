@@ -11,7 +11,7 @@ import SwiftUI
 
 public final class ApplicationServicesStub: IApplicationServices, IDataManagerService, IDataMappingService,
                                             INotificationService, IPermissionService, ISessionService,
-                                            ISteganographyService, ISystemService, IUIService,
+                                            ISystemService, IUIService,
                                             IAnalyticsService, ISecureDataManagerService, ICryptoService,
                                             ICloudKitService, IDataManagementService,
                                             IAccessAndSecurityManagementService, IUserInterfaceAndExperienceService,
@@ -72,7 +72,6 @@ public final class ApplicationServicesStub: IApplicationServices, IDataManagerSe
   public func getNotificationService() -> any INotificationService { self }
   public func getPermissionService() -> any IPermissionService { self }
   public lazy var sessionService: any ISessionService = self
-  public func getSteganographyService() -> any ISteganographyService { self }
   public func getSystemService() -> any ISystemService { self }
   public func getUIService() -> any IUIService { self }
   public func getAnalyticsService() -> any IAnalyticsService { self }
@@ -88,7 +87,6 @@ public final class ApplicationServicesStub: IApplicationServices, IDataManagerSe
   public var analyticsService: any IAnalyticsService { self }
   public var cloudKitService: any ICloudKitService { self }
   public var permissionService: any IPermissionService { self }
-  public var steganographyService: any ISteganographyService { self }
   public var cryptoService: any ICryptoService { self }
   public var dataManagerService: any IDataManagerService { self }
   public var dataMappingService: any IDataMappingService { self }
@@ -185,8 +183,6 @@ public final class ApplicationServicesStub: IApplicationServices, IDataManagerSe
   public func sha512(from inputData: Data) -> String { "" }
   public func sha256(from input: String) -> String { "" }
   public func sha256(from inputData: Data) -> String { "" }
-  public func hideTextBase64(_ textBase64: String?, withImage image: Data, completionBlock: @escaping EncoderCompletionBlock) {}
-  public func getTextBase64From(image: Data, completionBlock: @escaping DecoderCompletionBlock) {}
   public func checkIfPasscodeIsSet(completion: ((Result<Void, SystemServiceError>) -> Void)?) {}
   public var serverStateAction: ((TorServerState) -> Void)?
   public var sessionStateAction: ((TorSessionState) -> Void)?

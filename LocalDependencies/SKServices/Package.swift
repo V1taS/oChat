@@ -15,7 +15,6 @@ let package = Package(
   ],
   dependencies: [
     .package(path: "../../LocalDependencies/SKStyle"),
-    .package(path: "../../LocalDependencies/SKMySecret"),
     .package(path: "../../LocalDependencies/SKNetwork"),
     .package(path: "../../LocalDependencies/SKAbstractions"),
     .package(path: "../../LocalDependencies/SKFoundation"),
@@ -30,7 +29,6 @@ let package = Package(
       name: "SKServices",
       dependencies: [
         "SKStyle",
-        "SKMySecret",
         "Ecies",
         "SKNetwork",
         "SKAbstractions",

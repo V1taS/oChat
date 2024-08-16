@@ -26,11 +26,6 @@ final class AccessAndSecurityManagementService: IAccessAndSecurityManagementServ
     PermissionService()
   }
   
-  /// Возвращает сервис по работе с стеганографией в изображениях.
-  var steganographyService: ISteganographyService {
-    SteganographyService()
-  }
-  
   /// Возвращает сервис шифрования с использованием ECIES.
   var cryptoService: ICryptoService {
     CryptoService()
