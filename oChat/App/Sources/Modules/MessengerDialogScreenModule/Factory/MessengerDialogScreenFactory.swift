@@ -8,7 +8,7 @@
 import SwiftUI
 import SKUIKit
 import SKAbstractions
-import ExyteChat
+import SKChat
 
 /// Cобытия которые отправляем из Factory в Presenter
 protocol MessengerDialogScreenFactoryOutput: AnyObject {

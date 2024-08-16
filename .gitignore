@@ -96,7 +96,6 @@ LocalDependencies/ToxCore/ToxCore.xcodeproj
 LocalDependencies/SKServices/Package.resolved
 LocalDependencies/SKUIKit/Package.resolved
 LocalDependencies/MessengerSDK/Package.resolved
-LocalDependencies/ExyteChat/ExyteChat.xcodeproj
-LocalDependencies/ExyteChat/Package.resolved
-LocalDependencies/ExyteMediaPicker/ExyteMediaPicker.xcodeproj
+LocalDependencies/SKChat/SKChat.xcodeproj
+LocalDependencies/SKChat/Package.resolved
 LocalDependencies/SKManagers/SKManagers.xcodeproj

@@ -10,8 +10,7 @@ import SKUIKit
 import SwiftUI
 import SKAbstractions
 import SKFoundation
-import ExyteChat
-import ExyteMediaPicker
+import SKChat
 
 final class MessengerDialogScreenPresenter: ObservableObject {
   
@@ -231,7 +230,7 @@ final class MessengerDialogScreenPresenter: ObservableObject {
   func sendMessage(
     messenge: String,
     medias: [Media],
-    recording: ExyteChat.Recording?,
+    recording: SKChat.Recording?,
     replyMessageText: String?
   ) async {
     await impactFeedback.impactOccurred()

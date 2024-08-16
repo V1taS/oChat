@@ -34,7 +34,7 @@ public extension Array<Target> {
           .external(name: "SKManagers"),
           .external(name: "SKUIKit"),
           .external(name: "Wormholy"),
-          .external(name: "ExyteChat")
+          .external(name: "SKChat")
         ],
         settings: Settings.app
       ),

@@ -12,8 +12,7 @@ import SKAbstractions
 import Lottie
 import Combine
 import Foundation
-import ExyteChat
-import ExyteMediaPicker
+import SKChat
 
 typealias InputViewBuilder = ((
   Binding<String>,

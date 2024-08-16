@@ -1,0 +1,25 @@
+//
+//  Localization.strings
+//  SafeKeeper
+//
+//  Created by Vitalii Sosin on 21.04.2024.
+//
+
+// MARK: - State
+
+"AttachmentsEditor.Button.Cancel.Title" = "Отмена";
+"AttachmentsEditor.Button.Recents.Title" = "Недавние";
+"GalleryHeader.Image.Title" = "Изображение";
+"GalleryHeader.Video.Title" = "Видео";
+"GridPhotos.Header.Title" = "Все медиа с контактом";
+"MessageMenu.Reply.Title" = "Ответить";
+"MessageMenu.Copy.Title" = "Копировать";
+"MessageMenu.Delete.Title" = "Удалить";
+"MessageMenu.Retry.Title" = "Повторить";
+"Input.Reply.Title" = "Ответить";
+"Input.Recording.Title" = "Запись";
+"Input.Cancel.Title" = "Отмена";
+"Camera.Button.Cancel.Title" = "Отмена";
+"Camera.Button.Done.Title" = "Готово";
+"Camera.Button.Video.Title" = "Видео";
+"Camera.Button.Photo.Title" = "Фото";
