@@ -43,3 +43,4 @@ and generates three files:
 To use: save this script and run it in the terminal with the command `swift CreateLocalizedStrings.swift`.
 
 ![Tuist badge](https://img.shields.io/badge/Powered%20by-Tuist-blue)
+
