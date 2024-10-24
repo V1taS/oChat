@@ -18,14 +18,7 @@ let package = Package(
     .target(
       name: "Wormholy",
       dependencies: [],
-      resources: [
-//        .copy("UI/Cells/ActionableTableViewCell.xib"),
-//        .copy("UI/Flow.storyboard"),
-//        .copy("UI/Cells/RequestCell.xib"),
-//        .copy("UI/Sections/RequestTitleSectionView.xib"),
-//        .copy("UI/Cells/TextTableViewCell.xib"),
-//        .copy("UI/Flow.storyboard")
-      ]
+      resources: []
     )
   ]
 )
