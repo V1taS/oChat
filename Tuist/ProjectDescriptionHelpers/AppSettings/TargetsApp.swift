@@ -10,7 +10,7 @@ import ProjectDescription
 public extension Array<Target> {
   static var app: Self {
     [
-      Target(
+      .target(
         name: Constants.appNameRelease,
         destinations: .iOS,
         product: .app,

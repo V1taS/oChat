@@ -62,7 +62,7 @@ public enum ModuleProject {
         dependencies.append(contentsOf: config.additionalDependencies)
       }
       
-      let appTarget = Target(
+      let appTarget: Target = .target(
         name: name.appending("App"),
         destinations: .iOS,
         product: .app,
@@ -102,7 +102,7 @@ public extension Target {
     launchArguments: [LaunchArgument] = [],
     headers: Headers? = nil
   ) -> Target {
-    return Target(
+    return .target(
       name: name,
       destinations: .iOS,
       product: product,

@@ -9,7 +9,7 @@ import ProjectDescription
 
 public extension Scheme {
   static var app: Scheme {
-    Scheme(
+    .scheme(
       name: Constants.appNameRelease,
       shared: true,
       buildAction: .buildAction(targets: ["\(Constants.appNameRelease)"]),
@@ -17,9 +17,7 @@ public extension Scheme {
       runAction: .runAction(
         configuration: .debug,
         executable: "\(Constants.appNameRelease)",
-        arguments: .init(environmentVariables: [
-          "OS_ACTIVITY_MODE": .init(value: "disable", isEnabled: true)
-        ])
+        arguments: .arguments(environmentVariables: ["OS_ACTIVITY_MODE": .environmentVariable(value: "disable", isEnabled: true)])
       ),
       archiveAction: .archiveAction(
         configuration: .release

@@ -20,7 +20,7 @@ protocol AppearanceAppScreenFactoryInput {
   /// Создать заголовок для экрана
   func createHeaderTitle() -> String
   /// Создать виджет модельки для отображения
-  func createWidgetModels(_ colorScheme: UIUserInterfaceStyle?) -> [SKUIKit.WidgetCryptoView.Model]
+  func createWidgetModels(_ colorScheme: UIUserInterfaceStyle?) -> [WidgetCryptoView.Model]
 }
 
 /// Фабрика
@@ -34,7 +34,7 @@ final class AppearanceAppScreenFactory {
 // MARK: - AppearanceAppScreenFactoryInput
 
 extension AppearanceAppScreenFactory: AppearanceAppScreenFactoryInput {
-  func createWidgetModels(_ colorScheme: UIUserInterfaceStyle?) -> [SKUIKit.WidgetCryptoView.Model] {
+  func createWidgetModels(_ colorScheme: UIUserInterfaceStyle?) -> [WidgetCryptoView.Model] {
     var models: [WidgetCryptoView.Model] = []
     
     let automaticThemeModel = createWidgetModel(

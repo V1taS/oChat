@@ -91,7 +91,7 @@ private extension SettingsScreenView {
       Image(
         uiImage: UIImage(
           named: SKStyleAsset.oChatInProgress.name,
-          in: SKStyleResources.bundle,
+          in: SKStyle.bundle,
           with: nil
         ) ?? UIImage()
       )

@@ -8,11 +8,5 @@
 import ProjectDescription
 
 public extension DeploymentTargets {
-  static let defaultDeploymentTargets: DeploymentTargets = DeploymentTargets(
-    iOS: Constants.iOSTargetVersion,
-    macOS: nil,
-    watchOS: nil,
-    tvOS: nil,
-    visionOS: nil
-  )
+  static let defaultDeploymentTargets: DeploymentTargets = DeploymentTargets.iOS(Constants.iOSTargetVersion)
 }

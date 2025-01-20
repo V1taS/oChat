@@ -48,7 +48,7 @@ public struct SKUIKitData {
 @available(iOS 9.0, macOS 10.11, *)
 public extension NSDataAsset {
   convenience init?(asset: SKUIKitData) {
-    let bundle = SKUIKitResources.bundle
+    let bundle = Bundle.module
 #if os(iOS) || os(tvOS)
     self.init(name: asset.name, bundle: bundle)
 #elseif os(macOS)
@@ -68,7 +68,7 @@ public struct SKUIKitImages {
 #endif
   
   public var image: Image {
-    let bundle = SKUIKitResources.bundle
+    let bundle = Bundle.module
 #if os(iOS) || os(tvOS)
     let image = Image(named: name, in: bundle, compatibleWith: nil)
 #elseif os(macOS)
@@ -95,7 +95,7 @@ public extension SKUIKitImages.Image {
              message: "This initializer is unsafe on macOS, please use the SKUIKitImages.image property")
   convenience init?(asset: SKUIKitImages) {
 #if os(iOS) || os(tvOS)
-    let bundle = SKUIKitResources.bundle
+    let bundle = Bundle.module
     self.init(named: asset.name, in: bundle, compatibleWith: nil)
 #elseif os(macOS)
     self.init(named: NSImage.Name(asset.name))
@@ -109,21 +109,27 @@ public extension SKUIKitImages.Image {
 @available(iOS 13.0, tvOS 13.0, watchOS 6.0, macOS 10.15, *)
 public extension SwiftUI.Image {
   init(asset: SKUIKitImages) {
-    let bundle = SKUIKitResources.bundle
+    let bundle = Bundle.module
     self.init(asset.name, bundle: bundle)
   }
   
   init(asset: SKUIKitImages, label: Text) {
-    let bundle = SKUIKitResources.bundle
+    let bundle = Bundle.module
     self.init(asset.name, bundle: bundle, label: label)
   }
   
   init(decorative asset: SKUIKitImages) {
-    let bundle = SKUIKitResources.bundle
+    let bundle = Bundle.module
     self.init(decorative: asset.name, bundle: bundle)
   }
 }
 #endif
+
+// MARK: - Bundle
+
+public enum SKUIKit {
+  public static let bundle = Bundle.module
+}
 
 // swiftlint:enable all
 // swiftformat:enable all

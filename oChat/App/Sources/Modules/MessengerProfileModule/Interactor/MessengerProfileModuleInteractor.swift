@@ -73,7 +73,7 @@ extension MessengerProfileModuleInteractor: MessengerProfileModuleInteractorInpu
   }
   
   func getQrImageWith(onionAdress: String) {
-    let logoImage = UIImage(named: SKStyleAsset.oChatLogo.name, in: SKStyleResources.bundle, with: nil)!
+    let logoImage = UIImage(named: SKStyleAsset.oChatLogo.name, in: SKStyle.bundle, with: nil)!
     let cacheImageURL = cacheImage(logoImage, withName: "oChatLogo")
     
     // Получаем изображение из кэша

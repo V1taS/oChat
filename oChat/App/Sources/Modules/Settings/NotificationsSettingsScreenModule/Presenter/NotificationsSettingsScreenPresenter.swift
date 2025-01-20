@@ -13,7 +13,7 @@ final class NotificationsSettingsScreenPresenter: ObservableObject {
   
   // MARK: - View state
   
-  @Published var stateWidgetCryptoModels: [SKUIKit.WidgetCryptoView.Model] = []
+  @Published var stateWidgetCryptoModels: [WidgetCryptoView.Model] = []
   
   // MARK: - Internal properties
   

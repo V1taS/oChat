@@ -18,19 +18,19 @@ extension ContactModel.Status {
     case .online:
       return UIImage(
         named: SKStyleAsset.oChatOnline.name,
-        in: SKStyleResources.bundle,
+        in: SKStyle.bundle,
         with: nil
       )
     case .offline:
       return UIImage(
         named: SKStyleAsset.oChatOffline.name,
-        in: SKStyleResources.bundle,
+        in: SKStyle.bundle,
         with: nil
       )
     case .requestChat, .initialChat:
       return UIImage(
         named: SKStyleAsset.oChatInProgress.name,
-        in: SKStyleResources.bundle,
+        in: SKStyle.bundle,
         with: nil
       )
     }

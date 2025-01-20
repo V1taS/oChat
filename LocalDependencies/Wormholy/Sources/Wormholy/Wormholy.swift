@@ -95,7 +95,7 @@ public class Wormholy: NSObject {
       return
     }
     
-    let storyboard = UIStoryboard(name: "Flow", bundle: WormholyResources.bundle)
+    let storyboard = UIStoryboard(name: "Flow", bundle: Bundle.module)
     if let initialVC = storyboard.instantiateInitialViewController(){
       initialVC.modalPresentationStyle = .fullScreen
       UIViewController.currentViewController()?.present(initialVC, animated: true, completion: nil)
@@ -103,7 +103,7 @@ public class Wormholy: NSObject {
   }
   
   @objc public static var wormholyFlow: UIViewController? {
-    let storyboard = UIStoryboard(name: "Flow", bundle: WormholyResources.bundle)
+    let storyboard = UIStoryboard(name: "Flow", bundle: Bundle.module)
     return storyboard.instantiateInitialViewController()
   }
   

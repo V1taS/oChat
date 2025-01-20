@@ -71,7 +71,7 @@ private extension MessageView {
                   Image(
                     uiImage: UIImage(
                       named: model.messageType == .incoming ? SKUIKitAsset.incomingTail.name : SKUIKitAsset.outgoingTail.name,
-                      in: SKUIKitResources.bundle,
+                      in: SKUIKit.bundle,
                       with: nil
                     ) ?? UIImage()
                   )

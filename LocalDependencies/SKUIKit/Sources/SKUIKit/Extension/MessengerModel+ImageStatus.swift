@@ -18,19 +18,19 @@ extension AppSettingsModel.Status {
     case .online:
       return UIImage(
         named: SKStyleAsset.oChatOnline.name,
-        in: SKStyleResources.bundle,
+        in: SKStyle.bundle,
         with: nil
       )
     case .offline:
       return UIImage(
         named: SKStyleAsset.oChatOffline.name,
-        in: SKStyleResources.bundle,
+        in: SKStyle.bundle,
         with: nil
       )
     case .inProgress:
       return UIImage(
         named: SKStyleAsset.oChatInProgress.name,
-        in: SKStyleResources.bundle,
+        in: SKStyle.bundle,
         with: nil
       )
     }

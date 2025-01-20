@@ -30,7 +30,7 @@ public struct BrandingStubView: View {
       VStack(spacing: .s4) {
         Spacer()
         
-        Image(SKStyleAsset.oChatLogo.name, bundle: SKStyleResources.bundle)
+        Image(SKStyleAsset.oChatLogo.name, bundle: SKStyle.bundle)
           .resizable()
           .aspectRatio(contentMode: .fit)
           .frame(width: .gridValue(forSteps: .s9))
