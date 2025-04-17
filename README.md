@@ -32,7 +32,6 @@ mise install tuist
 ```
 
 **Install SwiftLint**
-
 SwiftLint is a tool to enforce Swift style and conventions. You can install SwiftLint using Homebrew:
 ```
 brew install swiftlint
