@@ -21,25 +21,14 @@ private enum Palette {
 // MARK: – View
 struct SettingsView: View {
   // MARK: Public API
-  let avatar: Image = Image("oChatLogo")
+  let avatar: Image = Image("playstore")
   let version = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String
-
-  // Actions
-  let onEditNick: () -> Void = {}
-  let onShareID: () -> Void = {}
-  let onCopyID: () -> Void = {}
-  let onPrivacy: () -> Void = {}
-  let onNotifications: () -> Void = {}
-  let onChats: () -> Void = {}
-  let onAppearance: () -> Void = {}
-  let onRecoveryPassword: () -> Void = {}
-  let onHelp: () -> Void = {}
-  let onClearData: () -> Void = {}
 
   // MARK: Environment
   @Environment(\.dismiss) private var dismiss
   @EnvironmentObject var toxManager: ToxManager
   @State private var ownAddress = ""
+  @State private var showScanQR = false
 
   // MARK: – Body
   var body: some View {
@@ -53,39 +42,51 @@ struct SettingsView: View {
 
           /// Первая карточка настроек
           VStack(spacing: 0) {
-            SettingsRow(icon: "lock",
-                        title: "Конфиденциальность",
-                        action: onPrivacy)
+            NavigationLink {
+              PrivacySettingsView()
+            } label: {
+              SettingsRow(icon: "lock", title: "Конфиденциальность")
+            }
+
             divider
-            SettingsRow(icon: "bell",
-                        title: "Уведомления",
-                        action: onNotifications)
+
+            NavigationLink {
+              NotificationSettingsView()
+            } label: {
+              SettingsRow(icon: "bell", title: "Уведомления")
+            }
+
             divider
-            SettingsRow(icon: "bubble.left.and.text.bubble.right",
-                        title: "Беседы",
-                        action: onChats)
+
+            NavigationLink {
+              RecoveryPasswordView()
+            } label: {
+              SettingsRow(icon: "shield.lefthalf.filled.badge.checkmark", title: "Пароль восстановления")
+            }
+
             divider
-            SettingsRow(icon: "paintbrush.pointed",
-                        title: "Внешний вид",
-                        action: onAppearance)
-            divider
-            SettingsRow(icon: "shield.lefthalf.filled.badge.checkmark",
-                        title: "Пароль восстановления",
-                        action: onRecoveryPassword)
+
+            NavigationLink {
+              PremiumView()
+            } label: {
+              SettingsRow(icon: "star", title: "Премиум")
+            }
           }
           .cardStyle
 
           /// Вторая карточка
           VStack(spacing: 0) {
-            SettingsRow(icon: "questionmark",
-                        title: "Помощь",
-                        action: onHelp)
+            NavigationLink {
+              HelpView()
+            } label: {
+              SettingsRow(icon: "questionmark", title: "Помощь")
+            }
+
             divider
             SettingsRow(icon: "trash",
                         iconColor: Palette.danger,
                         title: "Очистить данные",
-                        titleColor: Palette.danger,
-                        action: onClearData)
+                        titleColor: Palette.danger)
           }
           .cardStyle
 
@@ -121,7 +122,7 @@ struct SettingsView: View {
 
         ToolbarItem(placement: .navigationBarTrailing) {
           Button {
-            // «QR-код профиля» – возможно отдельный экран
+            showScanQR = true
           } label: {
             Image(systemName: "qrcode")
               .font(.headline)
@@ -131,6 +132,9 @@ struct SettingsView: View {
       }
       .task {
         ownAddress = await toxManager.getOwnAddress()
+      }
+      .sheet(isPresented: $showScanQR) {
+        ScanQRView()
       }
     }
   }
@@ -148,7 +152,6 @@ private extension SettingsView {
         .clipShape(Circle())
         .overlay { Circle().stroke(Palette.separator, lineWidth: 0.5) }
         .contentShape(Circle())
-        .onTapGesture(perform: onEditNick)
 
       Text("ID вашего аккаунта")
         .font(.footnote.weight(.semibold))
@@ -168,8 +171,12 @@ private extension SettingsView {
 
       // Кнопки «Поделиться / Скопировать»
       HStack(spacing: 24) {
-        CapsuleButton(title: "Поделиться", action: onShareID)
-        CapsuleButton(title: "Скопировать", action: onCopyID)
+        CapsuleButton(title: "Поделиться", action: {
+
+        })
+        CapsuleButton(title: "Скопировать", action: {
+
+        })
       }
     }
   }
@@ -181,24 +188,21 @@ private struct SettingsRow: View {
   var iconColor: Color = Palette.icon
   let title: String
   var titleColor: Color = Palette.icon
-  let action: () -> Void
 
   var body: some View {
-    Button(action: action) {
-      HStack(spacing: 20) {
-        Image(systemName: icon)
-          .font(.body)
-          .foregroundStyle(iconColor)
-          .frame(width: 26)
-        Text(title)
-          .font(.body)
-          .foregroundStyle(titleColor)
-        Spacer()
-      }
-      .padding(.vertical, 14)
-      .padding(.horizontal, 18)
-      .contentShape(Rectangle())
+    HStack(spacing: 20) {
+      Image(systemName: icon)
+        .font(.body)
+        .foregroundStyle(iconColor)
+        .frame(width: 26)
+      Text(title)
+        .font(.body)
+        .foregroundStyle(titleColor)
+      Spacer()
     }
+    .padding(.vertical, 14)
+    .padding(.horizontal, 18)
+    .contentShape(Rectangle())
     .buttonStyle(.plain)
   }
 }

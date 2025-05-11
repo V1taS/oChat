@@ -58,9 +58,13 @@ struct ChatView: View {
         Text(shortAddress).font(.headline)
       }
       ToolbarItem(placement: .navigationBarTrailing) {
-        AvatarView(emoji: nil,
-                   address: shortAddress,
-                   isOnline: true)          // TODO: онлайн-статус из tox
+        NavigationLink {
+          ContactDetailView()
+        } label: {
+          AvatarView(emoji: "😉",
+                     address: shortAddress,
+                     isOnline: true)
+        }
       }
     }
   }

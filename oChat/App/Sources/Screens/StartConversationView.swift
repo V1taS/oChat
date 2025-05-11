@@ -18,10 +18,6 @@ private enum Palette {
 
 // MARK: - Экран
 struct StartConversationView: View {
-  // MARK: Public API
-  let onNewMessage: () -> Void = {}
-  let onCreateGroup: () -> Void = {}
-  let onInviteFriend: () -> Void = {}
 
   // MARK: Environment
   @Environment(\.dismiss) private var dismiss
@@ -69,17 +65,23 @@ private extension StartConversationView {
   // Список действий
   var actionsBlock: some View {
     VStack(spacing: 0) {
-      ActionRow(icon: "bubble.left.and.bubble.right",
-                title: "Новое сообщение",
-                action: onNewMessage)
+
+      NavigationLink {
+        NewMessageView()
+      } label: {
+        ActionRow(icon: "bubble.left.and.bubble.right", title: "Новое сообщение")
+      }
+
       divider
-      ActionRow(icon: "person.3",
-                title: "Создать группу",
-                action: onCreateGroup)
+
+      NavigationLink {
+        CreateGroupView()
+      } label: {
+        ActionRow(icon: "person.3", title: "Создать группу")
+      }
+
       divider
-      ActionRow(icon: "person.badge.plus",
-                title: "Пригласить друга",
-                action: onInviteFriend)
+      ActionRow(icon: "person.badge.plus", title: "Пригласить друга")
     }
     .background(.ultraThinMaterial,
                 in: RoundedRectangle(cornerRadius: 16, style: .continuous))
@@ -109,7 +111,7 @@ private extension StartConversationView {
           .resizable()
           .scaledToFit()
 
-        Image("oChatLogo")          // ⬅️ логотип в центре
+        Image("oChatLogo")
           .resizable()
           .scaledToFit()
           .frame(width: 56, height: 56)
@@ -137,22 +139,19 @@ private extension StartConversationView {
 private struct ActionRow: View {
   let icon: String
   let title: String
-  let action: () -> Void
 
   var body: some View {
-    Button(action: action) {
-      HStack(spacing: 18) {
-        Image(systemName: icon)
-          .font(.body)
-          .frame(width: 24)
-        Text(title)
-          .font(.body)
-        Spacer()
-      }
-      .padding(.vertical, 14)
-      .padding(.horizontal, 18)
-      .contentShape(Rectangle())
+    HStack(spacing: 18) {
+      Image(systemName: icon)
+        .font(.body)
+        .frame(width: 24)
+      Text(title)
+        .font(.body)
+      Spacer()
     }
+    .padding(.vertical, 14)
+    .padding(.horizontal, 18)
+    .contentShape(Rectangle())
     .buttonStyle(.plain)
     .foregroundStyle(Palette.icon)
   }
