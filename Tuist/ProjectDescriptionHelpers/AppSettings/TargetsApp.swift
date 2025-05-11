@@ -30,11 +30,7 @@ public extension Array<Target> {
           .swiftlint(configPath: "\(Constants.appNameRelease)/\(Constants.appPath)/Sources"),
         ],
         dependencies: [
-          .external(name: "SKStoriesWidget"),
-          .external(name: "SKManagers"),
-          .external(name: "SKUIKit"),
-          .external(name: "Wormholy"),
-          .external(name: "SKChat")
+          .external(name: "ToxSwift")
         ],
         settings: Settings.app
       ),

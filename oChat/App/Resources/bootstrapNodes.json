@@ -1,0 +1,210 @@
+[
+  {
+    "IPv4": "144.217.167.73",
+    "IPv6": "",
+    "Port": "33445",
+    "Public Key": "7E5668E0EE09E19F320AD47902419331FFEE147BB3606769CFBE921A2A2FD34C",
+    "Maintainer": "velusip",
+    "Status": "ONLINE"
+  },
+  {
+    "IPv4": "tox.abilinski.com",
+    "IPv6": "",
+    "Port": "33445",
+    "Public Key": "10C00EB250C3233E343E2AEBA07115A5C28920E9C8D29492F6D00B29049EDC7E",
+    "Maintainer": "AnthonyBilinski",
+    "Status": "ONLINE"
+  },
+  {
+    "IPv4": "tox.kurnevsky.net",
+    "IPv6": "tox.kurnevsky.net",
+    "Port": "33445",
+    "Public Key": "82EF82BA33445A1F91A7DB27189ECFC0C013E06E3DA71F588ED692BED625EC23",
+    "Maintainer": "kurnevsky",
+    "Status": "ONLINE"
+  },
+  {
+    "IPv4": "205.185.115.131",
+    "IPv6": "",
+    "Port": "53",
+    "Public Key": "3091C6BEB2A993F1C6300C16549FABA67098FF3D62C6D253828B531470B53D68",
+    "Maintainer": "GDR!",
+    "Status": "ONLINE"
+  },
+  {
+    "IPv4": "tox2.abilinski.com",
+    "IPv6": "tox2.abilinski.com",
+    "Port": "33445",
+    "Public Key": "7A6098B590BDC73F9723FC59F82B3F9085A64D1B213AAF8E610FD351930D052D",
+    "Maintainer": "AnthonyBilinski",
+    "Status": "ONLINE"
+  },
+  {
+    "IPv4": "tox1.mf-net.eu",
+    "IPv6": "tox1.mf-net.eu",
+    "Port": "33445",
+    "Public Key": "B3E5FA80DC8EBD1149AD2AB35ED8B85BD546DEDE261CA593234C619249419506",
+    "Maintainer": "2mf",
+    "Status": "ONLINE"
+  },
+  {
+    "IPv4": "tox4.plastiras.org",
+    "IPv6": "",
+    "Port": "33445",
+    "Public Key": "836D1DA2BE12FE0E669334E437BE3FB02806F1528C2B2782113E0910C7711409",
+    "Maintainer": "Tha_14",
+    "Status": "ONLINE"
+  },
+  {
+    "IPv4": "5.19.249.240",
+    "IPv6": "",
+    "Port": "38296",
+    "Public Key": "DA98A4C0CD7473A133E115FEA2EBDAEEA2EF4F79FD69325FC070DA4DE4BA3238",
+    "Maintainer": "Toxdaemon",
+    "Status": "ONLINE"
+  },
+  {
+    "IPv4": "188.225.9.167",
+    "IPv6": "209:dead:ded:4991:49f3:b6c0:9869:3019",
+    "Port": "33445",
+    "Public Key": "1911341A83E02503AB1FD6561BD64AF3A9D6C3F12B5FBB656976B2E678644A67",
+    "Maintainer": "Nikat",
+    "Status": "ONLINE"
+  },
+  {
+    "IPv4": "3.0.24.15",
+    "IPv6": "",
+    "Port": "33445",
+    "Public Key": "E20ABCF38CDBFFD7D04B29C956B33F7B27A3BB7AF0618101617B036E4AEA402D",
+    "Maintainer": "Hardy",
+    "Status": "ONLINE"
+  },
+  {
+    "IPv4": "tox3.plastiras.org",
+    "IPv6": "tox3.plastiras.org",
+    "Port": "33445",
+    "Public Key": "4B031C96673B6FF123269FF18F2847E1909A8A04642BBECD0189AC8AEEADAF64",
+    "Maintainer": "Tha_14",
+    "Status": "ONLINE"
+  },
+  {
+    "IPv4": "104.225.141.59",
+    "IPv6": "",
+    "Port": "43334",
+    "Public Key": "933BA20B2E258B4C0D475B6DECE90C7E827FE83EFA9655414E7841251B19A72C",
+    "Maintainer": "Gabe",
+    "Status": "ONLINE"
+  },
+  {
+    "IPv4": "139.162.110.188",
+    "IPv6": "2400:8902::f03c:93ff:fe69:bf77",
+    "Port": "33445",
+    "Public Key": "F76A11284547163889DDC89A7738CF271797BF5E5E220643E97AD3C7E7903D55",
+    "Maintainer": "ToxTom",
+    "Status": "ONLINE"
+  },
+  {
+    "IPv4": "tox2.mf-net.eu",
+    "IPv6": "tox2.mf-net.eu",
+    "Port": "33445",
+    "Public Key": "70EA214FDE161E7432530605213F18F7427DC773E276B3E317A07531F548545F",
+    "Maintainer": "2mf",
+    "Status": "ONLINE"
+  },
+  {
+    "IPv4": "172.105.109.31",
+    "IPv6": "2600:3c04::f03c:92ff:fe30:5df",
+    "Port": "33445",
+    "Public Key": "D46E97CF995DC1820B92B7D899E152A217D36ABE22730FEA4B6BF1BFC06C617C",
+    "Maintainer": "amr",
+    "Status": "ONLINE"
+  },
+  {
+    "IPv4": "91.146.66.26",
+    "IPv6": "",
+    "Port": "33445",
+    "Public Key": "B5E7DAC610DBDE55F359C7F8690B294C8E4FCEC4385DE9525DBFA5523EAD9D53",
+    "Maintainer": "Toxdaemon",
+    "Status": "ONLINE"
+  },
+  {
+    "IPv4": "tox2.plastiras.org",
+    "IPv6": "tox2.plastiras.org",
+    "Port": "33445",
+    "Public Key": "B6626D386BE7E3ACA107B46F48A5C4D522D29281750D44A0CBA6A2721E79C951",
+    "Maintainer": "Tha_14",
+    "Status": "ONLINE"
+  },
+  {
+    "IPv4": "172.104.215.182",
+    "IPv6": "2600:3c03::f03c:93ff:fe7f:6096",
+    "Port": "33445",
+    "Public Key": "DA2BD927E01CD05EBCC2574EBE5BEBB10FF59AE0B2105A7D1E2B40E49BB20239",
+    "Maintainer": "zero-one",
+    "Status": "ONLINE"
+  },
+  {
+    "IPv4": "tox.initramfs.io",
+    "IPv6": "tox.initramfs.io",
+    "Port": "33445",
+    "Public Key": "3F0A45A268367C1BEA652F258C85F4A66DA76BCAA667A49E770BCC4917AB6A25",
+    "Maintainer": "initramfs",
+    "Status": "ONLINE"
+  },
+  {
+    "IPv4": "tox.plastiras.org",
+    "IPv6": "tox.plastiras.org",
+    "Port": "33445",
+    "Public Key": "8E8B63299B3D520FB377FE5100E65E3322F7AE5B20A0ACED2981769FC5B43725",
+    "Maintainer": "Tha_14",
+    "Status": "ONLINE"
+  },
+  {
+    "IPv4": "188.214.122.30",
+    "IPv6": "",
+    "Port": "33445",
+    "Public Key": "2A9F7A620581D5D1B09B004624559211C5ED3D1D712E8066ACDB0896A7335705",
+    "Maintainer": "turambar",
+    "Status": "ONLINE"
+  },
+  {
+    "IPv4": "194.36.190.71",
+    "IPv6": "",
+    "Port": "33445",
+    "Public Key": "99E8460035E45C0A6B6DC2C02B14440F7F876518E9D054D028209B5669827645",
+    "Maintainer": "UR1229SWL",
+    "Status": "ONLINE"
+  },
+  {
+    "IPv4": "62.183.96.32",
+    "IPv6": "",
+    "Port": "33445",
+    "Public Key": "52BD37D53357701CB9C69ABA81E7741C5F14105523C89153A770D73F434AC473",
+    "Maintainer": "Alexsandr",
+    "Status": "ONLINE"
+  },
+  {
+    "IPv4": "141.11.229.155",
+    "IPv6": "",
+    "Port": "33445",
+    "Public Key": "1FD96DF8DCAC4A95C117B460F23EB740C8FBA60DE89BE7B45136790B8E3D4B63",
+    "Maintainer": "lzk",
+    "Status": "ONLINE"
+  },
+  {
+    "IPv4": "43.198.227.166",
+    "IPv6": "",
+    "Port": "33445",
+    "Public Key": "AD13AB0D434BCE6C83FE2649237183964AE3341D0AFB3BE1694B18505E4E135E",
+    "Maintainer": "Hardy",
+    "Status": "ONLINE"
+  },
+  {
+    "IPv4": "95.181.230.108",
+    "IPv6": "2a03:c980:db:5d::",
+    "Port": "33445",
+    "Public Key": "B5FFECB4E4C26409EBB88DB35793E7B39BFA3BA12AC04C096950CB842E3E130A",
+    "Maintainer": "wdwp",
+    "Status": "ONLINE"
+  }
+]

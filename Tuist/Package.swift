@@ -11,10 +11,8 @@ import PackageDescription
 let package = Package(
   name: "Package",
   dependencies: [
-    .package(path: "../LocalDependencies/SKStoriesWidget"),
-    .package(path: "../LocalDependencies/SKUIKit"),
-    .package(path: "../LocalDependencies/SKManagers"),
-    .package(path: "../LocalDependencies/SKServices"),
-    .package(path: "../LocalDependencies/SKChat")
+    .package(path: "../LocalDependencies/ToxSwift")
   ]
 )
+
+extension Package: @unchecked Sendable {}
