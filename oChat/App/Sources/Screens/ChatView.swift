@@ -181,3 +181,8 @@ private struct InputBar: View {
     .onTapGesture { focused = true }
   }
 }
+
+// MARK: – Preview
+#Preview {
+  ChatView(friendID: 0)
+}
