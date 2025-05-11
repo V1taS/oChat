@@ -17,7 +17,7 @@ public enum Constants {
   static public let appLink = "onionChat"
 
   // Settings
-  static public let iOSTargetVersion = "16.0"
+  static public let iOSTargetVersion = "17.0"
   static public let developmentTeam = "34VDSPZYU9"
   
   /// If you pass the key `PRODUCT_BUNDLE_IDENTIFIER` in settings, this method can set additional name for you.
