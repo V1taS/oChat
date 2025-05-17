@@ -92,7 +92,6 @@ enum MessageType: Codable, Equatable {
   case system
 }
 
-#if DEBUG
 extension ChatMessage {
   static func mockList(friendID: UInt32, count: Int = 10) -> [ChatMessage] {
     let now = Date()
@@ -141,4 +140,3 @@ extension ChatMessage {
     attachments: nil
   )
 }
-#endif

@@ -34,7 +34,6 @@ struct FriendRequest: Identifiable, Codable, Equatable {
   var id: Data { publicKey }
 }
 
-#if DEBUG
 extension FriendRequest {
 
   /// Генерирует массив тестовых `FriendRequest`
@@ -69,4 +68,3 @@ extension FriendRequest {
     return String((0..<length).map { _ in hex.randomElement()! })
   }
 }
-#endif
