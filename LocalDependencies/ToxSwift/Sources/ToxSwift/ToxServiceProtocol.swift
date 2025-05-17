@@ -65,12 +65,13 @@ public protocol ToxServiceProtocol {
   func removeFriend(withID friendID: UInt32) async throws
 
   /// Отправляет текстовое сообщение другу.
-  func sendMessage(toFriend friendID: UInt32,
-                   text: String,
-                   type: MessageKind) async throws
+  func sendMessage(
+    toFriend friendID: UInt32,
+    text: String
+  ) async throws -> UInt32
 
   /// Возвращает статус подключения друга.
-  func getFriendConnectionStatus(forID friendID: UInt32) async -> ConnectionState
+  func getFriendConnectionStatus(forID friendID: UInt32) async -> ToxConnectionState
 
   /// Возвращает имя друга.
   func getFriendName(_ friendID: UInt32) async -> String
@@ -99,7 +100,6 @@ public protocol ToxServiceProtocol {
   /// Инициирует отправку файла другу.
   /// - Returns: ID создаваемой передачи.
   func sendFile(toFriend friendID: UInt32,
-                kind: FileKind,
                 size: UInt64,
                 fileName: String) async throws -> UInt32
 
@@ -184,7 +184,7 @@ public protocol ToxServiceProtocol {
   var conferenceEvents: AsyncStream<ConferenceEvent> { get async }
 
   /// Публичный стрим статуса DHT-подключения к сети Tox
-  var connectionStatusEvents: AsyncStream<ConnectionState> { get async }
+  var connectionStatusEvents: AsyncStream<ToxConnectionState> { get async }
 
 
   // MARK: — Аудио/Видео (ToxAV)

@@ -11,24 +11,25 @@ import AVFoundation
 
 // MARK: - Palette
 private enum Palette {
-  static let sheetBG   = Color(.systemGroupedBackground)
+  static let sheetBG = Color(.systemGroupedBackground)
   static let separator = Color.gray.opacity(0.22)
-  static let accent    = Color(red: 0/255, green: 183/255, blue: 241/255) // цвет индикатора
+  static let accent = Color(red: 0/255, green: 183/255, blue: 241/255) // цвет индикатора
 }
 
 // MARK: - Вкладки
 private enum InputMode: String, CaseIterable {
-  case manual  = "Введите Account ID"
-  case scanQR  = "Сканировать QR-код"
+  case manual = "Введите Account ID"
+  case scanQR = "Сканировать QR-код"
 }
 
 // MARK: - Экран
 struct NewMessageView: View {
   @Environment(\.dismiss) private var dismiss
+  @EnvironmentObject var toxManager: ToxManager
 
   @State private var selection: InputMode = .manual
-  @State private var accountID: String    = ""
-  @State private var isScanning           = false
+  @State private var accountID: String = ""
+  @State private var isScanning = false
 
   var onComplete: (String) -> Void = { _ in }
 
@@ -52,7 +53,7 @@ struct NewMessageView: View {
       .background(Palette.sheetBG.ignoresSafeArea())
       .navigationTitle("Новое сообщение")
       .navigationBarTitleDisplayMode(.large)
-      .onChange(of: selection) { value in
+      .onChange(of: selection) { value, _ in
         // запускаем/останавливаем сканер при переключении вкладки
         isScanning = (value == .scanQR)
       }
@@ -124,7 +125,7 @@ private extension NewMessageView {
       }
       .padding(.horizontal, 28)
       .padding(.top, 6)
-
+      
       Spacer(minLength: 0)
     }
   }
@@ -244,7 +245,11 @@ private final class PreviewView: UIView {
   var videoPreviewLayer: AVCaptureVideoPreviewLayer { layer as! AVCaptureVideoPreviewLayer }
 }
 
-// MARK: - Preview
+// MARK: – Preview
+
 #Preview {
-  NewMessageView()
+  NavigationStack {
+    NewMessageView()
+      .environmentObject(ToxManager.preview)
+  }
 }

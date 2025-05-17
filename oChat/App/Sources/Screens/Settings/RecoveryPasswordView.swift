@@ -134,13 +134,13 @@ private struct RecoveryCard: View {
       }
     }
     .padding(18)
-    .background(
-      RoundedRectangle(cornerRadius: 16, style: .continuous)
-        .fill(Color.cardBG)
-    )
-    .overlay(
-      RoundedRectangle(cornerRadius: 16, style: .continuous)
-        .stroke(Color.separator, lineWidth: 0.5)
+    .roundedEdge(
+      backgroundColor: .clear,
+      boarderColor: .clear,
+      paddingHorizontal: .zero,
+      paddingVertical: 4,
+      cornerRadius: 16,
+      tintOpacity: 0.1
     )
   }
 }
@@ -172,13 +172,13 @@ private struct HiddenCard: View {
       .padding(.top, 4)
     }
     .padding(18)
-    .background(
-      RoundedRectangle(cornerRadius: 16, style: .continuous)
-        .fill(Color.cardBG)
-    )
-    .overlay(
-      RoundedRectangle(cornerRadius: 16, style: .continuous)
-        .stroke(Color.separator, lineWidth: 0.5)
+    .roundedEdge(
+      backgroundColor: .clear,
+      boarderColor: .clear,
+      paddingHorizontal: .zero,
+      paddingVertical: 4,
+      cornerRadius: 16,
+      tintOpacity: 0.1
     )
   }
 }

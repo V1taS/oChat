@@ -18,7 +18,7 @@ import CSodium
 /// их как `UInt32`.
 public enum FileKind: UInt32, Sendable {
   /// Произвольные данные (значение `0`).
-  case data   = 0   // TOX_FILE_KIND_DATA
+  case data = 0   // TOX_FILE_KIND_DATA
   /// Аватар (значение `1`).
   case avatar = 1   // TOX_FILE_KIND_AVATAR
 

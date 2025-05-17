@@ -12,7 +12,7 @@ import CSodium
 // MARK: – Состояние соединения (Swift‑friendly)
 
 /// Текущее состояние соединения (для себя или конкретного друга).
-public enum ConnectionState: Sendable {
+public enum ToxConnectionState: Sendable {
   /// Нет соединения — пользователь (или друг) офлайн.
   case none
   /// Соединение через TCP‑relay.

@@ -30,7 +30,12 @@ public extension Array<Target> {
           .swiftlint(configPath: "\(Constants.appNameRelease)/\(Constants.appPath)/Sources"),
         ],
         dependencies: [
-          .external(name: "ToxSwift")
+          .external(name: "ToxSwift"),
+          .external(name: "Ecies"),
+          .external(name: "SKNotifications"),
+          .external(name: "ZipArchive"),
+          .external(name: "ApphudSDK"),
+          .external(name: "AmplitudeSwift")
         ],
         settings: Settings.app
       ),

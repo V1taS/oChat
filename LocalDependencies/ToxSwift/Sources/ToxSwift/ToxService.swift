@@ -22,7 +22,7 @@ public actor ToxService: ToxServiceProtocol {
   let friendEventStream = AsyncStream<FriendEvent>.makeStream()
   let fileEventStream = AsyncStream<FileEvent>.makeStream()
   let conferenceEventStream = AsyncStream<ConferenceEvent>.makeStream()
-  let selfConnectionStream = AsyncStream<ConnectionState>.makeStream()
+  let selfConnectionStream = AsyncStream<ToxConnectionState>.makeStream()
 
   // Храним исходные параметры, чтобы иметь возможность
   // пересоздать ядро без участия вызывающей стороны
@@ -102,7 +102,7 @@ public actor ToxService: ToxServiceProtocol {
 
   /// Создаёт новый `Tox`-инстанс, вешает ВСЕ колбэки и выполняет bootstrap.
   private static func makeCore(options: ToxServiceOptions, bootstrapNodes: [ToxNode])
-    throws -> UnsafeMutablePointer<Tox>
+  throws -> UnsafeMutablePointer<Tox>
   {
     // ─── 1. tox_new ───
     var errNew = TOX_ERR_NEW_OK
@@ -168,7 +168,7 @@ public actor ToxService: ToxServiceProtocol {
   public var conferenceEvents: AsyncStream<ConferenceEvent> {
     conferenceEventStream.stream
   }
-  public var connectionStatusEvents: AsyncStream<ConnectionState> {
+  public var connectionStatusEvents: AsyncStream<ToxConnectionState> {
     selfConnectionStream.stream
   }
 
@@ -482,24 +482,39 @@ public actor ToxService: ToxServiceProtocol {
     if errFriend != TOX_ERR_FRIEND_DELETE_OK { throw ToxError.friendRemoveFailed(errFriend) }
   }
 
-  public func sendMessage(toFriend friendID: UInt32, text: String, type: MessageKind = .normal) async throws {
+  public func sendMessage(
+    toFriend friendID: UInt32,
+    text: String
+  ) async throws -> UInt32 {
     try await withCheckedThrowingContinuation { cont in
-      var errMsg = TOX_ERR_FRIEND_SEND_MESSAGE_OK
-      _ = text.withCString { ptr in
-        tox_friend_send_message(toxPointer, friendID, type.cValue, ptr, text.utf8.count, &errMsg)
+      var err = TOX_ERR_FRIEND_SEND_MESSAGE_OK
+
+      // сохраняем то, что вернула C-функция
+      let messageId: UInt32 = text.withCString { ptr in
+        tox_friend_send_message(
+          toxPointer,
+          friendID,
+          MessageKind.normal.cValue,
+          ptr,
+          text.utf8.count,
+          &err
+        )
       }
-      errMsg == TOX_ERR_FRIEND_SEND_MESSAGE_OK ? cont.resume() : cont.resume(throwing: ToxError.messageSendFailed(errMsg))
+
+      err == TOX_ERR_FRIEND_SEND_MESSAGE_OK
+      ? cont.resume(returning: messageId)
+      : cont.resume(throwing: ToxError.messageSendFailed(err))
     }
   }
 
-  public func getFriendConnectionStatus(forID friendID: UInt32) -> ConnectionState {
-    ConnectionState(cValue: tox_friend_get_connection_status(toxPointer, friendID, nil)) ?? .none
+  public func getFriendConnectionStatus(forID friendID: UInt32) -> ToxConnectionState {
+    ToxConnectionState(cValue: tox_friend_get_connection_status(toxPointer, friendID, nil)) ?? .none
   }
 
-  public func sendFile(toFriend friendID: UInt32, kind: FileKind, size: UInt64, fileName: String) throws -> UInt32 {
+  public func sendFile(toFriend friendID: UInt32, size: UInt64, fileName: String) throws -> UInt32 {
     var errFile = TOX_ERR_FILE_SEND_OK
     let fileID = fileName.withCString { ptr in
-      tox_file_send(toxPointer, friendID, UInt32(kind.cValue), size, nil, ptr, fileName.utf8.count, &errFile)
+      tox_file_send(toxPointer, friendID, UInt32(FileKind.data.cValue), size, nil, ptr, fileName.utf8.count, &errFile)
     }
     if errFile != TOX_ERR_FILE_SEND_OK { throw ToxError.fileSendFailed(errFile) }
     return fileID
@@ -704,7 +719,7 @@ private let friendConnStatusCallback: @convention(c)
         let svc  = box.service
   else { return }
 
-  let state = ConnectionState(cValue: conn) ?? .none
+  let state = ToxConnectionState(cValue: conn) ?? .none
   Task { [weak svc] in
     svc?.friendEventStream.continuation.yield(.connectionStatusChanged(friendID: fid, state: state))
   }
@@ -973,7 +988,7 @@ private let selfConnectionStatusCallback: @convention(c)
         let svc = box.service
   else { return }
 
-  let state = ConnectionState(cValue: conn) ?? .none
+  let state = ToxConnectionState(cValue: conn) ?? .none
   Task { [weak svc] in
     svc?.selfConnectionStream.continuation.yield(state)
   }

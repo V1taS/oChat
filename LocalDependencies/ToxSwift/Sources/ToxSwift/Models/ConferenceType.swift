@@ -13,7 +13,7 @@ import CSodium
 
 public enum ConferenceType: UInt32, Sendable {
   case audioVideo = 0
-  case text       = 1
+  case text = 1
 }
 
 public enum ConferenceEvent: Sendable {

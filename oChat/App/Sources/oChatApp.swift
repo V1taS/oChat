@@ -10,6 +10,8 @@ import SwiftUI
 
 @main
 struct oChatApp: App {
+  /// «Вклеиваем» класс делегата в приложение
+  @UIApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
   @StateObject private var toxManager = ToxManager.shared
   @Environment(\.scenePhase) private var scenePhase
 

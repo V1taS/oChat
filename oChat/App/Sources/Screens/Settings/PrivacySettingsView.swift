@@ -11,7 +11,7 @@ import SwiftUI
 // MARK: - Palette
 private extension Color {
   /// Цвет карточек – мягкий голубоватый, похожий на скриншот
-  static let cardBG    = Color(red: 230/255, green: 247/255, blue: 255/255)
+  static let cardBG = Color(red: 230/255, green: 247/255, blue: 255/255)
   static let separator = Color.gray.opacity(0.22)
 }
 
@@ -19,12 +19,12 @@ private extension Color {
 struct PrivacySettingsView: View {
 
   // MARK: – Toggles (можно заменить на @AppStorage / ViewModel)
-  @State private var voiceVideoEnabled   = true
-  @State private var micEnabled          = true
-  @State private var cameraEnabled       = true
-  @State private var localNetEnabled     = false
+  @State private var voiceVideoEnabled = true
+  @State private var micEnabled = true
+  @State private var cameraEnabled = true
+  @State private var localNetEnabled = false
 
-  @State private var lockAppEnabled      = false
+  @State private var lockAppEnabled = false
 
   @State private var communityReqEnabled = true
   @State private var readReceiptsEnabled = true
@@ -142,13 +142,13 @@ private struct SettingsCard<Content: View>: View {
   @ViewBuilder var content: Content
   var body: some View {
     VStack(spacing: 0) { content }
-      .background(
-        RoundedRectangle(cornerRadius: 16, style: .continuous)
-          .fill(Color.cardBG)
-      )
-      .overlay(
-        RoundedRectangle(cornerRadius: 16, style: .continuous)
-          .stroke(Color.separator, lineWidth: 0.5)
+      .roundedEdge(
+        backgroundColor: .clear,
+        boarderColor: .clear,
+        paddingHorizontal: .zero,
+        paddingVertical: 4,
+        cornerRadius: 16,
+        tintOpacity: 0.1
       )
   }
 }

@@ -22,17 +22,27 @@ final class ToxManager: ObservableObject {
 
   /// Реальный сервис, реализующий ToxServiceProtocol (ваша обёртка над C-кодом toxcore).
   var toxService: ToxServiceProtocol!
+  private let cryptoService = CryptoService.shared
+  private let zipArchiveService = ZipArchiveService.shared
+  private let fileManagerService = FileManagerService.shared
 
   /// Пул тасков для обработки бесконечных AsyncStream.
   private var tasks = Set<Task<Void, Never>>()
 
   // MARK: - Публикуемые свойства (отражение состояния в UI)
 
+  /// Входящий запрос «добавь в друзья».
+  @Published var friendRequests: [FriendRequest] = []
+
   /// Список друзей (их ID, имя, статус и т.д.).
-  @Published var friends: [FriendModel] = []
+  @Published var friends: [FriendModel] = FriendModel.mockList()
 
   /// Все входящие/исходящие сообщения (в реальном приложении можно хранить раздельно по чатам).
-  @Published var messages: [ChatMessage] = []
+  @Published var messages: [UInt32: [ChatMessage]] = [
+    1: ChatMessage.mockList(friendID: 1),
+    2: ChatMessage.mockList(friendID: 2),
+    3: ChatMessage.mockList(friendID: 3)
+  ]
 
   /// Активные/известные конференции.
   @Published var conferences: [ConferenceModel] = []
@@ -44,30 +54,90 @@ final class ToxManager: ObservableObject {
   @Published var activeCalls: [UInt32: CallState] = [:]
 
   /// Статус подключения к DHT (для UI)
-  @Published var dhtConnectionState: ConnectionState = .none
-
-  /// Сводка чатов
-  @Published private(set) var chatSummaries: [ChatSummary] = []
+  @Published var connectionState: ConnectionStatus = .offline
 
   @AppStorage("toxSavedata")
   private var toxSavedataBase64: String = ""
+
+  // MARK: - Bindings helpers
+
+  // === ДРУЗЬЯ ================================================================
+  func bindingForFriend(_ friend: FriendModel) -> Binding<FriendModel>? {
+    guard let index = friends.firstIndex(of: friend) else { return nil }
+    return Binding(
+      get: { self.friends[index] },
+      set: { self.friends[index] = $0 }
+    )
+  }
+
+  // === ЗАПРОСЫ В ДРУЗЬЯ ======================================================
+  func bindingForFriendRequest(_ request: FriendRequest) -> Binding<FriendRequest>? {
+    guard let index = friendRequests.firstIndex(of: request) else { return nil }
+    return Binding(
+      get: { self.friendRequests[index] },
+      set: { self.friendRequests[index] = $0 }
+    )
+  }
+
+  // === КОНФЕРЕНЦИИ ===========================================================
+  func bindingForConference(_ conf: ConferenceModel) -> Binding<ConferenceModel>? {
+    guard let index = conferences.firstIndex(of: conf) else { return nil }
+    return Binding(
+      get: { self.conferences[index] },
+      set: { self.conferences[index] = $0 }
+    )
+  }
+
+  // === ПЕРЕДАЧИ ФАЙЛОВ =======================================================
+  func bindingForFileTransfer(_ transfer: FileTransferModel) -> Binding<FileTransferModel>? {
+    guard let index = fileTransfers.firstIndex(of: transfer) else { return nil }
+    return Binding(
+      get: { self.fileTransfers[index] },
+      set: { self.fileTransfers[index] = $0 }
+    )
+  }
+
+  // === СООБЩЕНИЯ (словарь) ===================================================
+  /// Binding ко всему массиву сообщений с конкретным другом.
+  func bindingForMessages(friendId: UInt32) -> Binding<[ChatMessage]> {
+    Binding(
+      get: { self.messages[friendId, default: []] },
+      set: { self.messages[friendId] = $0 }
+    )
+  }
+
+  // === ОДНО СООБЩЕНИЕ ==========================================================
+  func bindingForMessage(friendId: UInt32,
+                         message: ChatMessage) -> Binding<ChatMessage>? {
+    guard let friendMsgs = messages[friendId],
+          let index = friendMsgs.firstIndex(of: message) else {
+      return nil
+    }
+    return Binding(
+      get: { self.messages[friendId]![index] },
+      set: { self.messages[friendId]![index] = $0 }
+    )
+  }
+
+  // === СОСТОЯНИЕ ЗВОНКА (словарь) ============================================
+  func bindingForCallState(friendId: UInt32) -> Binding<CallState>? {
+    guard activeCalls[friendId] != nil else { return nil }
+    return Binding(
+      get: { self.activeCalls[friendId]! },
+      set: { self.activeCalls[friendId] = $0 }
+    )
+  }
 
   // MARK: - Инициализация
 
   private init() {
     startToxService()
-
-//    // Сохраняем при сворачивании приложения
-//    NotificationCenter.default.addObserver(
-//      forName: UIApplication.willResignActiveNotification,
-//      object: nil,
-//      queue: .main
-//    ) { [weak self] _ in self?.persistState() }
   }
 
   // MARK: - Жизненный цикл Tox-ядра
 
   func startToxService() {
+    connectionState = .inProgress
     do {
       let bootstrapNodes = try JSONLoader.load([ToxNode].self, fromFile: "bootstrapNodes")
       var toxServiceOptions = ToxServiceOptions()
@@ -97,6 +167,7 @@ final class ToxManager: ObservableObject {
   /// Корректно останавливает ядро и отменяет все подписки.
   /// Вызывайте, когда приложение уходит в background / закрывается.
   func shutdown() async {
+    connectionState = .offline
     // 3. Отключаемся от сети и освобождаем ресурсы toxcore
     await toxService.shutdown()
     print("🚨 Остановка Tox-ядра")
@@ -105,6 +176,7 @@ final class ToxManager: ObservableObject {
   /// Полный рестарт ядра с сохранением профиля.
   /// Вызывайте при возврате в foreground или при выявленной потере связи.
   func restart() async throws {
+    connectionState = .inProgress
     do {
       // 3. Перезапускаем ядро внутри ToxService
       try await toxService.restart()
@@ -126,7 +198,7 @@ final class ToxManager: ObservableObject {
     // 1. События сообщений
     let msgTask = Task {
       for await incoming in await toxService.incomingMessages {
-        handleIncomingMessage(incoming)
+        await handleIncomingMessage(incoming)
       }
     }
 
@@ -147,7 +219,7 @@ final class ToxManager: ObservableObject {
     // 4. События друзей
     let friendTask = Task {
       for await friendEvent in await toxService.friendEvents {
-        handleFriendEvent(friendEvent)
+        await handleFriendEvent(friendEvent)
       }
     }
 
@@ -170,24 +242,32 @@ final class ToxManager: ObservableObject {
 
   // MARK: - Обработчики событий
 
-  private func handleIncomingMessage(_ incoming: IncomingMessage) {
-    Task {
-      // Добавляем в общий список сообщений
-      let newMessage = ChatMessage(
-        friendID: incoming.friendID,
-        kind: incoming.kind,
-        text: incoming.text,
-        isOutgoing: false,
-        timestamp: Date(),
-        isDelivered: true,
-        isRead: false
-
-      )
-      messages.append(newMessage)
-
-      await rebuildChatSummaries()
-      persistState()
+  private func handleIncomingMessage(_ incoming: IncomingMessage) async {
+    guard let jsonData = incoming.text.data(using: .utf8),
+          let model = try? JSONDecoder().decode(MessengerNetworkRequestModel.self, from: jsonData) else {
+      return
     }
+
+    let toxAddressDecrypt = cryptoService.decrypt(model.toxAddress)
+    guard let idx = friends.firstIndex(where: { $0.id == incoming.friendID }) else { return }
+    let pushNotificationTokenDecrypt = cryptoService.decrypt(model.pushNotificationToken)
+    friends[idx].pushNotificationToken = pushNotificationTokenDecrypt
+    friends[idx].address = toxAddressDecrypt
+    guard let messageTextDecrypt = cryptoService.decrypt(model.messageText) else { return }
+
+    let newMessage = ChatMessage(
+      messageId: nil,
+      friendID: incoming.friendID,
+      message: messageTextDecrypt,
+      replyMessageText: nil,
+      reactions: nil,
+      messageType: .incoming,
+      date: Date(),
+      messageStatus: .sent,
+      attachments: []
+    )
+    messages[incoming.friendID]?.append(newMessage)
+    persistState()
   }
 
   private func handleFileEvent(_ event: FileEvent) {
@@ -197,11 +277,11 @@ final class ToxManager: ObservableObject {
       let transfer = FileTransferModel(
         friendID: friendID,
         fileID: fileID,
-        kind: kind,
         fileName: fileName,
         fileSize: size,
         progress: 0.0,
-        status: .incoming
+        status: .incoming,
+        fileData: Data() // 🚨 Не знаю что тут делать
       )
       fileTransfers.append(transfer)
 
@@ -265,59 +345,51 @@ final class ToxManager: ObservableObject {
     }
   }
 
-  private func handleFriendEvent(_ event: FriendEvent) {
+  private func handleFriendEvent(_ event: FriendEvent) async {
     switch event {
     case let .request(publicKey, message):
-      // Кто-то стучится к нам. Можно решить: автоматически добавить или спросить у пользователя
-      Task {
-        do {
-          let friendID = try await toxService.acceptFriendRequest(publicKey: publicKey)
-          print("✅ Приняли запрос; friendID = \(friendID)")
-          await refreshFriendsList()
-          // message содержит приветствие отправителя — можете сохранить/показать в UI
-        } catch {
-          print("❌ Не удалось принять запрос: \(error)")
-        }
+      guard let jsonData = message.data(using: .utf8),
+            let model = try? JSONDecoder().decode(MessengerNetworkRequestModel.self, from: jsonData) else {
+        return
       }
-
-    case let .nameChanged(friendID, name):
-      if let idx = friends.firstIndex(where: { $0.id == friendID }) {
-        friends[idx].name = name
-      }
-
-    case let .statusMessageChanged(friendID, message):
-      if let idx = friends.firstIndex(where: { $0.id == friendID }) {
-        friends[idx].statusMessage = message
-      }
-
-    case let .userStatusChanged(friendID, status):
-      if let idx = friends.firstIndex(where: { $0.id == friendID }) {
-        friends[idx].userStatus = status
-      }
+      let friendRequest = FriendRequest(
+        publicKey: publicKey,
+        meshAddress: nil,
+        toxAddress: nil,
+        publicKeyForEncryption: model.publicKeyForEncryption,
+        pushNotificationToken: nil,
+        chatRules: model.chatRules
+      )
+      friendRequests.append(friendRequest)
 
     case let .connectionStatusChanged(friendID, state):
-      if let idx = friends.firstIndex(where: { $0.id == friendID }) {
-        friends[idx].connectionState = state
+      guard let idx = friends.firstIndex(where: { $0.id == friendID }) else { return }
+      switch state {
+      case .none:
+        friends[idx].connectionState = .offline
+      case .tcp:
+        friends[idx].connectionState = .online
+      case .udp:
+        friends[idx].connectionState = .online
       }
 
     case let .typing(friendID, isTyping):
-      // Можно показывать индикатор "Печатает..." в UI
+      guard let idx = friends.firstIndex(where: { $0.id == friendID }) else { return }
+      friends[idx].isTyping = isTyping
       print("Друг \(friendID) typing = \(isTyping)")
 
     case let .readReceipt(friendID, messageID):
       // Удобно отмечать, что сообщение прочитано
+
+      guard let idx = messages[friendID]?.firstIndex(where: { $0.messageId == messageID }) else { return }
+      messages[friendID]?[idx].messageStatus = .read
       print("Друг \(friendID) прочитал сообщение \(messageID)")
-//      if let idx = messages.firstIndex(where: { $0.id == messageID }) {
-//        messages[idx].isDelivered = true
-//        messages[idx].isRead = true
-//      }
 
-    case let .lossyPacket(friendID, data):
-      // Свои низкоуровневые пакеты (например, для игр)
-      print("Получен lossy-пакет размером \(data.count) от друга \(friendID)")
-
-    case let .losslessPacket(friendID, data):
-      print("Получен lossless-пакет размером \(data.count) от друга \(friendID)")
+    case .lossyPacket: break
+    case .losslessPacket: break
+    case .nameChanged: break
+    case .statusMessageChanged: break
+    case .userStatusChanged: break
     }
   }
 
@@ -353,9 +425,16 @@ final class ToxManager: ObservableObject {
 
   // MARK: - Обработчик статуса DHT
 
-  private func handleDHTConnectionState(_ state: ConnectionState) {
+  private func handleDHTConnectionState(_ state: ToxConnectionState) {
     // Сохраняем в @Published-свойство, чтобы UI мог реагировать
-    dhtConnectionState = state
+    switch state {
+    case .none:
+      connectionState = .offline
+    case .tcp:
+      connectionState = .online
+    case .udp:
+      connectionState = .online
+    }
 
     print("Изменился статус DHT-подключения: \(state)")
     Task {
@@ -365,62 +444,37 @@ final class ToxManager: ObservableObject {
 
   // MARK: - Методы для обновления локальных списков
 
-  func rebuildChatSummaries() async {
-    var map: [UInt32: ChatSummary] = [:]
-
-    // 1. друзья → базовая строка
-    for f in friends {
-      map[f.id] = ChatSummary(
-        id: f.id,
-        contactEmoji: nil,                    // заполняйте своей логикой
-        address: await toxService.getFriendAddress(f.id),
-        isOnline: f.connectionState == .tcp,
-        isTyping: false,                      // когда появится событие typing → обновить
-        unreadCount: 0,
-        lastMessage: nil
-      )
-    }
-
-    // 2. последние сообщения → обновляем каждую строку
-    for msg in messages.sorted(by: { $0.timestamp > $1.timestamp }) {
-      guard var s = map[msg.friendID] else { continue }
-      if s.lastMessage == nil {
-        let kind = LastMessageSummary.Kind.text(msg.text)
-        s.lastMessage = LastMessageSummary(
-          kind: kind,
-          isOutgoing: msg.isOutgoing,
-          isDelivered: true,                 // TODO: подхватить реальный статус
-          isRead: !msg.isOutgoing            // читаем входящее сразу, исходящее → ждём квитанцию
-        )
-        map[msg.friendID] = s
-      }
-    }
-
-    chatSummaries = map.values.sorted { ($0.lastMessage?.preview ?? "") > ($1.lastMessage?.preview ?? "") }
-  }
-
-  func refreshFriendsList() async {
-    let friendIDs = await toxService.friendList()
-    var updatedFriends: [FriendModel] = []
-
-    for friendID in friendIDs {
-      let name = await toxService.getFriendName(friendID)
-      let statusMessage = await toxService.getFriendStatusMessage(friendID)
-      let connectionState = await toxService.getFriendConnectionStatus(forID: friendID)
-      let userStatus = await toxService.getFriendUserStatus(friendID)
-
-      let model = FriendModel(
-        id: friendID,
-        name: name,
-        statusMessage: statusMessage,
-        userStatus: userStatus,
-        connectionState: connectionState
-      )
-      updatedFriends.append(model)
-    }
-
-    self.friends = updatedFriends
-    await rebuildChatSummaries()
+  func refreshFriendsList() async { // 🚨 Подумать как сделать
+    //    let friendIDs = await toxService.friendList()
+    //    var updatedFriends: [FriendModel] = []
+    //
+    //    for friendID in friendIDs {
+    //      let name = await toxService.getFriendName(friendID)
+    //      let connectionState = await toxService.getFriendConnectionStatus(forID: friendID)
+    //
+    //      let model = FriendModel(
+    //        id: friendID,
+    //        address: T##String,
+    //        meshAddress: T##String?,
+    //        encryptionPublicKey: T##String?,
+    //        pushNotificationToken: T##String?,
+    //        contactEmoji: T##String?,
+    //        connectionState: T##ConnectionStatus,
+    //        isTyping: T##Bool,
+    //        unreadCount: T##Int
+    //      )
+    //
+    //      let model = FriendModel(
+    //        id: friendID,
+    //        name: name,
+    //        statusMessage: statusMessage,
+    //        userStatus: userStatus,
+    //        connectionState: connectionState
+    //      )
+    //      updatedFriends.append(model)
+    //    }
+    //
+    //    self.friends = updatedFriends
   }
 
   func refreshConferencesList() async {
@@ -444,31 +498,81 @@ final class ToxManager: ObservableObject {
 
   // MARK: - Публичные методы для View (добавление друзей, сообщений и т.д.)
 
+  public func acceptFriendRequest(friendRequest: FriendRequest) async {
+    // Кто-то стучится к нам. Можно решить: автоматически добавить или спросить у пользователя
+    do {
+      let friendID = try await toxService.acceptFriendRequest(publicKey: friendRequest.publicKey)
+      print("✅ Приняли запрос; friendID = \(friendID)")
+      let friend = FriendModel(
+        id: friendID,
+        address: "",
+        meshAddress: nil,
+        encryptionPublicKey: friendRequest.publicKeyForEncryption,
+        pushNotificationToken: nil,
+        avatar: .init(),
+        connectionState: .online,
+        isTyping: false,
+        unreadCount: .zero,
+        chatRules: friendRequest.chatRules
+      )
+
+      friends.append(friend)
+    } catch {
+      print("❌ Не удалось принять запрос: \(error)")
+    }
+  }
+
   /// Отправить сообщение конкретному другу.
-  func sendMessage(to friendID: UInt32, text: String) {
-    Task {
-      do {
-        try await toxService.sendMessage(
-          toFriend: friendID,
-          text: text,
-          type: .normal
-        )
-        // Сохраним и в локальный массив (как исходящее)
-        let outgoing = ChatMessage(
-          friendID: friendID,
-          kind: .normal,
-          text: text,
-          isOutgoing: true,
-          timestamp: Date(),
-          isDelivered: false,
-          isRead: false
-        )
-        messages.append(outgoing)
-        await rebuildChatSummaries()
-        persistState()
-      } catch {
-        print("Ошибка отправки сообщения другу \(friendID): \(error)")
-      }
+  func sendMessage(to friendID: UInt32, text: String) async {
+    guard let idx = friends.firstIndex(where: { $0.id == friendID }) else { return }
+    guard let encryptionPublicKey = friends[idx].encryptionPublicKey else { return }
+
+    let messageTextEncrypt = cryptoService.encrypt(text, publicKey: encryptionPublicKey)
+    let pushNotificationTokenEncrypt = cryptoService.encrypt(Secrets.pushNotificationToken, publicKey: encryptionPublicKey)
+    let toxAddressEncrypt = await cryptoService.encrypt(getOwnAddress(), publicKey: encryptionPublicKey)
+
+    let model = MessengerNetworkRequestModel(
+      messageID: UUID().uuidString,
+      messageText: messageTextEncrypt,
+      replyMessageText: nil,
+      reactions: nil,
+      attachments: nil,
+      meshAddress: nil,
+      toxAddress: toxAddressEncrypt,
+      publicKeyForEncryption: cryptoService.publicKey(),
+      pushNotificationToken: pushNotificationTokenEncrypt,
+      chatRules: friends[idx].chatRules
+    )
+    guard let json = createJSONString(from: model), let jsonData = json.data(using: .utf8) else { return }
+
+    // счётчик байтов
+    if jsonData.count > 1_300 {
+      // JSON слишком большой текст, отправляем как файл
+      await sendFile(to: friendID, messageText: text, attachments: [])
+      return
+    }
+
+    do {
+      let messageId = try await toxService.sendMessage(
+        toFriend: friendID,
+        text: json
+      )
+      // Сохраним и в локальный массив (как исходящее)
+      let outgoing = ChatMessage(
+        messageId: messageId,
+        friendID: friendID,
+        message: text,
+        replyMessageText: nil,
+        reactions: nil,
+        messageType: .outgoing,
+        date: Date(),
+        messageStatus: .sent,
+        attachments: nil
+      )
+      messages[friendID]?.append(outgoing)
+      persistState()
+    } catch {
+      print("Ошибка отправки сообщения другу \(friendID): \(error)")
     }
   }
 
@@ -608,36 +712,79 @@ final class ToxManager: ObservableObject {
   }
 
   /// Отправить (запушить) файл другу целиком.
-  func sendFile(to friendID: UInt32, fileURL: URL) {
-    Task {
-      do {
-        let fileData = try Data(contentsOf: fileURL)
-        let fileSize = UInt64(fileData.count)
-        let fileName = fileURL.lastPathComponent
-
-        let fileID = try await toxService.sendFile(
-          toFriend: friendID,
-          kind: .data,
-          size: fileSize,
-          fileName: fileName
-        )
-
-        // Добавляем в локальный список, чтобы трекать
-        let transfer = FileTransferModel(
-          friendID: friendID,
-          fileID: fileID,
-          kind: .data,
-          fileName: fileName,
-          fileSize: fileSize,
-          progress: 0,
-          status: .inProgress
-        )
-        fileTransfers.append(transfer)
-
-        // Ждём, когда друг запросит chunk-и (или используем другую логику)
-      } catch {
-        print("Ошибка при отправке файла \(fileURL): \(error)")
+  func sendFile(
+    to friendID: UInt32,
+    messageText: String?,
+    attachments: [MediaAttachmentURL]
+  ) async {
+    guard let idx = friends.firstIndex(where: { $0.id == friendID }) else { return }
+    guard let encryptionPublicKey = friends[idx].encryptionPublicKey else { return }
+    do {
+      let valid = attachments.compactMap { $0 }
+      var mapped = [MediaAttachmentData]()
+      mapped.reserveCapacity(valid.count)
+      for attachment in valid {
+        mapped.append(try await attachment.mapToData())
       }
+
+      var messageTextEncrypt: String?
+      if let messageText {
+        messageTextEncrypt = cryptoService.encrypt(messageText, publicKey: encryptionPublicKey)
+      }
+      let pushNotificationTokenEncrypt = cryptoService.encrypt(Secrets.pushNotificationToken, publicKey: encryptionPublicKey)
+      let toxAddressEncrypt = await cryptoService.encrypt(getOwnAddress(), publicKey: encryptionPublicKey)
+
+      let model = MessengerNetworkRequestModel(
+        messageID: UUID().uuidString,
+        messageText: messageTextEncrypt,
+        replyMessageText: nil,
+        reactions: nil,
+        attachments: mapped,
+        meshAddress: nil,
+        toxAddress: toxAddressEncrypt,
+        publicKeyForEncryption: cryptoService.publicKey(),
+        pushNotificationToken: pushNotificationTokenEncrypt,
+        chatRules: friends[idx].chatRules
+      )
+      guard let json = createJSONString(from: model), let jsonData = json.data(using: .utf8) else { return }
+
+      let password = cryptoService.generatePassword(length: 30)
+      let passwordEncrypt = cryptoService.encrypt(password, publicKey: encryptionPublicKey)
+      guard let passwordEncrypt,
+            let passwordEncodedString = passwordEncrypt.addingPercentEncoding(withAllowedCharacters: .urlHostAllowed) else {
+        return
+      }
+      let zipFileURL = try await zipArchiveService.zipFiles(
+        files: [(name: UUID().uuidString, data: jsonData)],
+        archiveName: passwordEncodedString,
+        password: password
+      )
+
+      let fileSize = UInt64(jsonData.count)
+      let zipFile = try Data(contentsOf: zipFileURL)
+      let fileName = UUID().uuidString
+
+      let fileID = try await toxService.sendFile(
+        toFriend: friendID,
+        size: fileSize,
+        fileName: fileName
+      )
+
+      // Добавляем в локальный список, чтобы трекать
+      let transfer = FileTransferModel(
+        friendID: friendID,
+        fileID: fileID,
+        fileName: fileName,
+        fileSize: fileSize,
+        progress: 0,
+        status: .inProgress,
+        fileData: zipFile
+      )
+      fileTransfers.append(transfer)
+
+      // Ждём, когда друг запросит chunk-и (или используем другую логику)
+    } catch {
+      print("Ошибка при отправке файла: \(error)")
     }
   }
 
@@ -770,84 +917,6 @@ final class ToxManager: ObservableObject {
 
 // MARK: - Пример дополнительных моделей (для хранения во @Published)
 
-struct LastMessageSummary: Hashable {
-  enum Kind: Hashable { case text(String), file, audioCall, videoCall }
-  let kind: Kind
-  let isOutgoing: Bool
-  let isDelivered: Bool
-  let isRead: Bool
-
-  var preview: String {
-    switch kind {
-    case .text(let t):  t
-    case .file:         "📁 Файл"
-    case .audioCall:    "📞 Аудиозвонок"
-    case .videoCall:    "🎥 Видеозвонок"
-    }
-  }
-}
-
-struct ChatSummary: Identifiable, Hashable {
-  let id: UInt32                // = friendID
-  let contactEmoji: String?     // 1-символьный emoji или nil
-  let address: String           // 76-символьный адрес друга
-  let isOnline: Bool
-  let isTyping: Bool            // пока нет sdk-события, заглушка = false
-  var unreadCount: Int
-  var lastMessage: LastMessageSummary?
-  var shortAddress: String { "\(address.prefix(5))…\(address.suffix(5))" }
-}
-
-/// Модель друга, чтобы удобно хранить в списке (для SwiftUI)
-struct FriendModel: Identifiable {
-  let id: UInt32
-  var name: String
-  var statusMessage: String
-  var userStatus: UserStatus
-  var connectionState: ConnectionState
-}
-
-/// Модель чата/сообщения
-struct ChatMessage: Identifiable {
-  let id = UUID() // локальный идентификатор для SwiftUI
-  let friendID: UInt32
-  let kind: MessageKind
-  let text: String
-  let isOutgoing: Bool
-  let timestamp: Date
-  var isDelivered: Bool
-  var isRead: Bool
-}
-
-/// Модель конференции
-struct ConferenceModel: Identifiable {
-  let id: UInt32
-  var title: String
-  let type: ConferenceType
-}
-
-/// Модель файла в процессе отправки/приёма
-struct FileTransferModel: Identifiable {
-  let id = UUID()
-  let friendID: UInt32
-  let fileID: UInt32
-  let kind: FileKind
-  let fileName: String
-  let fileSize: UInt64
-  var progress: Double
-  var status: TransferStatus
-}
-
-enum TransferStatus {
-  case incoming, inProgress, paused, cancelled, completed
-}
-
-/// Статус звонка
-struct CallState {
-  var audioEnabled: Bool
-  var videoEnabled: Bool
-}
-
 // MARK: - Утилита для hex -> Data
 extension Data {
   init?(hexString: String) {
@@ -874,3 +943,40 @@ extension Data {
     self = data
   }
 }
+
+extension ToxManager {
+  func createJSONString(from model: MessengerNetworkRequestModel) -> String? {
+    let encoder = JSONEncoder()
+
+    do {
+      let jsonData = try encoder.encode(model)
+      guard let jsonString = String(data: jsonData, encoding: .utf8) else {
+        print("Ошибка преобразования данных JSON в строку.")
+        return nil
+      }
+      return jsonString
+    } catch {
+      print("Ошибка кодирования модели в JSON: \(error)")
+      return nil
+    }
+  }
+}
+
+#if DEBUG
+@MainActor
+extension ToxManager {
+  /// Заглушка с демо-данными, чтобы превью работало офлайн
+  static var preview: ToxManager {
+    let manager = ToxManager.shared
+    manager.friends = FriendModel.mockList()
+    manager.messages = [
+      1: ChatMessage.mockList(friendID: 1),
+      2: ChatMessage.mockList(friendID: 2),
+      3: ChatMessage.mockList(friendID: 3)
+    ]
+    manager.friendRequests = FriendRequest.mockList()
+    manager.connectionState = .online
+    return manager
+  }
+}
+#endif

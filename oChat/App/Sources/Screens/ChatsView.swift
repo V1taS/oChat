@@ -15,21 +15,14 @@ struct ChatsView: View {
   @State private var showSettings = false
   @State private var presentStartConv = false
 
-  private var filtered: [ChatSummary] {
-    if query.isEmpty { return toxManager.chatSummaries }
-    return toxManager.chatSummaries.filter {
-      $0.shortAddress.localizedCaseInsensitiveContains(query) ||
-      ($0.lastMessage?.preview ?? "").localizedCaseInsensitiveContains(query)
-    }
-  }
-
   var body: some View {
     NavigationStack {
       ScrollView {
         LazyVStack(spacing: 12) {
-          ForEach(filtered) { chat in
-            NavigationLink(value: chat.id) {
-              ChatRow(chat: chat)
+          ForEach(toxManager.friends) { friend in
+            let message = toxManager.messages[friend.id]?.last
+            NavigationLink(value: friend.id) {
+              ChatRow(friendModel: friend, lastMessage: message)
             }
             .buttonStyle(.plain)
           }
@@ -44,7 +37,7 @@ struct ChatsView: View {
             .accessibilityLabel("Настройки")
         }
         ToolbarItem(placement: .principal) {
-          ConnectionStatusView(state: toxManager.dhtConnectionState)
+          ConnectionStatusView(state: toxManager.connectionState)
         }
         ToolbarItem(placement: .navigationBarTrailing) {
           Button { presentStartConv = true } label: { Image(systemName: "square.and.pencil") }
@@ -54,7 +47,6 @@ struct ChatsView: View {
       .navigationDestination(for: UInt32.self) { friendID in
         ChatView(friendID: friendID)
       }
-      .searchable(text: $query, placement: .navigationBarDrawer, prompt: "Поиск")
       .sheet(isPresented: $showSettings) {
         SettingsView()
       }
@@ -69,19 +61,20 @@ struct ChatsView: View {
 // MARK: - Вспомогательные компоненты ---------------------------------------------------------------
 
 private struct ChatRow: View {
-  let chat: ChatSummary
+  let friendModel: FriendModel
+  let lastMessage: ChatMessage?
 
   var body: some View {
     HStack(spacing: 12) {
-      AvatarView(emoji: chat.contactEmoji, address: chat.address, isOnline: chat.isOnline)
+      avatarView
 
       VStack(alignment: .leading, spacing: 6) {
-        Text(chat.shortAddress).font(.headline).lineLimit(1)
+        Text(friendModel.shortAddress).font(.headline).lineLimit(1)
 
-        if chat.isTyping {
+        if friendModel.isTyping {
           TypingIndicator()
         } else {
-          Text(chat.lastMessage?.preview ?? "Нет сообщений")
+          Text(lastMessage?.message ?? "Нет сообщений")
             .font(.subheadline)
             .foregroundStyle(.secondary)
             .lineLimit(2)
@@ -89,44 +82,70 @@ private struct ChatRow: View {
       }
 
       Spacer(minLength: 8)
-      RightStatus(chat: chat)
+      RightStatus(friendModel: friendModel, lastMessage: lastMessage)
     }
-    .padding(.vertical, 8)
-    .padding(.horizontal, 12)
-    .background(.ultraThinMaterial,
-                in: RoundedRectangle(cornerRadius: 18, style: .continuous))
-    .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous)
-      .strokeBorder(Color.gray.opacity(0.15), lineWidth: 0.5))
+    .roundedEdge(
+      paddingHorizontal: 12,
+      paddingVertical: 8,
+      cornerRadius: 18
+    )
+  }
+}
+
+extension ChatRow {
+  var avatarView: some View {
+    ZStack {
+      // Кружок с цветом + иконкой
+      Circle()
+        .foregroundColor(friendModel.avatar.color.opacity(0.2))
+
+      switch friendModel.avatar.icon {
+      case let .systemSymbol(systemName):
+        Image(systemName: systemName)
+          .foregroundColor(friendModel.avatar.color)
+      case let .customEmoji(emoji):
+        Text(emoji)
+          .foregroundColor(friendModel.avatar.color)
+      }
+
+      Circle().fill(friendModel.connectionState == .online ? .green : .gray)
+        .frame(width: 8, height: 8)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
+    }
+    .frame(width: 36, height: 36)
   }
 }
 
 // статус галочки / бейдж
 private struct RightStatus: View {
-  let chat: ChatSummary
+  let friendModel: FriendModel
+  let lastMessage: ChatMessage?
 
   var body: some View {
     VStack(alignment: .trailing) {
       Spacer()
-      if let last = chat.lastMessage, last.isOutgoing,
-         case .text = last.kind {
-        Checkmarks(delivered: last.isDelivered, read: last.isRead)
-      } else if !chat.isTyping, chat.unreadCount > 0 {
-        UnreadBadge(count: chat.unreadCount)
+      if let last = lastMessage, case .outgoing = last.messageType {
+        Checkmarks(messageStatus: last.messageStatus)
+        EmptyView()
+      } else if !friendModel.isTyping, friendModel.unreadCount > 0 {
+        UnreadBadge(count: friendModel.unreadCount)
       }
     }
   }
 
   private struct Checkmarks: View {
-    let delivered: Bool; let read: Bool
+    var messageStatus: MessageStatus
+
     var body: some View {
-      if read {
-        double(.blue).accessibilityLabel("Прочитано")
-      } else if delivered {
+      switch messageStatus {
+      case .sending:
         double(.secondary).accessibilityLabel("Доставлено")
-      } else {
-        Image(systemName: "checkmark")
-          .font(.caption2).foregroundStyle(.secondary)
-          .accessibilityLabel("Отправлено")
+      case .failed:
+        EmptyView()
+      case .sent:
+        double(.secondary).accessibilityLabel("Доставлено")
+      case .read:
+        double(.blue).accessibilityLabel("Прочитано")
       }
     }
     private func double(_ c: Color) -> some View {
@@ -141,17 +160,25 @@ private struct RightStatus: View {
   private struct UnreadBadge: View {
     let count: Int
     var body: some View {
-      Text("\(count)") .font(.caption2.weight(.semibold))
-        .padding(.horizontal, 6).padding(.vertical, 2)
-        .background(Capsule().fill(.blue)).foregroundStyle(.white)
-        .accessibilityLabel("\(count) непрочитанных")
+      Text("\(count)").font(.caption2.weight(.semibold))
+        .roundedEdge(
+          backgroundColor: .blue,
+          boarderColor: .clear,
+          paddingHorizontal: 6,
+          paddingVertical: 2,
+          paddingBottom: .zero,
+          paddingTrailing: .zero,
+          cornerRadius: 10,
+          tintOpacity: 0.7
+        )
+        .foregroundStyle(.white)
     }
   }
 }
 
 // Индикация подключения
 private struct ConnectionStatusView: View {
-  let state: ConnectionState
+  let state: ConnectionStatus
   var body: some View {
     HStack(spacing: 4) {
       Circle().fill(color).frame(width: 8, height: 8)
@@ -161,17 +188,26 @@ private struct ConnectionStatusView: View {
   }
   private var title: String {
     switch state {
-    case .tcp:  return "В сети"
-    case .udp:  return "UDP-режим"
-    case .none: return "Не в сети"
+
+    case .online:
+      return "В сети"
+    case .offline:
+      return "Не в сети"
+    case .inProgress:
+      return "Подключение"
     }
   }
 
   private var color: Color {
     switch state {
-    case .tcp:  return .green
-    case .udp:  return .yellow
-    case .none: return .red
+    case .online:  return .green
+    case .inProgress:  return .yellow
+    case .offline: return .red
     }
   }
+}
+
+#Preview {
+  ChatsView()
+    .environmentObject(ToxManager.preview)
 }

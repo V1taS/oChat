@@ -13,7 +13,7 @@ import CoreImage.CIFilterBuiltins
 private enum Palette {
   static let sheetBG   = Color(.systemGroupedBackground)
   static let separator = Color.gray.opacity(0.22)
-  static let icon      = Color.primary
+  static let icon = Color.primary
 }
 
 // MARK: - Экран
@@ -23,6 +23,7 @@ struct StartConversationView: View {
   @Environment(\.dismiss) private var dismiss
   @EnvironmentObject var toxManager: ToxManager
   @State private var ownAddress = ""
+  @State private var showScanQR = false
 
   // MARK: - Body
   var body: some View {
@@ -43,13 +44,16 @@ struct StartConversationView: View {
       .toolbar {
         ToolbarItem(placement: .navigationBarTrailing) {
           Button {
-            dismiss()
+            showScanQR = true
           } label: {
-            Image(systemName: "xmark")
+            Image(systemName: "qrcode")
               .font(.headline)
           }
-          .accessibilityLabel("Закрыть")
+          .accessibilityLabel("QR-код профиля")
         }
+      }
+      .sheet(isPresented: $showScanQR) {
+        ScanQRView()
       }
       .task {
         ownAddress = await toxManager.getOwnAddress()
@@ -83,11 +87,13 @@ private extension StartConversationView {
       divider
       ActionRow(icon: "person.badge.plus", title: "Пригласить друга")
     }
-    .background(.ultraThinMaterial,
-                in: RoundedRectangle(cornerRadius: 16, style: .continuous))
-    .overlay(
-      RoundedRectangle(cornerRadius: 16, style: .continuous)
-        .strokeBorder(Palette.separator, lineWidth: 0.5)
+    .roundedEdge(
+      backgroundColor: .clear,
+      boarderColor: .clear,
+      paddingHorizontal: .zero,
+      paddingVertical: 4,
+      cornerRadius: 16,
+      tintOpacity: 0.1
     )
     .padding(.horizontal)
   }
@@ -99,7 +105,7 @@ private extension StartConversationView {
         .font(.headline)
         .frame(maxWidth: .infinity, alignment: .leading)
 
-      Text("Друзья могут отправить вам сообщение, отсканировав ваш QR-код.")
+      Text("Друзья могут отправить вам сообщение")
         .font(.subheadline)
         .foregroundStyle(.secondary)
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -125,6 +131,59 @@ private extension StartConversationView {
           .shadow(radius: 2, y: 1)
       )
       .accessibilityLabel("QR-код вашей учётной записи")
+
+      // Сам ID (моноширинный, может быть в 2 строки)
+      Text(ownAddress)
+        .font(.system(.footnote, design: .monospaced))
+        .fontWeight(.bold)
+        .multilineTextAlignment(.center)
+        .lineLimit(3)
+        .roundedEdge(
+          backgroundColor: .gray,
+          boarderColor: .clear,
+          paddingHorizontal: 12,
+          paddingVertical: 4,
+          cornerRadius: 16,
+          tintOpacity: 0.1
+        )
+        .padding(.horizontal)
+
+      // Кнопки «Поделиться / Скопировать»
+      HStack(spacing: 24) {
+        TapGestureView(
+          style: .flash,
+          touchesEnded: {
+            // TODO: -
+          }
+        ) {
+          Text("Поделиться")
+            .roundedEdge(
+              backgroundColor: .gray,
+              boarderColor: .clear,
+              paddingHorizontal: 12,
+              paddingVertical: 4,
+              cornerRadius: 16,
+              tintOpacity: 0.1
+            )
+        }
+
+        TapGestureView(
+          style: .flash,
+          touchesEnded: {
+            // TODO: -
+          }
+        ) {
+          Text("Скопировать")
+            .roundedEdge(
+              backgroundColor: .gray,
+              boarderColor: .clear,
+              paddingHorizontal: 12,
+              paddingVertical: 4,
+              cornerRadius: 16,
+              tintOpacity: 0.1
+            )
+        }
+      }
     }
   }
 
@@ -164,7 +223,7 @@ private extension StartConversationView {
     let context = CIContext()
     let filter  = CIFilter.qrCodeGenerator()
     filter.setValue(data, forKey: "InputMessage")
-    filter.setValue("M",   forKey: "InputCorrectionLevel")
+    filter.setValue("M", forKey: "InputCorrectionLevel")
 
     guard
       let outputImage = filter.outputImage,
@@ -176,7 +235,11 @@ private extension StartConversationView {
   }
 }
 
-// MARK: - Preview
+// MARK: – Preview
+
 #Preview {
-  StartConversationView()
+  NavigationStack {
+    StartConversationView()
+      .environmentObject(ToxManager.preview)
+  }
 }

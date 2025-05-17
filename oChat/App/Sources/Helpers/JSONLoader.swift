@@ -9,7 +9,6 @@
 import Foundation
 
 enum JSONLoader {
-
   /// Синхронная загрузка (удобно вызывать из `init`)
   static func load<T: Decodable>(
     _ type: T.Type,

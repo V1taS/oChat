@@ -14,8 +14,12 @@ struct ChatView: View {
   @State private var draft = ""
 
   private var friendMessages: [ChatMessage] {
-    toxManager.messages.filter { $0.friendID == friendID }
-                .sorted { $0.timestamp < $1.timestamp }
+    toxManager.messages[friendID]!.sorted { $0.date < $1.date }
+  }
+
+  private var friendModel: FriendModel? {
+    guard let idx = toxManager.friends.firstIndex(where: { $0.id == friendID }) else { return nil }
+    return toxManager.friends[idx]
   }
 
   var body: some View {
@@ -26,7 +30,7 @@ struct ChatView: View {
             ForEach(friendMessages) { msg in
               Bubble(message: msg)
                 .frame(maxWidth: .infinity,
-                       alignment: msg.isOutgoing ? .trailing : .leading)
+                       alignment: msg.messageType == .outgoing ? .trailing : .leading)
                 .id(msg.id)
             }
             // TODO: live typing-indicator от tox
@@ -35,7 +39,7 @@ struct ChatView: View {
           .padding(.vertical, 6)
         }
         .background(Color(.systemGroupedBackground))
-        .onChange(of: friendMessages.count) { _ in
+        .onChange(of: friendMessages.count) { _, _ in
           withAnimation {
             proxy.scrollTo(friendMessages.last?.id, anchor: .bottom)
           }
@@ -47,7 +51,9 @@ struct ChatView: View {
       VStack(spacing: 0) {
         Divider()
         InputBar(text: $draft) {
-          send()
+          Task {
+            await send()
+          }
         }
       }
       .fixedSize(horizontal: false, vertical: true)
@@ -55,29 +61,32 @@ struct ChatView: View {
     .navigationBarTitleDisplayMode(.inline)
     .toolbar {
       ToolbarItem(placement: .principal) {
-        Text(shortAddress).font(.headline)
+        NavigationLink {
+          if let friendModel {
+            ContactDetailView(friendModel: friendModel)
+          }
+        } label: {
+          Text(friendModel?.shortAddress ?? "")
+            .font(.headline)
+            .foregroundColor(.primary)
+        }
       }
       ToolbarItem(placement: .navigationBarTrailing) {
         NavigationLink {
-          ContactDetailView()
+          if let friendModel {
+            ContactDetailView(friendModel: friendModel)
+          }
         } label: {
-          AvatarView(emoji: "😉",
-                     address: shortAddress,
-                     isOnline: true)
+          avatarView
         }
       }
     }
   }
 
-  private var shortAddress: String {
-    guard let f = toxManager.friends.first(where: { $0.id == friendID }) else { return "…" }
-    return "\(f.name)"
-  }
-
-  private func send() {
+  private func send() async {
     let text = draft.trimmingCharacters(in: .whitespacesAndNewlines)
     guard !text.isEmpty else { return }
-    toxManager.sendMessage(to: friendID, text: text)
+    await toxManager.sendMessage(to: friendID, text: text)
     draft = ""
   }
 
@@ -89,55 +98,76 @@ struct ChatView: View {
   #endif
 }
 
+extension ChatView {
+  var avatarView: some View {
+    ZStack {
+      // Кружок с цветом + иконкой
+      Circle()
+        .foregroundColor(friendModel?.avatar.color.opacity(0.2))
+
+      switch friendModel?.avatar.icon ?? .customEmoji("?") {
+      case let .systemSymbol(systemName):
+        Image(systemName: systemName)
+          .foregroundColor(friendModel?.avatar.color)
+      case let .customEmoji(emoji):
+        Text(emoji)
+          .foregroundColor(friendModel?.avatar.color)
+      }
+
+      Circle().fill(friendModel?.connectionState == .online ? .green : .gray)
+        .frame(width: 8, height: 8)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
+    }
+    .frame(width: 36, height: 36)
+  }
+}
+
 // MARK: - UI компоненты (Bubble + InputBar) ---------------------------------------------------------
 
 private struct Bubble: View {
   let message: ChatMessage
-  var isOut: Bool { message.isOutgoing }
-  private var bubbleFill: AnyShapeStyle {
-    isOut
-      ? AnyShapeStyle(Color.blue.opacity(0.85))
-      : AnyShapeStyle(.ultraThinMaterial)
-  }
+  var isOut: Bool { message.messageType == .outgoing }
 
   var body: some View {
-    ZStack(alignment: isOut ? .bottomTrailing : .bottomLeading) {
-      RoundedRectangle(cornerRadius: 16, style: .continuous)
-        .fill(bubbleFill)
-        .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous)
-                  .strokeBorder(.gray.opacity(0.15), lineWidth: 0.5))
-
-      Text(message.text)
-        .padding(.vertical, 8).padding(.horizontal, 12)
-        .foregroundStyle(isOut ? .white : .primary)
+    HStack(spacing: 4) {
+      Text(message.message)
+        .foregroundStyle(.primary)
 
       if isOut {
-        Checkmarks(delivered: message.isDelivered,
-                   read: message.isRead)
-          .padding(.horizontal, 4).padding(.bottom, 1)
-          .alignmentGuide(.bottom) { $0[.bottom] }
+        MessageStatusView(messageStatus: message.messageStatus)
+          .offset(x: 4, y: 6)
       }
     }
     .fixedSize(horizontal: true, vertical: false)
+    .roundedEdge(
+      backgroundColor: isOut ? .blue : .gray,
+      boarderColor: .clear,
+      paddingHorizontal: 12,
+      paddingVertical: 8,
+      cornerRadius: 16,
+      tintOpacity: 0.1
+    )
     .frame(maxWidth: UIScreen.main.bounds.width * 0.6,
            alignment: isOut ? .trailing : .leading)
   }
 
-  private struct Checkmarks: View {
-    let delivered: Bool; let read: Bool
+  private struct MessageStatusView: View {
+    let messageStatus: MessageStatus
     var body: some View {
-      if read {
-        double(.white)
-      } else if delivered {
-        double(.white.opacity(0.7))
-      } else {
-        Image(systemName: "checkmark")
-          .font(.caption2).foregroundStyle(.white.opacity(0.7))
+      switch messageStatus {
+      case .sending:
+        double(.blue)
+      case .failed:
+        double(.blue)
+      case .sent:
+        double(.blue.opacity(0.7))
+      case .read:
+        double(.blue)
       }
     }
     private func double(_ c: Color) -> some View {
       ZStack {
-        Image(systemName: "checkmark").offset(x: -3)
+        Image(systemName: "checkmark").offset(x: -4)
         Image(systemName: "checkmark")
       }.font(.caption2).foregroundStyle(c)
     }
@@ -187,6 +217,10 @@ private struct InputBar: View {
 }
 
 // MARK: – Preview
+
 #Preview {
-  ChatView(friendID: 0)
+  NavigationStack {
+    ChatView(friendID: 1)
+      .environmentObject(ToxManager.preview)
+  }
 }

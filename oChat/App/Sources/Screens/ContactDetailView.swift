@@ -10,45 +10,21 @@ import SwiftUI
 
 // MARK: - Palette
 private enum Palette {
-  static let sheetBG   = Color(.systemGroupedBackground)
+  static let sheetBG = Color(.systemGroupedBackground)
   static let separator = Color.gray.opacity(0.22)
   static let accentBG  = Color(uiColor: .secondarySystemBackground)
-  static let icon      = Color.primary
-}
-
-// MARK: - Model
-struct ContactTest {
-  let id: UUID  = .init()
-  let fullName: String
-  let lastSeen: String
-  let phone: String
-  let username: String
-  let avatar: Image    // Image("avatar") или AsyncImage
-  let media: [MediaItem]
-}
-
-struct MediaItem: Identifiable {
-  let id = UUID()
-  let thumbnail: Image
-  let duration: String? // для видео (например "2:57"), для фото nil
+  static let icon = Color.primary
 }
 
 // MARK: - Экран
 struct ContactDetailView: View {
-  // MARK: In-memory demo-данные
-  private let contact = ContactTest(
-    fullName: "Алексей Корнеев",
-    lastSeen: "был(а) сегодня в 05:16",
-    phone: "+7 925 312 1107",
-    username: "@lex58911",
-    avatar: Image("playstore"),          // добавьте ресурс в Assets
-    media: (0..<15).map { idx in            // примеры превью
-      let img = Image("Sample\(idx % 6)")   // 6 заглушек в Assets
-      return MediaItem(thumbnail: img, duration: idx.isMultiple(of: 3) ? "2:0\(idx % 10)" : nil)
-    })
+
+  @EnvironmentObject var toxManager: ToxManager
+  let friendModel: FriendModel
 
   // MARK: State
   @State private var selectedTab: Tab = .media
+  @State private var presentEditAvatarView = false
 
   var body: some View {
     ScrollView {
@@ -56,18 +32,17 @@ struct ContactDetailView: View {
 
         // MARK: Аватар + имя + статус
         VStack(spacing: 8) {
-          contact.avatar
-            .resizable()
-            .scaledToFill()
-            .frame(width: 112, height: 112)
-            .clipShape(Circle())
+          TapGestureView(
+            style: .flash,
+            touchesEnded: {
+              presentEditAvatarView = true
+            }
+          ) {
+            avatarView
+          }
 
-          Text(contact.fullName)
+          Text(friendModel.shortAddress)
             .font(.title2.weight(.semibold))
-
-          Text(contact.lastSeen)
-            .font(.subheadline)
-            .foregroundStyle(.secondary)
         }
         .padding(.top, 12)
 
@@ -80,23 +55,49 @@ struct ContactDetailView: View {
         // MARK: Tabs + контент
         VStack(spacing: 14) {
           tabBar
-          mediaGrid
         }
       }
       .padding(.horizontal)
       .padding(.bottom, 20)
     }
     .background(Palette.sheetBG.ignoresSafeArea())
-    .navigationTitle("")        // пустой, чтобы был крупный заголовок
+    .navigationTitle("")
     .navigationBarTitleDisplayMode(.inline)
-    .toolbar {
-      ToolbarItem(placement: .navigationBarTrailing) {
-        Button("Изм.") { /* edit */ }
-          .font(.body.weight(.semibold))
-      }
-    }
     .presentationDetents([.large])
     .presentationDragIndicator(.visible)
+    .sheet(isPresented: $presentEditAvatarView) {
+      EditAvatarView(friendModel: friendModel)
+    }
+  }
+}
+
+extension ContactDetailView {
+  var avatarView: some View {
+    ZStack {
+      // Кружок с цветом + иконкой
+      Circle()
+        .foregroundColor(friendModel.avatar.color.opacity(0.2))
+
+      switch friendModel.avatar.icon {
+      case let .systemSymbol(systemName):
+        Image(systemName: systemName)
+          .resizable()
+          .scaledToFit()
+          .frame(maxHeight: 40)
+          .foregroundColor(friendModel.avatar.color)
+      case let .customEmoji(emoji):
+        Text(emoji)
+          .fontWeight(.bold)
+          .font(.system(size: 40))
+          .foregroundColor(friendModel.avatar.color)
+      }
+
+      Circle().fill(friendModel.connectionState == .online ? .green : .gray)
+        .frame(width: 14, height: 14)
+        .offset(x: -10, y: -5)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
+    }
+    .frame(width: 100, height: 100)
   }
 }
 
@@ -106,20 +107,30 @@ private extension ContactDetailView {
   // five square buttons
   var actionButtons: some View {
     let buttons: [(String, String)] = [
-      ("phone",          "звонок"),
-      ("video",          "видео"),
-      ("bell.slash",     "звук"),
-      ("magnifyingglass","поиск"),
-      ("ellipsis",       "ещё")
+      ("phone", "звонок"),
+      ("video", "видео"),
+      ("bell.slash", "звук"),
+      ("magnifyingglass", "поиск"),
+      ("ellipsis", "ещё")
     ]
 
     return HStack(spacing: 18) {
-      ForEach(buttons, id: \.0) { icon, title in
+      ForEach(buttons, id: \.0) {
+        icon,
+        title in
         VStack(spacing: 6) {
           Image(systemName: icon)
             .font(.title3)
             .frame(width: 56, height: 56)
-            .background(Palette.accentBG, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+            .roundedEdge(
+              backgroundColor: .gray,
+              boarderColor: .clear,
+              paddingHorizontal: 0,
+              paddingVertical: 0,
+              cornerRadius: 16,
+              tintOpacity: 0.1
+            )
+
           Text(title)
             .font(.caption)
         }
@@ -132,27 +143,180 @@ private extension ContactDetailView {
       }
     }
   }
-
+  //  let chatRules: ChatRules
   // phone + username + QR
   var infoBlock: some View {
-    VStack(spacing: 0) {
-      InfoRow(label: "мобильный",
-              value: contact.phone,
-              valueColor: .blue,
-              showsQR: false)
+    VStack(spacing: 8) {
+      Group {
+        if let friendBinding = toxManager.bindingForFriend(friendModel) {
+          HStack {
+            Text("Авто-удаление сообщений")
+              .font(.footnote)
+              .foregroundStyle(.primary)
+            Spacer()
+          }
+          Picker("", selection: friendBinding.chatRules.autoDeletion) {
+            ForEach(AutoDeletionPeriod.allCases, id: \.self) { period in
+              Text(period.title).tag(period)
+            }
+          }
+          .pickerStyle(.segmented)
 
-      divider
+          divider
+        }
+      }
 
-      InfoRow(label: "имя пользователя",
-              value: contact.username,
-              valueColor: .blue,
-              showsQR: true)
+      Group {
+        if let friendBinding = toxManager.bindingForFriend(friendModel) {
+          HStack(alignment: .center) {
+            Text("Разрешить сохранение медиа")
+              .font(.footnote)
+              .foregroundStyle(.primary)
+
+            Spacer()
+
+            Toggle("", isOn: friendBinding.chatRules.isMediaSavingAllowed)
+              .toggleStyle(SwitchToggleStyle())
+              .fixedSize()
+          }
+
+          divider
+        }
+      }
+
+      Group {
+        if let friendBinding = toxManager.bindingForFriend(friendModel) {
+          HStack(alignment: .center) {
+            Text("Разрешить копировать текст сообщений")
+              .font(.footnote)
+              .foregroundStyle(.primary)
+
+            Spacer()
+
+            Toggle("", isOn: friendBinding.chatRules.isTextCopyAllowed)
+              .toggleStyle(SwitchToggleStyle())
+              .fixedSize()
+          }
+
+          divider
+        }
+      }
+
+      Group {
+        if let friendBinding = toxManager.bindingForFriend(friendModel) {
+          HStack(alignment: .center) {
+            Text("Разрешить скрывать реальный голос при звонках и аудио-сообщениях")
+              .font(.footnote)
+              .foregroundStyle(.primary)
+
+            Spacer()
+
+            Toggle("", isOn: friendBinding.chatRules.isVoiceMaskingEnabled)
+              .toggleStyle(SwitchToggleStyle())
+              .fixedSize()
+          }
+
+          divider
+        }
+      }
+
+      Group {
+        if let friendBinding = toxManager.bindingForFriend(friendModel) {
+          HStack(alignment: .center) {
+            Text("Разрешить отображать индикатор набора текста")
+              .font(.footnote)
+              .foregroundStyle(.primary)
+
+            Spacer()
+
+            Toggle("", isOn: friendBinding.chatRules.isTypingIndicatorEnabled)
+              .toggleStyle(SwitchToggleStyle())
+              .fixedSize()
+          }
+
+          divider
+        }
+      }
+
+      Group {
+        if let friendBinding = toxManager.bindingForFriend(friendModel) {
+          HStack(alignment: .center) {
+            Text("Разрешить аудио-звонки от контакта")
+              .font(.footnote)
+              .foregroundStyle(.primary)
+
+            Spacer()
+
+            Toggle("", isOn: friendBinding.chatRules.isAudioCallAllowed)
+              .toggleStyle(SwitchToggleStyle())
+              .fixedSize()
+          }
+
+          divider
+        }
+      }
+
+      Group {
+        if let friendBinding = toxManager.bindingForFriend(friendModel) {
+          HStack(alignment: .center) {
+            Text("Разрешить видео-звонки от контакта")
+              .font(.footnote)
+              .foregroundStyle(.primary)
+
+            Spacer()
+
+            Toggle("", isOn: friendBinding.chatRules.isVideoCallAllowed)
+              .toggleStyle(SwitchToggleStyle())
+              .fixedSize()
+          }
+
+          divider
+        }
+      }
+
+      Group {
+        if let friendBinding = toxManager.bindingForFriend(friendModel) {
+          HStack(alignment: .center) {
+            Text("Разрешить скриншоты экрана в этом чате")
+              .font(.footnote)
+              .foregroundStyle(.primary)
+
+            Spacer()
+
+            Toggle("", isOn: friendBinding.chatRules.areScreenshotsAllowed)
+              .toggleStyle(SwitchToggleStyle())
+              .fixedSize()
+          }
+
+          divider
+        }
+      }
+
+      Group {
+        if let friendBinding = toxManager.bindingForFriend(friendModel) {
+          HStack(alignment: .center) {
+            Text("Разрешить отправлять подтверждения о прочтении сообщений")
+              .font(.footnote)
+              .foregroundStyle(.primary)
+
+            Spacer()
+
+            Toggle("", isOn: friendBinding.chatRules.areReadReceiptsEnabled)
+              .toggleStyle(SwitchToggleStyle())
+              .fixedSize()
+          }
+
+          divider
+        }
+      }
     }
-    .background(.ultraThinMaterial,
-                in: RoundedRectangle(cornerRadius: 16, style: .continuous))
-    .overlay(
-      RoundedRectangle(cornerRadius: 16, style: .continuous)
-        .strokeBorder(Palette.separator, lineWidth: 0.5)
+    .roundedEdge(
+      backgroundColor: .gray,
+      boarderColor: .clear,
+      paddingHorizontal: 16,
+      paddingVertical: 8,
+      cornerRadius: 16,
+      tintOpacity: 0.1
     )
   }
 
@@ -160,7 +324,6 @@ private extension ContactDetailView {
     Rectangle()
       .fill(Palette.separator)
       .frame(height: 1 / UIScreen.main.scale)
-      .padding(.leading, 18) // отступ под текст
   }
 
   // MARK: Tabs
@@ -170,7 +333,7 @@ private extension ContactDetailView {
     case music = "Музыка"
     case voice = "Голосовые"
     case links = "Ссылки"
-    case gif   = "GIF"
+    case gif = "GIF"
   }
 
   var tabBar: some View {
@@ -182,76 +345,28 @@ private extension ContactDetailView {
           } label: {
             Text(tab.rawValue)
               .font(.subheadline.weight(.semibold))
-              .padding(.vertical, 6)
-              .padding(.horizontal, 14)
-              .background(selectedTab == tab ? Color.accentColor.opacity(0.15) : Palette.accentBG,
-                          in: Capsule())
+              .roundedEdge(
+                backgroundColor: selectedTab == tab ? .blue : .gray,
+                boarderColor: .clear,
+                paddingHorizontal: 12,
+                paddingVertical: 4,
+                cornerRadius: 12,
+                tintOpacity: 0.1
+              )
           }
-          .foregroundStyle(selectedTab == tab ? .secondary : .primary)
+          .foregroundStyle(.primary)
         }
       }
       .padding(.horizontal, 4)
     }
   }
-
-  // MARK: Media grid
-  var mediaGrid: some View {
-    LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 2), count: 3), spacing: 2) {
-      ForEach(contact.media) { item in
-        ZStack(alignment: .bottomTrailing) {
-          item.thumbnail
-            .resizable()
-            .scaledToFill()
-            .frame(height: 110)
-            .clipped()
-
-          if let dur = item.duration {
-            Text(dur)
-              .font(.caption2.monospacedDigit())
-              .padding(.horizontal, 4)
-              .padding(.vertical, 2)
-              .background(.black.opacity(0.7), in: RoundedRectangle(cornerRadius: 4, style: .continuous))
-              .foregroundColor(.white)
-              .padding(4)
-          }
-        }
-      }
-    }
-    .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
-  }
 }
 
-// MARK: - InfoRow
-private struct InfoRow: View {
-  let label: String
-  let value: String
-  let valueColor: Color
-  var showsQR: Bool = false
+// MARK: – Preview
 
-  var body: some View {
-    HStack(alignment: .firstTextBaseline, spacing: 12) {
-      VStack(alignment: .leading, spacing: 2) {
-        Text(label)
-          .font(.caption)
-          .foregroundStyle(.secondary)
-        Text(value)
-          .font(.body)
-          .foregroundStyle(valueColor)
-      }
-      Spacer()
-      if showsQR {
-        Image(systemName: "qrcode")
-          .font(.title3)
-          .foregroundStyle(Palette.icon)
-      }
-    }
-    .padding(.vertical, 14)
-    .padding(.horizontal, 18)
-    .contentShape(Rectangle())
-  }
-}
-
-// MARK: - Preview
 #Preview {
-  ContactDetailView()
+  NavigationStack {
+    ContactDetailView(friendModel: FriendModel.mockList()[1])
+      .environmentObject(ToxManager.preview)
+  }
 }

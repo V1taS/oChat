@@ -27,7 +27,7 @@ public enum FriendEvent: Sendable {
   case nameChanged(friendID: UInt32, name: String)
   case statusMessageChanged(friendID: UInt32, message: String)
   case userStatusChanged(friendID: UInt32, status: UserStatus)
-  case connectionStatusChanged(friendID: UInt32, state: ConnectionState)
+  case connectionStatusChanged(friendID: UInt32, state: ToxConnectionState)
   case typing(friendID: UInt32, isTyping: Bool)
   case readReceipt(friendID: UInt32, messageID: UInt32)
   case lossyPacket(friendID: UInt32, data: Data)

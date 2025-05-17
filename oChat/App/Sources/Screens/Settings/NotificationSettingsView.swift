@@ -10,7 +10,7 @@ import SwiftUI
 
 // MARK: - Palette
 private extension Color {
-  static let cardBG    = Color(red: 230/255, green: 247/255, blue: 255/255)
+  static let cardBG = Color(red: 230/255, green: 247/255, blue: 255/255)
   static let separator = Color.gray.opacity(0.22)
 }
 
@@ -18,12 +18,12 @@ private extension Color {
 struct NotificationSettingsView: View {
 
   // MARK: – States (замените на @AppStorage / ViewModel)
-  @State private var fastModeEnabled        = true
+  @State private var fastModeEnabled = true
 
-  @State private var soundName              = "Note"
+  @State private var soundName = "Note"
   @State private var playSoundWhenForeground = false
 
-  @State private var notificationContent    = "Имя и содержимое"
+  @State private var notificationContent = "Имя и содержимое"
 
   @Environment(\.dismiss) private var dismiss
 
@@ -130,13 +130,13 @@ private struct SettingsCard<Content: View>: View {
   @ViewBuilder var content: Content
   var body: some View {
     VStack(spacing: 0) { content }
-      .background(
-        RoundedRectangle(cornerRadius: 16, style: .continuous)
-          .fill(Color.cardBG)
-      )
-      .overlay(
-        RoundedRectangle(cornerRadius: 16, style: .continuous)
-          .stroke(Color.separator, lineWidth: 0.5)
+      .roundedEdge(
+        backgroundColor: .clear,
+        boarderColor: .clear,
+        paddingHorizontal: .zero,
+        paddingVertical: 4,
+        cornerRadius: 16,
+        tintOpacity: 0.1
       )
   }
 }
