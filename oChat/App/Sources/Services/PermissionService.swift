@@ -9,7 +9,6 @@
 import UIKit
 import AppTrackingTransparency
 import AdSupport
-import Contacts
 import Photos
 import AVFoundation
 import UserNotifications
@@ -259,20 +258,6 @@ public final class PermissionService {
 
   public func getIDFA() -> String {
     ASIdentifierManager.shared().advertisingIdentifier.uuidString
-  }
-
-  // MARK: - Contacts
-
-  public func requestContactStore() async throws -> Bool {
-    try await withCheckedThrowingContinuation { continuation in
-      CNContactStore().requestAccess(for: .contacts) { granted, error in
-        if let error = error {
-          continuation.resume(throwing: error)
-        } else {
-          continuation.resume(returning: granted)
-        }
-      }
-    }
   }
 
   // MARK: - Камера
