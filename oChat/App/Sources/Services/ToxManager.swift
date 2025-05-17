@@ -962,7 +962,6 @@ extension ToxManager {
   }
 }
 
-#if DEBUG
 @MainActor
 extension ToxManager {
   /// Заглушка с демо-данными, чтобы превью работало офлайн
@@ -979,4 +978,3 @@ extension ToxManager {
     return manager
   }
 }
-#endif

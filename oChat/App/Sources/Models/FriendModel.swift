@@ -47,9 +47,6 @@ struct FriendModel: Identifiable, Equatable {
   }
 }
 
-#if DEBUG
-import Foundation
-
 extension FriendModel {
   /// Моковые данные для предпросмотра и юнит-тестов
   static func mockList() -> [FriendModel] {
@@ -93,4 +90,3 @@ extension FriendModel {
     ]
   }
 }
-#endif
