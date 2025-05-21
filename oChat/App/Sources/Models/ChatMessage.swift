@@ -14,7 +14,7 @@ struct ChatMessage: Identifiable, Codable, Equatable {
   let id: UUID
 
   /// ID сообщения в TOX
-  let messageId: UInt32?
+  var messageId: UInt32?
 
   /// ID друга в TOX
   let friendID: UInt32
@@ -82,13 +82,13 @@ public enum MessageStatus: Codable, Equatable {
   case read
 }
 
-/// Тип сообщения
+/// Тип пользовательского сообщения
 enum MessageType: Codable, Equatable {
-  /// входящее
+  /// входящее сообщение
   case incoming
-  /// исходящее
+  /// исходящее сообщение
   case outgoing
-  /// системное
+  /// системное сообщение заданного типа
   case system
 }
 

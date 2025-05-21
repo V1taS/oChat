@@ -10,6 +10,12 @@ import Foundation
 
 /// Входящий запрос «добавь в друзья».
 struct FriendRequest: Identifiable, Codable, Equatable {
+  /// FriendID
+  var friendID: UInt32?
+
+  /// Текст сообщения.
+  let message: String?
+
   /// Публичный ключ отправителя (32 байта для Tox).
   let publicKey: Data
 
@@ -32,10 +38,20 @@ struct FriendRequest: Identifiable, Codable, Equatable {
 
   /// Используем сам ключ как уникальный идентификатор — Data уже Hashable.
   var id: Data { publicKey }
+
+  /// Полная версия publicKey
+  var fullAddress: String {
+    publicKey.hex
+  }
+
+  /// Короткая версия publicKey — 5 первых и 5 последних символов
+  var shortAddress: String {
+    let hexKey = publicKey.hex
+    return "\(hexKey.prefix(5))…\(hexKey.suffix(5))"
+  }
 }
 
 extension FriendRequest {
-
   /// Генерирует массив тестовых `FriendRequest`
   /// - Parameter count: Сколько объектов создать (по-умолчанию 3)
   static func mockList(count: Int = 3) -> [FriendRequest] {
@@ -47,6 +63,7 @@ extension FriendRequest {
 
       result.append(
         FriendRequest(
+          message: "Бу, я твой друг, не бойся",
           publicKey: publicKey,
           meshAddress: Bool.random() ? "10.0.0.\(Int.random(in: 2...254))" : nil,
           toxAddress: randomHex(length: 76),

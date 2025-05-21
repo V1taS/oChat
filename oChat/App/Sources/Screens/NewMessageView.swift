@@ -30,8 +30,7 @@ struct NewMessageView: View {
   @State private var selection: InputMode = .manual
   @State private var accountID: String = ""
   @State private var isScanning = false
-
-  var onComplete: (String) -> Void = { _ in }
+  @State private var requestMessage: String = ""
 
   var body: some View {
     NavigationStack {
@@ -93,18 +92,27 @@ private extension NewMessageView {
   }
 }
 
-// MARK: - Ручной ввод
+// MARK: ­– Ручной ввод
 private extension NewMessageView {
   var manualEntryView: some View {
     VStack(spacing: 22) {
+      // ID
       TextField("Введите Account ID или ONS", text: $accountID, axis: .vertical)
         .textInputAutocapitalization(.never)
         .disableAutocorrection(true)
-        .textFieldStyle(.roundedBorder)   // нативная закруглённая рамка
+        .textFieldStyle(.roundedBorder)
         .padding(.horizontal)
         .padding(.top)
 
-      Text("Начните новую беседу, введя ID аккаунта вашего друга, ONS или отсканировав их QR-код.")
+      // Первое сообщение
+      TextField("Первая фраза для запроса дружбы (необязательно)",
+                text: $requestMessage,
+                axis: .vertical)
+        .textFieldStyle(.roundedBorder)
+        .padding(.horizontal)
+
+      Text("Начните новую беседу, введя ID аккаунта вашего друга, ONS или отсканировав их QR-код. "
+           + "Можно сразу написать приветственное сообщение.")
         .font(.footnote)
         .foregroundStyle(.secondary)
         .multilineTextAlignment(.center)
@@ -112,7 +120,9 @@ private extension NewMessageView {
 
       Button {
         guard !accountID.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
-        onComplete(accountID)
+        Task {
+          await toxManager.addFriend(addressHex: accountID, greeting: requestMessage)
+        }
         dismiss()
       } label: {
         Text("Продолжить")
@@ -125,7 +135,7 @@ private extension NewMessageView {
       }
       .padding(.horizontal, 28)
       .padding(.top, 6)
-      
+
       Spacer(minLength: 0)
     }
   }

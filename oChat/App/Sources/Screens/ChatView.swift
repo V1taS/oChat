@@ -14,7 +14,8 @@ struct ChatView: View {
   @State private var draft = ""
 
   private var friendMessages: [ChatMessage] {
-    toxManager.messages[friendID]!.sorted { $0.date < $1.date }
+    // Вот Здесь крашится когда впервый раз добил контакт 🚨
+    toxManager.messages[friendID]?.sorted { $0.date < $1.date } ?? []
   }
 
   private var friendModel: FriendModel? {
@@ -86,7 +87,9 @@ struct ChatView: View {
   private func send() async {
     let text = draft.trimmingCharacters(in: .whitespacesAndNewlines)
     guard !text.isEmpty else { return }
-    await toxManager.sendMessage(to: friendID, text: text)
+    Task {
+      await toxManager.sendMessage(to: friendID, text: text)
+    }
     draft = ""
   }
 

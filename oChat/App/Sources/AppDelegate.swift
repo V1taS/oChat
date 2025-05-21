@@ -24,7 +24,7 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
     _ application: UIApplication,
     didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data
   ) {
-    let token = deviceToken.map { String(format: "%02x", $0) }.joined()
+    let token = deviceToken.hex
     print("APNs token: \(token)")
     Secrets.pushNotificationToken = token
   }

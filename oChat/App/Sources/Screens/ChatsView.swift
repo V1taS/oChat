@@ -19,6 +19,15 @@ struct ChatsView: View {
     NavigationStack {
       ScrollView {
         LazyVStack(spacing: 12) {
+          if toxManager.friendRequests.count != .zero {
+            NavigationLink {
+              FriendRequestsView()
+            } label: {
+              FriendRequestsBanner(count: toxManager.friendRequests.count)
+            }
+            .buttonStyle(.plain)
+          }
+
           ForEach(toxManager.friends) { friend in
             let message = toxManager.messages[friend.id]?.last
             NavigationLink(value: friend.id) {
@@ -204,6 +213,30 @@ private struct ConnectionStatusView: View {
     case .inProgress:  return .yellow
     case .offline: return .red
     }
+  }
+}
+
+private struct FriendRequestsBanner: View {
+  let count: Int
+  var body: some View {
+    HStack {
+      Text("Запросы в друзья")
+        .font(.headline)
+        .foregroundStyle(.primary)
+      Spacer()
+
+      Text("\(count)")
+        .font(.headline)
+        .foregroundStyle(.secondary)
+      Image(systemName: "chevron.right")
+        .font(.headline.weight(.semibold))
+        .foregroundStyle(.secondary)
+    }
+    .roundedEdge(
+      paddingHorizontal: 12,
+      paddingVertical: 10,
+      cornerRadius: 18
+    )
   }
 }
 

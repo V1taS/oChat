@@ -12,7 +12,6 @@ import Foundation
 import ToxSwift
 
 /// Глобальный менеджер, который инкапсулирует работу с ToxService.
-@MainActor
 final class ToxManager: ObservableObject {
 
   // MARK: - Singleton
@@ -31,17 +30,22 @@ final class ToxManager: ObservableObject {
 
   // MARK: - Публикуемые свойства (отражение состояния в UI)
 
+  /// Друзья которые попали в спам. Массив из publicKey
+  @Published var spamFriendPublicKeys: Set<Data> = []
+
   /// Входящий запрос «добавь в друзья».
-  @Published var friendRequests: [FriendRequest] = []
+  @Published var friendRequests: [FriendRequest] = [] // FriendRequest.mockList()
+  /// Пользователь подтвердил дружбу, ждем отправки системного сообщения с публичным ключом другу
+  @Published var pendingAcceptFriendRequests: [FriendRequest] = []
 
   /// Список друзей (их ID, имя, статус и т.д.).
-  @Published var friends: [FriendModel] = FriendModel.mockList()
+  @Published var friends: [FriendModel] = [] // FriendModel.mockList()
 
   /// Все входящие/исходящие сообщения (в реальном приложении можно хранить раздельно по чатам).
-  @Published var messages: [UInt32: [ChatMessage]] = [
-    1: ChatMessage.mockList(friendID: 1),
-    2: ChatMessage.mockList(friendID: 2),
-    3: ChatMessage.mockList(friendID: 3)
+  @Published var messages: [UInt32: [ChatMessage]] = [:
+//    1: ChatMessage.mockList(friendID: 1),
+//    2: ChatMessage.mockList(friendID: 2),
+//    3: ChatMessage.mockList(friendID: 3)
   ]
 
   /// Активные/известные конференции.
@@ -144,9 +148,10 @@ final class ToxManager: ObservableObject {
 
       // NEW: восстановление, если есть сохранённые данные
       if let saved = Data(base64Encoded: toxSavedataBase64), !saved.isEmpty {
-        toxServiceOptions.savedataType = .toxSave
-        toxServiceOptions.savedata = saved
-        print("🔄 Восстанавливаем Tox-сессию (\(saved.count) B)")
+        // TODO: - На время отключу сохранение
+//        toxServiceOptions.savedataType = .toxSave
+//        toxServiceOptions.savedata = saved
+//        print("🔄 Восстанавливаем Tox-сессию (\(saved.count) B)")
       }
 
       self.toxService = try ToxService(options: toxServiceOptions, bootstrapNodes: bootstrapNodes)
@@ -248,25 +253,51 @@ final class ToxManager: ObservableObject {
       return
     }
 
-    let toxAddressDecrypt = cryptoService.decrypt(model.toxAddress)
+    let toxAddressDecrypt = cryptoService.decrypt(model.system.toxAddress)
     guard let idx = friends.firstIndex(where: { $0.id == incoming.friendID }) else { return }
-    let pushNotificationTokenDecrypt = cryptoService.decrypt(model.pushNotificationToken)
+    let pushNotificationTokenDecrypt = cryptoService.decrypt(model.system.pushNotificationToken)
     friends[idx].pushNotificationToken = pushNotificationTokenDecrypt
     friends[idx].address = toxAddressDecrypt
-    guard let messageTextDecrypt = cryptoService.decrypt(model.messageText) else { return }
+    friends[idx].encryptionPublicKey = model.system.publicKeyForEncryption
 
-    let newMessage = ChatMessage(
-      messageId: nil,
-      friendID: incoming.friendID,
-      message: messageTextDecrypt,
-      replyMessageText: nil,
-      reactions: nil,
-      messageType: .incoming,
-      date: Date(),
-      messageStatus: .sent,
-      attachments: []
-    )
-    messages[incoming.friendID]?.append(newMessage)
+    model.payloads.forEach { payload in
+      switch payload {
+      case let .message(id, text):
+        guard let messageTextDecrypt = cryptoService.decrypt(text) else { return }
+        let newMessage = ChatMessage(
+          messageId: nil,
+          friendID: incoming.friendID,
+          message: messageTextDecrypt,
+          replyMessageText: nil,
+          reactions: nil,
+          messageType: .incoming,
+          date: Date(),
+          messageStatus: .sent,
+          attachments: []
+        )
+        messages[incoming.friendID]?.append(newMessage)
+      case let .quote(id, quotedMessageID):
+        break
+      case let .reaction(id, value):
+        break
+      case let .media(id, attachments):
+        break
+      case let .system(id, text):
+        guard let messageTextDecrypt = cryptoService.decrypt(text) else { return }
+        let newMessage = ChatMessage(
+          messageId: nil,
+          friendID: incoming.friendID,
+          message: messageTextDecrypt,
+          replyMessageText: nil,
+          reactions: nil,
+          messageType: .incoming,
+          date: Date(),
+          messageStatus: .sent,
+          attachments: []
+        )
+        messages[incoming.friendID]?.append(newMessage)
+      }
+    }
     persistState()
   }
 
@@ -348,17 +379,21 @@ final class ToxManager: ObservableObject {
   private func handleFriendEvent(_ event: FriendEvent) async {
     switch event {
     case let .request(publicKey, message):
+      guard !spamFriendPublicKeys.contains(publicKey) else { return }
+
       guard let jsonData = message.data(using: .utf8),
-            let model = try? JSONDecoder().decode(MessengerNetworkRequestModel.self, from: jsonData) else {
+            let model = try? JSONDecoder().decode(MessengerNetworkRequestModel.self, from: jsonData),
+            case let .message(id, text) = model.payloads.first else {
         return
       }
       let friendRequest = FriendRequest(
+        message: text,
         publicKey: publicKey,
         meshAddress: nil,
         toxAddress: nil,
-        publicKeyForEncryption: model.publicKeyForEncryption,
+        publicKeyForEncryption: model.system.publicKeyForEncryption,
         pushNotificationToken: nil,
-        chatRules: model.chatRules
+        chatRules: model.system.chatRules
       )
       friendRequests.append(friendRequest)
 
@@ -371,6 +406,55 @@ final class ToxManager: ObservableObject {
         friends[idx].connectionState = .online
       case .udp:
         friends[idx].connectionState = .online
+      }
+
+      if let idx = pendingAcceptFriendRequests.firstIndex(where: { $0.friendID == friendID }),
+         let publicKeyForEncryption = pendingAcceptFriendRequests[idx].publicKeyForEncryption {
+        let pushNotificationTokenEncrypt = cryptoService.encrypt(Secrets.pushNotificationToken, publicKey: publicKeyForEncryption)
+        let toxAddressEncrypt = await cryptoService.encrypt(getOwnAddress(), publicKey: publicKeyForEncryption)
+        let messageTextEncrypt = cryptoService.encrypt("Друг успешно подтвердил Вашу дружбу", publicKey: publicKeyForEncryption) ?? ""
+
+        let model = MessengerNetworkRequestModel(
+          payloads: [
+            .system(
+              id: UUID().uuidString,
+              text: messageTextEncrypt
+            )
+          ],
+          system: .init(
+            meshAddress: nil,
+            toxAddress: toxAddressEncrypt,
+            publicKeyForEncryption: cryptoService.publicKey(),
+            pushNotificationToken: pushNotificationTokenEncrypt,
+            chatRules: .init()
+          )
+        )
+
+        guard let json = createJSONString(from: model), let jsonData = json.data(using: .utf8) else { return }
+
+        do {
+          let messageId = try await toxService.sendMessage(
+            toFriend: friendID,
+            text: json
+          )
+          // Сохраним и в локальный массив (как исходящее)
+          let outgoing = ChatMessage(
+            messageId: messageId,
+            friendID: friendID,
+            message: "вы успешно добавили друга",
+            replyMessageText: nil,
+            reactions: nil,
+            messageType: .system,
+            date: Date(),
+            messageStatus: .sent,
+            attachments: nil
+          )
+          messages[friendID]?.append(outgoing)
+          pendingAcceptFriendRequests.remove(at: idx)
+          persistState()
+        } catch {
+          print("Ошибка отправки сообщения другу \(friendID): \(error)")
+        }
       }
 
     case let .typing(friendID, isTyping):
@@ -498,50 +582,43 @@ final class ToxManager: ObservableObject {
 
   // MARK: - Публичные методы для View (добавление друзей, сообщений и т.д.)
 
-  public func acceptFriendRequest(friendRequest: FriendRequest) async {
-    // Кто-то стучится к нам. Можно решить: автоматически добавить или спросить у пользователя
-    do {
-      let friendID = try await toxService.acceptFriendRequest(publicKey: friendRequest.publicKey)
-      print("✅ Приняли запрос; friendID = \(friendID)")
-      let friend = FriendModel(
-        id: friendID,
-        address: "",
-        meshAddress: nil,
-        encryptionPublicKey: friendRequest.publicKeyForEncryption,
-        pushNotificationToken: nil,
-        avatar: .init(),
-        connectionState: .online,
-        isTyping: false,
-        unreadCount: .zero,
-        chatRules: friendRequest.chatRules
-      )
-
-      friends.append(friend)
-    } catch {
-      print("❌ Не удалось принять запрос: \(error)")
-    }
-  }
-
   /// Отправить сообщение конкретному другу.
   func sendMessage(to friendID: UInt32, text: String) async {
+    // Сохраним и в локальный массив (как исходящее)
+    let outgoing = ChatMessage(
+      messageId: nil,
+      friendID: friendID,
+      message: text,
+      replyMessageText: nil,
+      reactions: nil,
+      messageType: .outgoing,
+      date: Date(),
+      messageStatus: .sent,
+      attachments: nil
+    )
+    messages[friendID]?.append(outgoing)
+
     guard let idx = friends.firstIndex(where: { $0.id == friendID }) else { return }
     guard let encryptionPublicKey = friends[idx].encryptionPublicKey else { return }
 
-    let messageTextEncrypt = cryptoService.encrypt(text, publicKey: encryptionPublicKey)
+    let messageTextEncrypt = cryptoService.encrypt(text, publicKey: encryptionPublicKey) ?? ""
     let pushNotificationTokenEncrypt = cryptoService.encrypt(Secrets.pushNotificationToken, publicKey: encryptionPublicKey)
     let toxAddressEncrypt = await cryptoService.encrypt(getOwnAddress(), publicKey: encryptionPublicKey)
 
     let model = MessengerNetworkRequestModel(
-      messageID: UUID().uuidString,
-      messageText: messageTextEncrypt,
-      replyMessageText: nil,
-      reactions: nil,
-      attachments: nil,
-      meshAddress: nil,
-      toxAddress: toxAddressEncrypt,
-      publicKeyForEncryption: cryptoService.publicKey(),
-      pushNotificationToken: pushNotificationTokenEncrypt,
-      chatRules: friends[idx].chatRules
+      payloads:[
+        .message(
+         id:  UUID().uuidString,
+         text: messageTextEncrypt
+       )
+      ],
+      system: .init(
+        meshAddress: nil,
+        toxAddress: toxAddressEncrypt,
+        publicKeyForEncryption: cryptoService.publicKey(),
+        pushNotificationToken: pushNotificationTokenEncrypt,
+        chatRules: friends[idx].chatRules
+      )
     )
     guard let json = createJSONString(from: model), let jsonData = json.data(using: .utf8) else { return }
 
@@ -557,19 +634,10 @@ final class ToxManager: ObservableObject {
         toFriend: friendID,
         text: json
       )
-      // Сохраним и в локальный массив (как исходящее)
-      let outgoing = ChatMessage(
-        messageId: messageId,
-        friendID: friendID,
-        message: text,
-        replyMessageText: nil,
-        reactions: nil,
-        messageType: .outgoing,
-        date: Date(),
-        messageStatus: .sent,
-        attachments: nil
-      )
-      messages[friendID]?.append(outgoing)
+      if let idx = messages[friendID]?.firstIndex(where: { $0.friendID == friendID }) {
+        messages[friendID]?[idx].messageId = messageId
+      }
+
       persistState()
     } catch {
       print("Ошибка отправки сообщения другу \(friendID): \(error)")
@@ -577,8 +645,24 @@ final class ToxManager: ObservableObject {
   }
 
   /// Принимает **только** 76-символьный адрес. (Если нужен PK-hex – отдельный метод.)
-  func addFriend(addressHex: String, greeting: String) {
-    Task { @MainActor in
+  func addFriend(addressHex: String, greeting: String) async {
+    // TODO: - по addressHex, делаем проверку, может этот друг уже добавлен в TOX
+    let model = MessengerNetworkRequestModel(
+      payloads: [
+        .message(
+          id:  UUID().uuidString,
+          text: greeting
+        )
+      ],
+      system: .init(
+        meshAddress: nil,
+        toxAddress: nil,
+        publicKeyForEncryption: cryptoService.publicKey(),
+        pushNotificationToken: nil,
+        chatRules: .init()
+      )
+    )
+    guard let json = createJSONString(from: model) else { return }
       let cleaned = addressHex
         .replacingOccurrences(of: " ", with: "")
         .replacingOccurrences(of: "-", with: "")
@@ -589,25 +673,130 @@ final class ToxManager: ObservableObject {
       }
 
       do {
-        let id = try await toxService.addFriend(withAddress: addrData, greeting: greeting)
+        let id = try await toxService.addFriend(withAddress: addrData, greeting: json)
         print("✅ friendID = \(id)")
         await refreshFriendsList()
         persistState()
+
+        let friendModel = FriendModel(
+          id: id,
+          address: addressHex,
+          meshAddress: nil,
+          encryptionPublicKey: nil,
+          pushNotificationToken: nil,
+          avatar: .init(),
+          connectionState: .offline,
+          isTyping: false,
+          unreadCount: 0,
+          chatRules: .init()
+        )
+        friends.append(friendModel)
+
+        let systemMessage = ChatMessage(
+          messageId: nil,
+          friendID: id,
+          message: "Отправлен запрос на добаление в друзья",
+          replyMessageText: nil,
+          reactions: nil,
+          messageType: .outgoing,
+          date: Date(),
+          messageStatus: .sent,
+          attachments: []
+        )
+        let greetingMessage = ChatMessage(
+          messageId: nil,
+          friendID: id,
+          message: greeting,
+          replyMessageText: nil,
+          reactions: nil,
+          messageType: .outgoing,
+          date: Date(),
+          messageStatus: .sent,
+          attachments: []
+        )
+        messages.updateValue([systemMessage, greetingMessage], forKey: id)
       } catch {
         print("❌ Не удалось добавить: \(error)")
       }
+  }
+
+  public func acceptFriendRequest(friendRequest: FriendRequest) async {
+    // Кто-то стучится к нам. Можно решить: автоматически добавить или спросить у пользователя
+    do {
+      let friendID = try await toxService.acceptFriendRequest(publicKey: friendRequest.publicKey)
+      print("✅ Приняли запрос; friendID = \(friendID)")
+
+      if let friendsIndex = friendRequests.firstIndex(where: { $0.fullAddress == friendRequest.fullAddress }) {
+        friendRequests.remove(at: friendsIndex)
+      }
+      var friendRequest = friendRequest
+      friendRequest.friendID = friendID
+      pendingAcceptFriendRequests.append(friendRequest)
+
+      let friend = FriendModel(
+        id: friendID,
+        address: friendRequest.publicKey.hex,
+        meshAddress: nil,
+        encryptionPublicKey: friendRequest.publicKeyForEncryption,
+        pushNotificationToken: nil,
+        avatar: .init(),
+        connectionState: .online,
+        isTyping: false,
+        unreadCount: .zero,
+        chatRules: friendRequest.chatRules
+      )
+
+      friends.append(friend)
+
+      let incomingMessage = ChatMessage(
+        messageId: nil,
+        friendID: friendID,
+        message: friendRequest.message ?? "",
+        replyMessageText: nil,
+        reactions: nil,
+        messageType: .incoming,
+        date: Date(),
+        messageStatus: .sent,
+        attachments: []
+      )
+      messages.updateValue([incomingMessage], forKey: friendID)
+
+      // TODO: - Отправить в ответ публичный ключ для шифрования
+    } catch {
+      print("❌ Не удалось принять запрос: \(error)")
     }
   }
 
+  func rejectFriendRequest(friendRequest: FriendRequest) async {
+    if let friendsIndex = friendRequests.firstIndex(where: { $0.fullAddress == friendRequest.fullAddress }) {
+      friendRequests.remove(at: friendsIndex)
+    }
+  }
+
+  func addToSpamList(_ publicKey: Data) async {
+    if let friendsIndex = friendRequests.firstIndex(where: { $0.fullAddress == publicKey.hex }) {
+      friendRequests.remove(at: friendsIndex)
+    }
+
+    spamFriendPublicKeys.insert(publicKey)
+  }
+
+  func removeFromSpamList(_ publicKey: Data) async {
+    spamFriendPublicKeys.remove(publicKey)
+  }
+
   /// Удалить друга по ID.
-  func removeFriend(_ friendID: UInt32) {
-    Task {
-      do {
-        try await toxService.removeFriend(withID: friendID)
-        await refreshFriendsList()
-      } catch {
-        print("Не удалось удалить друга: \(error)")
-      }
+  func removeFriend(_ friendID: UInt32) async {
+    if let friendsIndex = friends.firstIndex(where: { $0.id == friendID }) {
+      friends.remove(at: friendsIndex)
+      messages.removeValue(forKey: friendID)
+    }
+
+    do {
+      try await toxService.removeFriend(withID: friendID)
+      await refreshFriendsList()
+    } catch {
+      print("Не удалось удалить друга: \(error)")
     }
   }
 
@@ -735,17 +924,25 @@ final class ToxManager: ObservableObject {
       let toxAddressEncrypt = await cryptoService.encrypt(getOwnAddress(), publicKey: encryptionPublicKey)
 
       let model = MessengerNetworkRequestModel(
-        messageID: UUID().uuidString,
-        messageText: messageTextEncrypt,
-        replyMessageText: nil,
-        reactions: nil,
-        attachments: mapped,
-        meshAddress: nil,
-        toxAddress: toxAddressEncrypt,
-        publicKeyForEncryption: cryptoService.publicKey(),
-        pushNotificationToken: pushNotificationTokenEncrypt,
-        chatRules: friends[idx].chatRules
+        payloads: [
+          .media(
+            id: UUID().uuidString,
+            attachments: mapped
+          ),
+          .message(
+            id: UUID().uuidString,
+            text: messageTextEncrypt ?? ""
+          )
+        ],
+        system: .init(
+          meshAddress: nil,
+          toxAddress: toxAddressEncrypt,
+          publicKeyForEncryption: cryptoService.publicKey(),
+          pushNotificationToken: pushNotificationTokenEncrypt,
+          chatRules: friends[idx].chatRules
+        )
       )
+
       guard let json = createJSONString(from: model), let jsonData = json.data(using: .utf8) else { return }
 
       let password = cryptoService.generatePassword(length: 30)

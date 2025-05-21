@@ -153,7 +153,8 @@ private extension StartConversationView {
         TapGestureView(
           style: .flash,
           touchesEnded: {
-            // TODO: -
+            UIPasteboard.general.string = ownAddress
+            NotificationService.shared.showPositiveAlertWith(title: "Скопирован в буффер")
           }
         ) {
           Text("Поделиться")
