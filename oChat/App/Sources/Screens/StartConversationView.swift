@@ -56,7 +56,7 @@ struct StartConversationView: View {
         ScanQRView()
       }
       .task {
-        ownAddress = await toxManager.getOwnAddress()
+        ownAddress = await toxManager.toxService.getOwnAddress()
       }
     }
     .presentationDetents([.large])

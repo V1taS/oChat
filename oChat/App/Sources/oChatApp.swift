@@ -19,6 +19,13 @@ struct oChatApp: App {
     WindowGroup {
       ChatsView()
         .environmentObject(toxManager)
+        .environmentObject(toxManager.friendManager)
+        .environmentObject(toxManager.chatManager)
+        .environmentObject(toxManager.fileTransferManager)
+        .environmentObject(toxManager.callManager)
+        .environmentObject(toxManager.conferenceManager)
+        .environmentObject(toxManager.connectionManager)
+        .environmentObject(toxManager.persistenceManager)
     }
     .onChange(of: scenePhase) { newPhase, _ in
       if newPhase == .background {

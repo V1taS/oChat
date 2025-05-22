@@ -19,7 +19,8 @@ private enum Palette {
 // MARK: - Экран
 struct ContactDetailView: View {
 
-  @EnvironmentObject var toxManager: ToxManager
+  @EnvironmentObject var friendManager: FriendManager
+
   let friendModel: FriendModel
 
   // MARK: State
@@ -148,7 +149,7 @@ private extension ContactDetailView {
   var infoBlock: some View {
     VStack(spacing: 8) {
       Group {
-        if let friendBinding = toxManager.bindingForFriend(friendModel) {
+        if let friendBinding = friendManager.bindingForFriend(friendModel) {
           HStack {
             Text("Авто-удаление сообщений")
               .font(.footnote)
@@ -167,7 +168,7 @@ private extension ContactDetailView {
       }
 
       Group {
-        if let friendBinding = toxManager.bindingForFriend(friendModel) {
+        if let friendBinding = friendManager.bindingForFriend(friendModel) {
           HStack(alignment: .center) {
             Text("Разрешить сохранение медиа")
               .font(.footnote)
@@ -185,7 +186,7 @@ private extension ContactDetailView {
       }
 
       Group {
-        if let friendBinding = toxManager.bindingForFriend(friendModel) {
+        if let friendBinding = friendManager.bindingForFriend(friendModel) {
           HStack(alignment: .center) {
             Text("Разрешить копировать текст сообщений")
               .font(.footnote)
@@ -203,7 +204,7 @@ private extension ContactDetailView {
       }
 
       Group {
-        if let friendBinding = toxManager.bindingForFriend(friendModel) {
+        if let friendBinding = friendManager.bindingForFriend(friendModel) {
           HStack(alignment: .center) {
             Text("Разрешить скрывать реальный голос при звонках и аудио-сообщениях")
               .font(.footnote)
@@ -221,7 +222,7 @@ private extension ContactDetailView {
       }
 
       Group {
-        if let friendBinding = toxManager.bindingForFriend(friendModel) {
+        if let friendBinding = friendManager.bindingForFriend(friendModel) {
           HStack(alignment: .center) {
             Text("Разрешить отображать индикатор набора текста")
               .font(.footnote)
@@ -239,7 +240,7 @@ private extension ContactDetailView {
       }
 
       Group {
-        if let friendBinding = toxManager.bindingForFriend(friendModel) {
+        if let friendBinding = friendManager.bindingForFriend(friendModel) {
           HStack(alignment: .center) {
             Text("Разрешить аудио-звонки от контакта")
               .font(.footnote)
@@ -257,7 +258,7 @@ private extension ContactDetailView {
       }
 
       Group {
-        if let friendBinding = toxManager.bindingForFriend(friendModel) {
+        if let friendBinding = friendManager.bindingForFriend(friendModel) {
           HStack(alignment: .center) {
             Text("Разрешить видео-звонки от контакта")
               .font(.footnote)
@@ -275,7 +276,7 @@ private extension ContactDetailView {
       }
 
       Group {
-        if let friendBinding = toxManager.bindingForFriend(friendModel) {
+        if let friendBinding = friendManager.bindingForFriend(friendModel) {
           HStack(alignment: .center) {
             Text("Разрешить скриншоты экрана в этом чате")
               .font(.footnote)
@@ -293,7 +294,7 @@ private extension ContactDetailView {
       }
 
       Group {
-        if let friendBinding = toxManager.bindingForFriend(friendModel) {
+        if let friendBinding = friendManager.bindingForFriend(friendModel) {
           HStack(alignment: .center) {
             Text("Разрешить отправлять подтверждения о прочтении сообщений")
               .font(.footnote)
@@ -367,6 +368,6 @@ private extension ContactDetailView {
 #Preview {
   NavigationStack {
     ContactDetailView(friendModel: FriendModel.mockList()[1])
-      .environmentObject(ToxManager.preview)
+      .environmentObject(FriendManager.preview)
   }
 }

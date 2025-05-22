@@ -1076,9 +1076,9 @@ private func withUnsafeBridgeOptions(_ options: ToxServiceOptions) -> (
 }
 
 // MARK: – Утилиты
-private extension Data {
+extension Data {
   /// init из 76-символьной hex-строки адреса (возвращает 38 raw-байт)
-  init?(toxAddressHex: String) {
+  public init?(toxAddressHex: String) {
     let clean = toxAddressHex.lowercased()
     guard clean.count == 76 else { return nil }
 
@@ -1093,11 +1093,8 @@ private extension Data {
     self = data
   }
 
-  /// hex-строка в нижнем регистре
-  var hex: String { map { String(format: "%02x", $0) }.joined() }
-
   /// Инициализирует `Data` из hex‑строки (в любом регистре, без пробелов).
-  init?(hexString: String) {
+  public init?(hexString: String) {
     let cleaned = hexString.trimmingCharacters(in: .whitespacesAndNewlines)
     guard cleaned.count % 2 == 0 else { return nil }
     var bytes = [UInt8]()
@@ -1112,6 +1109,9 @@ private extension Data {
     }
     self = Data(bytes)
   }
+
+  /// hex-строка в нижнем регистре
+  var hex: String { map { String(format: "%02x", $0) }.joined() }
 }
 
 /// Быстрое и безопасное преобразование (без options, без Foundation copies).

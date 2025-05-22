@@ -25,7 +25,7 @@ private enum InputMode: String, CaseIterable {
 // MARK: - Экран
 struct NewMessageView: View {
   @Environment(\.dismiss) private var dismiss
-  @EnvironmentObject var toxManager: ToxManager
+  @EnvironmentObject var friendManager: FriendManager
 
   @State private var selection: InputMode = .manual
   @State private var accountID: String = ""
@@ -121,7 +121,7 @@ private extension NewMessageView {
       Button {
         guard !accountID.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
         Task {
-          await toxManager.addFriend(addressHex: accountID, greeting: requestMessage)
+          await friendManager.addFriend(addressHex: accountID, greeting: requestMessage)
         }
         dismiss()
       } label: {
@@ -163,7 +163,7 @@ private extension NewMessageView {
 #else
     ZStack {
       CameraPreview(isRunning: $isScanning) { foundCode in
-        onComplete(foundCode)
+        // TODO: - foundCode подумать что с этим делать
         dismiss()
       }
       .ignoresSafeArea()
@@ -260,6 +260,6 @@ private final class PreviewView: UIView {
 #Preview {
   NavigationStack {
     NewMessageView()
-      .environmentObject(ToxManager.preview)
+      .environmentObject(FriendManager.preview)
   }
 }

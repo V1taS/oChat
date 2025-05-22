@@ -10,7 +10,10 @@ import SwiftUI
 import ToxSwift
 
 struct ChatsView: View {
-  @EnvironmentObject var toxManager: ToxManager
+  @EnvironmentObject var friendManager: FriendManager
+  @EnvironmentObject var chatManager: ChatManager
+  @EnvironmentObject var connectionManager: ConnectionManager
+
   @State private var query = ""
   @State private var showSettings = false
   @State private var presentStartConv = false
@@ -19,17 +22,17 @@ struct ChatsView: View {
     NavigationStack {
       ScrollView {
         LazyVStack(spacing: 12) {
-          if toxManager.friendRequests.count != .zero {
+          if friendManager.friendRequests.count != .zero {
             NavigationLink {
               FriendRequestsView()
             } label: {
-              FriendRequestsBanner(count: toxManager.friendRequests.count)
+              FriendRequestsBanner(count: friendManager.friendRequests.count)
             }
             .buttonStyle(.plain)
           }
 
-          ForEach(toxManager.friends) { friend in
-            let message = toxManager.messages[friend.id]?.last
+          ForEach(friendManager.friends) { friend in
+            let message = chatManager.messages[friend.id]?.last
             NavigationLink(value: friend.id) {
               ChatRow(friendModel: friend, lastMessage: message)
             }
@@ -46,7 +49,7 @@ struct ChatsView: View {
             .accessibilityLabel("Настройки")
         }
         ToolbarItem(placement: .principal) {
-          ConnectionStatusView(state: toxManager.connectionState)
+          ConnectionStatusView(state: connectionManager.connectionState)
         }
         ToolbarItem(placement: .navigationBarTrailing) {
           Button { presentStartConv = true } label: { Image(systemName: "square.and.pencil") }
@@ -242,5 +245,7 @@ private struct FriendRequestsBanner: View {
 
 #Preview {
   ChatsView()
-    .environmentObject(ToxManager.preview)
+    .environmentObject(FriendManager.preview)
+    .environmentObject(ChatManager.preview)
+    .environmentObject(ConnectionManager.preview)
 }

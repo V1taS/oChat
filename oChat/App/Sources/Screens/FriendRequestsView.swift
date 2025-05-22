@@ -9,12 +9,12 @@
 import SwiftUI
 
 struct FriendRequestsView: View {
-  @EnvironmentObject private var toxManager: ToxManager
+  @EnvironmentObject private var friendManager: FriendManager
   @Environment(\.dismiss) private var dismiss
 
   var body: some View {
     List {
-      ForEach(toxManager.friendRequests) { request in
+      ForEach(friendManager.friendRequests) { request in
         FriendRequestRow(request: request)
           .listRowSeparator(.hidden)
       }
@@ -22,7 +22,7 @@ struct FriendRequestsView: View {
     .listStyle(.plain)
     .navigationTitle("Запросы в друзья")
     .navigationBarTitleDisplayMode(.inline)
-    .onChange(of: toxManager.friendRequests) { _, newValue in
+    .onChange(of: friendManager.friendRequests) { _, newValue in
       if newValue.count == .zero {
         dismiss()
       }
@@ -32,7 +32,7 @@ struct FriendRequestsView: View {
 
 // MARK: строка списка
 private struct FriendRequestRow: View {
-  @EnvironmentObject private var toxManager: ToxManager
+  @EnvironmentObject private var friendManager: FriendManager
   let request: FriendRequest
 
   var body: some View {
@@ -49,7 +49,9 @@ private struct FriendRequestRow: View {
       HStack(spacing: 8) {
         // 1. Принять
         Button {
-          Task { await toxManager.acceptFriendRequest(friendRequest: request) }
+          Task {
+            await friendManager.acceptFriendRequest(request)
+          }
         } label: {
           Text("Принять")
         }
@@ -58,7 +60,9 @@ private struct FriendRequestRow: View {
 
         // 2. Отклонить
         Button {
-          Task { await toxManager.rejectFriendRequest(friendRequest: request) }
+          Task {
+            await friendManager.rejectFriendRequest(request)
+          }
         } label: {
           Text("Отклонить")
         }
@@ -67,7 +71,9 @@ private struct FriendRequestRow: View {
 
         // 3. В спам
         Button {
-          Task { await toxManager.addToSpamList(request.publicKey) }
+          Task {
+            await friendManager.addToSpamList(request.publicKey)
+          }
         } label: {
           Text("В спам")
         }
@@ -86,5 +92,5 @@ private struct FriendRequestRow: View {
 
 #Preview {
   FriendRequestsView()
-    .environmentObject(ToxManager.preview)
+    .environmentObject(FriendManager.preview)
 }

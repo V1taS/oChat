@@ -12,7 +12,7 @@ struct EditAvatarView: View {
 
   // MARK: - Public Properties
 
-  @EnvironmentObject var toxManager: ToxManager
+  @EnvironmentObject var friendManager: FriendManager
   private let friendModel: FriendModel
 
   @State var color: Color = .blue
@@ -222,8 +222,8 @@ struct EditAvatarView: View {
 
   /// Обработка сохранения новой или редактируемой категории
   private func processCategory() {
-    toxManager.bindingForFriend(friendModel)?.avatar.color.wrappedValue = self.color
-    toxManager.bindingForFriend(friendModel)?.avatar.icon.wrappedValue = self.icon
+    friendManager.bindingForFriend(friendModel)?.avatar.color.wrappedValue = self.color
+    friendManager.bindingForFriend(friendModel)?.avatar.icon.wrappedValue = self.icon
   }
 
   /// Показываем текущее эмодзи, если оно уже выбрано пользователем
@@ -339,5 +339,5 @@ extension EditAvatarView {
 
 #Preview {
   EditAvatarView(friendModel: .mockList().first!)
-    .environmentObject(ToxManager.preview)
+    .environmentObject(FriendManager.preview)
 }

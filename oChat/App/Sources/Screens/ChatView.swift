@@ -10,17 +10,19 @@ import SwiftUI
 
 struct ChatView: View {
   let friendID: UInt32
-  @EnvironmentObject var toxManager: ToxManager
+  @EnvironmentObject var chatManager: ChatManager
+  @EnvironmentObject var friendManager: FriendManager
+
   @State private var draft = ""
 
   private var friendMessages: [ChatMessage] {
     // Вот Здесь крашится когда впервый раз добил контакт 🚨
-    toxManager.messages[friendID]?.sorted { $0.date < $1.date } ?? []
+    chatManager.messages[friendID]?.sorted { $0.date < $1.date } ?? []
   }
 
   private var friendModel: FriendModel? {
-    guard let idx = toxManager.friends.firstIndex(where: { $0.id == friendID }) else { return nil }
-    return toxManager.friends[idx]
+    guard let idx = friendManager.friends.firstIndex(where: { $0.id == friendID }) else { return nil }
+    return friendManager.friends[idx]
   }
 
   var body: some View {
@@ -88,7 +90,7 @@ struct ChatView: View {
     let text = draft.trimmingCharacters(in: .whitespacesAndNewlines)
     guard !text.isEmpty else { return }
     Task {
-      await toxManager.sendMessage(to: friendID, text: text)
+      await chatManager.sendMessage(to: friendID, text: text)
     }
     draft = ""
   }
@@ -224,6 +226,7 @@ private struct InputBar: View {
 #Preview {
   NavigationStack {
     ChatView(friendID: 1)
-      .environmentObject(ToxManager.preview)
+      .environmentObject(ChatManager.preview)
+      .environmentObject(FriendManager.preview)
   }
 }
