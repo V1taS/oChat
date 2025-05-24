@@ -105,7 +105,16 @@ extension ChatMessage {
       let text = samples[idx % samples.count]
       let reply = idx == 4 ? "Цитата: \(samples[1])" : nil
       let reaction = idx == 3 ? "👍" : nil
-      let type: MessageType = idx.isMultiple(of: 2) ? .outgoing : .incoming
+      let type: MessageType
+
+      if idx.isMultiple(of: 3) {
+        type = .system
+      } else if idx.isMultiple(of: 2) {
+        type = .outgoing
+      } else {
+        type = .incoming
+      }
+
       let date = Calendar.current.date(byAdding: .minute,
                                        value: -(idx * 5),
                                        to: now) ?? now

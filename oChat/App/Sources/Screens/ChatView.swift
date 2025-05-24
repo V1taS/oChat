@@ -16,7 +16,6 @@ struct ChatView: View {
   @State private var draft = ""
 
   private var friendMessages: [ChatMessage] {
-    // Вот Здесь крашится когда впервый раз добил контакт 🚨
     chatManager.messages[friendID]?.sorted { $0.date < $1.date } ?? []
   }
 
@@ -31,10 +30,17 @@ struct ChatView: View {
         ScrollView {
           LazyVStack(spacing: 8) {
             ForEach(friendMessages) { msg in
-              Bubble(message: msg)
-                .frame(maxWidth: .infinity,
-                       alignment: msg.messageType == .outgoing ? .trailing : .leading)
-                .id(msg.id)
+              if msg.messageType == .system {
+                BubbleSystemMessage(message: msg)
+                  .frame(maxWidth: .infinity,
+                         alignment: .center)
+                  .id(msg.id)
+              } else {
+                BubbleMessage(message: msg)
+                  .frame(maxWidth: .infinity,
+                         alignment: msg.messageType == .outgoing ? .trailing : .leading)
+                  .id(msg.id)
+              }
             }
             // TODO: live typing-indicator от tox
           }
@@ -129,31 +135,71 @@ extension ChatView {
 
 // MARK: - UI компоненты (Bubble + InputBar) ---------------------------------------------------------
 
-private struct Bubble: View {
+private struct BubbleSystemMessage: View {
   let message: ChatMessage
-  var isOut: Bool { message.messageType == .outgoing }
 
   var body: some View {
-    HStack(spacing: 4) {
-      Text(message.message)
-        .foregroundStyle(.primary)
+    VStack(spacing: .zero) {
+      HStack(alignment: .top) {
+        Text(message.message)
+          .foregroundStyle(.primary)
+          .frame(maxWidth: .infinity, alignment: .leading)
 
-      if isOut {
-        MessageStatusView(messageStatus: message.messageStatus)
-          .offset(x: 4, y: 6)
+        Button {
+          // TODO: - Закрыть системное сообщение
+        } label: {
+          Image(systemName: "xmark")
+            .font(.headline)
+        }
+        .tint(.orange)
+      }
+
+        Text("Системное сообщение")
+          .multilineTextAlignment(.leading)
+          .foregroundColor(.orange)
+          .font(.caption)
+          .frame(maxWidth: .infinity, alignment: .trailing)
+          .padding(.top, 10)
+          .padding(.bottom, 4)
+    }
+    .roundedEdge(
+      backgroundColor: .orange,
+      boarderColor: .clear,
+      paddingHorizontal: 12,
+      paddingVertical: 8,
+      cornerRadius: 12,
+      tintOpacity: 0.04
+    )
+    .padding(.vertical)
+  }
+}
+
+private struct BubbleMessage: View {
+  let message: ChatMessage
+
+  var body: some View {
+    VStack(spacing: .zero) {
+      HStack(spacing: 4) {
+        Text(message.message)
+          .foregroundStyle(.primary)
+
+        if message.messageType == .outgoing {
+          MessageStatusView(messageStatus: message.messageStatus)
+            .offset(x: 4, y: 6)
+        }
       }
     }
+    .frame(maxWidth: UIScreen.main.bounds.width * 0.6,
+           alignment: message.messageType == .outgoing ? .trailing : .leading)
     .fixedSize(horizontal: true, vertical: false)
     .roundedEdge(
-      backgroundColor: isOut ? .blue : .gray,
+      backgroundColor: message.messageType == .outgoing ? .blue : .gray,
       boarderColor: .clear,
       paddingHorizontal: 12,
       paddingVertical: 8,
       cornerRadius: 16,
       tintOpacity: 0.1
     )
-    .frame(maxWidth: UIScreen.main.bounds.width * 0.6,
-           alignment: isOut ? .trailing : .leading)
   }
 
   private struct MessageStatusView: View {

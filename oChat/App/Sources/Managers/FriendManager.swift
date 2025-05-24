@@ -51,7 +51,6 @@ final class FriendManager: ObservableObject {
   // MARK: Public API
 
   /// Добавить друга по 76‑символьному Tox‑адресу.
-  @MainActor
   func addFriend(addressHex: String, greeting: String) async {
     let requestModel = MessengerNetworkRequestModel(
       payloads: [.message(id: UUID().uuidString, text: greeting)],

@@ -187,6 +187,11 @@ extension ChatManager {
       pushTokenProvider: {
         Secrets.pushNotificationToken ?? ""
       })
+    chatManager.messages = [
+      0: ChatMessage.mockList(friendID: 0),
+      1: ChatMessage.mockList(friendID: 1),
+      2: ChatMessage.mockList(friendID: 2),
+    ]
     friendManager.friendRequests = FriendRequest.mockList()
     friendManager.friends = FriendModel.mockList()
     return chatManager
