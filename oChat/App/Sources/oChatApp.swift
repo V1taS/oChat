@@ -22,7 +22,6 @@ struct oChatApp: App {
         .environmentObject(toxManager.friendManager)
         .environmentObject(toxManager.chatManager)
         .environmentObject(toxManager.fileTransferManager)
-        .environmentObject(toxManager.callManager)
         .environmentObject(toxManager.conferenceManager)
         .environmentObject(toxManager.connectionManager)
         .environmentObject(toxManager.persistenceManager)

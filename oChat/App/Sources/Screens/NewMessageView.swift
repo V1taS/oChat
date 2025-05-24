@@ -145,26 +145,11 @@ private extension NewMessageView {
 private extension NewMessageView {
   @ViewBuilder
   var qrScannerView: some View {
-#if targetEnvironment(simulator)
-    // Заглушка, когда приложение запущено в симуляторе
-    VStack(spacing: 16) {
-      Image(systemName: "qrcode.viewfinder")
-        .resizable()
-        .scaledToFit()
-        .frame(width: 120, height: 120)
-        .foregroundStyle(.secondary)
 
-      Text("Сканирование QR-кодов недоступно\nв симуляторе")
-        .multilineTextAlignment(.center)
-        .font(.footnote)
-        .foregroundStyle(.secondary)
-    }
-    .frame(maxWidth: .infinity, maxHeight: .infinity)
-#else
     ZStack {
-      CameraPreview(isRunning: $isScanning) { foundCode in
-        // TODO: - foundCode подумать что с этим делать
-        dismiss()
+      ScanQRView { qrCode in
+        accountID = qrCode
+        selection = .manual
       }
       .ignoresSafeArea()
 
@@ -184,75 +169,7 @@ private extension NewMessageView {
         .strokeBorder(Color.white.opacity(0.8), lineWidth: 2)
         .frame(width: 280, height: 280)
     }
-#endif
   }
-}
-
-// MARK: - Представление камеры
-private struct CameraPreview: UIViewRepresentable {
-  @Binding var isRunning: Bool
-  var onFoundCode: (String) -> Void
-
-  func makeCoordinator() -> Coordinator { Coordinator(parent: self) }
-
-  func makeUIView(context: Context) -> PreviewView {
-    let view = PreviewView()
-    context.coordinator.configureSession(for: view)
-    return view
-  }
-
-  func updateUIView(_ uiView: PreviewView, context: Context) {
-    isRunning ? context.coordinator.start() : context.coordinator.stop()
-  }
-
-  // MARK: Coordinator
-  final class Coordinator: NSObject, AVCaptureMetadataOutputObjectsDelegate {
-    private let session  = AVCaptureSession()
-    private var parent: CameraPreview?
-
-    init(parent: CameraPreview) { self.parent = parent }
-
-    func configureSession(for preview: PreviewView) {
-      preview.videoPreviewLayer.session = session
-
-      guard
-        let device  = AVCaptureDevice.default(for: .video),
-        let input   = try? AVCaptureDeviceInput(device: device),
-        session.canAddInput(input)
-      else { return }
-
-      session.addInput(input)
-
-      let output = AVCaptureMetadataOutput()
-      if session.canAddOutput(output) {
-        session.addOutput(output)
-        output.setMetadataObjectsDelegate(self, queue: .main)
-        output.metadataObjectTypes = [.qr]
-      }
-    }
-
-    func start() { if !session.isRunning { session.startRunning() } }
-    func stop()  { if  session.isRunning { session.stopRunning()  } }
-
-    // MARK: Delegate
-    func metadataOutput(_ output: AVCaptureMetadataOutput,
-                        didOutput metadataObjects: [AVMetadataObject],
-                        from connection: AVCaptureConnection) {
-      guard
-        let object  = metadataObjects.first as? AVMetadataMachineReadableCodeObject,
-        let string  = object.stringValue
-      else { return }
-
-      parent?.onFoundCode(string)
-      stop()
-    }
-  }
-}
-
-// MARK: - Preview helper UIView
-private final class PreviewView: UIView {
-  override class var layerClass: AnyClass { AVCaptureVideoPreviewLayer.self }
-  var videoPreviewLayer: AVCaptureVideoPreviewLayer { layer as! AVCaptureVideoPreviewLayer }
 }
 
 // MARK: – Preview

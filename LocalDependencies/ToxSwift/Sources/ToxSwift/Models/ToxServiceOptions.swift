@@ -47,15 +47,15 @@ public struct ToxServiceOptions: Sendable {
 
   /// Удобный Swift‑инициализатор.
   public init(
-    isIPv6Enabled: Bool = true,
+    isIPv6Enabled: Bool = false,
     isUDPEnabled: Bool = false,
     isLocalDiscoveryEnabled: Bool = false,
     isDHTAnnouncementsEnabled: Bool = false,
     proxy: ProxyKind = .none,
     proxyHost: String = "",
     proxyPort: UInt16 = 0,
-    startPort: UInt16 = 0,
-    endPort: UInt16 = 0,
+    startPort: UInt16 = 33445,
+    endPort: UInt16 = 33445,
     tcpPort: UInt16 = 0,
     savedataType: SavedataKind = .none,
     savedata: Data? = nil

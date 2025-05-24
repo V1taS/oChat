@@ -19,7 +19,6 @@ final class ToxManager: ObservableObject {
   let friendManager: FriendManager
   let chatManager: ChatManager
   let fileTransferManager: FileTransferManager
-  let callManager: CallManager
   let conferenceManager: ConferenceManager
   let connectionManager: ConnectionManager
   let persistenceManager: PersistenceManager
@@ -31,7 +30,7 @@ final class ToxManager: ObservableObject {
   private init() {
     do {
       let bootstrapNodes = try JSONLoader.load([ToxNode].self, fromFile: "bootstrapNodes")
-      var toxServiceOptions = ToxServiceOptions()
+      let toxServiceOptions = ToxServiceOptions()
 
       // NEW: восстановление, если есть сохранённые данные
       if let data = Data(base64Encoded: UserDefaults.standard.string(forKey: "toxSavedata") ?? ""), !data.isEmpty {
@@ -76,9 +75,6 @@ final class ToxManager: ObservableObject {
         pushTokenProvider: {
           Secrets.pushNotificationToken ?? ""
         })
-      callManager = CallManager(
-        toxService: toxService
-      )
       conferenceManager = ConferenceManager(
         toxService: toxService
       )
@@ -118,7 +114,6 @@ final class ToxManager: ObservableObject {
     tasks.insert(Task { for await friend in await toxService.friendEvents { await friendManager.handleFriendEvent(friend) } })
     tasks.insert(Task { for await msg in await toxService.incomingMessages { await chatManager.handleIncomingMessage(msg) } })
     tasks.insert(Task { for await file in await toxService.fileEvents { fileTransferManager.handleFileEvent(file) } })
-    tasks.insert(Task { for await call in await toxService.callEvents { callManager.handleCallEvent(call) } })
     tasks.insert(Task { for await conf in await toxService.conferenceEvents { conferenceManager.handleConferenceEvent(conf) } })
     tasks.insert(Task { for await state in await toxService.connectionStatusEvents { connectionManager.handle(state) } })
   }

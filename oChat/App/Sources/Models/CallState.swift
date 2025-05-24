@@ -8,8 +8,21 @@
 
 import Foundation
 
-/// Статус звонка
-struct CallState {
+enum CallPhase: Sendable {
+  case outgoingRinging   // исходящий, ждём ответа
+  case incomingRinging   // входящий, ждём решения
+  case active            // обе стороны в линии
+}
+
+struct CallState: Identifiable, Equatable, Sendable {
+  let id: UInt32                 // friendID
+  var phase: CallPhase           // ← единственный флаг “где мы сейчас”
+
+  // текущее состояние потоков
   var audioEnabled: Bool
   var videoEnabled: Bool
+
+  // локальные переключатели
+  var isOnHold:   Bool = false
+  var isSpeakerOn: Bool = false
 }

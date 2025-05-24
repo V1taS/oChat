@@ -53,7 +53,9 @@ struct StartConversationView: View {
         }
       }
       .sheet(isPresented: $showScanQR) {
-        ScanQRView()
+        ScanQRView { qrCode in
+
+        }
       }
       .task {
         ownAddress = await toxManager.toxService.getOwnAddress()
@@ -69,7 +71,6 @@ private extension StartConversationView {
   // Список действий
   var actionsBlock: some View {
     VStack(spacing: 0) {
-
       NavigationLink {
         NewMessageView()
       } label: {

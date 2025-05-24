@@ -19,7 +19,7 @@ private enum Palette {
 // MARK: - Экран
 struct ContactDetailView: View {
 
-  @EnvironmentObject var friendManager: FriendManager
+  @EnvironmentObject private var friendManager: FriendManager
 
   let friendModel: FriendModel
 
@@ -137,9 +137,7 @@ private extension ContactDetailView {
         }
         .foregroundStyle(Palette.icon)
         .onTapGesture {
-          presentFullScreenWithoutAnimation {
-            CallView()
-          }
+         // TODO: -
         }
       }
     }

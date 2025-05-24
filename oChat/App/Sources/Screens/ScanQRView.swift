@@ -16,6 +16,7 @@ private enum Palette {
 }
 
 // MARK: - Экран
+@MainActor
 struct ScanQRView: View {
   @Environment(\.dismiss) private var dismiss
   @State private var isScanning = true
@@ -65,7 +66,6 @@ private extension ScanQRView {
     ZStack {
       CameraPreview(isRunning: $isScanning) { code in
         onComplete(code)
-        dismiss()
       }
       .ignoresSafeArea()
 
